@@ -18,6 +18,13 @@ import {
   readMultiRoundRunManifest,
   type MultiRoundSessionSummary,
 } from '../multiRoundRunManifestContract';
+import type { MultiCandidateSessionSummaryV1 } from '../multiCandidateSessionManifestContract';
+import {
+  runMultiCandidateOrdinaryEvolution,
+  type MultiCandidateOrdinaryEvolutionDependencies,
+  type MultiCandidateOrdinaryEvolutionResult,
+  type RunMultiCandidateOrdinaryEvolutionInput,
+} from './runMultiCandidateOrdinaryEvolution';
 import { archiveOperationalRunReport } from '../reporting/archiveOperationalRunReport';
 import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
 import { buildOperationalObservabilityIndex } from '../reporting/buildOperationalObservabilityIndex';
@@ -106,25 +113,28 @@ export interface RunOrdinaryEvolutionDependencies {
   refreshOperationalIndex?: (input: { repositoryRoot: string }) => Promise<{
     topLevelIndexPath: string;
   }>;
+  runMultiCandidateOperator?: (input: RunMultiCandidateOrdinaryEvolutionInput) => Promise<MultiCandidateOrdinaryEvolutionResult>;
+  multiCandidateDependencies?: MultiCandidateOrdinaryEvolutionDependencies;
 }
 
 export interface RunOrdinaryEvolutionInput {
   repositoryRoot?: string;
   bindingId?: string;
+  resumeSession?: string;
   dependencies?: RunOrdinaryEvolutionDependencies;
 }
 
 export type ObservabilityStatus = 'PASS' | 'OBSERVABILITY_REFRESH_FAILED';
 
 export interface OrdinaryEvolutionOperatorResult {
-  schemaVersion: 'ordinary-evolution-operator-result-v3';
+  schemaVersion: 'ordinary-evolution-operator-result-v3' | 'ordinary-evolution-operator-result-v4';
   sessionId: string;
   branch: string;
   headSha: string;
   workingTreeClean: boolean;
   participantBinding: OperatorParticipantBindingId;
-  sessionExecution: MultiRoundSessionSummary;
-  authoritativeRootChanged: boolean;
+  sessionExecution: MultiRoundSessionSummary | MultiCandidateSessionSummaryV1;
+  authoritativeRootChanged?: boolean;
   runReportId: string | null;
   runReportPath: string | null;
   humanFollowupActiveCount: number | null;
@@ -136,6 +146,15 @@ export interface OrdinaryEvolutionOperatorResult {
   durableEvidenceCapsulePath: string | null;
   durableEvidenceStatus: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
   durableEvidenceError: string | null;
+  logicalSessionId?: string;
+  hostSliceId?: string;
+  currentSourceEpochRef?: string;
+  candidateCounts?: MultiCandidateSessionSummaryV1['sourceEpochs'][number]['candidateCounts'];
+  sourceTransitionCount?: 0 | 1;
+  reportSnapshotRef?: string;
+  recoverableSessionStateRef?: string;
+  terminalForensicEvidenceRef?: string | null;
+  terminalForensicEvidenceStatus?: 'PUBLISHED' | 'NOT_APPLICABLE';
 }
 
 function toRepoRelative(repositoryRoot: string, absolutePath: string): string {
@@ -274,9 +293,70 @@ async function defaultRefreshHumanFollowupInbox(input: {
   };
 }
 
+function formatMultiCandidateOperatorSummary(result: OrdinaryEvolutionOperatorResult): string {
+  if (result.sessionExecution.schemaVersion !== 'multi-candidate-session-summary-v1') {
+    throw new Error('formatMultiCandidateOperatorSummary requires a multi-candidate session summary');
+  }
+  const counts = result.candidateCounts;
+  return [
+    'AE 运行',
+    '',
+    'Logical Session：',
+    result.logicalSessionId ?? result.sessionId,
+    '',
+    'Host Slice：',
+    result.hostSliceId ?? '（无）',
+    '',
+    'Git 基线：',
+    `${result.branch}@${result.headSha}`,
+    '',
+    '工作树：',
+    result.workingTreeClean ? 'clean' : 'dirty（DEV_CONVENIENCE_ONLY：本次 AE 使用当前 workspace，含未提交修改）',
+    '',
+    'Participant：',
+    result.participantBinding,
+    '',
+    '生命周期：',
+    result.sessionExecution.sessionState,
+    '',
+    '暂停/停止原因：',
+    result.sessionExecution.pauseOrStopReason ?? '（无）',
+    '',
+    'Current Source Epoch：',
+    result.currentSourceEpochRef ?? result.sessionExecution.currentSourceEpochRef,
+    '',
+    'Candidate counts：',
+    counts === undefined ? '（无）' : `total=${counts.total}, pending=${counts.pending}, active=${counts.active}, completed=${counts.completed}, superseded=${counts.superseded}, interrupted=${counts.interrupted}`,
+    '',
+    'Source transition count：',
+    String(result.sourceTransitionCount ?? result.sessionExecution.sourceTransitionCount),
+    '',
+    'Report snapshot：',
+    result.reportSnapshotRef ?? result.runReportPath ?? '（不可用）',
+    '',
+    'Recoverable session state：',
+    result.recoverableSessionStateRef ?? result.sessionRoot,
+    '',
+    'Terminal forensic evidence：',
+    result.terminalForensicEvidenceRef ?? '（无；当前不是 terminal forensic completion）',
+    '',
+    'Human Follow-up：',
+    result.humanFollowupActiveCount === null || result.humanFollowupActiveCount === undefined
+      ? '（不可用）'
+      : `${result.humanFollowupActiveCount} 项 active`,
+    '',
+    '索引：',
+    result.operationalIndexPath ?? '（不可用）',
+    '',
+  ].join('\n');
+}
+
 export function formatOrdinaryEvolutionOperatorSummary(
   result: OrdinaryEvolutionOperatorResult,
 ): string {
+  if (result.sessionExecution.schemaVersion === 'multi-candidate-session-summary-v1') {
+    return formatMultiCandidateOperatorSummary(result);
+  }
   const session = result.sessionExecution;
   const lines = [
     'AE 运行',
@@ -361,6 +441,54 @@ export async function runOrdinaryEvolution(
 ): Promise<OrdinaryEvolutionOperatorResult> {
   const repositoryRoot = resolve(input.repositoryRoot ?? process.cwd());
   const dependencies = input.dependencies ?? {};
+
+  if (dependencies.runAeWorkflow === undefined) {
+    const multi = await (dependencies.runMultiCandidateOperator ?? ((multiInput: RunMultiCandidateOrdinaryEvolutionInput) => runMultiCandidateOrdinaryEvolution({
+      ...multiInput,
+      dependencies: dependencies.multiCandidateDependencies,
+    })))({
+      repositoryRoot,
+      ...(input.bindingId === undefined ? {} : { bindingId: input.bindingId }),
+      operation: input.resumeSession === undefined
+        ? { mode: 'START_NEW_SESSION' }
+        : { mode: 'RESUME_SESSION', logicalSessionId: input.resumeSession },
+    });
+    const currentSourceEpoch = multi.sessionExecution.sourceEpochs.find(epoch => epoch.sourceEpochRef === multi.currentSourceEpochRef);
+    const result: OrdinaryEvolutionOperatorResult = {
+      schemaVersion: 'ordinary-evolution-operator-result-v4',
+      sessionId: multi.logicalSessionId,
+      branch: multi.repositoryBaseline.branch,
+      headSha: multi.repositoryBaseline.headSha,
+      workingTreeClean: multi.repositoryBaseline.clean,
+      participantBinding: multi.participantBinding,
+      sessionExecution: multi.sessionExecution,
+      runReportId: multi.reportId,
+      runReportPath: multi.reportSnapshotRef,
+      humanFollowupActiveCount: multi.humanFollowupActiveCount,
+      operationalIndexPath: multi.operationalIndexPath,
+      observabilityStatus: 'PASS',
+      observabilityError: null,
+      sessionRoot: multi.recoverableSessionStateRef,
+      experimentRoot: null,
+      durableEvidenceCapsulePath: multi.terminalForensicEvidenceRef,
+      durableEvidenceStatus: multi.terminalForensicEvidenceStatus === 'PUBLISHED' ? 'PASS' : 'NOT_ATTEMPTED',
+      durableEvidenceError: null,
+      logicalSessionId: multi.logicalSessionId,
+      hostSliceId: multi.hostSliceId,
+      currentSourceEpochRef: multi.currentSourceEpochRef,
+      candidateCounts: currentSourceEpoch?.candidateCounts,
+      sourceTransitionCount: multi.sourceTransitionCount,
+      reportSnapshotRef: multi.reportSnapshotRef,
+      recoverableSessionStateRef: multi.recoverableSessionStateRef,
+      terminalForensicEvidenceRef: multi.terminalForensicEvidenceRef,
+      terminalForensicEvidenceStatus: multi.terminalForensicEvidenceStatus,
+    };
+    const operatorRoot = join(repositoryRoot, '.tmp/evolution', multi.logicalSessionId);
+    await mkdir(operatorRoot, { recursive: true });
+    await writeFile(join(operatorRoot, 'operator-result.json'), `${JSON.stringify(result, null, 2)}\n`);
+    await writeFile(join(operatorRoot, 'operator-summary.txt'), formatOrdinaryEvolutionOperatorSummary(result));
+    return result;
+  }
 
   const git = await (dependencies.preflightGit ?? captureOperatorGitPreflight)(repositoryRoot);
   assertOperatorPreflight(git);
@@ -564,6 +692,7 @@ export async function runOrdinaryEvolution(
 function parseCliArgs(args: string[]): RunOrdinaryEvolutionInput {
   let repositoryRoot: string | undefined;
   let bindingId: string | undefined;
+  let resumeSession: string | undefined;
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--repository-root') {
@@ -574,6 +703,11 @@ function parseCliArgs(args: string[]): RunOrdinaryEvolutionInput {
       const value = args[++index];
       if (!value) throw new Error('--binding requires a value');
       bindingId = value;
+    } else if (arg === '--resume-session') {
+      const value = args[++index];
+      if (!value) throw new Error('--resume-session requires a value');
+      if (resumeSession !== undefined && resumeSession !== value) throw new Error('--resume-session cannot be repeated with a different value');
+      resumeSession = value;
     } else {
       throw new Error(`unknown argument: ${arg}`);
     }
@@ -581,6 +715,7 @@ function parseCliArgs(args: string[]): RunOrdinaryEvolutionInput {
   return {
     ...(repositoryRoot === undefined ? {} : { repositoryRoot }),
     ...(bindingId === undefined ? {} : { bindingId }),
+    ...(resumeSession === undefined ? {} : { resumeSession }),
   };
 }
 

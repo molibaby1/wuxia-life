@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
-import { mkdir } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { mkdir, readFile } from 'node:fs/promises';
+import { join, relative, resolve, sep } from 'node:path';
 import { getP8GatePersonas } from '../../../src/p8/personas';
 import { runPhase0 } from '../phase0/runPhase0';
 import { captureWorktreeSourceFingerprint } from '../phase0/provenance';
@@ -8,6 +8,7 @@ import {
   readDurableMultiCandidateSessionManifest,
   type CandidateSessionLocation,
 } from '../candidateSessionStore';
+import { buildMultiCandidateSessionSummaryV1, type MultiCandidateSessionSummaryV1 } from '../multiCandidateSessionManifestContract';
 import {
   runMultiCandidateSessionSlice,
   type MultiCandidateSessionSliceResult,
@@ -20,6 +21,13 @@ import {
   type OperatorGitPreflight,
 } from './runOrdinaryEvolution';
 import { allocateOrdinarySessionId } from './allocateSessionId';
+import {
+  retainMultiCandidateSessionEvidence,
+  type RetainMultiCandidateSessionEvidenceResult,
+} from '../evidence/retainMultiCandidateSessionEvidence';
+import { archiveMultiCandidateSessionReport, type ArchiveMultiCandidateSessionReportResult } from '../reporting/archiveMultiCandidateSessionReport';
+import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
+import { buildOperationalObservabilityIndex } from '../reporting/buildOperationalObservabilityIndex';
 import {
   parseOperatorParticipantBindingId,
   resolveOperatorParticipantBinding,
@@ -45,16 +53,40 @@ export interface MultiCandidateOrdinaryEvolutionDependencies {
   runPhase0Source?: (input: { repositoryRoot: string; sessionId: string; sessionRoot: string }) => Promise<{ sourceRoot: string; sourceRunRef: string }>;
   runSessionSlice?: (input: RunMultiCandidateSessionSliceInput) => Promise<MultiCandidateSessionSliceResult>;
   readManifest?: typeof readDurableMultiCandidateSessionManifest;
+  retainTerminalEvidence?: (input: { repositoryRoot: string; logicalSessionId: string; createdAt: string }) => Promise<RetainMultiCandidateSessionEvidenceResult>;
+  archiveReport?: (input: { repositoryRoot: string; logicalSessionId: string; hostSliceId: string; terminalForensicEvidenceRef?: string | null }) => Promise<ArchiveMultiCandidateSessionReportResult>;
+  refreshHumanFollowupInbox?: (input: { repositoryRoot: string }) => Promise<{ inboxPath: string; activeCount: number }>;
+  refreshOperationalIndex?: typeof buildOperationalObservabilityIndex;
 }
 
 export interface MultiCandidateOrdinaryEvolutionResult extends MultiCandidateSessionSliceResult {
   participantBinding: OperatorParticipantBindingId;
   repositoryBaseline: OperatorGitPreflight;
+  sessionExecution: MultiCandidateSessionSummaryV1;
+  reportId: string;
+  reportSnapshotRef: string;
+  reportSnapshotPath: string;
+  recoverableSessionStateRef: string;
+  terminalForensicEvidenceRef: string | null;
+  terminalForensicEvidenceStatus: 'PUBLISHED' | 'NOT_APPLICABLE';
+  humanFollowupInboxPath: string;
+  humanFollowupActiveCount: number;
+  operationalIndexPath: string;
 }
 
 function nextHostSliceId(hostSliceCount: number): string {
   if (!Number.isInteger(hostSliceCount) || hostSliceCount < 0) throw new Error('durable Host slice count is invalid');
   return `host-slice-${String(hostSliceCount + 1).padStart(6, '0')}`;
+}
+
+async function countActiveHumanFollowupItems(repositoryRoot: string): Promise<number> {
+  try {
+    const markdown = await readFile(join(repositoryRoot, 'artifacts/evolution/human-follow-up/index.md'), 'utf8');
+    const match = /- active: (\d+)/.exec(markdown);
+    return match ? Number(match[1]) : 0;
+  } catch {
+    return 0;
+  }
 }
 
 async function defaultRunPhase0Source(input: {
@@ -130,5 +162,43 @@ export async function runMultiCandidateOrdinaryEvolution(
     },
     ...(initialSourceRoot === undefined ? {} : { initialSourceRoot }),
   });
-  return { ...result, participantBinding: binding.bindingId, repositoryBaseline: git };
+  const createdAt = new Date().toISOString();
+  const evidence = await (dependencies.retainTerminalEvidence ?? retainMultiCandidateSessionEvidence)({
+    repositoryRoot,
+    logicalSessionId,
+    createdAt,
+  });
+  const terminalForensicEvidenceRef = evidence.capsuleRoot === null
+    ? null
+    : relative(repositoryRoot, evidence.capsuleRoot).split(sep).join('/');
+  const report = await (dependencies.archiveReport ?? archiveMultiCandidateSessionReport)({
+    repositoryRoot,
+    logicalSessionId,
+    hostSliceId: result.hostSliceId,
+    terminalForensicEvidenceRef,
+  });
+  const inbox = await (dependencies.refreshHumanFollowupInbox ?? (async ({ repositoryRoot: root }: { repositoryRoot: string }) => ({
+    inboxPath: await buildHumanFollowupInbox({ repositoryRoot: root }),
+    activeCount: await countActiveHumanFollowupItems(root),
+  })))(
+    { repositoryRoot },
+  );
+  const index = await (dependencies.refreshOperationalIndex ?? buildOperationalObservabilityIndex)({ repositoryRoot });
+  const sessionManifest = await readManifest(repositoryRoot, logicalSessionId);
+  const sessionExecution = buildMultiCandidateSessionSummaryV1(sessionManifest);
+  return {
+    ...result,
+    participantBinding: binding.bindingId,
+    repositoryBaseline: git,
+    sessionExecution,
+    reportId: report.reportId,
+    reportSnapshotRef: relative(repositoryRoot, report.reportJsonPath).split(sep).join('/'),
+    reportSnapshotPath: report.reportJsonPath,
+    recoverableSessionStateRef: relative(repositoryRoot, result.manifestPath).split(sep).join('/'),
+    terminalForensicEvidenceRef,
+    terminalForensicEvidenceStatus: evidence.status,
+    humanFollowupInboxPath: inbox.inboxPath,
+    humanFollowupActiveCount: inbox.activeCount,
+    operationalIndexPath: index.topLevelIndexPath,
+  };
 }

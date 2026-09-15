@@ -28,6 +28,8 @@ import {
   type MultiRoundSessionSummaryV1,
   type MultiRoundSessionSummaryV2,
 } from '../../scripts/evolution/multiRoundRunManifestContract';
+import { buildMultiCandidateSessionManifestV1, buildMultiCandidateSessionSummaryV1 } from '../../scripts/evolution/multiCandidateSessionManifestContract';
+import type { MultiCandidateOrdinaryEvolutionResult } from '../../scripts/evolution/operator/runMultiCandidateOrdinaryEvolution';
 
 function fakeBinding(
   bindingId: typeof OPERATOR_BINDING_CODEX_CURRENT = OPERATOR_BINDING_CODEX_CURRENT,
@@ -257,6 +259,70 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     new Set(Array.from({ length: rosterIds.size }, (_, seed) => selectP8PersonaForSeed(seed).id)),
     rosterIds,
   );
+
+  {
+    const repositoryRoot = await createRepo();
+    const operations: Array<{ mode: string; logicalSessionId?: string }> = [];
+    const manifest = buildMultiCandidateSessionManifestV1({
+      logicalSessionId: 'ordinary-run-20260915-000010',
+      sessionState: 'PAUSED',
+      pauseOrStopReason: 'HOST_SLICE_BUDGET',
+      sourceEpochs: [{ sourceEpochRef: 'source-epoch-000001', sourceRunRef: 'source-000001', poolRef: null, poolStatus: 'PROCESSING', lifecycle: 'ANALYSIS_PENDING', candidateCounts: { total: 1, pending: 1, active: 0, completed: 0, superseded: 0, interrupted: 0 }, dispositionCounts: {} }],
+      currentSourceEpochRef: 'source-epoch-000001',
+      hostSlices: [{ hostSliceId: 'host-slice-000001', startedAt: '2026-09-15T00:00:00.000Z', endedAt: '2026-09-15T00:01:00.000Z', participantJobs: 2, state: 'PAUSED', reason: 'HOST_SLICE_BUDGET' }],
+      sourceTransitionCount: 0,
+      failureRef: null,
+      repositoryBaseline: { branch: 'dev', headSha: 'a'.repeat(40), workingTreeFingerprint: 'b'.repeat(64) },
+      participantBindingId: OPERATOR_BINDING_CODEX_CURRENT,
+    });
+    const multiResult = (input: Parameters<NonNullable<import('../../scripts/evolution/operator/runOrdinaryEvolution').RunOrdinaryEvolutionDependencies>['runMultiCandidateOperator']>[0]): MultiCandidateOrdinaryEvolutionResult => ({
+      logicalSessionId: input.operation.mode === 'RESUME_SESSION' ? input.operation.logicalSessionId : 'ordinary-run-20260915-000010',
+      hostSliceId: input.operation.mode === 'RESUME_SESSION' ? 'host-slice-000002' : 'host-slice-000001',
+      sessionState: 'PAUSED',
+      reason: 'HOST_SLICE_BUDGET',
+      participantJobs: 2,
+      currentSourceEpochRef: 'source-epoch-000001',
+      manifestPath: 'artifacts/evolution/sessions/ordinary-run-20260915-000010/session-manifest.json',
+      sourceTransitionCount: 0,
+      participantBinding: OPERATOR_BINDING_CODEX_CURRENT,
+      repositoryBaseline: { branch: 'dev', headSha: 'a'.repeat(40), statusShort: '', clean: true, workingTreeFingerprint: 'b'.repeat(64) },
+      sessionExecution: buildMultiCandidateSessionSummaryV1(manifest),
+      reportId: 'candidate-report-000001',
+      reportSnapshotRef: 'artifacts/evolution/run-reports/candidate-report-000001/report.json',
+      reportSnapshotPath: 'artifacts/evolution/run-reports/candidate-report-000001/report.json',
+      recoverableSessionStateRef: 'artifacts/evolution/sessions/ordinary-run-20260915-000010/session-manifest.json',
+      terminalForensicEvidenceRef: null,
+      terminalForensicEvidenceStatus: 'NOT_APPLICABLE',
+      humanFollowupInboxPath: 'artifacts/evolution/human-follow-up/index.md',
+      humanFollowupActiveCount: 0,
+      operationalIndexPath: 'artifacts/evolution/index.md',
+    });
+    const started = await runOrdinaryEvolution({
+      repositoryRoot,
+      dependencies: {
+        runMultiCandidateOperator: async input => {
+          operations.push(input.operation);
+          return multiResult(input);
+        },
+      },
+    });
+    assert.equal(started.schemaVersion, 'ordinary-evolution-operator-result-v4');
+    assert.deepEqual(operations, [{ mode: 'START_NEW_SESSION' }]);
+    assert.match(formatOrdinaryEvolutionOperatorSummary(started), /Logical Session：/);
+    assert.doesNotMatch(formatOrdinaryEvolutionOperatorSummary(started), /最后一轮路由：/);
+    const resumed = await runOrdinaryEvolution({
+      repositoryRoot,
+      resumeSession: 'ordinary-run-20260915-000010',
+      dependencies: {
+        runMultiCandidateOperator: async input => {
+          operations.push(input.operation);
+          return multiResult(input);
+        },
+      },
+    });
+    assert.equal(resumed.logicalSessionId, 'ordinary-run-20260915-000010');
+    assert.deepEqual(operations, [{ mode: 'START_NEW_SESSION' }, { mode: 'RESUME_SESSION', logicalSessionId: 'ordinary-run-20260915-000010' }]);
+  }
 
   {
     const result = {

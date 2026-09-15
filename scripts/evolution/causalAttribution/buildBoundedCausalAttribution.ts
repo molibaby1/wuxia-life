@@ -25,10 +25,27 @@ export const CAUSAL_ATTRIBUTION_RELATIVE_PATH = 'diagnostic/causal-attribution.j
 export interface BuildBoundedCausalAttributionInput {
   sealedPhase0SourceRoot: string;
   sealedObservablePayloadPath: string;
-  selectedHypothesisPath: string;
+  selectedHypothesisPath?: string;
+  activeCandidate?: ImprovementHypothesis;
   sourceRunRef: string;
   sourceExperimentRootHash: string;
   destinationPath: string;
+}
+
+function candidateHypothesisFromInput(value: ImprovementHypothesis): ImprovementHypothesis {
+  assertObject(value, 'active candidate');
+  if (typeof value.hypothesisId !== 'string' || value.hypothesisId.length === 0) {
+    throw new Error('active candidate hypothesisId must be a non-empty string');
+  }
+  const { hypothesisId: _ignored, ...draft } = value;
+  const parsed = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [draft],
+    noProblemAssessment: null,
+  }));
+  const hypothesis = parsed.hypotheses[0];
+  if (!hypothesis) throw new Error('active candidate does not contain a valid hypothesis');
+  return { ...hypothesis, hypothesisId: value.hypothesisId };
 }
 
 function assertObject(value: unknown, label: string): asserts value is Record<string, unknown> {
@@ -130,8 +147,12 @@ export async function buildBoundedCausalAttribution(
     );
   }
 
-  const selectedArtifact = JSON.parse(await readFile(input.selectedHypothesisPath, 'utf8')) as unknown;
-  const hypothesis = selectedHypothesisFromArtifact(selectedArtifact);
+  if ((input.selectedHypothesisPath === undefined) === (input.activeCandidate === undefined)) {
+    throw new Error('bounded causal attribution requires exactly one selected hypothesis or active candidate input');
+  }
+  const hypothesis = input.activeCandidate !== undefined
+    ? candidateHypothesisFromInput(input.activeCandidate)
+    : selectedHypothesisFromArtifact(JSON.parse(await readFile(input.selectedHypothesisPath!, 'utf8')) as unknown);
   const entryToStep = mapObservableEntriesToPlayerSurfaceSteps(surface);
   const seen = new Set<string>();
   const items: BoundedCausalAttributionItem[] = [];

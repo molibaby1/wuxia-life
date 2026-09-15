@@ -14,14 +14,23 @@ import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/p
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
 const baseline = { branch: 'dev', headSha: 'a'.repeat(40), workingTreeFingerprint: 'b'.repeat(64) };
 
-function manifest(logicalSessionId: string, participantBindingId = 'CODEX_CURRENT', hostSliceId = 'host-slice-000001', sessionState: 'PAUSED' | 'COMPLETED' = 'PAUSED') {
+function manifest(
+  logicalSessionId: string,
+  participantBindingId = 'CODEX_CURRENT',
+  hostSliceId = 'host-slice-000001',
+  sessionState: 'PAUSED' | 'COMPLETED' | 'FAILED' | 'INTERRUPTED' | 'PROCESSING' = 'PAUSED',
+  pauseOrStopReason?: string | null,
+  hostSliceState: 'PROCESSING' | 'PAUSED' | 'COMPLETED' | 'INTERRUPTED' | 'FAILED' = sessionState,
+  endedAt: string | null = '2026-09-15T00:01:00.000Z',
+) {
+  const reason = pauseOrStopReason ?? (sessionState === 'PAUSED' ? 'HOST_SLICE_BUDGET' : null);
   return buildMultiCandidateSessionManifestV1({
     logicalSessionId,
     sessionState,
-    pauseOrStopReason: sessionState === 'PAUSED' ? 'HOST_SLICE_BUDGET' : null,
+    pauseOrStopReason: reason,
     sourceEpochs: [{ sourceEpochRef: 'source-epoch-000001', sourceRunRef: 'source-000001', poolRef: null, poolStatus: sessionState === 'COMPLETED' ? 'EXHAUSTED' : 'PROCESSING', lifecycle: sessionState === 'COMPLETED' ? 'POOL_EXHAUSTED' : 'ANALYSIS_PENDING', candidateCounts: { total: 0, pending: 0, active: 0, completed: 0, superseded: 0, interrupted: 0 }, dispositionCounts: {} }],
     currentSourceEpochRef: 'source-epoch-000001',
-    hostSlices: [{ hostSliceId, startedAt: '2026-09-15T00:00:00.000Z', endedAt: '2026-09-15T00:01:00.000Z', participantJobs: 2, state: sessionState, reason: sessionState === 'PAUSED' ? 'HOST_SLICE_BUDGET' : null }],
+    hostSlices: [{ hostSliceId, startedAt: '2026-09-15T00:00:00.000Z', endedAt, participantJobs: 2, state: hostSliceState, reason }],
     sourceTransitionCount: 0,
     failureRef: null,
     repositoryBaseline: baseline,
@@ -70,6 +79,57 @@ export async function runMultiCandidateOrdinaryEvolutionOperatorTests(): Promise
   assert.equal(phase0Calls, 1);
   assert.equal(participantCalls, 2);
   assert.deepEqual(sidecarEvents, ['evidence', 'report', 'hfl', 'index', 'evidence', 'report', 'hfl', 'index']);
+
+  for (const state of ['COMPLETED', 'FAILED', 'INTERRUPTED'] as const) {
+    const forbiddenRoot = await mkdtemp(join(tmpdir(), `candidate-operator-${state.toLowerCase()}-`));
+    await writeMultiCandidateSessionManifestAtomic(forbiddenRoot, manifest(`ordinary-run-${state.toLowerCase()}`, 'CODEX_CURRENT', 'host-slice-000001', state));
+    let forbiddenRunCalls = 0;
+    await assert.rejects(
+      () => runMultiCandidateOrdinaryEvolution({
+        repositoryRoot: forbiddenRoot,
+        operation: { mode: 'RESUME_SESSION', logicalSessionId: `ordinary-run-${state.toLowerCase()}` },
+        dependencies: { ...dependencies, runSessionSlice: async input => { forbiddenRunCalls += 1; return dependencies.runSessionSlice!(input); } },
+      }),
+      /not resumable|resume/i,
+    );
+    assert.equal(forbiddenRunCalls, 0);
+  }
+
+  const sourceChangeLimitRoot = await mkdtemp(join(tmpdir(), 'candidate-operator-source-change-limit-'));
+  await writeMultiCandidateSessionManifestAtomic(sourceChangeLimitRoot, manifest('ordinary-run-source-change-limit', 'CODEX_CURRENT', 'host-slice-000001', 'PAUSED', 'SOURCE_CHANGE_LIMIT_REACHED'));
+  let sourceChangeLimitRunCalls = 0;
+  await assert.rejects(
+    () => runMultiCandidateOrdinaryEvolution({
+      repositoryRoot: sourceChangeLimitRoot,
+      operation: { mode: 'RESUME_SESSION', logicalSessionId: 'ordinary-run-source-change-limit' },
+      dependencies: { ...dependencies, runSessionSlice: async input => { sourceChangeLimitRunCalls += 1; return dependencies.runSessionSlice!(input); } },
+    }),
+    /not resumable|source-change authority|resume/i,
+  );
+  assert.equal(sourceChangeLimitRunCalls, 0);
+
+  const finishedProcessingRoot = await mkdtemp(join(tmpdir(), 'candidate-operator-finished-processing-'));
+  await writeMultiCandidateSessionManifestAtomic(finishedProcessingRoot, manifest('ordinary-run-finished-processing', 'CODEX_CURRENT', 'host-slice-000001', 'PROCESSING', null, 'COMPLETED'));
+  let finishedProcessingRunCalls = 0;
+  await assert.rejects(
+    () => runMultiCandidateOrdinaryEvolution({
+      repositoryRoot: finishedProcessingRoot,
+      operation: { mode: 'RESUME_SESSION', logicalSessionId: 'ordinary-run-finished-processing' },
+      dependencies: { ...dependencies, runSessionSlice: async input => { finishedProcessingRunCalls += 1; return dependencies.runSessionSlice!(input); } },
+    }),
+    /not resumable|resume/i,
+  );
+  assert.equal(finishedProcessingRunCalls, 0);
+
+  const crashRoot = await mkdtemp(join(tmpdir(), 'candidate-operator-crash-reconcile-'));
+  await writeMultiCandidateSessionManifestAtomic(crashRoot, manifest('ordinary-run-crash-reconcile', 'CODEX_CURRENT', 'host-slice-000001', 'PROCESSING', null, 'PROCESSING', null));
+  let crashReconcileRunCalls = 0;
+  await runMultiCandidateOrdinaryEvolution({
+    repositoryRoot: crashRoot,
+    operation: { mode: 'RESUME_SESSION', logicalSessionId: 'ordinary-run-crash-reconcile' },
+    dependencies: { ...dependencies, runSessionSlice: async input => { crashReconcileRunCalls += 1; return dependencies.runSessionSlice!(input); } },
+  });
+  assert.equal(crashReconcileRunCalls, 1);
 
   await assert.rejects(
     () => runMultiCandidateOrdinaryEvolution({ repositoryRoot: root, operation: { mode: 'RESUME_SESSION', logicalSessionId: 'ordinary-run-20260915-999999' }, dependencies }),

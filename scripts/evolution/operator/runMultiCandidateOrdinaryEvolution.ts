@@ -8,7 +8,7 @@ import {
   readDurableMultiCandidateSessionManifest,
   type CandidateSessionLocation,
 } from '../candidateSessionStore';
-import { buildMultiCandidateSessionSummaryV1, type MultiCandidateSessionSummaryV1 } from '../multiCandidateSessionManifestContract';
+import { buildMultiCandidateSessionSummaryV1, type MultiCandidateSessionManifestV1, type MultiCandidateSessionSummaryV1 } from '../multiCandidateSessionManifestContract';
 import {
   runMultiCandidateSessionSlice,
   type MultiCandidateSessionSliceResult,
@@ -79,6 +79,18 @@ function nextHostSliceId(hostSliceCount: number): string {
   return `host-slice-${String(hostSliceCount + 1).padStart(6, '0')}`;
 }
 
+function assertResumeEligible(manifest: MultiCandidateSessionManifestV1): void {
+  if (manifest.sessionState === 'PAUSED') {
+    if (manifest.pauseOrStopReason === 'SOURCE_CHANGE_LIMIT_REACHED') {
+      throw new Error('Logical Session is not resumable without new source-change authority');
+    }
+    return;
+  }
+  const latest = manifest.hostSlices.at(-1);
+  if (manifest.sessionState === 'PROCESSING' && latest?.state === 'PROCESSING' && latest.endedAt === null) return;
+  throw new Error(`Logical Session is not resumable from state ${manifest.sessionState}`);
+}
+
 async function countActiveHumanFollowupItems(repositoryRoot: string): Promise<number> {
   try {
     const markdown = await readFile(join(repositoryRoot, 'artifacts/evolution/human-follow-up/index.md'), 'utf8');
@@ -144,6 +156,7 @@ export async function runMultiCandidateOrdinaryEvolution(
       throw new Error('resume repository baseline mismatch');
     }
     if (manifest.participantBindingId !== binding.bindingId) throw new Error('resume participant binding mismatch');
+    assertResumeEligible(manifest);
     hostSliceId = nextHostSliceId(manifest.hostSlices.length);
   }
 

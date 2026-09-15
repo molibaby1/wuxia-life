@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { runMultiCandidateSessionSlice } from '../../scripts/evolution/runMultiCandidateSessionSlice';
 import { PHASE0_REQUIRED_SEALED_ARTIFACTS, sealPhase0Run } from '../../scripts/evolution/phase0/provenance';
 import { parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
+import { readDurableMultiCandidateSessionManifest } from '../../scripts/evolution/candidateSessionStore';
 import type { CompletedSourceCandidateAnalysisResult } from '../../scripts/evolution/runSourceCandidateAnalysis';
 import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { buildMultiCandidateOperationalRunReport } from '../../scripts/evolution/reporting/buildMultiCandidateOperationalRunReport';
@@ -23,7 +24,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   const analysis: CompletedSourceCandidateAnalysisResult = { status: 'completed', sourceRunRef: 'cohort-run-000001', sourceRoot, analysisRoot: join(root, 'analysis'), sourceExperimentRootHash: sealed.experimentRootHash, sourceFingerprintSha256: 'b'.repeat(64), authoritativeFingerprintSha256: 'c'.repeat(64), observablePayloadRef: 'source/observable-payload.json', externalFeedbackRef: 'feedback-runs/cohort-run-000001/feedback.json', improvementHypothesisRef: 'hypothesis-runs/cohort-run-000001/hypotheses.json', feedbackInvocationRef: 'feedback-000001', hypothesisInvocationRef: 'hypothesis-000001', hypotheses, noProblemAssessment: null, actualParticipantJobs: 2 };
   const calls: string[] = [];
   const humanFollowupRefs: string[] = [];
-  const base = { repositoryRoot: root, logicalSessionId: 'logical-session-000001', participantBindingId: 'CODEX_CURRENT', participant, repositoryBaseline: { branch: 'dev', headSha: 'd'.repeat(40), workingTreeFingerprint: 'e'.repeat(64) }, initialSourceRoot: sourceRoot, dependencies: { now: () => '2026-09-15T00:00:00.000Z', runSourceAnalysis: async () => analysis, runCandidateLane: async ({ candidate }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number } }) => { calls.push(candidate.hypothesisId); return { status: 'completed' as const, candidateRef: candidate.candidateRef, hypothesisId: candidate.hypothesisId, sourceIndex: candidate.sourceIndex, candidateActivationPath: 'candidate-activation.json', problemPackagePath: 'problem-package.json', causalAttributionPath: 'diagnostic/causal-attribution.json', decisionPath: 'decision.json', baseDecisionPath: 'decision.json', humanReviewPackagePath: 'human-review-package.md', actualParticipantJobs: 1 as const, decision: validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'SKIP', reasonCode: 'NO_PROPOSAL', inputs: { solutionStatus: 'NO_PROPOSAL', reviewerDecision: null, solutionScope: null, reviewScope: null, permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } }), solutionInvocationRef: 'solution', reviewerInvocationRef: null, problemPackage: {} as never }; } } };
+  const base = { repositoryRoot: root, logicalSessionId: 'logical-session-000001', participantBindingId: 'CODEX_CURRENT', participant, repositoryBaseline: { branch: 'dev', headSha: 'd'.repeat(40), workingTreeFingerprint: 'e'.repeat(64) }, initialSourceRoot: sourceRoot, dependencies: { now: () => '2026-09-15T00:00:00.000Z', runSourceAnalysis: async () => analysis, runCandidateLane: async ({ candidate, laneRoot }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }; laneRoot: string }) => { calls.push(candidate.hypothesisId); const decision = validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'SKIP', reasonCode: 'NO_PROPOSAL', inputs: { solutionStatus: 'NO_PROPOSAL', reviewerDecision: null, solutionScope: null, reviewScope: null, permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } }); await mkdir(laneRoot, { recursive: true }); await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision)); return { status: 'completed' as const, candidateRef: candidate.candidateRef, hypothesisId: candidate.hypothesisId, sourceIndex: candidate.sourceIndex, candidateActivationPath: 'candidate-activation.json', problemPackagePath: 'problem-package.json', causalAttributionPath: 'diagnostic/causal-attribution.json', decisionPath: 'decision.json', baseDecisionPath: 'decision.json', humanReviewPackagePath: 'human-review-package.md', actualParticipantJobs: 1 as const, decision, solutionInvocationRef: 'solution', reviewerInvocationRef: null, problemPackage: {} as never }; } } };
   const first = await runMultiCandidateSessionSlice({ ...base, mode: 'START_NEW_SESSION', hostSliceId: 'host-slice-000001' });
   assert.equal(first.sessionState, 'COMPLETED');
   assert.deepEqual(calls, ['hypothesis-000001', 'hypothesis-000002', 'hypothesis-000003']);
@@ -137,8 +138,10 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
         solutionInvocationRef: 'solution', reviewerInvocationRef: 'reviewer',
         problemPackage: {} as never,
       }),
-      runCandidateContinuation: async () => {
+      runCandidateContinuation: async ({ laneRoot }) => {
         candidateContinuationCalls += 1;
+        await mkdir(join(laneRoot, 'review-continuation-000001'), { recursive: true });
+        await writeFile(join(laneRoot, 'review-continuation-000001/decision.json'), JSON.stringify(continuationEscalationDecision));
         return {
           status: 'completed' as const,
           participantJobs: 1 as const,
@@ -174,6 +177,61 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   });
   assert.equal(resumed.sessionState, 'COMPLETED');
   assert.equal(resumeAnalysisLoads, 1);
+  const resumedManifest = await readDurableMultiCandidateSessionManifest(root, 'logical-session-000001');
+  assert.equal(resumedManifest.budgetAccounting.hostSliceCount, 2);
+  assert.equal(resumedManifest.budgetAccounting.participantJobs, resumedManifest.hostSlices.reduce((sum, item) => sum + item.participantJobs, 0));
+
+  const dispositionRoot = await mkdtemp(join(tmpdir(), 'candidate-session-dispositions-'));
+  const dispositionRoutes = ['SKIP', 'DEFER', 'ESCALATE_HUMAN'] as const;
+  const disposition = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: dispositionRoot,
+    logicalSessionId: 'logical-session-000005',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runCandidateLane: async ({ candidate, laneRoot }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }; laneRoot: string }) => {
+        const route = dispositionRoutes[candidate.sourceIndex]!;
+        const decision = validateSolutionDecision({
+          schemaVersion: 'solution-decision-v1',
+          problemId: `problem-${candidate.hypothesisId}`,
+          route,
+          reasonCode: route === 'SKIP' ? 'NO_PROPOSAL' : route === 'DEFER' ? 'INSUFFICIENT_EVIDENCE' : 'EXPLICIT_ESCALATION',
+          inputs: {
+            solutionStatus: route === 'SKIP' || route === 'DEFER' ? 'NO_PROPOSAL' : 'OPTIONS',
+            reviewerDecision: route === 'ESCALATE_HUMAN' ? 'ESCALATE' : null,
+            solutionScope: route === 'ESCALATE_HUMAN' ? 'configuration' : null,
+            reviewScope: route === 'ESCALATE_HUMAN' ? 'config_only' : null,
+            permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
+            budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
+          },
+        });
+        await mkdir(laneRoot, { recursive: true });
+        await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision));
+        return {
+          status: 'completed' as const,
+          candidateRef: candidate.candidateRef,
+          hypothesisId: candidate.hypothesisId,
+          sourceIndex: candidate.sourceIndex,
+          candidateActivationPath: 'candidate-activation.json',
+          problemPackagePath: 'problem-package.json',
+          causalAttributionPath: 'diagnostic/causal-attribution.json',
+          decisionPath: 'decision.json',
+          baseDecisionPath: 'decision.json',
+          humanReviewPackagePath: 'human-review-package.md',
+          actualParticipantJobs: 1 as const,
+          decision,
+          solutionInvocationRef: 'solution', reviewerInvocationRef: null,
+          problemPackage: {} as never,
+        };
+      },
+      retainHumanFollowup: async () => ({ itemPath: join(dispositionRoot, 'hfl-item.json'), item: {} as never, created: true }),
+    },
+  });
+  assert.equal(disposition.sessionState, 'COMPLETED');
+  const dispositionManifest = await readDurableMultiCandidateSessionManifest(dispositionRoot, 'logical-session-000005');
+  assert.deepEqual(dispositionManifest.sourceEpochs[0]!.dispositionCounts, { SKIP: 1, DEFER: 1, ESCALATE_HUMAN: 1 });
 
   const transitionRoot = await mkdtemp(join(tmpdir(), 'candidate-session-transition-'));
   const transitionSourceA = join(transitionRoot, 'source-a');

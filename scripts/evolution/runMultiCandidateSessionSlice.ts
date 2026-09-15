@@ -60,6 +60,7 @@ import { reconcileActiveCandidate } from './reconcileCandidateSession';
 import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
 import { parseExternalFeedback } from '../../src/evolution/externalFeedbackContract';
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
+import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import { captureAuthoritativeFingerprint } from './problemAgnosticSolution/agentWorkspace';
 import { sha256Hex } from './phase0/provenance';
 
@@ -146,7 +147,7 @@ function candidateCounts(pool: CandidatePoolV1) {
   };
 }
 
-function summaryForPool(pool: CandidatePoolV1, sourceEpochRef: string, poolRef: string, previous?: SourceEpochSummaryV1): SourceEpochSummaryV1 {
+function summaryForPool(pool: CandidatePoolV1, sourceEpochRef: string, poolRef: string, previous?: SourceEpochSummaryV1, dispositionCounts: Record<string, number> = {}): SourceEpochSummaryV1 {
   return {
     sourceEpochRef,
     sourceRunRef: pool.source.sourceRunRef,
@@ -154,8 +155,26 @@ function summaryForPool(pool: CandidatePoolV1, sourceEpochRef: string, poolRef: 
     poolStatus: pool.status,
     lifecycle: pool.status === 'EXHAUSTED' ? 'POOL_EXHAUSTED' : pool.status === 'SUPERSEDED' ? 'SUPERSEDED' : pool.status === 'INTERRUPTED' ? 'INTERRUPTED' : 'POOL_ACTIVE',
     candidateCounts: candidateCounts(pool),
-    dispositionCounts: previous?.dispositionCounts ?? {},
+    dispositionCounts,
   };
+}
+
+function durableSessionArtifactPath(sessionRoot: string, value: string): string {
+  if (isAbsolute(value) || value.includes('\\')) throw new Error(`durable session reference must be relative: ${value}`);
+  const candidate = resolve(sessionRoot, value);
+  const child = relative(resolve(sessionRoot), candidate);
+  if (!child || child === '..' || child.startsWith(`..${sep}`) || isAbsolute(child)) throw new Error(`durable session reference escapes session: ${value}`);
+  return candidate;
+}
+
+async function dispositionCountsForPool(sessionRoot: string, pool: CandidatePoolV1): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  for (const candidate of pool.candidates) {
+    if (candidate.effectiveDecisionRef === null) continue;
+    const decision = validateSolutionDecision(JSON.parse(await readFile(durableSessionArtifactPath(sessionRoot, candidate.effectiveDecisionRef), 'utf8')) as unknown);
+    counts[decision.route] = (counts[decision.route] ?? 0) + 1;
+  }
+  return counts;
 }
 
 function buildManifest(input: {
@@ -169,7 +188,6 @@ function buildManifest(input: {
   sourceTransitionCount: 0 | 1;
   repositoryBaseline: RunMultiCandidateSessionSliceInput['repositoryBaseline'];
   participantBindingId: string;
-  participantJobs: number;
 }): MultiCandidateSessionManifestV1 {
   return buildMultiCandidateSessionManifestV1({
     logicalSessionId: input.logicalSessionId,
@@ -183,7 +201,7 @@ function buildManifest(input: {
     repositoryBaseline: input.repositoryBaseline,
     participantBindingId: input.participantBindingId,
     budgetAccounting: {
-      participantJobs: input.existing?.budgetAccounting.participantJobs ?? 0,
+      participantJobs: input.hostSlices.reduce((sum, hostSlice) => sum + hostSlice.participantJobs, 0),
       hostSliceCount: input.hostSlices.length,
     },
   });
@@ -340,7 +358,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
     if (!input.initialSourceRoot) throw new Error('START_NEW_SESSION requires initialSourceRoot');
     if (await exists(location.manifestPath)) throw new Error(`Logical Session already exists: ${input.logicalSessionId}`);
     sourceEpochs = [{ sourceEpochRef: currentSourceEpochRef, sourceRunRef: 'pending', poolRef: null, poolStatus: 'PROCESSING', lifecycle: 'ANALYSIS_PENDING', candidateCounts: { total: 0, pending: 0, active: 0, completed: 0, superseded: 0, interrupted: 0 }, dispositionCounts: {} }];
-    manifest = buildManifest({ logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs, currentSourceEpochRef, hostSlices: [{ hostSliceId: input.hostSliceId, startedAt: now(), endedAt: null, participantJobs: 0, state: 'PROCESSING', reason: null }], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId, participantJobs: 0 });
+    manifest = buildManifest({ logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs, currentSourceEpochRef, hostSlices: [{ hostSliceId: input.hostSliceId, startedAt: now(), endedAt: null, participantJobs: 0, state: 'PROCESSING', reason: null }], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId });
     await writeMultiCandidateSessionManifestAtomic(input.repositoryRoot, manifest);
   }
   let slice: HostSliceSummaryV1 = { hostSliceId: input.hostSliceId, startedAt: now(), endedAt: null, participantJobs: 0, state: 'PROCESSING', reason: null };
@@ -367,7 +385,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
     const present = await analysisArtifacts(analysis.analysisRoot ?? analysisRoot, analysis.sourceRunRef);
     if (present.length > 0) await retainSourceAnalysisArtifacts({ repositoryRoot: input.repositoryRoot, logicalSessionId: input.logicalSessionId, sourceEpochRef: currentSourceEpochRef, sourceRoot: analysis.analysisRoot ?? analysisRoot, relativePaths: present });
     sourceEpochs = sourceEpochs.map(epoch => epoch.sourceEpochRef === currentSourceEpochRef ? summaryForPool(pool, currentSourceEpochRef, relative(sessionRoot, durablePoolPath).split('/').join('/'), { ...epoch, sourceRunRef: pool.source.sourceRunRef }) : epoch);
-    manifest = buildManifest({ logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs, currentSourceEpochRef, hostSlices: [...priorSlices, slice], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId, participantJobs: 2 });
+    manifest = buildManifest({ logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs, currentSourceEpochRef, hostSlices: [...priorSlices, slice], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId });
     await writeMultiCandidateSessionManifestAtomic(input.repositoryRoot, manifest);
     analysisRoot = analysis.analysisRoot ?? analysisRoot;
   } else {
@@ -546,8 +564,18 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
     if (pool.candidates.every(candidate => candidate.processingState !== 'PENDING')) { pool = exhaustPoolIfComplete(pool); await persistPool(join(sessionRoot, durablePoolPath), pool); sessionState = 'COMPLETED'; slice = { ...slice, state: 'COMPLETED', endedAt: now(), participantJobs: budget.usedParticipantJobs }; break; }
   }
   if (slice.endedAt === null) slice = { ...slice, state: sessionState === 'PROCESSING' ? 'COMPLETED' : sessionState, reason, endedAt: now(), participantJobs: budget.usedParticipantJobs };
-  const updatedSourceEpochs = sourceEpochs.map(epoch => epoch.sourceEpochRef === currentSourceEpochRef && epoch.poolRef !== null ? summaryForPool(pool, currentSourceEpochRef, epoch.poolRef, epoch) : epoch);
-  const finalManifest = buildManifest({ existing: manifest, logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs: updatedSourceEpochs, currentSourceEpochRef, hostSlices: [...priorSlices, slice], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId, participantJobs: budget.usedParticipantJobs });
+  const updatedSourceEpochs: SourceEpochSummaryV1[] = [];
+  for (const epoch of sourceEpochs) {
+    if (epoch.poolRef === null) {
+      updatedSourceEpochs.push(epoch);
+      continue;
+    }
+    const epochPool = epoch.sourceEpochRef === currentSourceEpochRef
+      ? pool
+      : parseCandidatePoolV1(JSON.parse(await readFile(durableSessionArtifactPath(sessionRoot, epoch.poolRef), 'utf8')) as unknown);
+    updatedSourceEpochs.push(summaryForPool(epochPool, epoch.sourceEpochRef, epoch.poolRef, epoch, await dispositionCountsForPool(sessionRoot, epochPool)));
+  }
+  const finalManifest = buildManifest({ existing: manifest, logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs: updatedSourceEpochs, currentSourceEpochRef, hostSlices: [...priorSlices, slice], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId });
   await writeMultiCandidateSessionManifestAtomic(input.repositoryRoot, finalManifest);
   return { logicalSessionId: input.logicalSessionId, hostSliceId: input.hostSliceId, sessionState, reason, participantJobs: budget.usedParticipantJobs, currentSourceEpochRef, manifestPath: location.manifestPath, sourceTransitionCount };
 }

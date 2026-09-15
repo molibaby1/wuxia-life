@@ -118,6 +118,23 @@ async function collectFiles(root: string, current = ''): Promise<string[]> {
   return result;
 }
 
+async function copyCreateOnlyTree(sourceRoot: string, destinationRoot: string, current = ''): Promise<void> {
+  const directory = resolve(sourceRoot, current || '.');
+  for (const entry of (await readdir(directory, { withFileTypes: true })).sort((left, right) => left.name.localeCompare(right.name))) {
+    const relativePath = current ? join(current, entry.name) : entry.name;
+    const sourcePath = resolve(sourceRoot, relativePath);
+    const destinationPath = resolve(destinationRoot, relativePath);
+    if (entry.isDirectory()) {
+      await mkdir(destinationPath, { recursive: true });
+      await copyCreateOnlyTree(sourceRoot, destinationRoot, relativePath);
+    } else if (entry.isFile()) {
+      await writeCreateOnly(destinationPath, await readFile(sourcePath));
+    } else {
+      throw new Error(`durable artifact materialization refuses non-file: ${relativePath}`);
+    }
+  }
+}
+
 function sourceAnchorRoot(repositoryRoot: string, logicalSessionId: string, sourceEpochRef: string): string {
   const location = resolveCandidateSessionLocation(repositoryRoot, logicalSessionId);
   return join(location.sessionRoot, 'source-epochs', safeId(sourceEpochRef, 'sourceEpochRef'));
@@ -184,7 +201,48 @@ export async function materializeSourceEpochAnchor(input: {
     await writeCreateOnly(join(sourceRoot, safePath), bytes);
   }
   await validatePhase0RunSeal(sourceRoot, manifest.sourceExperimentRootHash);
-  return { sourceRoot };
+  return {
+    sourceRoot,
+    sourceRunRef: manifest.sourceRunRef,
+    sourceFingerprintSha256: manifest.sourceFingerprintSha256,
+    sourceExperimentRootHash: manifest.sourceExperimentRootHash,
+  };
+}
+
+export async function materializeSourceAnalysisArtifacts(input: {
+  repositoryRoot: string;
+  logicalSessionId: string;
+  sourceEpochRef: string;
+  sourceRoot: string;
+  sourceRunRef: string;
+  destinationRoot?: string;
+  hostSliceId?: string;
+}): Promise<{ analysisRoot: string }> {
+  const anchorRoot = sourceAnchorRoot(input.repositoryRoot, input.logicalSessionId, input.sourceEpochRef);
+  const retainedRoot = join(anchorRoot, 'source-analysis');
+  const analysisRoot = resolve(input.destinationRoot ?? join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId ?? 'materialize', input.sourceEpochRef, 'analysis'));
+  await lstat(retainedRoot);
+  await mkdir(analysisRoot, { recursive: true });
+  await copyCreateOnlyTree(retainedRoot, analysisRoot);
+  await copyCreateOnlyTree(input.sourceRoot, join(analysisRoot, 'game-runs', input.sourceRunRef));
+  return { analysisRoot };
+}
+
+export async function materializeCandidateLaneArtifacts(input: {
+  repositoryRoot: string;
+  logicalSessionId: string;
+  sourceEpochRef: string;
+  candidateRef: string;
+  destinationRoot: string;
+}): Promise<{ laneRoot: string }> {
+  const candidateName = basename(input.candidateRef);
+  safeId(candidateName, 'candidateRef');
+  const durableRoot = join(sourceAnchorRoot(input.repositoryRoot, input.logicalSessionId, input.sourceEpochRef), 'candidates', candidateName);
+  await lstat(durableRoot);
+  const laneRoot = resolve(input.destinationRoot);
+  await mkdir(laneRoot, { recursive: true });
+  await copyCreateOnlyTree(durableRoot, laneRoot);
+  return { laneRoot };
 }
 
 async function retainArtifacts(input: {

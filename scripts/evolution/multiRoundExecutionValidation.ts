@@ -437,7 +437,7 @@ async function isolatedSourceFingerprint(root: string): Promise<Phase0SourceFing
   };
 }
 
-async function defaultRerunGame(input: {
+export async function defaultRerunGame(input: {
   workspaceRoot: string;
   previousSourceRoot: string;
   outRoot: string;

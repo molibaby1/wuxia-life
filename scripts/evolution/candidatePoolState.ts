@@ -121,3 +121,32 @@ export function exhaustPoolIfComplete(pool: CandidatePoolV1): CandidatePoolV1 {
   }
   return parseCandidatePoolV1(appendTransition(parsed, null, null, null, 'EXHAUSTED', 'all candidates have terminal processing state'));
 }
+
+export function supersedePendingCandidates(pool: CandidatePoolV1, sourceEpochRef: string): CandidatePoolV1 {
+  const parsed = parseCandidatePoolV1(pool);
+  if (parsed.status !== 'SOURCE_CHANGE_BARRIER') throw new Error(`candidate pool is not at source-change barrier: ${parsed.status}`);
+  const pending = parsed.candidates.filter(candidate => candidate.processingState === 'PENDING');
+  if (pending.length === 0) return parsed;
+  const next = {
+    ...parsed,
+    candidates: parsed.candidates.map(candidate => candidate.processingState === 'PENDING'
+      ? { ...candidate, processingState: 'SUPERSEDED' as const, supersededBySourceEpochRef: sourceEpochRef }
+      : { ...candidate }),
+  };
+  return parseCandidatePoolV1({
+    ...next,
+    status: 'SUPERSEDED',
+    transitions: [
+      ...parsed.transitions,
+      ...pending.map((candidate, index) => ({
+        transitionId: `pool-transition-${String(parsed.transitions.length + index + 1).padStart(6, '0')}`,
+        candidateRef: candidate.candidateRef,
+        fromState: 'PENDING' as const,
+        toState: 'SUPERSEDED' as const,
+        fromPoolStatus: parsed.status,
+        toPoolStatus: 'SUPERSEDED' as const,
+        reason: `candidate superseded by ${sourceEpochRef}`,
+      })),
+    ],
+  });
+}

@@ -27,7 +27,7 @@ export interface CandidateCountsV1 {
 export interface SourceEpochSummaryV1 {
   sourceEpochRef: string;
   sourceRunRef: string;
-  poolRef: string;
+  poolRef: string | null;
   poolStatus: CandidatePoolStatus;
   lifecycle: SourceEpochLifecycle;
   candidateCounts: CandidateCountsV1;
@@ -58,6 +58,12 @@ export interface MultiCandidateSessionManifestV1 {
   hostSlices: HostSliceSummaryV1[];
   sourceTransitionCount: 0 | 1;
   failureRef: string | null;
+  repositoryBaseline: {
+    branch: string;
+    headSha: string;
+    workingTreeFingerprint: string;
+  };
+  participantBindingId: string;
 }
 
 export interface MultiCandidateSessionSummaryV1 {
@@ -133,7 +139,7 @@ function parseSourceEpoch(value: unknown, index: number): SourceEpochSummaryV1 {
   return {
     sourceEpochRef: stringValue(value.sourceEpochRef, `${label}.sourceEpochRef`),
     sourceRunRef: stringValue(value.sourceRunRef, `${label}.sourceRunRef`),
-    poolRef: stringValue(value.poolRef, `${label}.poolRef`),
+    poolRef: value.poolRef === null ? null : stringValue(value.poolRef, `${label}.poolRef`),
     poolStatus: enumValue(value.poolStatus, POOL_STATES, `${label}.poolStatus`),
     lifecycle: enumValue(value.lifecycle, ['ANALYSIS_PENDING', 'POOL_ACTIVE', 'POOL_EXHAUSTED', 'SUPERSEDED', 'INTERRUPTED'], `${label}.lifecycle`),
     candidateCounts: parseCounts(value.candidateCounts, `${label}.candidateCounts`),
@@ -181,11 +187,13 @@ export interface BuildMultiCandidateSessionManifestInput {
   failureRef: string | null;
   pauseOrStopReason?: string | null;
   budgetAccounting?: { participantJobs: number; hostSliceCount?: number };
+  repositoryBaseline?: MultiCandidateSessionManifestV1['repositoryBaseline'];
+  participantBindingId?: string;
 }
 
 export function parseMultiCandidateSessionManifestV1(value: unknown): MultiCandidateSessionManifestV1 {
   assertObject(value, 'multi-candidate session manifest');
-  assertExactKeys(value, ['schemaVersion', 'logicalSessionId', 'sessionState', 'pauseOrStopReason', 'limits', 'budgetAccounting', 'sourceEpochs', 'currentSourceEpochRef', 'hostSlices', 'sourceTransitionCount', 'failureRef'], 'multi-candidate session manifest');
+  assertExactKeys(value, ['schemaVersion', 'logicalSessionId', 'sessionState', 'pauseOrStopReason', 'limits', 'budgetAccounting', 'sourceEpochs', 'currentSourceEpochRef', 'hostSlices', 'sourceTransitionCount', 'failureRef', 'repositoryBaseline', 'participantBindingId'], 'multi-candidate session manifest');
   if (value.schemaVersion !== MULTI_CANDIDATE_SESSION_MANIFEST_SCHEMA_VERSION) throw new Error(`multi-candidate session manifest schemaVersion must be ${MULTI_CANDIDATE_SESSION_MANIFEST_SCHEMA_VERSION}`);
   if (!Array.isArray(value.sourceEpochs)) throw new Error('session.sourceEpochs must be an array');
   if (!Array.isArray(value.hostSlices)) throw new Error('session.hostSlices must be an array');
@@ -197,6 +205,8 @@ export function parseMultiCandidateSessionManifestV1(value: unknown): MultiCandi
   if (!sourceEpochs.some(epoch => epoch.sourceEpochRef === currentSourceEpochRef)) throw new Error('currentSourceEpochRef does not reference a source epoch');
   const sourceTransitionCount = value.sourceTransitionCount;
   if (sourceTransitionCount !== 0 && sourceTransitionCount !== 1) throw new Error('sourceTransitionCount must be 0 or 1');
+  assertObject(value.repositoryBaseline, 'session.repositoryBaseline');
+  assertExactKeys(value.repositoryBaseline, ['branch', 'headSha', 'workingTreeFingerprint'], 'session.repositoryBaseline');
   return {
     schemaVersion: MULTI_CANDIDATE_SESSION_MANIFEST_SCHEMA_VERSION,
     logicalSessionId: stringValue(value.logicalSessionId, 'session.logicalSessionId'),
@@ -212,6 +222,12 @@ export function parseMultiCandidateSessionManifestV1(value: unknown): MultiCandi
     hostSlices,
     sourceTransitionCount,
     failureRef: nullableString(value.failureRef, 'session.failureRef'),
+    repositoryBaseline: {
+      branch: stringValue(value.repositoryBaseline.branch, 'session.repositoryBaseline.branch'),
+      headSha: stringValue(value.repositoryBaseline.headSha, 'session.repositoryBaseline.headSha'),
+      workingTreeFingerprint: stringValue(value.repositoryBaseline.workingTreeFingerprint, 'session.repositoryBaseline.workingTreeFingerprint'),
+    },
+    participantBindingId: stringValue(value.participantBindingId, 'session.participantBindingId'),
   };
 }
 
@@ -231,6 +247,8 @@ export function buildMultiCandidateSessionManifestV1(input: BuildMultiCandidateS
     hostSlices: input.hostSlices,
     sourceTransitionCount: input.sourceTransitionCount,
     failureRef: input.failureRef,
+    repositoryBaseline: input.repositoryBaseline ?? { branch: 'unknown', headSha: 'unknown', workingTreeFingerprint: 'unknown' },
+    participantBindingId: input.participantBindingId ?? 'unbound',
   });
 }
 

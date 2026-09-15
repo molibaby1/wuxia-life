@@ -172,7 +172,7 @@ export async function captureOperatorGitPreflight(repositoryRoot: string): Promi
   };
 }
 
-function assertOperatorPreflight(preflight: OperatorGitPreflight): void {
+export function assertOperatorPreflight(preflight: OperatorGitPreflight): void {
   if (preflight.branch !== 'dev') {
     throw new OperatorPreflightError(
       `OPERATOR_PREFLIGHT_FAILED: branch must be dev (got ${JSON.stringify(preflight.branch || '(detached)')})`,

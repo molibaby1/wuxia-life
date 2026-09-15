@@ -35,6 +35,7 @@ export interface CompletedSourceCandidateAnalysisResult {
   status: 'completed';
   sourceRunRef: string;
   sourceRoot: string;
+  analysisRoot?: string;
   sourceExperimentRootHash: string;
   sourceFingerprintSha256: string;
   authoritativeFingerprintSha256: string;
@@ -182,6 +183,7 @@ export async function runSourceCandidateAnalysis(
     status: 'completed',
     sourceRunRef: preflight.sourceRunRef,
     sourceRoot: preflight.sourceRoot,
+    analysisRoot: experimentRoot,
     sourceExperimentRootHash: preflight.experimentRootHash,
     sourceFingerprintSha256: preflight.sourceFingerprintSha256,
     authoritativeFingerprintSha256,

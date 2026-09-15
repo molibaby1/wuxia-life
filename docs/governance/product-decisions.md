@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-09-11
+> 最后更新：2026-09-15
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -2043,3 +2043,62 @@ Human accepted: 2026-09-12.
 #### 允许重新讨论的条件
 
 仅当需要增加 continuation 次数或预算、改变 HFL / PD-111 scope、引入新的 evidence acquisition，或将 bounded continuation 泛化为 queue 时，才重新讨论本决策。
+
+### PD-118：Source-local Candidate Pool / Multi-candidate Session v1
+
+**产品决策（Human accepted：2026-09-15）**
+
+Auto Evolution 不再把 Improvement Hypothesis Set 的第一条 hypothesis 作为唯一 semantic winner。一个 exact sealed source 下形成的全部合法 hypotheses 都成为该 Source Epoch 的 candidates；Host 按原始 hypothesis 顺序做 deterministic Candidate Activation。原始顺序只决定 processing order，不表示 importance、quality、priority 或 survival。
+
+核心语义：
+
+> **candidate terminal != candidate pool exhausted**
+
+- `selectFirstHypothesis` 的 winner-selection 职责退出 active workflow；不以 LLM Selector、ranking、score 或 semantic filter 替代。
+- 一个 Source Epoch 对应一个 exact Hypothesis Set 和一个 Source-local Candidate Pool。Candidate identity 必须保留原始 `hypothesisId` / source order，不得 downstream 重新编号；identity 不跨 Source Epoch。
+- Candidate processing state 与 Decision disposition 分离。ordinary `SKIP`、`DEFER`、`ESCALATE_HUMAN`、terminal `DEFER_MORE_WORK_REQUESTED` 结束当前 candidate 后，Host 继续下一条 PENDING candidate；这些 route 不再自动结束整个 Pool。
+- `ESCALATE_HUMAN` 仍遵守 PD-100：正式 effective `ESCALATE_HUMAN` 才自动创建 retained HFL item；普通 unresolved HFL item 不同步阻塞当前 Pool。
+- PD-111 evidence safety boundary 保留。bounded causal-attribution scope 从 `selectedHypothesis.evidenceRefs` 改为 `activeCandidate.evidenceRefs`；raw Phase0 internal source、nearby / longitudinal expansion、hidden state、seed/persona、RNG、candidate pools、weights/probabilities、full trace 等继续禁止进入 Solution / Reviewer workspace。
+- 每个 ACTIVE candidate 继续进入现有单问题 lane：bounded attribution → Problem Package → Solution → Reviewer → optional bounded continuation → effective Decision。
+- PD-117 continuation 的形状保留，但 ownership 从 session-wide 改为 candidate-local：每个 Candidate Lane 最多一次 bounded continuation；base Decision immutable；第二个 `REQUEST_MORE_WORK` 仍终止为 `DEFER_MORE_WORK_REQUESTED`；ordinary semantic retry 仍为 `0`；envelope retransmission 仍是独立 transport recovery。
+- Logical Session 与 Host invocation 分离。一个 Logical Session 可跨多个 bounded Host execution slices；现有 `11` Participant jobs 的 hard workflow envelope 改为 **per Host slice**，不是整个 Logical Session 的总上限。
+- Host 只能在 candidate boundary 正常 budget-pause；一旦 candidate 从 PENDING 进入 ACTIVE，必须预留足够 budget 使其完成最大合法 lane，除非命中真正 fail-closed failure。Host budget 不得把进行中的 candidate 强制解释成 `DEFER` / `SKIP`。
+- Source-local Candidate Pool 是可恢复 Host workflow state，不是 generic backlog。Resume 必须验证 exact source / hypothesis set / repository baseline / Participant binding / candidate mapping；不允许 silent rebase、regenerate hypotheses、cross-source rebind 或自动 semantic repair。
+- 异常发现 ACTIVE candidate 时，若已有完整 Contract-valid terminal artifacts，可以 deterministic reconcile；否则 candidate/session 进入 interrupted/fail-closed handling，不自动 semantic retry。
+- effective `READY_FOR_CONFIG_EXECUTION` 形成 Source-change barrier：Host 停止激活后续 candidate。只有 authorized execution、scope verification、deterministic verification、real rerun 和 new sealed source 全部成功后，旧 Source Epoch 中尚未调查的 PENDING candidates 才以 `SUPERSEDED_BY_SOURCE_CHANGE` 明确结束其当前-source 生命周期；不得自动迁移到新 Source。
+- v1 保留当前 P2 authority：每个 Logical Session 最多一次 source-changing transition。Source B 再出现 READY 时不自动第二次 mutation，而以明确 authority boundary 暂停。
+- Logical Session 不再拥有 product `terminalRoute`。Session 只表达 `PROCESSING / PAUSED / COMPLETED / INTERRUPTED / FAILED` 等 workflow lifecycle；Candidate 才拥有 `SKIP / DEFER / ESCALATE_HUMAN / READY_FOR_CONFIG_EXECUTION / ...` disposition。
+- Run Report 继续是 deterministic observability，不成为 reasoning / routing authority。一个 Session 可同时展示多个 candidate facts、多个 HFL refs 和多个 Human next actions；不得通过 route precedence 合成 `overallRoute` / `dominantRoute`。
+- 一个 Logical Session 可产生多个 immutable Report Snapshots；Operational Index 必须区分 logical session 与 report snapshot，不能把同一 Session 的多个 Host slices 统计成多个 independent natural AE runs。
+- Participant failure、repository/provenance integrity failure、scope violation、verification failure、invalid sealed source 等继续 fail closed；v1 不新增“失败 candidate 自动跳过继续下一条”的 recovery authority。
+
+**与既有 authority 的调和**
+
+- PD-100 HFL trigger / lifecycle：保留。
+- PD-111 player-observable / diagnostic evidence boundary：保留；仅局部 supersede `selectedHypothesis` / `selectFirstHypothesis` active-path wording，改为 `activeCandidate` / deterministic activation。
+- PD-117 continuation shape、base/effective Decision、semantic retry = 0：保留。
+- PD-117 one continuation per session：supersede 为 one continuation per Candidate Lane。
+- PD-117 max 11 Participant jobs per whole session：supersede 为 max 11 Participant jobs per Host execution slice。
+- PD-117 ordinary semantic retry = 0：保留。
+- P2/current one source-changing transition：保留。
+- 既有 provenance / permission / scope / deterministic verification / sealed-source fail-closed boundaries：全部保留。
+
+**明确不做**
+
+- 不建设 LLM Selector、semantic ranking、priority score 或 semantic candidate filter；
+- 不建设 cross-source candidate matching / rebinding、semantic dedupe / merge、global backlog、generic task queue 或 Human task scheduler；
+- 不新增 reasoning Role、model switching、Report Analysis Agent 或 full P3；
+- 不扩大 PD-111 evidence；
+- 不授权 multiple source-changing executions per Logical Session；
+- 不授权 autonomous program/code modification。
+
+**重新讨论条件**
+
+- participant order 作为 scheduling order 本身造成 material starvation；
+- 11-job Host slice 无法在 bounded latency 下提供合理 throughput；
+- Source B 必须可靠继承 Source A pending work；
+- 需要超过一次 source-changing transition；
+- Candidate-level Participant failure 需要安全隔离而不是 Session fail closed；
+- 需要跨 Source / Session semantic dedupe、priority 或 merge；
+- PD-111 evidence boundary 无法支撑 candidate investigation；
+- Source-local Pool 无法在不建设 generic queue 的情况下稳定恢复。

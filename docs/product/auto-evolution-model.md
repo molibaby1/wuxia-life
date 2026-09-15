@@ -1,7 +1,7 @@
 # Wuxia-Life Auto Evolution 产品模型
 
 > 状态：当前权威规范  
-> 日期：2026-09-04 Decision Audit / Human Review Surface v1 Slice B
+> 日期：2026-09-15 PD-118 Source-local Candidate Pool / Multi-candidate Session v1 authority sync
 > 发生冲突时，Auto Evolution 产品语义以本文件为准。历史 Phase、实验 PRD / plan、领域专用 investigation 路线不得覆盖本文件。  
 > 与 `docs/product/player-model.md` 同属第一层产品规范。
 
@@ -30,7 +30,7 @@ Auto Evolution 是：
 
 > **早期可运行 / 工程化阶段：让已有 workflow 持续运行、旁路可观察，并从真实运行中继续收敛。**
 
-正常 repository-host 操作是通过 operator wrapper 跑一次 ordinary natural AE session（当前入口：`npm run evolution:operator:run`）。这是执行宿主 packaging，不是新的产品语义层，也不是最终 Human-facing AE Skill；Skill 未来可以调用这个稳定 host primitive。Canonical Participant binding 必须显式声明（当前默认 `CODEX_CURRENT`），不得依赖 previous-run inheritance。运行后的 Human 操作入口仍是 `artifacts/evolution/index.md`。Session execution 以 multi-round `run-manifest.json` 为准；round decision 只解释该 round 的 workflow 结果，两者分别呈现。
+正常 repository-host 操作是通过 operator wrapper 跑一次 ordinary natural AE session（当前入口：`npm run evolution:operator:run`）。这是执行宿主 packaging，不是新的产品语义层，也不是最终 Human-facing AE Skill；Skill 未来可以调用这个稳定 host primitive。Canonical Participant binding 必须显式声明（当前默认 `CODEX_CURRENT`），不得依赖 previous-run inheritance。运行后的 Human 操作入口仍是 `artifacts/evolution/index.md`。正式产品语义区分 Logical AE Session、Host execution slice、Source Epoch、Candidate Pool 与 Candidate Lane。Logical Session 可以跨多个 Host invocation；Candidate Decision 只解释该 candidate，Session 不合成单一 product terminal route。当前 `dev` runtime 仍是 legacy multi-round / selectFirstHypothesis implementation，需按 PD-118 迁移后才能宣称该新语义已工程交付。
 
 长期原则继续保持：
 
@@ -154,11 +154,27 @@ Problem Package 是轻量的信息与权限包，不是领域模型。
 Evidence handoff 分层（PD-111）：
 
 - External Feedback / Improvement Hypothesis 只看到 player-observable evidence；
-- 选中 hypothesis 之后，Orchestrator 可派生 bounded internal causal-attribution diagnostic，并仅交给 Solution / Reviewer；
+- candidate 被 Host 确定性激活为当前 `activeCandidate` 后，Orchestrator 可派生 bounded internal causal-attribution diagnostic，并仅交给该 candidate 的 Solution / Reviewer；
 - raw Phase0 `internal/player-surface-source.json` 仍禁止进入 Participant workspace；
 - diagnostic provenance ≠ player-visible evidence，也不等于完整因果解释。
 
 Active Problem Package 使用 `problem-package-v2`（含 `diagnosticEvidenceRefs`）；历史 `problem-package-v1` 仍可被契约接受。Human Follow-up escalation 在 v2 时保留 diagnostic evidence。
+
+PD-118 下，一个 Source Epoch 的其他 candidates 不扩大当前 active candidate 的 evidence scope。Projection scope 始终等于 `activeCandidate.evidenceRefs`；Candidate Pool 只拥有 workflow lifecycle，不拥有新的 evidence authority。
+
+### 2.5.1 Source-local Candidate Pool / Multi-candidate Session
+
+Improvement Hypothesis Set 的 `1..N` 条合法 hypothesis 全部成为当前 Source Epoch 的 candidates。原始顺序只定义 deterministic processing order；不存在 semantic winner、ranking 或 priority score。
+
+Host 每次只激活一个 PENDING candidate 进入既有单问题 lane。ordinary SKIP / DEFER / ESCALATE_HUMAN / terminal DEFER_MORE_WORK_REQUESTED 结束当前 candidate 后继续下一 candidate；candidate terminal 不等于 Pool exhausted。
+
+READY_FOR_CONFIG_EXECUTION 是 source-change barrier。只有 authorized execution → verification → real rerun → new sealed source 成功后，旧 Source Epoch 尚未调查的 PENDING candidates 才以 `SUPERSEDED_BY_SOURCE_CHANGE` 明确结束当前-source 生命周期，并由新 Source 重新形成 Feedback / Hypothesis / Pool；不做跨 Source rebind。
+
+每个 Candidate Lane 最多一次 bounded continuation；11 Participant jobs 是 per Host execution slice 的 hard workflow envelope。Budget 只能在 candidate boundary 正常暂停，不能污染 candidate product disposition。
+
+Logical Session 与 Host invocation 分离；Pool 必须可恢复，resume 必须验证 exact source、hypothesis set、repository baseline、Participant binding 和 candidate mapping。Session 只表达 PROCESSING / PAUSED / COMPLETED / INTERRUPTED / FAILED 等 workflow lifecycle，不拥有 overallRoute / dominantRoute。
+
+v1 仍最多允许一次 source-changing transition / Logical Session；Participant / provenance / scope / verification / sealed-source failures 继续 fail closed。
 ### 2.6 Run Report / Operational Report
 
 Run Report 是旁路观察 artifact，不是新的核心 reasoning Role。
@@ -179,7 +195,11 @@ Report Producer 不应理解某个具体 Skill 或领域问题，也不在第一
 
 Report schema 在对应最小切片设计时定义，不在本产品模型提前穷举。
 
-当前 Human-accepted 的 bounded correction（Decision Audit / SKIP Explainability Slice A）允许 Run Report 旁路保留已验证的 External Feedback、Improvement Hypothesis、selection、Solution、Reviewer 与 Decision structured outputs，供 Human 审计正式决策链。当前 Hypothesis contract 在形成 0 条 hypothesis 时必须保留有界的 `noProblemAssessment`、feedback refs 与 player-visible evidence refs；历史契约缺失该信息时只能标记为 unavailable，不得补造解释。
+当前 Human-accepted 的 bounded correction（Decision Audit / SKIP Explainability Slice A）允许 Run Report 旁路保留已验证的 External Feedback、Improvement Hypothesis、candidate activation、candidate-local Solution、Reviewer 与 Decision structured outputs，供 Human 审计正式决策链。当前 Hypothesis contract 在形成 0 条 hypothesis 时必须保留有界的 `noProblemAssessment`、feedback refs 与 player-visible evidence refs；历史契约缺失该信息时只能标记为 unavailable，不得补造解释。
+
+PD-118 下 Run Report 可以同时展示同一 Logical Session 中多个 Candidate dispositions、PENDING/SUPERSEDED/INTERRUPTED counts、HFL refs、Host pause/failure facts 与多个 deterministic Human actions。Report 不通过 route precedence 合成 single overall product conclusion。
+
+一个 Logical Session 可以跨多个 Host slices 产生多个 immutable report snapshots；Operational Index 必须按 Logical Session 聚合，而不是把 snapshots 统计为多个 independent natural runs。
 
 该 correction 仍是 observability，不是 Report Analysis；不新增 reasoning Participant，不评价 Participant 是否正确，也不改变 `SKIP`、Decision routing 或 Human Follow-up 创建边界。
 
@@ -199,7 +219,7 @@ Human work item 是 downstream workflow state，不是新的 reasoning Role、Pa
 
 v1 的自动创建入口只有 `decision.route == ESCALATE_HUMAN`，包括明确要求 Human 判断以及超出 configuration authority 的正式 routed outcome。`DEFER`、`DEFER_MORE_WORK_REQUESTED`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 本身不自动创建 Human work item；它们可以成为后续 evidence review 的观察信号，但不把普通失败或不确定性全部转嫁给 Human。
 
-在 PD-117 下，`DEFER_MORE_WORK_REQUESTED` 只在一个明确的 Host workflow 条件下允许 bounded continuation：当本 multi-round session 中首次完成的 Reviewer decision 为 `REQUEST_MORE_WORK` 时，Orchestrator 可创建一次 Host-owned `review-continuation-000001`。它包含一次 fresh Solution revision；仅当 revision 返回 `OPTIONS` 时再进行一次 fresh independent Reviewer re-review。base Decision 保持不可变，continuation Decision 作为 effective route；每 session 最多一次 continuation、最多两个 continuation Participant jobs、总 Participant jobs 最多 11，且不改变 Participant 的 reasoning authority。第二次 `REQUEST_MORE_WORK` 终止为 `DEFER_MORE_WORK_REQUESTED`；`DEFER` / `ESCALATE` 不触发 continuation。该机制不新增 gameplay sample、HFL 入口、PD-111 evidence scope 或 full P3 能力。
+PD-117 定义的 bounded continuation shape、base Decision immutable 与 effective continuation Decision 继续有效；PD-118 将 continuation ownership 改为 candidate-local：每个 Candidate Lane 最多一次 continuation。第二个 `REQUEST_MORE_WORK` 仍终止为 DEFER_MORE_WORK_REQUESTED；ordinary semantic retry 仍为 0；envelope retransmission 仍是独立 transport recovery。11 Participant jobs 改为 per Host execution slice，而不是整个 Logical Session 的总预算。PD-100 HFL trigger scope 与 PD-111 evidence boundary 不变。
 
 普通 unresolved Human work item 不阻塞 RUN / OBSERVE 主循环：
 
@@ -258,9 +278,19 @@ Report Analysis 是未来可能存在的独立消费者。
 当前目标工作流：
 
 ```text
-真实运行
+真实 sealed run / Source Epoch
 ↓
 player-observable evidence / problem
+↓
+External Feedback
+↓
+Improvement Hypothesis Set 0..N
+↓
+Source-local Candidate Pool
+↓
+Host deterministic activation of one PENDING candidate
+↓
+bounded causal attribution(activeCandidate.evidenceRefs)
 ↓
 Problem Package
 ↓
@@ -268,27 +298,25 @@ Investigation / Solution Participant
 ↓
 Independent Reviewer
 ↓
-Decision
-├─ SKIP / DEFER
+effective Candidate Decision
+├─ SKIP / DEFER / terminal DEFER_MORE_WORK_REQUESTED
+│      ↓
+│  candidate completed → next PENDING candidate
 ├─ ESCALATE TO HUMAN
 │      ↓
-│  Human Follow-up Inbox / work-item
-│      ↔ asynchronous Human review
-│      └─ READY_FOR_FORMAL_TASK → existing formal workflow
-└─ accepted configuration work
+│  retained HFL item → candidate completed → next PENDING candidate
+└─ READY_FOR_CONFIG_EXECUTION
        ↓
-    Execution
+    Source-change barrier
        ↓
-    verification
+    authorized Execution → verification → real rerun → new sealed Source
        ↓
-    modified runtime real rerun
+    old pending candidates superseded-by-source-change
        ↓
-    sidecar Run Report
-       ↓
-    next-round entry
+    new Source Epoch → new Feedback / Hypothesis Set / Candidate Pool
 ```
 
-注意：`ESCALATE TO HUMAN` 不再是没有后续定义的 dead-end；其 work-item lifecycle 与 Human review 不同步阻塞主 RUN / OBSERVE loop。最后的“自动 next-round entry”仍是需要验证的能力，不应从单轮成功直接推断已经稳定。
+普通 unresolved HFL 不阻塞 Pool；v1 一个 Logical Session 最多一次 source-changing transition。ordinary candidate terminal 是 candidate-local outcome，不是 Session terminal。
 
 ## 4. Agent Owns Problem Solving
 
@@ -394,6 +422,7 @@ ESCALATE TO HUMAN
 - bounded execution；
 - rerun；
 - sidecar operational reporting。
+- candidate lifecycle / Pool persistence / resume validation / Host slice admission / source-change barrier / multi-candidate observability。
 
 默认不增强：
 
@@ -463,7 +492,11 @@ P2 Multi-round Execution Validation
 ↓
 RUN / OBSERVE + Human Follow-up Loop v1 retain + review + list (real-use pilot completed / `HFL_REAL_USE_VALIDATED`)
 ↓
-P3 Participant Communication Contract Consolidation (DEFERRED)
+PD-118 Source-local Candidate Pool / Multi-candidate Session v1 (design accepted; engineering pending)
+↓
+resume RUN / OBSERVE on migrated workflow
+↓
+P3 full consolidation remains DEFERRED
 ```
 
 P1 与 P2 已有当前阶段记录的 delivered / closed 状态；Human Follow-up Loop v1 的 authority 已记录，minimal runtime 已可在 RUN / OBSERVE 中使用，但本产品规范不定义其 runtime implementation 细节。Full P3 remains `DEFERRED`，不能因为 Human follow-up lifecycle 的定义而重新打开。

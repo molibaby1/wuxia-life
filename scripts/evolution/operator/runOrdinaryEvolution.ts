@@ -398,9 +398,7 @@ export async function runOrdinaryEvolution(
   let durableEvidenceError: string | null = null;
   const sourceRunRef = phase0.sourceRunRef;
   const additionalSourceRunRefs = [
-    ...(ae.sessionExecution.schemaVersion === 'multi-round-session-summary-v2'
-      ? ae.sessionExecution.rounds.map(round => round.sourceRunRef)
-      : []),
+    ...ae.multiRound.rounds.map(round => round.sourceRunRef),
     ...(ae.sessionExecution.execution.resultingRunRef === null
       ? []
       : [ae.sessionExecution.execution.resultingRunRef]),

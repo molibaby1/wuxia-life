@@ -656,6 +656,112 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
 
   {
     const repositoryRoot = await createRepo();
+    const sessionId = 'ordinary-run-20260915-000001';
+    const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
+    const experimentRoot = join(sessionRoot, 'experiment');
+    await mkdir(join(sessionRoot, 'game-runs'), { recursive: true });
+    await mkdir(experimentRoot, { recursive: true });
+    let observedSourceRunRefs: unknown;
+    const sessionExecution: MultiRoundSessionSummaryV2 = {
+      ...continuationSessionSummary(),
+      multiRoundRunRef: sessionId,
+      stopReason: 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE',
+      crossRoundTransitions: 0,
+      execution: {
+        ...continuationSessionSummary().execution,
+        status: 'not_started',
+        resultingRunRef: null,
+      },
+    };
+    await runOrdinaryEvolution({
+      repositoryRoot,
+      dependencies: {
+        preflightGit: async () => ({ branch: 'dev', headSha: 'a'.repeat(40), statusShort: '', clean: true }),
+        resolveBinding: async () => fakeBinding(),
+        allocateSessionId: async () => sessionId,
+        runPhase0Source: async () => ({ sourceRoot: join(repositoryRoot, 'source'), sourceRunRef: sessionId }),
+        runAeWorkflow: async () => aeResult({
+          sessionExecution,
+          experimentRoot,
+          multiRound: {
+            ...aeResult({ sessionExecution, experimentRoot }).multiRound,
+            rounds: [{
+              round: 1,
+              workflowRef: 'round-1',
+              sourceRunRef: sessionId,
+              terminalRoute: 'PARTICIPANT_FAILURE',
+              executionRef: null,
+              resultingRunRef: null,
+              nextAction: 'STOP',
+            }],
+          },
+        }),
+        archiveCapsule: async input => {
+          observedSourceRunRefs = input.sourceRunRefs;
+          throw new Error('stop after v2 continuation source refs capture');
+        },
+        archiveReport: async () => ({ reportId: 'v2-continuation-source-ref-report', reportDirectory: join(repositoryRoot, 'report') }),
+        refreshHumanFollowupInbox: async () => ({ inboxPath: join(repositoryRoot, 'inbox'), activeCount: 0 }),
+        refreshOperationalIndex: async () => ({ topLevelIndexPath: join(repositoryRoot, 'index') }),
+      },
+    });
+    assert.deepEqual(observedSourceRunRefs, [sessionId]);
+  }
+
+  {
+    const repositoryRoot = await createRepo();
+    const sessionId = 'ordinary-run-20260915-000002';
+    const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
+    const experimentRoot = join(sessionRoot, 'experiment');
+    await mkdir(join(sessionRoot, 'game-runs'), { recursive: true });
+    await mkdir(experimentRoot, { recursive: true });
+    let observedSourceRunRefs: unknown;
+    const sessionExecution: MultiRoundSessionSummaryV2 = {
+      ...continuationSessionSummary(),
+      multiRoundRunRef: sessionId,
+      crossRoundTransitions: 1,
+      rounds: [
+        { ...continuationSessionSummary().rounds[0]!, round: 1 },
+        { ...continuationSessionSummary().rounds[0]!, round: 2, continuationRef: null },
+      ],
+      execution: {
+        ...continuationSessionSummary().execution,
+        status: 'not_started',
+        resultingRunRef: 'resulting-run',
+      },
+    };
+    await runOrdinaryEvolution({
+      repositoryRoot,
+      dependencies: {
+        preflightGit: async () => ({ branch: 'dev', headSha: 'b'.repeat(40), statusShort: '', clean: true }),
+        resolveBinding: async () => fakeBinding(),
+        allocateSessionId: async () => sessionId,
+        runPhase0Source: async () => ({ sourceRoot: join(repositoryRoot, 'source'), sourceRunRef: 'initial-run' }),
+        runAeWorkflow: async () => aeResult({
+          sessionExecution,
+          experimentRoot,
+          multiRound: {
+            ...aeResult({ sessionExecution, experimentRoot }).multiRound,
+            rounds: [
+              { round: 1, workflowRef: 'round-1', sourceRunRef: 'initial-run', terminalRoute: 'READY_FOR_CONFIG_EXECUTION', executionRef: 'configuration-execution-000001', resultingRunRef: 'resulting-run', nextAction: 'ROUND_2' },
+              { round: 2, workflowRef: 'round-2', sourceRunRef: 'resulting-run', terminalRoute: 'DEFER', executionRef: null, resultingRunRef: null, nextAction: 'STOP' },
+            ],
+          },
+        }),
+        archiveCapsule: async input => {
+          observedSourceRunRefs = input.sourceRunRefs;
+          throw new Error('stop after cross-round source refs capture');
+        },
+        archiveReport: async () => ({ reportId: 'cross-round-source-ref-report', reportDirectory: join(repositoryRoot, 'report') }),
+        refreshHumanFollowupInbox: async () => ({ inboxPath: join(repositoryRoot, 'inbox'), activeCount: 0 }),
+        refreshOperationalIndex: async () => ({ topLevelIndexPath: join(repositoryRoot, 'index') }),
+      },
+    });
+    assert.deepEqual(observedSourceRunRefs, ['initial-run', 'resulting-run']);
+  }
+
+  {
+    const repositoryRoot = await createRepo();
     await mkdir(join(repositoryRoot, '.tmp/evolution/ordinary-run-20260903-000001'), { recursive: true });
     const allocated = await allocateOrdinarySessionId({
       repositoryRoot,

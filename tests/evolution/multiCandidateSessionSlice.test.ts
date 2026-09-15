@@ -90,6 +90,77 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   const escalationReport = await buildMultiCandidateOperationalRunReport({ repositoryRoot: escalationRoot, logicalSessionId: 'logical-session-000002', hostSliceId: 'host-slice-000001' });
   assert.equal(escalationReport.candidates[0]!.effectiveRoute, 'ESCALATE_HUMAN');
 
+  const continuationRoot = await mkdtemp(join(tmpdir(), 'candidate-session-continuation-'));
+  let candidateContinuationCalls = 0;
+  let candidateAwareHumanFollowupRetentionCalls = 0;
+  let candidateProvenanceMode: string | null = null;
+  const continuationBaseDecision = validateSolutionDecision({
+    schemaVersion: 'solution-decision-v1',
+    problemId: 'problem-hypothesis-000001',
+    route: 'DEFER_MORE_WORK_REQUESTED',
+    reasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    inputs: {
+      solutionStatus: 'OPTIONS', reviewerDecision: 'REQUEST_MORE_WORK',
+      solutionScope: 'configuration', reviewScope: 'config_only',
+      permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
+      budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+  const continuationEscalationDecision = validateSolutionDecision({
+    ...continuationBaseDecision,
+    route: 'ESCALATE_HUMAN',
+    reasonCode: 'EXPLICIT_ESCALATION',
+    inputs: { ...continuationBaseDecision.inputs, reviewerDecision: 'ESCALATE' },
+  });
+  const continuation = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: continuationRoot,
+    logicalSessionId: 'logical-session-000004',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => ({ ...analysis, hypotheses: [hypotheses[0]!] }),
+      runCandidateLane: async ({ candidate }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number } }) => ({
+        status: 'completed' as const,
+        candidateRef: candidate.candidateRef,
+        hypothesisId: candidate.hypothesisId,
+        sourceIndex: candidate.sourceIndex,
+        candidateActivationPath: 'candidate-activation.json',
+        problemPackagePath: 'problem-package.json',
+        causalAttributionPath: 'diagnostic/causal-attribution.json',
+        decisionPath: 'decision.json',
+        baseDecisionPath: 'decision.json',
+        humanReviewPackagePath: 'human-review-package.md',
+        actualParticipantJobs: 1 as const,
+        decision: continuationBaseDecision,
+        solutionInvocationRef: 'solution', reviewerInvocationRef: 'reviewer',
+        problemPackage: {} as never,
+      }),
+      runCandidateContinuation: async () => {
+        candidateContinuationCalls += 1;
+        return {
+          status: 'completed' as const,
+          participantJobs: 1 as const,
+          continuationRef: 'review-continuation-000001' as const,
+          effectiveDecisionPath: 'review-continuation-000001/decision.json',
+          effectiveDecision: continuationEscalationDecision,
+        };
+      },
+      retainHumanFollowup: async input => {
+        candidateAwareHumanFollowupRetentionCalls += 1;
+        candidateProvenanceMode = input.candidateProvenance?.mode ?? null;
+        return { itemPath: join(continuationRoot, 'candidate-hfl-item.json'), item: {} as never, created: true };
+      },
+    },
+  });
+  assert.equal(continuation.sessionState, 'COMPLETED');
+  assert.equal(candidateContinuationCalls, 1);
+  assert.equal(candidateAwareHumanFollowupRetentionCalls, 1);
+  assert.equal(candidateProvenanceMode, 'candidate-activation-v1');
+  const continuationPool = parseCandidatePoolV1(JSON.parse(await readFile(join(continuationRoot, 'artifacts/evolution/sessions/logical-session-000004/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(continuationPool.candidates[0]!.humanFollowupRef, 'candidate-hfl-item.json');
+
   let resumeAnalysisLoads = 0;
   const resumed = await runMultiCandidateSessionSlice({
     ...base,

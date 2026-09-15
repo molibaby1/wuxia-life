@@ -7,6 +7,7 @@ import {
   runReviewContinuation,
   type ReviewContinuationDependencies,
 } from '../../scripts/evolution/problemAgnosticSolution/runReviewContinuation';
+import { runCandidateReviewContinuation } from '../../scripts/evolution/runCandidateReviewContinuation';
 import {
   prepareAgentWorkspace,
   captureAuthoritativeFingerprint,
@@ -332,6 +333,7 @@ function failureReviewerRunner(
 async function runContinuation(
   fixture: Awaited<ReturnType<typeof createFixture>>,
   dependencies: ReviewContinuationDependencies,
+  options: { retainHumanFollowupOnEscalate?: boolean } = {},
 ) {
   return runReviewContinuation({
     round: 1,
@@ -342,6 +344,7 @@ async function runContinuation(
     sourceRunRef: SOURCE_RUN_REF,
     sourceFingerprintSha256: fixture.sourceFingerprintSha256,
     participant: participant(),
+    ...options,
     dependencies,
   });
 }
@@ -436,6 +439,65 @@ export async function runReviewContinuationTests(): Promise<void> {
   assert.equal(escalationResult.participantJobs, 1);
   assert.equal(retained.length, 1);
   assert.equal(retained[0]!.continuation?.effectiveDecisionPath, 'review-continuation-000001/decision.json');
+
+  const candidateOwnedEscalation = await createFixture();
+  const candidateOwnedCalls = { revision: 0, rereview: 0 };
+  const candidateOwnedRetained: RetainHumanFollowupWorkItemInput[] = [];
+  const candidateOwnedResult = await runContinuation(candidateOwnedEscalation, {
+    runSolutionRevision: fakeRevisionRunner('ESCALATE', candidateOwnedCalls),
+    runSolutionReReviewer: fakeReviewerRunner('ACCEPT_OPTION', candidateOwnedCalls),
+    retainHumanFollowup: async input => {
+      candidateOwnedRetained.push(input);
+      return { itemPath: 'item.json', item: {} as RetainedHumanFollowupWorkItem['item'], created: true };
+    },
+  }, { retainHumanFollowupOnEscalate: false });
+  assert.equal(candidateOwnedResult.status, 'completed');
+  assert.equal(candidateOwnedResult.terminalRoute, 'ESCALATE_HUMAN');
+  assert.equal(candidateOwnedRetained.length, 0);
+
+  const adapterFixture = await createFixture();
+  let adapterRetentionFlag: boolean | undefined;
+  const adapterDecision = validateSolutionDecision({
+    schemaVersion: 'solution-decision-v1',
+    problemId: adapterFixture.baseDecision.problemId,
+    route: 'ESCALATE_HUMAN',
+    reasonCode: 'EXPLICIT_ESCALATION',
+    inputs: {
+      solutionStatus: 'OPTIONS',
+      reviewerDecision: 'ESCALATE',
+      solutionScope: 'configuration',
+      reviewScope: 'config_only',
+      permissions: adapterFixture.baseDecision.inputs.permissions,
+      budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+  const adapterResult = await runCandidateReviewContinuation({
+    candidateRef: 'candidate-pool-000001/hypothesis-000001',
+    candidateLaneRoot: adapterFixture.roundRoot,
+    baseDecisionPath: adapterFixture.roundRoot + '/decision.json',
+    problemPackagePath: adapterFixture.problemPackagePath,
+    sourceFingerprintSha256: adapterFixture.sourceFingerprintSha256,
+    participant: participant(),
+    repositoryRoot: adapterFixture.repositoryRoot,
+    dependencies: {
+      runCandidateContinuation: async input => {
+        adapterRetentionFlag = input.retainHumanFollowupOnEscalate;
+        return {
+          status: 'completed',
+          continuationRef: 'review-continuation-000001',
+          participantJobs: 1,
+          terminalRoute: 'ESCALATE_HUMAN',
+          terminalReasonCode: adapterDecision.reasonCode,
+          decision: adapterDecision,
+          decisionPath: adapterFixture.roundRoot + '/review-continuation-000001/decision.json',
+          effectiveSolutionPath: null,
+          effectiveReviewPath: null,
+        };
+      },
+    },
+  });
+  assert.equal(adapterResult.status, 'completed');
+  assert.equal(adapterRetentionFlag, false);
 
   const accepted = await createFixture();
   const acceptedCalls = { revision: 0, rereview: 0 };

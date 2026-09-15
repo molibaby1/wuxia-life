@@ -76,6 +76,7 @@ export interface RunReviewContinuationInput {
   sourceRunRef: string;
   sourceFingerprintSha256: string;
   participant: WorkspaceAgentParticipantOptions;
+  retainHumanFollowupOnEscalate?: boolean;
   dependencies?: ReviewContinuationDependencies;
 }
 
@@ -557,7 +558,7 @@ export async function runReviewContinuation(
   const continuationPath = join(continuationRoot, 'continuation.json');
   await writeCreateOnly(continuationPath, continuation);
 
-  if (decision.route === 'ESCALATE_HUMAN') {
+  if (decision.route === 'ESCALATE_HUMAN' && input.retainHumanFollowupOnEscalate !== false) {
     const retain = input.dependencies?.retainHumanFollowup ?? retainHumanFollowupWorkItem;
     const continuationEvidence: HumanFollowupContinuationEvidence = {
       effectiveDecisionPath: 'review-continuation-000001/decision.json',

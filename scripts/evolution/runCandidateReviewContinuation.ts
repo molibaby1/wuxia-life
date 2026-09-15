@@ -101,6 +101,7 @@ export async function runCandidateReviewContinuation(
     sourceRunRef,
     sourceFingerprintSha256: input.sourceFingerprintSha256,
     participant: input.participant,
+    retainHumanFollowupOnEscalate: false,
     dependencies: input.dependencies,
   };
   const result = await (input.dependencies?.runCandidateContinuation ?? runReviewContinuation)(continuationInput);

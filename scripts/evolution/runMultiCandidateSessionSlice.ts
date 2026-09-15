@@ -334,12 +334,13 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
   const sourceSummary = sourceEpochs.find(epoch => epoch.sourceEpochRef === currentSourceEpochRef)!;
   let analysisRoot: string;
   let analysis: CompletedSourceCandidateAnalysisResult;
-  if (input.mode === 'START_NEW_SESSION' || sourceSummary.lifecycle === 'ANALYSIS_PENDING' || sourceSummary.poolRef === null) {
+  const sourceNeedsFreshAnalysis = sourceSummary.lifecycle === 'ANALYSIS_PENDING' || sourceSummary.poolRef === null;
+  if (input.mode === 'START_NEW_SESSION' || sourceNeedsFreshAnalysis) {
     const sourceRoot = input.initialSourceRoot ?? (await materializeSourceEpochAnchor({ repositoryRoot: input.repositoryRoot, logicalSessionId: input.logicalSessionId, sourceEpochRef: currentSourceEpochRef, hostSliceId: input.hostSliceId })).sourceRoot;
     analysisRoot = join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId, currentSourceEpochRef, 'analysis');
-    analysis = input.mode === 'RESUME_SESSION'
-      ? await (input.dependencies?.loadSourceAnalysis ?? (value => defaultLoadSourceAnalysis(input, value)))({ sourceEpochRef: currentSourceEpochRef, sourceRoot, analysisRoot })
-      : await (input.dependencies?.runSourceAnalysis ?? (value => defaultSourceAnalysis(input, value.sourceRoot, value.analysisRoot, value.sourceEpochRef)))({ sourceRoot, sourceEpochRef: currentSourceEpochRef, analysisRoot });
+    analysis = sourceNeedsFreshAnalysis
+      ? await (input.dependencies?.runSourceAnalysis ?? (value => defaultSourceAnalysis(input, value.sourceRoot, value.analysisRoot, value.sourceEpochRef)))({ sourceRoot, sourceEpochRef: currentSourceEpochRef, analysisRoot })
+      : await (input.dependencies?.loadSourceAnalysis ?? (value => defaultLoadSourceAnalysis(input, value)))({ sourceEpochRef: currentSourceEpochRef, sourceRoot, analysisRoot });
     const sourceFingerprintPath = join(sourceRoot, 'provenance/source-fingerprint.json');
     const sourceFingerprintSha256 = analysis.sourceFingerprintSha256;
     if (input.mode === 'START_NEW_SESSION') {

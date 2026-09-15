@@ -102,7 +102,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     for (const artifact of PHASE0_REQUIRED_SEALED_ARTIFACTS) { await mkdir(join(source, artifact, '..'), { recursive: true }); await writeFile(join(source, artifact), '{}'); }
   }
   const transitionSealA = await sealPhase0Run(transitionSourceA, 'cohort-run-000003');
-  await sealPhase0Run(transitionSourceB, 'cohort-run-000004');
+  const transitionSealB = await sealPhase0Run(transitionSourceB, 'cohort-run-000004');
   const transitionAnalysis: CompletedSourceCandidateAnalysisResult = { ...analysis, sourceRunRef: 'cohort-run-000003', sourceRoot: transitionSourceA, sourceExperimentRootHash: transitionSealA.experimentRootHash, hypotheses: hypotheses.slice(0, 2) };
   const transition = await runMultiCandidateSessionSlice({
     ...base,
@@ -139,6 +139,64 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   const transitionPool = parseCandidatePoolV1(JSON.parse(await readFile(join(transitionRoot, 'artifacts/evolution/sessions/logical-session-000003/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
   assert.equal(transitionPool.status, 'SUPERSEDED');
   assert.equal(transitionPool.candidates[1]!.processingState, 'SUPERSEDED');
+
+  let sourceBRunAnalysisCalls = 0;
+  let sourceBLoadAnalysisCalls = 0;
+  const sourceBAnalysis: CompletedSourceCandidateAnalysisResult = {
+    ...analysis,
+    sourceRunRef: 'cohort-run-000004',
+    sourceRoot: transitionSourceB,
+    sourceExperimentRootHash: transitionSealB.experimentRootHash,
+    hypotheses: [hypotheses[0]!],
+  };
+  const resumedSourceB = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: transitionRoot,
+    logicalSessionId: 'logical-session-000003',
+    mode: 'RESUME_SESSION',
+    hostSliceId: 'host-slice-000002',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => {
+        sourceBRunAnalysisCalls += 1;
+        return sourceBAnalysis;
+      },
+      loadSourceAnalysis: async () => {
+        sourceBLoadAnalysisCalls += 1;
+        throw new Error('fresh Source B must not load non-existent retained analysis');
+      },
+      runCandidateLane: async ({ candidate }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number } }) => ({
+        status: 'completed' as const,
+        candidateRef: candidate.candidateRef,
+        hypothesisId: candidate.hypothesisId,
+        sourceIndex: candidate.sourceIndex,
+        candidateActivationPath: 'candidate-activation.json',
+        problemPackagePath: 'problem-package.json',
+        causalAttributionPath: 'diagnostic/causal-attribution.json',
+        decisionPath: 'decision.json',
+        baseDecisionPath: 'decision.json',
+        humanReviewPackagePath: 'human-review-package.md',
+        actualParticipantJobs: 1 as const,
+        decision: validateSolutionDecision({
+          schemaVersion: 'solution-decision-v1',
+          problemId: `problem-${candidate.hypothesisId}`,
+          route: 'SKIP',
+          reasonCode: 'NO_PROPOSAL',
+          inputs: {
+            solutionStatus: 'NO_PROPOSAL', reviewerDecision: null,
+            solutionScope: null, reviewScope: null,
+            permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
+            budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
+          },
+        }),
+        solutionInvocationRef: 'solution', reviewerInvocationRef: null,
+        problemPackage: {} as never,
+      }),
+    },
+  });
+  assert.equal(sourceBRunAnalysisCalls, 1);
+  assert.equal(sourceBLoadAnalysisCalls, 0);
+  assert.equal(resumedSourceB.currentSourceEpochRef, 'source-epoch-000002');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

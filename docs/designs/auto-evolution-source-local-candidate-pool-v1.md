@@ -1,6 +1,6 @@
 # Auto Evolution Source-local Candidate Pool / Multi-candidate Session v1
 
-> 状态：HUMAN-ACCEPTED / WRITTEN SPEC REVIEW ACCEPTED；IMPLEMENTATION DELIVERED / CLOSURE VERIFICATION IN PROGRESS
+> 状态：HUMAN-ACCEPTED / WRITTEN SPEC REVIEW ACCEPTED；IMPLEMENTATION DELIVERED / CLOSURE VERIFICATION COMPLETE
 > 日期：2026-09-15
 > 目标 authority：PD-118（本书面 spec 已获 Human 认可；需与 `docs/product/auto-evolution-model.md`、`docs/governance/product-decisions.md`、`docs/governance/current-product-stage.md` 同步落库）
 > 本文是工程设计，不是 runtime implementation authorization。
@@ -1108,11 +1108,11 @@ Observability / legacy compatibility tests
 
 3. 更新 `docs/governance/current-product-stage.md`：
    - 记录 PD-118 / 本设计 accepted；
-   - engineering 尚未开始；
-   - 当前 next step 为 implementation plan / bounded engineering slice；
+   - implementation 已完成，closure verification 已完成；
+   - 当前 next step 为在新 workflow 基础上继续 RUN / OBSERVE；
    - 不继续通过 ordinary runs 重复证明已确认的 Selection bottleneck。
 
-完成上述 authority sync 后，才进入 implementation plan；authority sync 本身不代表 runtime engineering 已完成。
+上述 authority sync 已完成；本设计对应的 runtime implementation 已完成，并已通过本 repair plan 的 closure verification。
 
 ## 38. Governance Relationship
 

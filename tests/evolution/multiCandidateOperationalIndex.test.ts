@@ -10,7 +10,7 @@ async function writeReport(root: string, reportId: string, value: unknown): Prom
   await writeFile(join(directory, 'report.json'), `${JSON.stringify(value)}\n`, 'utf8');
 }
 
-function v7(reportId: string, logicalSessionId: string, hostSliceId: string, createdAt: string) {
+function v7(reportId: string, logicalSessionId: string, hostSliceId: string, createdAt: string, candidates: unknown[] = []) {
   return {
     schemaVersion: 'operational-run-report-v7',
     reportId,
@@ -29,7 +29,7 @@ function v7(reportId: string, logicalSessionId: string, hostSliceId: string, cre
       sourceTransitionCount: 0,
       failureRef: null,
     },
-    candidates: [],
+    candidates,
     recoverableSessionStateRef: `artifacts/evolution/sessions/${logicalSessionId}/session-manifest.json`,
     terminalForensicEvidenceRef: null,
   };
@@ -38,12 +38,14 @@ function v7(reportId: string, logicalSessionId: string, hostSliceId: string, cre
 export async function runMultiCandidateOperationalIndexTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'candidate-operational-index-'));
   await writeReport(root, 'candidate-report-a1', v7('candidate-report-a1', 'logical-session-a', 'host-slice-000001', '2026-09-15T00:01:00.000Z'));
-  await writeReport(root, 'candidate-report-a2', v7('candidate-report-a2', 'logical-session-a', 'host-slice-000002', '2026-09-15T00:02:00.000Z'));
-  await writeReport(root, 'candidate-report-b1', v7('candidate-report-b1', 'logical-session-b', 'host-slice-000001', '2026-09-15T00:03:00.000Z'));
+  await writeReport(root, 'candidate-report-a2', v7('candidate-report-a2', 'logical-session-a', 'host-slice-000002', '2026-09-15T00:02:00.000Z', [
+    { candidateRef: 'source-epoch-000001/candidates/hypothesis-000001', hypothesisId: 'hypothesis-000001', sourceIndex: 0, processingState: 'PENDING', effectiveRoute: null, effectiveReasonCode: null, effectiveDecisionRef: null, humanFollowupRef: 'human-follow-up/item-000001.json', supersededBySourceEpochRef: null, interruptionRef: null },
+  ]));
+  await writeReport(root, 'candidate-report-b1', v7('candidate-report-b1', 'logical-session-b', 'host-slice-000001', '2026-09-15T00:02:00.000Z'));
   await writeReport(root, 'legacy-report-v1', {
     schemaVersion: 'auto-evolution-operational-run-report-v1',
     reportId: 'legacy-report-v1',
-    createdAt: '2026-09-15T00:04:00.000Z',
+    createdAt: '2026-09-15T00:00:00.000Z',
     sourceRoot: '.tmp/evolution/legacy',
     workflowCount: 0,
     workflows: [],
@@ -57,9 +59,12 @@ export async function runMultiCandidateOperationalIndexTests(): Promise<void> {
   assert.match(index, /candidate-report-a2/);
   assert.match(index, /history: candidate-report-a1/);
   assert.match(index, /legacy-report-v1/);
+  assert.match(index, /RESUME_SESSION/);
+  assert.match(index, /REVIEW_HUMAN_FOLLOWUP/);
   const top = await readFile(result.topLevelIndexPath, 'utf8');
   assert.match(top, /Logical Session 总数：3/);
   assert.match(top, /Report snapshot 总数：4/);
+  assert.match(top, /RESUME_SESSION/);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

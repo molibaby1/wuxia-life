@@ -23,7 +23,11 @@ import {
   type MultiCandidateSessionSummaryV1,
 } from '../multiCandidateSessionManifestContract';
 import type { CandidateProcessingState } from '../candidatePoolContract';
-import { buildHumanReviewSummary, type HumanReviewSummary } from './buildHumanReviewSummary';
+import {
+  buildHumanReviewSummary,
+  buildMultiCandidateHumanReviewSummary,
+  type HumanReviewSummary,
+} from './buildHumanReviewSummary';
 import {
   parseWorkspaceStateProvenanceProjection,
   type WorkspaceStateProvenanceProjection,
@@ -470,6 +474,19 @@ function sessionRouteSummary(report: OperationalRunReport): string {
   ].join('; ');
 }
 
+function multiCandidateActionSummary(report: OperationalRunReportV7): string {
+  const projection = buildMultiCandidateHumanReviewSummary({
+    logicalSessionId: report.logicalSessionId,
+    sessionState: report.sessionStateAtSnapshot,
+    pauseOrStopReason: report.sessionExecution.pauseOrStopReason,
+    candidates: report.candidates,
+  });
+  if (projection.actions.length === 0) return '（无）';
+  return projection.actions.map(action => action.candidateRef === null
+    ? action.kind
+    : `${action.kind}:${action.candidateRef}`).join(', ');
+}
+
 function sourceRunSummary(workflows: WorkflowSummary[]): string {
   const refs = workflows
     .map(workflow => workflow.sourceRunRef)
@@ -525,7 +542,7 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
         }, {} as Record<string, number>);
         const history = snapshots.slice(1).map(snapshot => snapshot.reportId).join(', ');
         lines.push(
-          `| ${markdownCell(latest.createdAt)} | [${markdownCell(latest.reportId)}](${latest.reportId}/report.md) | ${markdownCell(latest.sessionStateAtSnapshot)} | v7 snapshots: ${snapshots.length} | ${markdownCell(latest.sessionStateAtSnapshot)} | ${markdownCell(sessionRouteSummary(latest))} | ${markdownCell(latest.sessionExecution.currentSourceEpochRef)} | ${markdownCell(latest.logicalSessionId)} | v7: ${counts.COMPLETED ?? 0} completed, ${counts.PENDING ?? 0} pending; ${history === '' ? '（无历史 snapshot）' : `history: ${markdownCell(history)}`} |`,
+          `| ${markdownCell(latest.createdAt)} | [${markdownCell(latest.reportId)}](${latest.reportId}/report.md) | ${markdownCell(latest.sessionStateAtSnapshot)} | v7 snapshots: ${snapshots.length} | ${markdownCell(latest.sessionStateAtSnapshot)} | ${markdownCell(sessionRouteSummary(latest))} | ${markdownCell(latest.sessionExecution.currentSourceEpochRef)} | ${markdownCell(latest.logicalSessionId)} | v7: ${counts.COMPLETED ?? 0} completed, ${counts.PENDING ?? 0} pending; actions: ${markdownCell(multiCandidateActionSummary(latest))}; ${history === '' ? '（无历史 snapshot）' : `history: ${markdownCell(history)}`} |`,
         );
         continue;
       }
@@ -563,6 +580,7 @@ function renderTopLevelIndex(input: {
   reportSnapshotCount: number;
   latestReport: OperationalRunReport | null;
   latestHumanReview: HumanReviewSummary | null;
+  latestMultiCandidateActions: string[] | null;
   humanFollowupIndexPresent: boolean;
 }): string {
   const latestLine = input.latestReport === null
@@ -577,6 +595,12 @@ function renderTopLevelIndex(input: {
       `- 一句话人类结论：${input.latestHumanReview.conclusion}`,
       `- 建议动作：${input.latestHumanReview.recommendedAction}`,
     ];
+  const multiCandidateGuidance = input.latestMultiCandidateActions === null
+    ? []
+    : [
+      '- Multi-candidate actions：',
+      ...input.latestMultiCandidateActions.map(action => `  - ${action}`),
+    ];
 
   return [
     '# Auto Evolution 运行索引',
@@ -588,6 +612,7 @@ function renderTopLevelIndex(input: {
     `- Report snapshot 总数：${input.reportSnapshotCount}`,
     latestLine,
     ...humanGuidance,
+    ...multiCandidateGuidance,
     '- 打开 [run-reports/index.md](run-reports/index.md)',
     '',
     '## Human Follow-up',
@@ -622,8 +647,21 @@ export async function buildOperationalObservabilityIndex(
     : buildHumanReviewSummary({
       workflows: latestReport.workflows,
       reportId: latestReport.reportId,
-      ...(latestReport.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION ? {} : { sessionExecution: latestReport.sessionExecution }),
-    });
+        ...(latestReport.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION ? {} : { sessionExecution: latestReport.sessionExecution }),
+      });
+  const latestMultiCandidateActions = latestReport?.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V7
+    ? (() => {
+      const projection = buildMultiCandidateHumanReviewSummary({
+        logicalSessionId: latestReport.logicalSessionId,
+        sessionState: latestReport.sessionStateAtSnapshot,
+        pauseOrStopReason: latestReport.sessionExecution.pauseOrStopReason,
+        candidates: latestReport.candidates,
+      });
+      return projection.actions.map(action => action.candidateRef === null
+        ? action.kind
+        : `${action.kind}:${action.candidateRef}`);
+    })()
+    : null;
   await mkdir(join(repositoryRoot, RUN_REPORTS_ROOT), { recursive: true });
   await mkdir(join(repositoryRoot, 'artifacts/evolution'), { recursive: true });
   await writeFile(runReportsIndexPath, renderRunReportsIndex(reports), 'utf8');
@@ -635,6 +673,7 @@ export async function buildOperationalObservabilityIndex(
       reportSnapshotCount: reports.length,
       latestReport,
       latestHumanReview,
+      latestMultiCandidateActions,
       humanFollowupIndexPresent: await pathExists(join(repositoryRoot, HUMAN_FOLLOWUP_INDEX_PATH)),
     }),
     'utf8',

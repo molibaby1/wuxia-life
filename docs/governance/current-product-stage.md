@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-09-15（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 design accepted；engineering not started）。
+> 最后更新：2026-09-15（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 engineering delivered；default ordinary path active；deterministic acceptance verified）。
 
 ---
 
@@ -38,8 +38,9 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；
 - P2 不修改 authoritative product state，也不包含 repository promotion / commit / merge。
-- **PD-118 Source-local Candidate Pool / Multi-candidate Session v1：FOUNDATION ENGINEERING DELIVERED / HOST INTEGRATION NOT YET COMPLETE；**
-- 已验证 canonical Candidate Pool / Logical Session contracts、一次性 Source Analysis、保留原始 hypothesis identity 的 Candidate Lane，以及单 Source deterministic serial Pool processing；当前 ordinary operator 仍是 legacy Host，未宣称 durable resume、source transition、candidate-local continuation 或新报告已交付。
+- **PD-118 Source-local Candidate Pool / Multi-candidate Session v1：ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED；**
+- 已验证 canonical Candidate Pool / Logical Session contracts、一次性 Source Analysis、保留原始 hypothesis identity 的 Candidate Lane、单 Source deterministic serial Pool processing、durable Host resume、candidate-local continuation、一次 source-change barrier、immutable per-slice report snapshots、multi-action Human projection、Logical Session index grouping 与 terminal forensic evidence。
+- 默认 ordinary operator 已切换到 exact START/RESUME semantics；legacy multi-round / Selection artifacts 仅保留为历史读取与 replay 兼容面，不再是新 ordinary path 的 winner-selection 入口。
 - RUN / OBSERVE 已确认当前 earliest material workflow bottleneck：`selectFirstHypothesis` 使 participant order 决定 candidate survival，且单 candidate terminal 被错误放大为 Pool/session terminal；正式方向不是调 smarter selector，而是 preserve-all + deterministic candidate activation。
 - PD-118 保留 PD-100 HFL trigger、PD-111 evidence safety、PD-117 continuation shape / semantic retry=0 与 P2 one-source-transition ceiling；改变的是 Selection winner semantics、continuation/budget ownership、Logical Session / Host slice、Pool persistence/resume 与 multi-candidate report semantics。
 - **Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy：HUMAN ACCEPTED / AUTHORITY RECORDED；**
@@ -63,11 +64,9 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 
 ## 3. 当前仍未证明
 
-- Source-local Candidate Pool durable Host runtime 尚未实现；
-- multi-candidate Host slice pause/resume、durable Pool persistence 与 crash reconciliation 尚未验证；
-- candidate-local continuation / per-slice 11-job accounting 尚未工程验证；
-- multi-candidate report snapshots / action-set / session aggregation 尚未工程验证；
-- PD-118 设计被接受不等于 runtime 已迁移，也不构成 production-ready 声明；
+- PD-118 在长期自然运行中的 effectiveness、稳定性与普遍性尚未证明；
+- PD-118 implementation closure 不等于 production-ready 声明；
+- 当前 focused PD-118 suites、`npm run typecheck`、`npm run test:contracts` 与 `npm run build` 已通过；完整 `npm test` 仍受既有 baseline failures `stageAtomicProgression` 与 `canonicalUndefinedPropertyEliminationTests` 阻断，不归因于本次迁移；
 
 以下内容不要因 deterministic engineering validation 或设计意图而写成已成立：
 
@@ -129,7 +128,7 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 - 真实运行暴露具体问题时再修正对应模块；
 - 不为了“完成验证”人为制造 READY、反复 retry 或预选保证可修改的问题。
 - 对正式 `ESCALATE_HUMAN` outcome，按 Human Follow-up Loop v1 保留后续异步 review 语义；不把它变成 RUN / OBSERVE 的同步 gate。
-- 真实运行已经暴露并确认 Selection / candidate-lifecycle bottleneck；不再通过额外 ordinary runs 重复证明该已确认问题。当前 next step 是完成 PD-118 authority sync → implementation plan → bounded engineering migration；迁移和验证完成后再恢复以新 workflow 为基础的 ordinary RUN / OBSERVE。
+- 真实运行已经暴露并确认 Selection / candidate-lifecycle bottleneck；不再通过额外 ordinary runs 重复证明该已确认问题。PD-118 bounded engineering migration 已完成并通过 deterministic acceptance；下一步是在不人为制造 READY / Selection 样本的前提下，恢复以新 workflow 为基础的 ordinary RUN / OBSERVE。
 - **PD-117 Bounded More-Work Continuation v1：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED / INITIAL NATURAL EFFECTIVENESS SUPPORTED ACROSS MULTIPLE INDEPENDENT CASES；GLOBAL / LONG-RUN EFFECTIVENESS NOT YET ESTABLISHED；** 首个符合条件的 Reviewer `REQUEST_MORE_WORK` 在单次 session 内最多触发一次 Host continuation、最多增加两个 Participant jobs；base Decision、PD-100 HFL trigger、PD-111 evidence scope 与 full P3 boundary 保持不变。自然 evidence anchor：ordinary-run-20260913-000001（continuation 后再次 `REQUEST_MORE_WORK`）与 ordinary-run-20260913-000006（continuation 后 `ACCEPT_OPTION` → disposable workspace 配置执行 → modified rerun B → Round 2 以 `DEFER_MORE_WORK_REQUESTED` 终止，`authoritativeRootChanged = false`）；Batch #3 early-stop sampling 不用于 activation-rate 统计；不宣称 global effectiveness / 成功率 / READY 率提升。
 
 ### Engineering convenience（非 Product Decision）
@@ -312,6 +311,6 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 18b. Human Follow-up Loop v1 minimal runtime？→ **ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / HFL_REAL_USE_VALIDATED**
 19. Ordinary unresolved Human work item 是否阻塞 RUN / OBSERVE？→ **NO**
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
-21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / engineering not started**
-22. 当前 legacy `selectFirstHypothesis` runtime 是否已符合 PD-118？→ **NO / migration pending**
-23. 当前 next engineering target？→ **Source-local Candidate Pool / Multi-candidate Session v1 bounded implementation planning**
+21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
+22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
+23. 当前 next engineering target？→ **基于已迁移 workflow 继续 RUN / OBSERVE；不把自然 effectiveness 写成已证明**

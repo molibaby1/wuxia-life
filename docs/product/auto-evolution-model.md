@@ -30,7 +30,7 @@ Auto Evolution 是：
 
 > **早期可运行 / 工程化阶段：让已有 workflow 持续运行、旁路可观察，并从真实运行中继续收敛。**
 
-正常 repository-host 操作是通过 operator wrapper 跑一次 ordinary natural AE session（当前入口：`npm run evolution:operator:run`）。这是执行宿主 packaging，不是新的产品语义层，也不是最终 Human-facing AE Skill；Skill 未来可以调用这个稳定 host primitive。Canonical Participant binding 必须显式声明（当前默认 `CODEX_CURRENT`），不得依赖 previous-run inheritance。运行后的 Human 操作入口仍是 `artifacts/evolution/index.md`。正式产品语义区分 Logical AE Session、Host execution slice、Source Epoch、Candidate Pool 与 Candidate Lane。Logical Session 可以跨多个 Host invocation；Candidate Decision 只解释该 candidate，Session 不合成单一 product terminal route。当前 `dev` runtime 仍是 legacy multi-round / selectFirstHypothesis implementation，需按 PD-118 迁移后才能宣称该新语义已工程交付。
+正常 repository-host 操作是通过 operator wrapper 跑一次 ordinary natural AE session（当前入口：`npm run evolution:operator:run`）。这是执行宿主 packaging，不是新的产品语义层，也不是最终 Human-facing AE Skill；Skill 未来可以调用这个稳定 host primitive。Canonical Participant binding 必须显式声明（当前默认 `CODEX_CURRENT`），不得依赖 previous-run inheritance。运行后的 Human 操作入口仍是 `artifacts/evolution/index.md`。正式产品语义区分 Logical AE Session、Host execution slice、Source Epoch、Candidate Pool 与 Candidate Lane。Logical Session 可以跨多个 Host invocation；Candidate Decision 只解释该 candidate，Session 不合成单一 product terminal route。当前 `dev` default ordinary runtime 已按 PD-118 迁移到 multi-candidate START/RESUME path；legacy multi-round / `selectFirstHypothesis` implementation 仅保留历史读取与 replay 兼容。
 
 长期原则继续保持：
 
@@ -492,9 +492,9 @@ P2 Multi-round Execution Validation
 ↓
 RUN / OBSERVE + Human Follow-up Loop v1 retain + review + list (real-use pilot completed / `HFL_REAL_USE_VALIDATED`)
 ↓
-PD-118 Source-local Candidate Pool / Multi-candidate Session v1 (design accepted; engineering pending)
+PD-118 Source-local Candidate Pool / Multi-candidate Session v1 (engineering delivered; deterministic acceptance verified)
 ↓
-resume RUN / OBSERVE on migrated workflow
+resume RUN / OBSERVE on migrated workflow; natural effectiveness remains unverified
 ↓
 P3 full consolidation remains DEFERRED
 ```

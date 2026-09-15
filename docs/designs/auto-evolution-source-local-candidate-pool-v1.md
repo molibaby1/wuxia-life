@@ -2,7 +2,7 @@
 
 > 状态：HUMAN-ACCEPTED / WRITTEN SPEC REVIEW ACCEPTED；IMPLEMENTATION DELIVERED / CLOSURE VERIFICATION COMPLETE
 > 日期：2026-09-15
-> 目标 authority：PD-118（本书面 spec 已获 Human 认可；需与 `docs/product/auto-evolution-model.md`、`docs/governance/product-decisions.md`、`docs/governance/current-product-stage.md` 同步落库）
+> 目标 authority：PD-118（本书面 spec 已获 Human 认可；已与 `docs/product/auto-evolution-model.md`、`docs/governance/product-decisions.md`、`docs/governance/current-product-stage.md` 完成 authority sync）
 > 本文是工程设计，不是 runtime implementation authorization。
 
 ## 1. Problem Statement

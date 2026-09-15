@@ -55,6 +55,27 @@ export async function runProblemPackageBuilderTests(): Promise<void> {
   }
   assert.equal(JSON.parse(await readFile(destinationPath, 'utf8')).problem.statement, hypothesis.hypothesis);
 
+  const candidateDestinationPath = join(root, 'candidate', 'problem-package.json');
+  const candidate = await buildProblemPackage({
+    activeCandidate: {
+      ...hypothesis,
+      hypothesisId: 'hypothesis-000002',
+      hypothesis: 'The second candidate must retain its original identity.',
+    },
+    activeCandidateRef: 'pool-x/hypothesis-000002',
+    activeCandidateSourceIndex: 1,
+    runRef: 'cohort-run-000001',
+    observablePayloadRef: 'source/observable-payload.json',
+    externalFeedbackRef: 'feedback/feedback.json',
+    improvementHypothesisRef: 'hypothesis/hypotheses.json',
+    diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
+    authorityRefs: ['docs/product/auto-evolution-model.md'],
+    productSourceFingerprintSha256: 'a'.repeat(64),
+    destinationPath: candidateDestinationPath,
+  });
+  assert.equal(candidate.problemId, 'problem-hypothesis-000002');
+  assert.equal(candidate.problem.hypothesisId, 'hypothesis-000002');
+
   await assert.rejects(
     () => buildProblemPackage({
       selectedHypothesisPath,

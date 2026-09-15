@@ -1,6 +1,6 @@
 # Auto Evolution Source-local Candidate Pool / Multi-candidate Session v1
 
-> 状态：HUMAN-ACCEPTED / WRITTEN SPEC REVIEW ACCEPTED；ENGINEERING NOT STARTED
+> 状态：HUMAN-ACCEPTED / WRITTEN SPEC REVIEW ACCEPTED；IMPLEMENTATION DELIVERED / CLOSURE VERIFICATION IN PROGRESS
 > 日期：2026-09-15
 > 目标 authority：PD-118（本书面 spec 已获 Human 认可；需与 `docs/product/auto-evolution-model.md`、`docs/governance/product-decisions.md`、`docs/governance/current-product-stage.md` 同步落库）
 > 本文是工程设计，不是 runtime implementation authorization。

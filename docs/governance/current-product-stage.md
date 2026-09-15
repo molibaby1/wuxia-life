@@ -38,7 +38,8 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；
 - P2 不修改 authoritative product state，也不包含 repository promotion / commit / merge。
-- **PD-118 Source-local Candidate Pool / Multi-candidate Session v1：HUMAN ACCEPTED / DESIGN BASELINE ACCEPTED；ENGINEERING NOT STARTED；**
+- **PD-118 Source-local Candidate Pool / Multi-candidate Session v1：FOUNDATION ENGINEERING DELIVERED / HOST INTEGRATION NOT YET COMPLETE；**
+- 已验证 canonical Candidate Pool / Logical Session contracts、一次性 Source Analysis、保留原始 hypothesis identity 的 Candidate Lane，以及单 Source deterministic serial Pool processing；当前 ordinary operator 仍是 legacy Host，未宣称 durable resume、source transition、candidate-local continuation 或新报告已交付。
 - RUN / OBSERVE 已确认当前 earliest material workflow bottleneck：`selectFirstHypothesis` 使 participant order 决定 candidate survival，且单 candidate terminal 被错误放大为 Pool/session terminal；正式方向不是调 smarter selector，而是 preserve-all + deterministic candidate activation。
 - PD-118 保留 PD-100 HFL trigger、PD-111 evidence safety、PD-117 continuation shape / semantic retry=0 与 P2 one-source-transition ceiling；改变的是 Selection winner semantics、continuation/budget ownership、Logical Session / Host slice、Pool persistence/resume 与 multi-candidate report semantics。
 - **Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy：HUMAN ACCEPTED / AUTHORITY RECORDED；**
@@ -62,7 +63,7 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 
 ## 3. 当前仍未证明
 
-- Source-local Candidate Pool runtime 尚未实现；
+- Source-local Candidate Pool durable Host runtime 尚未实现；
 - multi-candidate Host slice pause/resume、durable Pool persistence 与 crash reconciliation 尚未验证；
 - candidate-local continuation / per-slice 11-job accounting 尚未工程验证；
 - multi-candidate report snapshots / action-set / session aggregation 尚未工程验证；

@@ -1,4 +1,6 @@
 import type { MultiRoundSessionSummary } from '../multiRoundRunManifestContract';
+import type { CandidateProcessingState } from '../candidatePoolContract';
+import type { LogicalSessionState } from '../multiCandidateSessionManifestContract';
 import type { WorkflowSummary } from './buildOperationalRunReport';
 import type { WorkflowDecisionAuditV1 } from './buildWorkflowDecisionAudit';
 import type { WorkflowContinuationAuditV1 } from './buildWorkflowContinuationAudit';
@@ -39,6 +41,47 @@ export interface BuildHumanReviewSummaryInput {
     continuationAudit?: WorkflowContinuationAuditV1 | null;
   }>;
   reportId?: string;
+}
+
+export type MultiCandidateHumanActionKind =
+  | 'RESUME_SESSION'
+  | 'REVIEW_HUMAN_FOLLOWUP'
+  | 'INVESTIGATE_HOST_FAILURE'
+  | 'AWAIT_EXECUTION_AUTHORITY'
+  | 'OPTIONAL_DECISION_AUDIT';
+
+export interface MultiCandidateHumanActionV1 {
+  kind: MultiCandidateHumanActionKind;
+  requirement: 'REQUIRED' | 'OPTIONAL' | 'AVAILABLE';
+  blocksResume: boolean;
+  candidateRef: string | null;
+  humanFollowupRef: string | null;
+  reason: string;
+}
+
+export interface MultiCandidateHumanReviewSummaryV1 {
+  logicalSessionId: string;
+  sessionState: LogicalSessionState;
+  explanation: string[];
+  actions: MultiCandidateHumanActionV1[];
+}
+
+export interface BuildMultiCandidateHumanReviewSummaryInput {
+  logicalSessionId: string;
+  sessionState: LogicalSessionState;
+  pauseOrStopReason: string | null;
+  candidates: Array<{
+    candidateRef: string;
+    hypothesisId: string;
+    sourceIndex: number;
+    processingState: CandidateProcessingState;
+    effectiveRoute: string | null;
+    effectiveReasonCode: string | null;
+    effectiveDecisionRef: string | null;
+    humanFollowupRef: string | null;
+    supersededBySourceEpochRef: string | null;
+    interruptionRef: string | null;
+  }>;
 }
 
 function auditOf(workflow: BuildHumanReviewSummaryInput['workflows'][number]): WorkflowDecisionAuditV1 | null {
@@ -654,5 +697,87 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
     },
     attention: 'legacy',
     handoff: evidenceGapHandoff(input),
+  };
+}
+
+function multiCandidateAction(input: Omit<MultiCandidateHumanActionV1, 'candidateRef' | 'humanFollowupRef'> & {
+  candidateRef?: string | null;
+  humanFollowupRef?: string | null;
+}): MultiCandidateHumanActionV1 {
+  return {
+    candidateRef: input.candidateRef ?? null,
+    humanFollowupRef: input.humanFollowupRef ?? null,
+    kind: input.kind,
+    requirement: input.requirement,
+    blocksResume: input.blocksResume,
+    reason: input.reason,
+  };
+}
+
+export function buildMultiCandidateHumanReviewSummary(
+  input: BuildMultiCandidateHumanReviewSummaryInput,
+): MultiCandidateHumanReviewSummaryV1 {
+  const orderedCandidates = [...input.candidates].sort((left, right) => left.sourceIndex - right.sourceIndex);
+  const actions: MultiCandidateHumanActionV1[] = [];
+  const pendingCandidates = orderedCandidates.filter(candidate => candidate.processingState === 'PENDING' || candidate.processingState === 'ACTIVE');
+
+  if (input.sessionState === 'FAILED' || input.sessionState === 'INTERRUPTED') {
+    actions.push(multiCandidateAction({
+      kind: 'INVESTIGATE_HOST_FAILURE',
+      requirement: 'REQUIRED',
+      blocksResume: true,
+      reason: `Logical Session ${input.sessionState}；先调查 Host 失败/中断证据，不能把会话当作可恢复执行。`,
+    }));
+  } else if (input.sessionState === 'PAUSED' && input.pauseOrStopReason === 'SOURCE_CHANGE_LIMIT_REACHED') {
+    actions.push(multiCandidateAction({
+      kind: 'AWAIT_EXECUTION_AUTHORITY',
+      requirement: 'REQUIRED',
+      blocksResume: true,
+      reason: 'Source-change limit 已达到；继续执行需要新的 Human execution authority（执行授权），不能自动进行第二次 source transition。',
+    }));
+  } else if (input.sessionState === 'PAUSED' && pendingCandidates.length > 0) {
+    actions.push(multiCandidateAction({
+      kind: 'RESUME_SESSION',
+      requirement: 'AVAILABLE',
+      blocksResume: false,
+      reason: `Session paused at a candidate boundary（${input.pauseOrStopReason ?? '未记录原因'}）；可使用 exact logicalSessionId 恢复未完成 candidates。`,
+    }));
+  }
+
+  for (const candidate of orderedCandidates) {
+    if (candidate.humanFollowupRef !== null) {
+      actions.push(multiCandidateAction({
+        kind: 'REVIEW_HUMAN_FOLLOWUP',
+        requirement: 'REQUIRED',
+        blocksResume: false,
+        candidateRef: candidate.candidateRef,
+        humanFollowupRef: candidate.humanFollowupRef,
+        reason: `Candidate ${candidate.hypothesisId} retained an active Human Follow-up；按当前 HFL disposition 做只读 review，不阻塞其他 candidate 的恢复。`,
+      }));
+    }
+  }
+
+  if (input.sessionState === 'COMPLETED') {
+    for (const candidate of orderedCandidates) {
+      if (candidate.processingState !== 'COMPLETED' && candidate.processingState !== 'SUPERSEDED') continue;
+      if (candidate.effectiveRoute !== 'SKIP' && candidate.effectiveRoute !== 'DEFER' && candidate.effectiveRoute !== 'DEFER_MORE_WORK_REQUESTED') continue;
+      actions.push(multiCandidateAction({
+        kind: 'OPTIONAL_DECISION_AUDIT',
+        requirement: 'OPTIONAL',
+        blocksResume: false,
+        candidateRef: candidate.candidateRef,
+        reason: `Candidate ${candidate.hypothesisId} 已有 ${candidate.effectiveRoute} disposition；如需复核，可对该 candidate 的 bounded decision evidence 做只读 audit。`,
+      }));
+    }
+  }
+
+  return {
+    logicalSessionId: input.logicalSessionId,
+    sessionState: input.sessionState,
+    explanation: [
+      `Logical Session ${input.logicalSessionId} 当前为 ${input.sessionState}。`,
+      `Candidate dispositions 保持独立事实；本 projection 生成 ${actions.length} 个并行动作，不合成 overall route 或 dominant route。`,
+    ],
+    actions,
   };
 }

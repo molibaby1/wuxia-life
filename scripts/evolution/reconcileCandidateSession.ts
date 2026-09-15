@@ -1,4 +1,4 @@
-import { lstat, open, readFile, mkdir } from 'node:fs/promises';
+import { lstat, open, readFile, mkdir, rename } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { validateProblemPackage } from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
@@ -36,7 +36,7 @@ async function writeAtomic(path: string, value: unknown): Promise<void> {
   const temp = `${path}.reconcile-${process.pid}-${Date.now()}`;
   const handle = await open(temp, 'wx');
   try { await handle.writeFile(`${canonicalJson(value)}\n`); } finally { await handle.close(); }
-  await import('node:fs/promises').then(fs => fs.rename(temp, path));
+  await rename(temp, path);
 }
 
 export async function reconcileActiveCandidate(input: ReconcileActiveCandidateInput): Promise<CandidateReconciliationResult> {

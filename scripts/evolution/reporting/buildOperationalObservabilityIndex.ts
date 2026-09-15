@@ -676,7 +676,7 @@ export async function buildOperationalObservabilityIndex(
   await writeFile(
     topLevelIndexPath,
     renderTopLevelIndex({
-      reportCount: logicalSessionCount(reports),
+      reportCount: reports.length,
       logicalSessionCount: logicalSessionCount(reports),
       reportSnapshotCount: reports.length,
       latestReport,
@@ -690,7 +690,7 @@ export async function buildOperationalObservabilityIndex(
   return {
     runReportsIndexPath,
     topLevelIndexPath,
-    reportCount: logicalSessionCount(reports),
+    reportCount: reports.length,
     logicalSessionCount: logicalSessionCount(reports),
     reportSnapshotCount: reports.length,
   };

@@ -40,18 +40,16 @@ export interface RunSourceCandidatePoolOptions {
   sealedSourceRef?: string;
   baseline?: CandidatePoolV1['baseline'];
   pool?: CandidatePoolV1;
-  initialPool?: CandidatePoolV1;
   laneRoot?: string;
   authorityRefs?: string[];
   participant?: WorkspaceAgentParticipantOptions;
   participantMode?: 'deepseek' | 'local-subagent';
   repositoryRoot?: string;
   candidateLaneRunner?: (input: CandidatePoolLaneInput) => Promise<CandidateLaneResult>;
-  runCandidateLane?: (input: CandidatePoolLaneInput) => Promise<CandidateLaneResult>;
 }
 
 function buildInitialPool(options: RunSourceCandidatePoolOptions): CandidatePoolV1 {
-  const supplied = options.pool ?? options.initialPool;
+  const supplied = options.pool;
   if (supplied) return supplied;
   if (!options.logicalSessionId || !options.sourceEpochId || !options.sealedSourceRef || !options.baseline) {
     throw new Error('candidate pool requires an initial Pool or logicalSessionId/sourceEpochId/sealedSourceRef/baseline');
@@ -107,8 +105,7 @@ export async function runSourceCandidatePool(options: RunSourceCandidatePoolOpti
   let pool = poolInitial;
   const laneResults: CandidateLaneResult[] = [];
   let participantJobs = options.sourceAnalysis.actualParticipantJobs;
-  const injectedRunner = options.candidateLaneRunner ?? options.runCandidateLane;
-  const laneRunner = injectedRunner ?? defaultCandidateLaneRunner(options, pool);
+  const laneRunner = options.candidateLaneRunner ?? defaultCandidateLaneRunner(options, pool);
   while (pool.status === 'PROCESSING') {
     const pending = nextPendingCandidate(pool);
     if (pending === null) {

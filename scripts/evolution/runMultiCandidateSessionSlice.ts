@@ -1,4 +1,4 @@
-import { lstat, mkdir, open, readFile, readdir } from 'node:fs/promises';
+import { lstat, mkdir, open, readFile, readdir, rename } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   buildCandidatePoolV1,
@@ -119,7 +119,7 @@ async function writeAtomicJson(path: string, value: unknown): Promise<void> {
   const temp = `${path}.tmp-${process.pid}-${Date.now()}`;
   const handle = await open(temp, 'wx');
   try { await handle.writeFile(`${JSON.stringify(value, null, 2)}\n`); } finally { await handle.close(); }
-  await import('node:fs/promises').then(fs => fs.rename(temp, path));
+  await rename(temp, path);
 }
 
 async function writeCreateOnly(path: string, value: unknown): Promise<void> {
@@ -222,7 +222,6 @@ async function defaultSourceAnalysis(input: RunMultiCandidateSessionSliceInput, 
   } as RunSourceCandidateAnalysisOptions;
   const result = await runSourceCandidateAnalysis(options);
   if (result.status !== 'completed') throw new Error(`source analysis failed at ${result.stage}`);
-  void sourceEpochRef;
   return result;
 }
 

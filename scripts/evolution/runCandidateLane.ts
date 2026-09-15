@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile } from 'node:fs/promises';
+import { copyFile, mkdir, open, readFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import type { ImprovementHypothesis } from '../../src/evolution/improvementHypothesisContract';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
@@ -90,7 +90,7 @@ export type CandidateLaneResult = CompletedCandidateLaneResult | ParticipantFail
 
 async function writeCreateOnly(path: string, value: unknown): Promise<void> {
   await mkdir(resolve(path, '..'), { recursive: true });
-  const handle = await import('node:fs/promises').then(fs => fs.open(path, 'wx'));
+  const handle = await open(path, 'wx');
   try {
     await handle.writeFile(`${canonicalJson(value)}\n`);
   } finally {

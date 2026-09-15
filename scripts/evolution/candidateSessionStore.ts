@@ -151,7 +151,6 @@ export async function retainSourceEpochAnchor(input: {
 }): Promise<RetainedSourceEpochAnchor> {
   await validatePhase0RunSeal(input.sourceRoot, input.sourceExperimentRootHash);
   const anchorRoot = sourceAnchorRoot(input.repositoryRoot, input.logicalSessionId, input.sourceEpochRef);
-  const objectRoot = join(anchorRoot, 'objects');
   const entries: SourceAnchorEntry[] = [];
   for (const path of await collectFiles(input.sourceRoot)) {
     const bytes = await readFile(join(input.sourceRoot, path));
@@ -172,7 +171,6 @@ export async function retainSourceEpochAnchor(input: {
   const manifestPath = join(anchorRoot, 'source-anchor.json');
   const bytes = `${canonicalJson(manifest)}\n`;
   await writeImmutable(manifestPath, bytes);
-  void objectRoot;
   return {
     sourceEpochRef: input.sourceEpochRef,
     manifestRef: `source-epochs/${input.sourceEpochRef}/source-anchor.json`,

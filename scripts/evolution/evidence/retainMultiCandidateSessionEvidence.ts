@@ -72,6 +72,13 @@ export async function retainMultiCandidateSessionEvidence(
   if (currentSource === undefined) throw new Error(`current Source Epoch is missing from Session: ${manifest.currentSourceEpochRef}`);
   const participantFailure = manifest.sessionState === 'FAILED' || (manifest.pauseOrStopReason ?? '').includes('PARTICIPANT_FAILURE');
   const reviewContinuation = sessionFiles.some(path => path.includes('continuation'));
+  const sourceTransitionEvidenceRefs = sessionFiles
+    .filter(path => path.startsWith('source-transitions/'))
+    .map(path => `session/${path}`);
+  const sourceTransitionOccurred = manifest.sourceTransitionCount === 1;
+  if (sourceTransitionOccurred && sourceTransitionEvidenceRefs.length === 0) {
+    throw new Error('source transition count is 1 but durable source-transition evidence is missing');
+  }
   const result = await publishDurableEvidenceCapsule({
     capsuleRoot: join(repositoryRoot, DURABLE_EVIDENCE_ROOT, input.logicalSessionId),
     sessionId: input.logicalSessionId,
@@ -93,12 +100,16 @@ export async function retainMultiCandidateSessionEvidence(
     importantEvents: {
       participantFailure,
       reviewContinuation,
-      configurationExecution: false,
-      crossRoundTransition: false,
+      configurationExecution: sourceTransitionOccurred,
+      crossRoundTransition: sourceTransitionOccurred,
     },
     extensions: {
-      configurationExecution: { status: 'not_applicable', refs: [] },
-      crossRoundTransition: { status: 'not_applicable', refs: [] },
+      configurationExecution: sourceTransitionOccurred
+        ? { status: 'present', refs: sourceTransitionEvidenceRefs }
+        : { status: 'not_applicable', refs: [] },
+      crossRoundTransition: sourceTransitionOccurred
+        ? { status: 'present', refs: sourceTransitionEvidenceRefs }
+        : { status: 'not_applicable', refs: [] },
     },
   });
   return {

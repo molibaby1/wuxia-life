@@ -7,18 +7,20 @@ import { writeMultiCandidateSessionManifestAtomic } from '../../scripts/evolutio
 import { retainMultiCandidateSessionEvidence } from '../../scripts/evolution/evidence/retainMultiCandidateSessionEvidence';
 import { verifyDurableEvidenceCapsule } from '../../scripts/evolution/evidence/durableEvidenceCapsule';
 
-async function createSession(root: string, sessionState: 'PAUSED' | 'COMPLETED' | 'FAILED' | 'INTERRUPTED') {
+async function createSession(root: string, sessionState: 'PAUSED' | 'COMPLETED' | 'FAILED' | 'INTERRUPTED', sourceTransitionCount: 0 | 1 = 0) {
   const logicalSessionId = `logical-session-${sessionState.toLowerCase()}`;
   const sessionRoot = join(root, 'artifacts/evolution/sessions', logicalSessionId);
   const sourceEpochRoot = join(sessionRoot, 'source-epochs/source-epoch-000001');
   await mkdir(join(sourceEpochRoot, 'source-analysis'), { recursive: true });
   await mkdir(join(sourceEpochRoot, 'candidates/hypothesis-000001'), { recursive: true });
-  await mkdir(join(sessionRoot, 'source-transitions'), { recursive: true });
   await writeFile(join(sourceEpochRoot, 'source-anchor.json'), '{"schemaVersion":"source-epoch-anchor-v1"}\n');
   await writeFile(join(sourceEpochRoot, 'source-analysis/analysis.json'), '{"analysis":true}\n');
   await writeFile(join(sourceEpochRoot, 'candidates/hypothesis-000001/decision.json'), '{"route":"SKIP"}\n');
   await writeFile(join(sourceEpochRoot, 'candidates/hypothesis-000001/continuation.json'), '{"continuation":true}\n');
-  await writeFile(join(sessionRoot, 'source-transitions/transition.json'), '{"transition":true}\n');
+  if (sourceTransitionCount === 1) {
+    await mkdir(join(sessionRoot, 'source-transitions'), { recursive: true });
+    await writeFile(join(sessionRoot, 'source-transitions/transition.json'), '{"transition":true}\n');
+  }
   const manifest = buildMultiCandidateSessionManifestV1({
     logicalSessionId,
     sessionState,
@@ -34,7 +36,7 @@ async function createSession(root: string, sessionState: 'PAUSED' | 'COMPLETED' 
     }],
     currentSourceEpochRef: 'source-epoch-000001',
     hostSlices: [{ hostSliceId: 'host-slice-000001', startedAt: '2026-09-15T00:00:00.000Z', endedAt: '2026-09-15T00:01:00.000Z', participantJobs: 2, state: sessionState, reason: sessionState === 'PAUSED' ? 'HOST_SLICE_BUDGET' : null }],
-    sourceTransitionCount: 0,
+    sourceTransitionCount,
     failureRef: sessionState === 'FAILED' ? 'failure.json' : null,
     repositoryBaseline: { branch: 'dev', headSha: 'a'.repeat(40), workingTreeFingerprint: 'b'.repeat(64) },
     participantBindingId: 'CODEX_CURRENT',
@@ -63,13 +65,28 @@ export async function runMultiCandidateTerminalEvidenceTests(): Promise<void> {
     assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('source-analysis/analysis.json')));
     assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('decision.json')));
     assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('continuation.json')));
-    assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('source-transitions/transition.json')));
+    assert.equal(manifest.importantEvents.configurationExecution, false);
+    assert.equal(manifest.importantEvents.crossRoundTransition, false);
+    assert.equal(manifest.extensions.configurationExecution.status, 'not_applicable');
+    assert.equal(manifest.extensions.crossRoundTransition.status, 'not_applicable');
     const before = await readFile(join(first.capsuleRoot!, 'manifest.json'), 'utf8');
     const second = await retainMultiCandidateSessionEvidence({ repositoryRoot: root, logicalSessionId: session.logicalSessionId, createdAt: '2026-09-15T00:02:00.000Z' });
     assert.equal(second.status, 'PUBLISHED');
     assert.equal(second.reused, true);
     assert.equal(await readFile(join(first.capsuleRoot!, 'manifest.json'), 'utf8'), before);
   }
+
+  const transitionedRoot = await mkdtemp(join(tmpdir(), 'candidate-terminal-transitioned-'));
+  const transitioned = await createSession(transitionedRoot, 'COMPLETED', 1);
+  const transitionedResult = await retainMultiCandidateSessionEvidence({ repositoryRoot: transitionedRoot, logicalSessionId: transitioned.logicalSessionId, createdAt: '2026-09-15T00:01:00.000Z' });
+  assert.equal(transitionedResult.status, 'PUBLISHED');
+  const transitionedManifest = transitionedResult.manifest!;
+  assert.equal(transitionedManifest.importantEvents.configurationExecution, true);
+  assert.equal(transitionedManifest.importantEvents.crossRoundTransition, true);
+  assert.equal(transitionedManifest.extensions.configurationExecution.status, 'present');
+  assert.equal(transitionedManifest.extensions.crossRoundTransition.status, 'present');
+  assert.ok(transitionedManifest.extensions.configurationExecution.refs.includes('session/source-transitions/transition.json'));
+  assert.ok(transitionedManifest.extensions.crossRoundTransition.refs.includes('session/source-transitions/transition.json'));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

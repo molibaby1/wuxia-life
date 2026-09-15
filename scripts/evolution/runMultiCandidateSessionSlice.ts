@@ -1,5 +1,5 @@
 import { lstat, mkdir, open, readFile, readdir } from 'node:fs/promises';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   buildCandidatePoolV1,
   parseCandidatePoolV1,
@@ -304,6 +304,21 @@ function durableLaneRef(sourceEpochRef: string, hypothesisId: string): string {
   return `source-epochs/${sourceEpochRef}/candidates/${hypothesisId}`;
 }
 
+function durableCandidateArtifactRef(input: {
+  sourceEpochRef: string;
+  hypothesisId: string;
+  candidateLaneRoot: string;
+  artifactPath: string;
+}): string {
+  const laneRoot = resolve(input.candidateLaneRoot);
+  const artifact = isAbsolute(input.artifactPath) ? resolve(input.artifactPath) : resolve(laneRoot, input.artifactPath);
+  const child = relative(laneRoot, artifact).split(sep).join('/');
+  if (!child || child === '..' || child.startsWith('../') || isAbsolute(child)) {
+    throw new Error(`candidate artifact must be inside candidate lane: ${input.artifactPath}`);
+  }
+  return `${durableLaneRef(input.sourceEpochRef, input.hypothesisId)}/${child}`;
+}
+
 export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSessionSliceInput): Promise<MultiCandidateSessionSliceResult> {
   const now = input.dependencies?.now ?? (() => new Date().toISOString());
   const authorityRefs = input.authorityRefs ?? DEFAULT_AUTHORITY_REFS;
@@ -463,7 +478,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       await retainLaneArtifacts();
     }
     if (effectiveDecision.route === 'READY_FOR_CONFIG_EXECUTION') {
-      pool = markSourceChangePending(pool, pending.candidateRef, { laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId), baseDecisionRef: laneResult.baseDecisionPath, effectiveDecisionRef: effectiveDecisionPath, sourceTransitionRef: `source-transition/${pending.hypothesisId}` });
+      pool = markSourceChangePending(pool, pending.candidateRef, { laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId), baseDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: laneResult.baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }), sourceTransitionRef: `source-transitions/${pending.hypothesisId}` });
       await persistPool(join(sessionRoot, durablePoolPath), pool);
       if (sourceTransitionCount === 1) { sessionState = 'PAUSED'; reason = 'SOURCE_CHANGE_LIMIT_REACHED'; slice = { ...slice, state: 'PAUSED', reason, endedAt: now() }; break; }
       if (budget.remainingParticipantJobs < 1) { sessionState = 'PAUSED'; reason = 'HOST_SLICE_BUDGET'; slice = { ...slice, state: 'PAUSED', reason, endedAt: now(), participantJobs: budget.usedParticipantJobs }; break; }
@@ -526,7 +541,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       const hfl: RetainedHumanFollowupWorkItem = await retain({ repositoryRoot: input.repositoryRoot, workflowRoot: laneRoot, workflowInstanceRef: `${input.logicalSessionId}/${candidate.hypothesisId}`, sourceRunRef: pool.source.sourceRunRef, sourceFingerprintSha256: pool.source.sourceFingerprintSha256, problemPackagePath: laneResult.problemPackagePath, decisionPath: effectiveDecisionPath, candidateProvenance: { mode: 'candidate-activation-v1', candidateActivationPath: 'candidate-activation.json', hypothesisSetPath: analysis.improvementHypothesisRef } });
       humanFollowupRef = relative(input.repositoryRoot, hfl.itemPath).split('/').join('/');
     }
-    pool = completeCandidate(pool, pending.candidateRef, { laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId), baseDecisionRef: laneResult.baseDecisionPath, effectiveDecisionRef: effectiveDecisionPath, humanFollowupRef });
+    pool = completeCandidate(pool, pending.candidateRef, { laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId), baseDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: laneResult.baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }), humanFollowupRef });
     await persistPool(join(sessionRoot, durablePoolPath), pool);
     if (pool.candidates.every(candidate => candidate.processingState !== 'PENDING')) { pool = exhaustPoolIfComplete(pool); await persistPool(join(sessionRoot, durablePoolPath), pool); sessionState = 'COMPLETED'; slice = { ...slice, state: 'COMPLETED', endedAt: now(), participantJobs: budget.usedParticipantJobs }; break; }
   }

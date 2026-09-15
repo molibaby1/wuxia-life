@@ -8,6 +8,7 @@ import { PHASE0_REQUIRED_SEALED_ARTIFACTS, sealPhase0Run } from '../../scripts/e
 import { parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
 import type { CompletedSourceCandidateAnalysisResult } from '../../scripts/evolution/runSourceCandidateAnalysis';
 import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import { buildMultiCandidateOperationalRunReport } from '../../scripts/evolution/reporting/buildMultiCandidateOperationalRunReport';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
@@ -48,8 +49,9 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
         await mkdir(laneRoot, { recursive: true });
         await writeFile(join(laneRoot, 'candidate-activation.json'), '{}');
         await writeFile(join(laneRoot, 'problem-package.json'), '{}');
-        await writeFile(join(laneRoot, 'decision.json'), '{}');
         await writeFile(join(laneRoot, 'human-review-package.md'), 'candidate');
+        const decision = validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'ESCALATE_HUMAN', reasonCode: 'EXPLICIT_ESCALATION', inputs: { solutionStatus: 'OPTIONS', reviewerDecision: 'ESCALATE', solutionScope: 'configuration', reviewScope: 'config_only', permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } });
+        await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision));
         return {
           status: 'completed' as const,
           candidateRef: candidate.candidateRef,
@@ -62,7 +64,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
           baseDecisionPath: join(laneRoot, 'decision.json'),
           humanReviewPackagePath: join(laneRoot, 'human-review-package.md'),
           actualParticipantJobs: 1 as const,
-          decision: validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'ESCALATE_HUMAN', reasonCode: 'EXPLICIT_ESCALATION', inputs: { solutionStatus: 'OPTIONS', reviewerDecision: 'ESCALATE', solutionScope: 'configuration', reviewScope: 'config_only', permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } }),
+          decision,
           solutionInvocationRef: 'solution',
           reviewerInvocationRef: null,
           problemPackage: {} as never,
@@ -77,8 +79,16 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(escalation.sessionState, 'COMPLETED');
   assert.equal(humanFollowupRefs.length, 1);
   const escalationPool = parseCandidatePoolV1(JSON.parse(await readFile(join(escalationRoot, 'artifacts/evolution/sessions/logical-session-000002/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  const escalationRecord = escalationPool.candidates[0]!;
+  assert.equal(escalationRecord.laneRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001');
+  assert.equal(escalationRecord.baseDecisionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/decision.json');
+  assert.equal(escalationRecord.effectiveDecisionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/decision.json');
+  assert.equal(escalationRecord.baseDecisionRef?.includes('.tmp/evolution'), false);
+  assert.equal(escalationRecord.effectiveDecisionRef?.includes('.tmp/evolution'), false);
   assert.equal(escalationPool.candidates[0]!.humanFollowupRef, 'hfl-item.json');
   assert.equal(await readFile(join(escalationRoot, 'artifacts/evolution/sessions/logical-session-000002/source-epochs/source-epoch-000001/candidates', hypotheses[0]!.hypothesisId, 'candidate-activation.json'), 'utf8'), '{}');
+  const escalationReport = await buildMultiCandidateOperationalRunReport({ repositoryRoot: escalationRoot, logicalSessionId: 'logical-session-000002', hostSliceId: 'host-slice-000001' });
+  assert.equal(escalationReport.candidates[0]!.effectiveRoute, 'ESCALATE_HUMAN');
 
   let resumeAnalysisLoads = 0;
   const resumed = await runMultiCandidateSessionSlice({
@@ -138,6 +148,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(await readFile(join(transitionRoot, 'artifacts/evolution/sessions/logical-session-000003/source-epochs/source-epoch-000002/source-anchor.json'), 'utf8').then(() => true), true);
   const transitionPool = parseCandidatePoolV1(JSON.parse(await readFile(join(transitionRoot, 'artifacts/evolution/sessions/logical-session-000003/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
   assert.equal(transitionPool.status, 'SUPERSEDED');
+  assert.equal(transitionPool.candidates[0]!.sourceTransitionRef, 'source-transitions/hypothesis-000001');
   assert.equal(transitionPool.candidates[1]!.processingState, 'SUPERSEDED');
 
   let sourceBRunAnalysisCalls = 0;

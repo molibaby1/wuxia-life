@@ -1,5 +1,5 @@
 import { lstat, open, readFile, mkdir } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { validateProblemPackage } from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import { canonicalJson } from './phase0/provenance';
@@ -16,6 +16,15 @@ export interface ReconcileActiveCandidateInput {
   candidateLaneRoot: string;
   poolPath?: string;
   laneRef?: string;
+}
+
+function durableCandidateArtifactRef(input: { laneRef: string; candidateLaneRoot: string; artifactPath: string }): string {
+  if (isAbsolute(input.laneRef) || input.laneRef.includes('\\')) throw new Error(`candidate lane reference must be relative: ${input.laneRef}`);
+  const laneRoot = resolve(input.candidateLaneRoot);
+  const artifact = isAbsolute(input.artifactPath) ? resolve(input.artifactPath) : resolve(laneRoot, input.artifactPath);
+  const child = relative(laneRoot, artifact).split(sep).join('/');
+  if (!child || child === '..' || child.startsWith('../') || isAbsolute(child)) throw new Error(`candidate artifact must be inside candidate lane: ${input.artifactPath}`);
+  return `${input.laneRef}/${child}`;
 }
 
 async function exists(path: string): Promise<boolean> {
@@ -66,10 +75,10 @@ export async function reconcileActiveCandidate(input: ReconcileActiveCandidateIn
     const baseDecision = validateSolutionDecision(JSON.parse(await readFile(baseDecisionPath, 'utf8')) as unknown);
     if (baseDecision.route === 'DEFER_MORE_WORK_REQUESTED' && !await exists(continuationDecisionPath)) throw new Error('candidate continuation terminal decision is missing');
     if (await exists(continuationDecisionPath) && baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED') throw new Error('candidate continuation exists without a base continuation request');
-    const laneRef = input.laneRef ?? input.candidateLaneRoot;
+    const laneRef = input.laneRef ?? `${input.pool.source.sealedSourceRef}/candidates/${active.hypothesisId}`;
     const next = decision.route === 'READY_FOR_CONFIG_EXECUTION'
-      ? markSourceChangePending(input.pool, active.candidateRef, { laneRef, baseDecisionRef: `${laneRef}/decision.json`, effectiveDecisionRef: `${laneRef}/${effectivePath.slice(resolve(input.candidateLaneRoot).length + 1)}`, sourceTransitionRef: `source-transition/${active.hypothesisId}` })
-      : completeCandidate(input.pool, active.candidateRef, { laneRef, baseDecisionRef: `${laneRef}/decision.json`, effectiveDecisionRef: `${laneRef}/${effectivePath.slice(resolve(input.candidateLaneRoot).length + 1)}` });
+      ? markSourceChangePending(input.pool, active.candidateRef, { laneRef, baseDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: effectivePath }), sourceTransitionRef: `source-transitions/${active.hypothesisId}` })
+      : completeCandidate(input.pool, active.candidateRef, { laneRef, baseDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: effectivePath }) });
     if (input.poolPath) await writeAtomic(input.poolPath, next);
     return { status: 'RECONCILED', candidateRef: active.candidateRef, decisionPath: effectivePath };
   } catch {

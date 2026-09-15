@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,7 +15,7 @@ const decision = { schemaVersion: 'solution-decision-v1', problemId: 'problem-hy
 export async function runCandidateSessionReconciliationTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'candidate-reconcile-'));
   // The exact candidate reference is deterministic but opaque; locate it from the Pool.
-  const basePool = buildCandidatePoolV1({ logicalSessionId: 's3', sourceEpochId: 'e', sourceRunRef: 'cohort-run-000001', sourceFingerprintSha256: 'a'.repeat(64), sealedSourceRef: 'source', hypothesisSet: { artifactRef: 'hypotheses.json', hypotheses: [hypothesis] }, baseline: { branch: 'dev', headSha: 'b'.repeat(40), workingTreeFingerprint: 'c'.repeat(64), participantBinding: 'CODEX_CURRENT' } });
+  const basePool = buildCandidatePoolV1({ logicalSessionId: 's3', sourceEpochId: 'e', sourceRunRef: 'cohort-run-000001', sourceFingerprintSha256: 'a'.repeat(64), sealedSourceRef: 'source-epochs/source-epoch-000001', hypothesisSet: { artifactRef: 'hypotheses.json', hypotheses: [hypothesis] }, baseline: { branch: 'dev', headSha: 'b'.repeat(40), workingTreeFingerprint: 'c'.repeat(64), participantBinding: 'CODEX_CURRENT' } });
   const activePool = activateCandidate(basePool, basePool.candidates[0]!.candidateRef);
   const lane = join(root, 'lane');
   await mkdir(lane, { recursive: true });
@@ -33,9 +33,15 @@ export async function runCandidateSessionReconciliationTests(): Promise<void> {
   await buildProblemPackage({ activeCandidate: hypothesis, activeCandidateRef: activePool.candidates[0]!.candidateRef, activeCandidateSourceIndex: 0, runRef: 'cohort-run-000001', observablePayloadRef: 'source.json', externalFeedbackRef: 'feedback.json', improvementHypothesisRef: 'hypotheses.json', diagnosticEvidenceRefs: ['diagnostic.json'], authorityRefs: [], productSourceFingerprintSha256: 'a'.repeat(64), destinationPath: join(lane, 'problem-package.json') });
   await writeFile(join(lane, 'decision.json'), canonicalJson(decision));
   let participantCalls = 0;
-  const result = await reconcileActiveCandidate({ pool: activePool, candidateLaneRoot: lane });
+  const poolPath = join(root, 'pool.json');
+  await writeFile(poolPath, canonicalJson(activePool));
+  const result = await reconcileActiveCandidate({ pool: activePool, candidateLaneRoot: lane, poolPath });
   assert.equal(result.status, 'RECONCILED');
   assert.equal(participantCalls, 0);
+  const reconciledPool = JSON.parse(await readFile(poolPath, 'utf8')) as { candidates: Array<{ laneRef: string | null; baseDecisionRef: string | null; effectiveDecisionRef: string | null }> };
+  assert.equal(reconciledPool.candidates[0]!.laneRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000002');
+  assert.equal(reconciledPool.candidates[0]!.baseDecisionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000002/decision.json');
+  assert.equal(reconciledPool.candidates[0]!.effectiveDecisionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000002/decision.json');
   const incomplete = await reconcileActiveCandidate({ pool: activePool, candidateLaneRoot: join(root, 'missing') });
   assert.equal(incomplete.status, 'INTERRUPTED');
 }

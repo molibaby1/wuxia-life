@@ -480,13 +480,14 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         laneRoot: string;
         baseDecisionPath: string;
         problemPackagePath: string;
+        sourceProvenanceRoot?: string;
       }) => runCandidateReviewContinuation({
         candidateRef: value.candidate.candidateRef,
         candidateLaneRoot: value.laneRoot,
         baseDecisionPath: value.baseDecisionPath,
         problemPackagePath: value.problemPackagePath,
         sourceFingerprintSha256: pool.source.sourceFingerprintSha256,
-        sourceProvenanceRoot: value.sourceAnalysis.sourceRoot,
+        sourceProvenanceRoot: value.sourceProvenanceRoot ?? value.sourceAnalysis.sourceRoot,
         participant: input.participant,
         repositoryRoot: input.repositoryRoot,
       }));

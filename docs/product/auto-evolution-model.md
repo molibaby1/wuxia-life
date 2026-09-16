@@ -177,6 +177,7 @@ Logical Session 与 Host invocation 分离；Pool 必须可恢复，resume 必�
 Participant failure 不再是单一 containment class。只有 Host 以 typed deterministic facts 证明 Participant runtime 已正常完成、失败仅属于当前 Candidate 的未接受 output conformance，且 repository / provenance / source / workspace / authority integrity 均保持有效时，active Candidate 才可进入 `INTERRUPTED` 而 Pool 保持 `PROCESSING`，Host 随后回到正常 candidate-boundary scheduling。若无 PENDING / ACTIVE Candidate，含 `INTERRUPTED` Candidate 的 Pool 仍可 `EXHAUSTED`、Logical Session `COMPLETED`；`COMPLETED` 仅表示 workflow processing finished，不表示全部 Candidate 成功。Runtime / provider protocol、cross-task identity、scope、repository / provenance / workspace integrity、verification、sealed-source 与任何无法可靠分类的 failure 继续 fail closed。Classification 必须来自 typed failure facts，不得从 diagnostic message 或粗粒度 `invalid_output` 推断。
 
 v1 仍最多允许一次 source-changing transition / Logical Session；PD-119 允许机械证明的 candidate-local Participant output rejection 只中断当前 Candidate；Participant runtime / provider protocol、provenance、scope、repository / workspace integrity、verification、sealed-source、cross-task identity 与 unknown failures 继续 fail closed。
+
 ### 2.6 Run Report / Operational Report
 
 Run Report 是旁路观察 artifact，不是新的核心 reasoning Role。

@@ -188,6 +188,32 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
   const valid = interpret(wire(' {"ok":true} '));
   assert.ok(valid.ok);
   if (valid.ok) assert.equal(valid.rawOutput, ' {"ok":true} ', 'Host must preserve Role payload verbatim');
+  const reconnecting = [
+    { type: 'thread.started', thread_id: threadId },
+    { type: 'turn.started' },
+    { type: 'error', message: 'Reconnecting... 1/5' },
+    { type: 'item.completed', item: { type: 'agent_message', text: ' {"ok":true} ' } },
+    { type: 'turn.completed', usage: {} },
+  ].map(event => JSON.stringify(event)).join('\n');
+  const recovered = interpret(reconnecting);
+  assert.ok(recovered.ok, 'A recoverable pre-terminal reconnect error must not fail the turn');
+  if (recovered.ok) assert.equal(recovered.rawOutput, ' {"ok":true} ');
+  const multipleReconnects = [
+    { type: 'thread.started', thread_id: threadId },
+    { type: 'turn.started' },
+    { type: 'error', message: 'Reconnecting... 1/5' },
+    { type: 'error', message: 'Reconnecting... 2/5' },
+    { type: 'item.completed', item: { type: 'agent_message', text: ' {"ok":true} ' } },
+    { type: 'turn.completed', usage: {} },
+  ].map(event => JSON.stringify(event)).join('\n');
+  const recoveredAfterMultipleReconnects = interpret(multipleReconnects);
+  assert.ok(recoveredAfterMultipleReconnects.ok, 'Multiple pre-terminal reconnect errors must remain recoverable');
+  const unrecoveredError = [
+    { type: 'thread.started', thread_id: threadId },
+    { type: 'turn.started' },
+    { type: 'error', message: 'Reconnecting... 5/5' },
+  ].map(event => JSON.stringify(event)).join('\n');
+  assert.equal(interpret(unrecoveredError).ok, false, 'An unrecovered error without turn.completed must fail');
   for (const invalid of [
     'null', '[]', '17', 'not-json',
     wire('{}').split('\n').slice(0, -1).join('\n'),

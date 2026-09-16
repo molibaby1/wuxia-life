@@ -49,8 +49,8 @@ function interpretCodexSolutionOutput(input: WorkspaceAgentCompletedOutputInput)
       const event: unknown = JSON.parse(line);
       if (!event || typeof event !== 'object' || Array.isArray(event)) throw new Error('invalid event object');
       const row = event as Record<string, unknown>;
-      if (row.type === 'error' || row.type === 'turn.failed') throw new Error('failed Codex turn');
-      if (turnCompleted && typeof row.type === 'string' && /^(thread|turn|item)\./.test(row.type)) throw new Error('activity after completed turn');
+      if (row.type === 'turn.failed') throw new Error('failed Codex turn');
+      if (turnCompleted && typeof row.type === 'string') throw new Error('activity after completed turn');
       if (row.type === 'thread.started') {
         if (threadId !== undefined || typeof row.thread_id !== 'string' || !CODEX_THREAD_ID.test(row.thread_id)) throw new Error('invalid or repeated thread identity');
         threadId = row.thread_id;

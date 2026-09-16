@@ -2,7 +2,11 @@ import { lstat, mkdir, open, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson } from '../phase0/provenance';
 import { buildOperationalObservabilityIndex, RUN_REPORTS_ROOT } from './buildOperationalObservabilityIndex';
-import { buildMultiCandidateOperationalRunReport } from './buildMultiCandidateOperationalRunReport';
+import {
+  buildMultiCandidateOperationalRunReport,
+  readMultiCandidateParticipantFailureDetails,
+  type MultiCandidateParticipantFailureDetailV1,
+} from './buildMultiCandidateOperationalRunReport';
 import { parseOperationalRunReport, type OperationalRunReportV7 } from './buildOperationalObservabilityIndex';
 
 export interface ArchiveMultiCandidateSessionReportInput {
@@ -27,7 +31,10 @@ function markdownCell(value: string): string {
   return value.replaceAll('|', '\\|').replaceAll('\r', ' ').replaceAll('\n', ' ');
 }
 
-export function renderMultiCandidateOperationalRunReportMarkdown(report: OperationalRunReportV7): string {
+export function renderMultiCandidateOperationalRunReportMarkdown(
+  report: OperationalRunReportV7,
+  participantFailureDetails: MultiCandidateParticipantFailureDetailV1[] = [],
+): string {
   const counts = report.candidates.reduce((result, candidate) => {
     result[candidate.processingState] = (result[candidate.processingState] ?? 0) + 1;
     return result;
@@ -50,10 +57,26 @@ export function renderMultiCandidateOperationalRunReportMarkdown(report: Operati
     '',
     `- Candidate counts：total=${report.candidates.length}, completed=${counts.COMPLETED ?? 0}, pending=${counts.PENDING ?? 0}, active=${counts.ACTIVE ?? 0}, superseded=${counts.SUPERSEDED ?? 0}, interrupted=${counts.INTERRUPTED ?? 0}`,
     `- Disposition counts：${Object.entries(dispositionCounts).map(([key, value]) => `${key}=${value}`).join(', ') || '（无）'}`,
+  ];
+  if (participantFailureDetails.length > 0) {
+    lines.push(
+      '',
+      '## Participant Failure',
+      ...participantFailureDetails.flatMap((detail, index) => [
+        ...(index === 0 ? [] : ['- ---']),
+        `- candidate=${markdownCell(detail.candidateRef)}`,
+        `- stage=${detail.stage}`,
+        `- errorKind=${markdownCell(detail.errorKind)}`,
+        `- cause=${markdownCell(detail.cause)}`,
+        `- evidence=${markdownCell(detail.evidenceRef)}`,
+      ]),
+    );
+  }
+  lines.push(
     '',
     '| sourceIndex | candidate | hypothesis | processing state | effective route | reasonCode | HFL |',
     '| ---: | --- | --- | --- | --- | --- | --- |',
-  ];
+  );
   if (report.candidates.length === 0) lines.push('| （无） |  |  |  |  |  |  |');
   for (const candidate of report.candidates) {
     lines.push(`| ${candidate.sourceIndex} | ${markdownCell(candidate.candidateRef)} | ${markdownCell(candidate.hypothesisId)} | ${candidate.processingState} | ${markdownCell(candidate.effectiveRoute ?? '（无）')} | ${markdownCell(candidate.effectiveReasonCode ?? '（无）')} | ${markdownCell(candidate.humanFollowupRef ?? '（无）')} |`);
@@ -72,6 +95,7 @@ export async function archiveMultiCandidateSessionReport(
   input: ArchiveMultiCandidateSessionReportInput,
 ): Promise<ArchiveMultiCandidateSessionReportResult> {
   let report = await buildMultiCandidateOperationalRunReport(input);
+  const participantFailureDetails = await readMultiCandidateParticipantFailureDetails(input);
   const reportDirectory = join(resolve(input.repositoryRoot), RUN_REPORTS_ROOT, report.reportId);
   const reportJsonPath = join(reportDirectory, 'report.json');
   const reportMarkdownPath = join(reportDirectory, 'report.md');
@@ -85,7 +109,7 @@ export async function archiveMultiCandidateSessionReport(
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
   }
   const reportBytes = `${canonicalJson(report)}\n`;
-  const markdown = renderMultiCandidateOperationalRunReportMarkdown(report);
+  const markdown = renderMultiCandidateOperationalRunReportMarkdown(report, participantFailureDetails);
   try {
     const existing = parseOperationalRunReport(await readFile(reportJsonPath, 'utf8'), report.reportId);
     if (existing.schemaVersion !== 'operational-run-report-v7' || canonicalJson(existing) !== canonicalJson(report)) throw new Error(`immutable multi-candidate report identity collision: ${report.reportId}`);

@@ -322,6 +322,7 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
       humanFollowupInboxPath: 'artifacts/evolution/human-follow-up/index.md',
       humanFollowupActiveCount: 0,
       operationalIndexPath: 'artifacts/evolution/index.md',
+      participantFailureDetails: [],
     });
     const started = await runOrdinaryEvolution({
       repositoryRoot,
@@ -336,6 +337,19 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     assert.deepEqual(operations, [{ mode: 'START_NEW_SESSION' }]);
     assert.match(formatOrdinaryEvolutionOperatorSummary(started), /Logical Session：/);
     assert.doesNotMatch(formatOrdinaryEvolutionOperatorSummary(started), /最后一轮路由：/);
+    const failureSummary = formatOrdinaryEvolutionOperatorSummary({
+      ...started,
+      participantFailureDetails: [{
+        candidateRef: 'candidate-pool-abc/hypothesis-000002',
+        hypothesisId: 'hypothesis-000002',
+        stage: 'SOLUTION',
+        errorKind: 'invalid_output',
+        cause: 'repoRef does not exist: src/data/identity-year-events.json',
+        evidenceRef: 'artifacts/evolution/sessions/ordinary-run-20260915-000010/source-epochs/source-epoch-000001/candidates/hypothesis-000002/workflow-outcome.json',
+      }],
+    } as Parameters<typeof formatOrdinaryEvolutionOperatorSummary>[0]);
+    assert.match(failureSummary, /Failure：\ncandidate=candidate-pool-abc\/hypothesis-000002\nstage=SOLUTION\nerrorKind=invalid_output\ncause=repoRef does not exist: src\/data\/identity-year-events\.json\nevidence=artifacts\/evolution\/sessions\/ordinary-run-20260915-000010\/source-epochs\/source-epoch-000001\/candidates\/hypothesis-000002\/workflow-outcome\.json/);
+    assert.doesNotMatch(formatOrdinaryEvolutionOperatorSummary(started), /Failure：/);
     const resumed = await runOrdinaryEvolution({
       repositoryRoot,
       resumeSession: 'ordinary-run-20260915-000010',
@@ -348,6 +362,74 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     });
     assert.equal(resumed.logicalSessionId, 'ordinary-run-20260915-000010');
     assert.deepEqual(operations, [{ mode: 'START_NEW_SESSION' }, { mode: 'RESUME_SESSION', logicalSessionId: 'ordinary-run-20260915-000010' }]);
+  }
+
+  {
+    const repositoryRoot = await createRepo();
+    const previousQuiet = process.env.WUXIA_ENGINE_QUIET;
+    let observedQuiet: string | undefined;
+    const quietSession = buildMultiCandidateSessionManifestV1({
+      logicalSessionId: 'ordinary-run-20260915-000011',
+      sessionState: 'PAUSED',
+      pauseOrStopReason: 'HOST_SLICE_BUDGET',
+      sourceEpochs: [{ sourceEpochRef: 'source-epoch-000001', sourceRunRef: 'source-000001', poolRef: null, poolStatus: 'PROCESSING', lifecycle: 'ANALYSIS_PENDING', candidateCounts: { total: 0, pending: 0, active: 0, completed: 0, superseded: 0, interrupted: 0 }, dispositionCounts: {} }],
+      currentSourceEpochRef: 'source-epoch-000001',
+      hostSlices: [{ hostSliceId: 'host-slice-000001', startedAt: '2026-09-15T00:00:00.000Z', endedAt: '2026-09-15T00:01:00.000Z', participantJobs: 0, state: 'PAUSED', reason: 'HOST_SLICE_BUDGET' }],
+      sourceTransitionCount: 0,
+      failureRef: null,
+      repositoryBaseline: { branch: 'dev', headSha: 'a'.repeat(40), workingTreeFingerprint: 'b'.repeat(64) },
+      participantBindingId: OPERATOR_BINDING_CODEX_CURRENT,
+    });
+    try {
+      delete process.env.WUXIA_ENGINE_QUIET;
+      await runOrdinaryEvolution({
+        repositoryRoot,
+        dependencies: {
+          runMultiCandidateOperator: async input => {
+            observedQuiet = process.env.WUXIA_ENGINE_QUIET;
+            return {
+              logicalSessionId: input.operation.mode === 'RESUME_SESSION' ? input.operation.logicalSessionId : 'ordinary-run-20260915-000011',
+              hostSliceId: 'host-slice-000001',
+              sessionState: 'PAUSED',
+              reason: 'HOST_SLICE_BUDGET',
+              participantJobs: 0,
+              currentSourceEpochRef: 'source-epoch-000001',
+              manifestPath: 'artifacts/evolution/sessions/ordinary-run-20260915-000011/session-manifest.json',
+              sourceTransitionCount: 0,
+              participantBinding: OPERATOR_BINDING_CODEX_CURRENT,
+              repositoryBaseline: { branch: 'dev', headSha: 'a'.repeat(40), statusShort: '', clean: true, workingTreeFingerprint: 'b'.repeat(64) },
+              sessionExecution: buildMultiCandidateSessionSummaryV1(quietSession),
+              reportId: 'candidate-report-000011',
+              reportSnapshotRef: 'artifacts/evolution/run-reports/candidate-report-000011/report.json',
+              reportSnapshotPath: 'artifacts/evolution/run-reports/candidate-report-000011/report.json',
+              recoverableSessionStateRef: 'artifacts/evolution/sessions/ordinary-run-20260915-000011/session-manifest.json',
+              terminalForensicEvidenceRef: null,
+              terminalForensicEvidenceStatus: 'NOT_APPLICABLE',
+              humanFollowupInboxPath: 'artifacts/evolution/human-follow-up/index.md',
+              humanFollowupActiveCount: 0,
+              operationalIndexPath: 'artifacts/evolution/index.md',
+              participantFailureDetails: [],
+            };
+          },
+        },
+      });
+      assert.equal(observedQuiet, '1');
+
+      process.env.WUXIA_ENGINE_QUIET = '0';
+      await runOrdinaryEvolution({
+        repositoryRoot,
+        dependencies: {
+          runMultiCandidateOperator: async () => {
+            observedQuiet = process.env.WUXIA_ENGINE_QUIET;
+            throw new Error('explicit diagnostics probe');
+          },
+        },
+      }).catch(error => assert.match(String(error), /explicit diagnostics probe/));
+      assert.equal(observedQuiet, '0');
+    } finally {
+      if (previousQuiet === undefined) delete process.env.WUXIA_ENGINE_QUIET;
+      else process.env.WUXIA_ENGINE_QUIET = previousQuiet;
+    }
   }
 
   {

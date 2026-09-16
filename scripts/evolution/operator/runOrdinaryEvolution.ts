@@ -26,6 +26,7 @@ import {
   type RunMultiCandidateOrdinaryEvolutionInput,
 } from './runMultiCandidateOrdinaryEvolution';
 import { archiveOperationalRunReport } from '../reporting/archiveOperationalRunReport';
+import type { MultiCandidateParticipantFailureDetailV1 } from '../reporting/buildMultiCandidateOperationalRunReport';
 import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
 import { buildOperationalObservabilityIndex } from '../reporting/buildOperationalObservabilityIndex';
 import {
@@ -155,6 +156,7 @@ export interface OrdinaryEvolutionOperatorResult {
   recoverableSessionStateRef?: string;
   terminalForensicEvidenceRef?: string | null;
   terminalForensicEvidenceStatus?: 'PUBLISHED' | 'NOT_APPLICABLE';
+  participantFailureDetails?: MultiCandidateParticipantFailureDetailV1[];
 }
 
 function toRepoRelative(repositoryRoot: string, absolutePath: string): string {
@@ -168,6 +170,18 @@ async function pathExists(path: string): Promise<boolean> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
     throw error;
+  }
+}
+
+async function runWithOperatorEngineDiagnosticsQuiet<T>(operation: () => Promise<T>): Promise<T> {
+  const hadExplicitValue = Object.prototype.hasOwnProperty.call(process.env, 'WUXIA_ENGINE_QUIET');
+  const previousValue = process.env.WUXIA_ENGINE_QUIET;
+  if (!hadExplicitValue) process.env.WUXIA_ENGINE_QUIET = '1';
+  try {
+    return await operation();
+  } finally {
+    if (!hadExplicitValue || previousValue === undefined) delete process.env.WUXIA_ENGINE_QUIET;
+    else process.env.WUXIA_ENGINE_QUIET = previousValue;
   }
 }
 
@@ -321,6 +335,20 @@ function formatMultiCandidateOperatorSummary(result: OrdinaryEvolutionOperatorRe
     '',
     '暂停/停止原因：',
     result.sessionExecution.pauseOrStopReason ?? '（无）',
+    ...(result.participantFailureDetails === undefined || result.participantFailureDetails.length === 0
+      ? []
+      : [
+        '',
+        'Failure：',
+        ...result.participantFailureDetails.flatMap((detail, index) => [
+          ...(index === 0 ? [] : ['---']),
+          `candidate=${detail.candidateRef}`,
+          `stage=${detail.stage}`,
+          `errorKind=${detail.errorKind}`,
+          `cause=${detail.cause}`,
+          `evidence=${detail.evidenceRef}`,
+        ]),
+      ]),
     '',
     'Current Source Epoch：',
     result.currentSourceEpochRef ?? result.sessionExecution.currentSourceEpochRef,
@@ -443,7 +471,7 @@ export async function runOrdinaryEvolution(
   const dependencies = input.dependencies ?? {};
 
   if (dependencies.runAeWorkflow === undefined) {
-    const multi = await (dependencies.runMultiCandidateOperator ?? ((multiInput: RunMultiCandidateOrdinaryEvolutionInput) => runMultiCandidateOrdinaryEvolution({
+    const multi = await runWithOperatorEngineDiagnosticsQuiet(() => (dependencies.runMultiCandidateOperator ?? ((multiInput: RunMultiCandidateOrdinaryEvolutionInput) => runMultiCandidateOrdinaryEvolution({
       ...multiInput,
       dependencies: dependencies.multiCandidateDependencies,
     })))({
@@ -452,7 +480,7 @@ export async function runOrdinaryEvolution(
       operation: input.resumeSession === undefined
         ? { mode: 'START_NEW_SESSION' }
         : { mode: 'RESUME_SESSION', logicalSessionId: input.resumeSession },
-    });
+    }));
     const currentSourceEpoch = multi.sessionExecution.sourceEpochs.find(epoch => epoch.sourceEpochRef === multi.currentSourceEpochRef);
     const result: OrdinaryEvolutionOperatorResult = {
       schemaVersion: 'ordinary-evolution-operator-result-v4',
@@ -482,6 +510,7 @@ export async function runOrdinaryEvolution(
       recoverableSessionStateRef: multi.recoverableSessionStateRef,
       terminalForensicEvidenceRef: multi.terminalForensicEvidenceRef,
       terminalForensicEvidenceStatus: multi.terminalForensicEvidenceStatus,
+      participantFailureDetails: multi.participantFailureDetails,
     };
     const operatorRoot = join(repositoryRoot, '.tmp/evolution', multi.logicalSessionId);
     await mkdir(operatorRoot, { recursive: true });

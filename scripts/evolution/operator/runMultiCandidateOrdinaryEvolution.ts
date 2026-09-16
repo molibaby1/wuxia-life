@@ -26,6 +26,7 @@ import {
   type RetainMultiCandidateSessionEvidenceResult,
 } from '../evidence/retainMultiCandidateSessionEvidence';
 import { archiveMultiCandidateSessionReport, type ArchiveMultiCandidateSessionReportResult } from '../reporting/archiveMultiCandidateSessionReport';
+import { readMultiCandidateParticipantFailureDetails, type MultiCandidateParticipantFailureDetailV1 } from '../reporting/buildMultiCandidateOperationalRunReport';
 import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
 import { buildOperationalObservabilityIndex } from '../reporting/buildOperationalObservabilityIndex';
 import {
@@ -72,6 +73,7 @@ export interface MultiCandidateOrdinaryEvolutionResult extends MultiCandidateSes
   humanFollowupInboxPath: string;
   humanFollowupActiveCount: number;
   operationalIndexPath: string;
+  participantFailureDetails: MultiCandidateParticipantFailureDetailV1[];
 }
 
 function nextHostSliceId(hostSliceCount: number): string {
@@ -199,6 +201,7 @@ export async function runMultiCandidateOrdinaryEvolution(
   const index = await (dependencies.refreshOperationalIndex ?? buildOperationalObservabilityIndex)({ repositoryRoot });
   const sessionManifest = await readManifest(repositoryRoot, logicalSessionId);
   const sessionExecution = buildMultiCandidateSessionSummaryV1(sessionManifest);
+  const participantFailureDetails = await readMultiCandidateParticipantFailureDetails({ repositoryRoot, logicalSessionId });
   return {
     ...result,
     participantBinding: binding.bindingId,
@@ -213,5 +216,6 @@ export async function runMultiCandidateOrdinaryEvolution(
     humanFollowupInboxPath: inbox.inboxPath,
     humanFollowupActiveCount: inbox.activeCount,
     operationalIndexPath: index.topLevelIndexPath,
+    participantFailureDetails,
   };
 }

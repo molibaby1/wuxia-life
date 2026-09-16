@@ -424,14 +424,20 @@ async function inputIdentityFailure(
 
 export async function runSolutionReviewer(input: RunSolutionReviewerInput): Promise<SolutionReviewerRunResult> {
   const problemPackage = validateProblemPackage(input.problemPackage);
-  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   if (input.solutionWork.problemId !== problemPackage.problemId) {
+    let problemPackageSha256 = 'unavailable';
+    try {
+      problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+    } catch {
+      // Identity mismatch already established from in-memory ProblemPackage; keep hash best-effort.
+    }
     return inputIdentityFailure(
       input,
       problemPackageSha256,
       'SolutionWork problemId does not match ProblemPackage',
     );
   }
+  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   let assignedSkills: DeliveredParticipantSkill[];
   try {
     assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);
@@ -454,18 +460,24 @@ export async function runSolutionReReviewer(
   const originalSolutionWork = validateSolutionWork(input.originalSolutionWork);
   const originalReview = validateSolutionReview(input.originalReview);
   const revisedSolutionWork = validateSolutionWork(input.solutionWork);
-  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   if (
     originalSolutionWork.problemId !== problemPackage.problemId
     || originalReview.problemId !== problemPackage.problemId
     || revisedSolutionWork.problemId !== problemPackage.problemId
   ) {
+    let problemPackageSha256 = 'unavailable';
+    try {
+      problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+    } catch {
+      // Identity mismatch already established from in-memory ProblemPackage; keep hash best-effort.
+    }
     return inputIdentityFailure(
       input,
       problemPackageSha256,
       're-review source problemId does not match ProblemPackage',
     );
   }
+  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   let assignedSkills: DeliveredParticipantSkill[];
   try {
     assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);

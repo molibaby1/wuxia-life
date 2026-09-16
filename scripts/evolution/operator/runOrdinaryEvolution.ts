@@ -307,6 +307,10 @@ async function defaultRefreshHumanFollowupInbox(input: {
   };
 }
 
+function singleLineSummaryCell(value: string): string {
+  return value.replaceAll('\r', ' ').replaceAll('\n', ' ').slice(0, 240);
+}
+
 function formatMultiCandidateOperatorSummary(result: OrdinaryEvolutionOperatorResult): string {
   if (result.sessionExecution.schemaVersion !== 'multi-candidate-session-summary-v1') {
     throw new Error('formatMultiCandidateOperatorSummary requires a multi-candidate session summary');
@@ -342,15 +346,13 @@ function formatMultiCandidateOperatorSummary(result: OrdinaryEvolutionOperatorRe
         'Failure：',
         ...result.participantFailureDetails.flatMap((detail, index) => [
           ...(index === 0 ? [] : ['---']),
-          `candidate=${detail.candidateRef}`,
-          `stage=${detail.stage}`,
-          `errorKind=${detail.errorKind ?? 'typed details unavailable'}`,
-          `cause=${detail.cause ?? detail.message ?? 'typed details unavailable'}`,
-          `evidence=${detail.evidenceRef}`,
-          `failureOrigin=${detail.failureOrigin ?? 'typed details unavailable'}`,
-          `failureReason=${detail.failureReason ?? 'typed details unavailable'}`,
-          `containment=${detail.containment ?? 'typed details unavailable'}`,
-          `message=${detail.message ?? detail.cause ?? 'typed details unavailable'}`,
+          `candidate=${singleLineSummaryCell(detail.candidateRef)}`,
+          `stage=${singleLineSummaryCell(detail.stage)}`,
+          `evidence=${singleLineSummaryCell(detail.evidenceRef)}`,
+          `failureOrigin=${singleLineSummaryCell(detail.failureOrigin ?? 'typed details unavailable')}`,
+          `failureReason=${singleLineSummaryCell(detail.failureReason ?? 'typed details unavailable')}`,
+          `containment=${singleLineSummaryCell(detail.containment ?? 'typed details unavailable')}`,
+          `message=${singleLineSummaryCell(detail.message ?? detail.cause ?? 'typed details unavailable')}`,
         ]),
       ]),
     '',

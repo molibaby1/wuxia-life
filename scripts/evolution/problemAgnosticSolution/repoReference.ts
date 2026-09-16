@@ -117,6 +117,13 @@ export async function assertRepoReferenceFileAgainstAuthoritative(input: {
   reference: string;
   label: string;
 }): Promise<void> {
+  if (typeof input.authoritativeRoot !== 'string' || typeof input.workspaceRoot !== 'string') {
+    referenceFailure(
+      'HOST_INFRASTRUCTURE',
+      'WORKSPACE_MATERIALIZATION_MISMATCH',
+      `${input.label} requires configured workspace and authoritative roots`,
+    );
+  }
   const locator = parseReferenceForValidation(input.reference, input.label);
   const authoritativeTarget = resolveReferencePath(
     input.authoritativeRoot,
@@ -160,6 +167,15 @@ export async function assertArtifactReferenceFile(input: {
   reference: string;
   label: string;
 }): Promise<void> {
+  if (typeof input.authoritativeRoot !== 'string'
+    || typeof input.workspaceRoot !== 'string'
+    || typeof input.artifactRoot !== 'string') {
+    referenceFailure(
+      'HOST_INFRASTRUCTURE',
+      'WORKSPACE_MATERIALIZATION_MISMATCH',
+      `${input.label} requires configured artifact, workspace and authoritative roots`,
+    );
+  }
   const locator = parseReferenceForValidation(input.reference, input.label);
   if (locator.lineStart !== undefined) {
     referenceFailure('OUTPUT_REFERENCE', 'MALFORMED_LOCATOR', `${input.label} does not accept line locators: ${input.reference}`);

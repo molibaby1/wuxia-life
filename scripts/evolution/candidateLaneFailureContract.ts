@@ -3,6 +3,7 @@ import type {
   ParticipantFailureOrigin,
   ParticipantFailureReason,
 } from './problemAgnosticSolution/participantFailureClassification';
+import { VALID_REASON_BY_ORIGIN } from './problemAgnosticSolution/participantFailureClassification';
 
 export type CandidateLaneFailureStage =
   | 'SOLUTION'
@@ -36,60 +37,10 @@ const STAGES: readonly CandidateLaneFailureStage[] = [
   'SOLUTION_REVISION',
   'RE_REVIEWER',
 ];
-const ORIGINS: readonly ParticipantFailureOrigin[] = [
-  'PARTICIPANT_RUNTIME',
-  'PROVIDER_PROTOCOL',
-  'OUTPUT_ENVELOPE',
-  'OUTPUT_SCHEMA',
-  'OUTPUT_IDENTITY',
-  'OUTPUT_INTERNAL_CONSISTENCY',
-  'OUTPUT_REFERENCE',
-  'HOST_INFRASTRUCTURE',
-  'UNKNOWN',
-];
-const REASONS: readonly ParticipantFailureReason[] = [
-  'RUNTIME_UNAVAILABLE',
-  'PROCESS_FAILURE',
-  'TIMEOUT',
-  'PROVIDER_PROTOCOL_FAILURE',
-  'CONTINUATION_PROTOCOL_FAILURE',
-  'EMPTY_ENVELOPE',
-  'INVALID_JSON_ENVELOPE',
-  'NON_OBJECT_ENVELOPE',
-  'ROLE_SCHEMA_INVALID',
-  'PROBLEM_ID_MISMATCH',
-  'OPTION_ID_MISMATCH',
-  'MALFORMED_LOCATOR',
-  'MISSING_TARGET',
-  'NOT_REGULAR_FILE',
-  'ABSOLUTE_PATH',
-  'ESCAPES_ALLOWED_ROOT',
-  'IO_ERROR',
-  'WORKSPACE_MATERIALIZATION_MISMATCH',
-  'SKILL_DELIVERY_FAILURE',
-  'UNCLASSIFIED',
-];
+const ORIGINS: readonly ParticipantFailureOrigin[] = Object.keys(VALID_REASON_BY_ORIGIN) as ParticipantFailureOrigin[];
+const REASONS: readonly ParticipantFailureReason[] = [...new Set(Object.values(VALID_REASON_BY_ORIGIN).flat())];
 
-const VALID_REASON_BY_ORIGIN: Readonly<Record<ParticipantFailureOrigin, readonly ParticipantFailureReason[]>> = {
-  PARTICIPANT_RUNTIME: ['RUNTIME_UNAVAILABLE', 'PROCESS_FAILURE', 'TIMEOUT'],
-  PROVIDER_PROTOCOL: ['PROVIDER_PROTOCOL_FAILURE', 'CONTINUATION_PROTOCOL_FAILURE'],
-  OUTPUT_ENVELOPE: ['EMPTY_ENVELOPE', 'INVALID_JSON_ENVELOPE', 'NON_OBJECT_ENVELOPE'],
-  OUTPUT_SCHEMA: ['ROLE_SCHEMA_INVALID'],
-  OUTPUT_IDENTITY: ['PROBLEM_ID_MISMATCH'],
-  OUTPUT_INTERNAL_CONSISTENCY: ['OPTION_ID_MISMATCH'],
-  OUTPUT_REFERENCE: [
-    'MALFORMED_LOCATOR',
-    'MISSING_TARGET',
-    'NOT_REGULAR_FILE',
-    'ABSOLUTE_PATH',
-    'ESCAPES_ALLOWED_ROOT',
-    'IO_ERROR',
-  ],
-  HOST_INFRASTRUCTURE: ['WORKSPACE_MATERIALIZATION_MISMATCH', 'SKILL_DELIVERY_FAILURE', 'UNCLASSIFIED'],
-  UNKNOWN: ['UNCLASSIFIED'],
-};
-
-const CANDIDATE_LOCAL_FAILURES = new Set<string>([
+const CANDIDATE_LOCAL_FAILURES = new Set<`${ParticipantFailureOrigin}:${ParticipantFailureReason}`>([
   'OUTPUT_ENVELOPE:EMPTY_ENVELOPE',
   'OUTPUT_ENVELOPE:INVALID_JSON_ENVELOPE',
   'OUTPUT_ENVELOPE:NON_OBJECT_ENVELOPE',
@@ -153,7 +104,7 @@ function assertValidFailurePair(origin: ParticipantFailureOrigin, reason: Partic
 }
 
 export function containmentForParticipantFailure(
-  facts: ParticipantFailureFacts,
+  facts: Pick<ParticipantFailureFacts, 'origin' | 'reason'>,
 ): CandidateLaneFailureContainment {
   assertValidFailurePair(facts.origin, facts.reason);
   return CANDIDATE_LOCAL_FAILURES.has(failurePair(facts.origin, facts.reason))

@@ -59,6 +59,9 @@ export async function readMultiCandidateParticipantFailureDetails(input: {
     const pool = await readPool(location.sessionRoot, epoch.poolRef);
     for (const candidate of pool.candidates) {
       if (candidate.processingState !== 'INTERRUPTED') continue;
+      if (candidate.interruptionRef === 'host-failure.json'
+        || candidate.interruptionRef?.startsWith('reconciliation/')
+        || candidate.interruptionRef?.startsWith('candidate-failure/')) continue;
       const unavailable: MultiCandidateParticipantFailureDetailV1 = {
         candidateRef: candidate.candidateRef,
         hypothesisId: candidate.hypothesisId,

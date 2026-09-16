@@ -447,14 +447,20 @@ export async function runSolutionRevisionAgent(
   const problemPackage = validateProblemPackage(input.problemPackage);
   const originalSolutionWork = validateSolutionWork(input.originalSolutionWork);
   const originalReview = validateSolutionReview(input.originalReview);
-  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   if (originalSolutionWork.problemId !== problemPackage.problemId || originalReview.problemId !== problemPackage.problemId) {
+    let problemPackageSha256 = 'unavailable';
+    try {
+      problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+    } catch {
+      // Identity mismatch already established from in-memory ProblemPackage; keep hash best-effort.
+    }
     return inputIdentityFailure(
       input,
       problemPackageSha256,
       'revision source problemId does not match ProblemPackage',
     );
   }
+  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   let assignedSkills: DeliveredParticipantSkill[];
   try {
     assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);

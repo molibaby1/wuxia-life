@@ -499,6 +499,7 @@ export async function runSolutionReviewerReplay(
       problemPackagePath: replaySurface.problemPackagePath,
       solutionWork: verified.solutionWork,
       workspaceRoot: clone.workspaceRoot,
+      repositoryRoot: verified.sourceWorkspace,
       artifactRoot: temporaryReplayRoot,
       workspaceBaselineFingerprintSha256: verified.sourceInvocation.workspaceBaselineFingerprintSha256,
       invocationRef: `${verified.sourceInvocation.invocationRef}-replay`,

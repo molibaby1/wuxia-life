@@ -367,9 +367,9 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   });
   assert.equal(unknownValidationFailure.ok, false);
   if (!unknownValidationFailure.ok) {
-    assert.equal(unknownValidationFailure.failure.origin, 'UNKNOWN');
-    assert.equal(unknownValidationFailure.failure.reason, 'UNCLASSIFIED');
-    assert.equal(unknownValidationFailure.failure.participantErrorKind, null);
+    assert.equal(unknownValidationFailure.failure.origin, 'HOST_INFRASTRUCTURE');
+    assert.equal(unknownValidationFailure.failure.reason, 'WORKSPACE_MATERIALIZATION_MISMATCH');
+    assert.equal(unknownValidationFailure.failure.participantErrorKind, 'invalid_output');
   }
 
   const timeoutRoot = join(root, 'timeout-reviewer-agent');

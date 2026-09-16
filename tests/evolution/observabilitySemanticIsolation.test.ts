@@ -108,6 +108,7 @@ async function run(): Promise<void> {
     problemPackagePath,
     solutionWork,
     workspaceRoot,
+    repositoryRoot: workspaceRoot,
     artifactRoot,
     workspaceBaselineFingerprintSha256: 'b'.repeat(64),
     invocationRef: 'reviewer-invocation-000001',

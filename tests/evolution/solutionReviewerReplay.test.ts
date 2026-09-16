@@ -89,6 +89,7 @@ const historicalSkillAssignment = {
 
 interface Fixture {
   root: string;
+  authoritativeRoot: string;
   experimentRoot: string;
   packagePath: string;
   solutionPath: string;
@@ -153,6 +154,7 @@ async function createFixture(): Promise<Fixture> {
 
   return {
     root,
+    authoritativeRoot,
     experimentRoot,
     packagePath,
     solutionPath,
@@ -246,6 +248,7 @@ export async function runSolutionReviewerReplayTests(): Promise<void> {
       problemPackagePath: fixture.packagePath,
       solutionWork,
       workspaceRoot: fixture.sourceWorkspace,
+      repositoryRoot: fixture.authoritativeRoot,
       artifactRoot: fixture.artifactRoot,
       workspaceBaselineFingerprintSha256: fixture.sourceBaseline,
       invocationRef: 'production-topology-000001',

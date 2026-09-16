@@ -95,6 +95,10 @@ async function existingContinuation(
     ) {
       throw new Error('existing continuation failure identity does not match candidate continuation input');
     }
+    if (continuation.participantJobCount !== undefined
+      && continuation.participantJobCount !== failure.actualParticipantJobs) {
+      throw new Error('existing continuation failure identity does not match candidate continuation input');
+    }
     return {
       status: 'participant_failure',
       participantJobs: continuation.participantJobCount === 2 ? 2 : 1,

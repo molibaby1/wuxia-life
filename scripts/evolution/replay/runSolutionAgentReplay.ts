@@ -494,6 +494,7 @@ export async function runSolutionAgentReplay(
       problemPackage: verified.problemPackage,
       problemPackagePath: replaySurface.problemPackagePath,
       workspaceRoot: clone.workspaceRoot,
+      repositoryRoot: verified.sourceWorkspace,
       artifactRoot: temporaryReplayRoot,
       workspaceBaselineFingerprintSha256: verified.sourceInvocation.workspaceBaselineFingerprintSha256,
       invocationRef: `${verified.sourceInvocation.invocationRef}-replay`,

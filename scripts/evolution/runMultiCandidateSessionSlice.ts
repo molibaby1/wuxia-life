@@ -507,6 +507,8 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         sourceProvenanceRoot?: string;
       }) => runCandidateReviewContinuation({
         candidateRef: value.candidate.candidateRef,
+        hypothesisId: value.candidate.hypothesisId,
+        sourceIndex: value.candidate.sourceIndex,
         candidateLaneRoot: value.laneRoot,
         baseDecisionPath: value.baseDecisionPath,
         problemPackagePath: value.problemPackagePath,

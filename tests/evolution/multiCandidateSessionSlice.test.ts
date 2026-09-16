@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { runMultiCandidateSessionSlice } from '../../scripts/evolution/runMultiCandidateSessionSlice';
-import { PHASE0_REQUIRED_SEALED_ARTIFACTS, sealPhase0Run } from '../../scripts/evolution/phase0/provenance';
-import { parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
+import { PHASE0_REQUIRED_SEALED_ARTIFACTS, canonicalJson, sealPhase0Run } from '../../scripts/evolution/phase0/provenance';
+import { buildCandidatePoolV1, parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
+import { activateCandidate } from '../../scripts/evolution/candidatePoolState';
+import { retainCandidateLaneArtifacts } from '../../scripts/evolution/candidateSessionStore';
 import { readDurableMultiCandidateSessionManifest } from '../../scripts/evolution/candidateSessionStore';
 import type { CompletedSourceCandidateAnalysisResult } from '../../scripts/evolution/runSourceCandidateAnalysis';
 import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
@@ -147,6 +149,97 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.deepEqual(calls, ['hypothesis-000001', 'hypothesis-000002', 'hypothesis-000003']);
   const pool = parseCandidatePoolV1(JSON.parse(await readFile(join(root, 'artifacts/evolution/sessions/logical-session-000001/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
   assert.equal(pool.status, 'EXHAUSTED');
+
+  async function prepareDurableLocalFailureCase(logicalSessionId: string, caseHypotheses: typeof hypotheses): Promise<{ caseRoot: string; caseAnalysis: CompletedSourceCandidateAnalysisResult; activeCandidate: CandidateIdentity }> {
+    const caseRoot = await mkdtemp(join(tmpdir(), `candidate-session-reconcile-${logicalSessionId}-`));
+    const caseAnalysis = scopedAnalysis(caseRoot, { hypotheses: caseHypotheses });
+    await runMultiCandidateSessionSlice({
+      ...base,
+      mode: 'START_NEW_SESSION',
+      repositoryRoot: caseRoot,
+      logicalSessionId,
+      initialSourceRoot: sourceRoot,
+      hostSliceId: 'host-slice-000001',
+      dependencies: {
+        ...base.dependencies,
+        runSourceAnalysis: async () => caseAnalysis,
+      },
+    });
+    await rm(join(caseRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidates'), { recursive: true, force: true });
+    const durablePoolPath = join(caseRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidate-pool.json');
+    const rebuiltPool = buildCandidatePoolV1({
+      logicalSessionId,
+      sourceEpochId: 'source-epoch-000001',
+      sourceRunRef: caseAnalysis.sourceRunRef,
+      sourceFingerprintSha256: caseAnalysis.sourceFingerprintSha256,
+      sealedSourceRef: 'source-epochs/source-epoch-000001',
+      hypothesisSet: { artifactRef: caseAnalysis.improvementHypothesisRef, hypotheses: caseHypotheses },
+      baseline: { ...base.repositoryBaseline, participantBinding: base.participantBindingId },
+    });
+    const activePool = activateCandidate(rebuiltPool, rebuiltPool.candidates[0]!.candidateRef);
+    await writeFile(durablePoolPath, canonicalJson(activePool));
+    const stagedLane = join(caseRoot, 'staged-local-failure');
+    await mkdir(stagedLane, { recursive: true });
+    const failure = localLaneFailure(activePool.candidates[0]!);
+    await writeFile(join(stagedLane, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+    await retainCandidateLaneArtifacts({
+      repositoryRoot: caseRoot,
+      logicalSessionId,
+      sourceEpochRef: 'source-epoch-000001',
+      sourceRoot: stagedLane,
+      candidateRef: activePool.candidates[0]!.candidateRef,
+      relativePaths: [failure.workflowOutcomeRef],
+    });
+    return { caseRoot, caseAnalysis, activeCandidate: activePool.candidates[0]! };
+  }
+
+  const resumeLocalCase = await prepareDurableLocalFailureCase('logical-session-resume-local', hypotheses.slice(0, 2));
+  const resumedCalls: string[] = [];
+  const resumedLocal = await runMultiCandidateSessionSlice({
+    ...base,
+    mode: 'RESUME_SESSION',
+    repositoryRoot: resumeLocalCase.caseRoot,
+    logicalSessionId: 'logical-session-resume-local',
+    hostSliceId: 'host-slice-000002',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => { throw new Error('resume must not rerun source analysis'); },
+      loadSourceAnalysis: async () => resumeLocalCase.caseAnalysis,
+      runCandidateLane: async input => {
+        resumedCalls.push(input.candidate.hypothesisId);
+        return base.dependencies.runCandidateLane!(input);
+      },
+    },
+  });
+  assert.equal(resumedLocal.sessionState, 'COMPLETED');
+  assert.deepEqual(resumedCalls, ['hypothesis-000002']);
+  const resumedLocalPool = parseCandidatePoolV1(JSON.parse(await readFile(join(resumeLocalCase.caseRoot, 'artifacts/evolution/sessions/logical-session-resume-local/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(resumedLocalPool.status, 'EXHAUSTED');
+  assert.deepEqual(resumedLocalPool.candidates.map(candidate => candidate.processingState), ['INTERRUPTED', 'COMPLETED']);
+
+  const resumeExhaustedCase = await prepareDurableLocalFailureCase('logical-session-resume-exhausted', hypotheses.slice(0, 1));
+  let exhaustedResumeCalls = 0;
+  const resumedExhausted = await runMultiCandidateSessionSlice({
+    ...base,
+    mode: 'RESUME_SESSION',
+    repositoryRoot: resumeExhaustedCase.caseRoot,
+    logicalSessionId: 'logical-session-resume-exhausted',
+    hostSliceId: 'host-slice-000002',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => { throw new Error('resume must not rerun source analysis'); },
+      loadSourceAnalysis: async () => resumeExhaustedCase.caseAnalysis,
+      runCandidateLane: async () => {
+        exhaustedResumeCalls += 1;
+        throw new Error('exhausted local failure must not admit another candidate');
+      },
+    },
+  });
+  assert.equal(resumedExhausted.sessionState, 'COMPLETED');
+  assert.equal(exhaustedResumeCalls, 0);
+  const resumedExhaustedPool = parseCandidatePoolV1(JSON.parse(await readFile(join(resumeExhaustedCase.caseRoot, 'artifacts/evolution/sessions/logical-session-resume-exhausted/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(resumedExhaustedPool.status, 'EXHAUSTED');
+  assert.equal(resumedExhaustedPool.candidates[0]!.processingState, 'INTERRUPTED');
 
   const localFirstRoot = await mkdtemp(join(tmpdir(), 'candidate-session-local-first-'));
   let localFirstHflCalls = 0;

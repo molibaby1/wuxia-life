@@ -3,13 +3,15 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { validateProblemPackage } from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import { canonicalJson } from './phase0/provenance';
-import { completeCandidate, interruptCandidate, markSourceChangePending } from './candidatePoolState';
+import { parseCandidateLaneFailureV2 } from './candidateLaneFailureContract';
+import { completeCandidate, exhaustPoolIfComplete, interruptCandidate, interruptCandidateLocally, markSourceChangePending } from './candidatePoolState';
 import type { CandidatePoolV1 } from './candidatePoolContract';
 
 export type CandidateReconciliationResult =
   | { status: 'NO_ACTIVE_CANDIDATE' }
   | { status: 'RECONCILED'; candidateRef: string; decisionPath: string }
-  | { status: 'INTERRUPTED'; candidateRef: string; interruptionRef: string };
+  | { status: 'INTERRUPTED'; candidateRef: string; interruptionRef: string }
+  | { status: 'CANDIDATE_LOCAL_FAILURE_RECONCILED'; candidateRef: string; interruptionRef: string; poolStatus: 'PROCESSING' | 'EXHAUSTED' };
 
 export interface ReconcileActiveCandidateInput {
   pool: CandidatePoolV1;
@@ -45,9 +47,35 @@ export async function reconcileActiveCandidate(input: ReconcileActiveCandidateIn
   const baseDecisionPath = join(resolve(input.candidateLaneRoot), 'decision.json');
   const continuationDecisionPath = join(resolve(input.candidateLaneRoot), 'review-continuation-000001/decision.json');
   const effectivePath = await exists(continuationDecisionPath) ? continuationDecisionPath : baseDecisionPath;
+  const workflowOutcomePath = join(resolve(input.candidateLaneRoot), 'workflow-outcome.json');
   const packagePath = join(resolve(input.candidateLaneRoot), 'problem-package.json');
   const activationPath = join(resolve(input.candidateLaneRoot), 'candidate-activation.json');
   const interruptionRef = 'reconciliation/incomplete-terminal-artifacts.json';
+
+  if (await exists(workflowOutcomePath)) {
+    try {
+      const failure = parseCandidateLaneFailureV2(await readFile(workflowOutcomePath, 'utf8'));
+      if (failure.candidateRef !== active.candidateRef
+        || failure.hypothesisId !== active.hypothesisId
+        || failure.sourceIndex !== active.sourceIndex) throw new Error('candidate lane failure identity mismatch');
+      if (await exists(baseDecisionPath) || await exists(continuationDecisionPath)) throw new Error('candidate lane failure contradicts a terminal decision');
+      if (failure.containment === 'CANDIDATE_LOCAL') {
+        const laneRef = input.laneRef ?? `${input.pool.source.sealedSourceRef}/candidates/${active.hypothesisId}`;
+        const localInterruptionRef = durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: workflowOutcomePath });
+        const next = exhaustPoolIfComplete(interruptCandidateLocally(input.pool, active.candidateRef, localInterruptionRef));
+        if (input.poolPath) await writeAtomic(input.poolPath, next);
+        return { status: 'CANDIDATE_LOCAL_FAILURE_RECONCILED', candidateRef: active.candidateRef, interruptionRef: localInterruptionRef, poolStatus: next.status === 'EXHAUSTED' ? 'EXHAUSTED' : 'PROCESSING' };
+      }
+    } catch {
+      const next = interruptCandidate(input.pool, active.candidateRef, interruptionRef);
+      if (input.poolPath) await writeAtomic(input.poolPath, next);
+      return { status: 'INTERRUPTED', candidateRef: active.candidateRef, interruptionRef };
+    }
+    const next = interruptCandidate(input.pool, active.candidateRef, interruptionRef);
+    if (input.poolPath) await writeAtomic(input.poolPath, next);
+    return { status: 'INTERRUPTED', candidateRef: active.candidateRef, interruptionRef };
+  }
+
   if (!await exists(effectivePath) || !await exists(packagePath) || !await exists(activationPath)) {
     const next = interruptCandidate(input.pool, active.candidateRef, interruptionRef);
     if (input.poolPath) await writeAtomic(input.poolPath, next);

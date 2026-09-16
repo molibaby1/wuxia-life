@@ -429,6 +429,12 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       reason = 'INCOMPLETE_TERMINAL_ARTIFACTS';
     } else if (reconciliation.status === 'RECONCILED') {
       pool = parseCandidatePoolV1(JSON.parse(await readFile(join(sessionRoot, durablePoolPath), 'utf8')) as unknown);
+    } else if (reconciliation.status === 'CANDIDATE_LOCAL_FAILURE_RECONCILED') {
+      pool = parseCandidatePoolV1(JSON.parse(await readFile(join(sessionRoot, durablePoolPath), 'utf8')) as unknown);
+      if (pool.status === 'EXHAUSTED') {
+        sessionState = 'COMPLETED';
+        slice = { ...slice, state: 'COMPLETED', endedAt: now() };
+      }
     }
   }
   let budget: HostSliceBudgetV1 = createHostSliceBudget();

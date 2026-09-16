@@ -75,6 +75,8 @@ export interface RunReviewContinuationInput {
   roundRoot: string;
   sourceRunRef: string;
   sourceFingerprintSha256: string;
+  /** Host-only sealed source root; never copied into Participant workspaces. */
+  sourceProvenanceRoot?: string;
   participant: WorkspaceAgentParticipantOptions;
   retainHumanFollowupOnEscalate?: boolean;
   dependencies?: ReviewContinuationDependencies;
@@ -172,8 +174,11 @@ async function assertSourceFingerprint(
   roundRoot: string,
   sourceRunRef: string,
   expectedFingerprint: string,
+  sourceProvenanceRoot?: string,
 ): Promise<void> {
-  const sourceFingerprintPath = join(roundRoot, 'game-runs', sourceRunRef, 'provenance/source-fingerprint.json');
+  const sourceFingerprintPath = sourceProvenanceRoot === undefined
+    ? join(roundRoot, 'game-runs', sourceRunRef, 'provenance/source-fingerprint.json')
+    : join(resolve(sourceProvenanceRoot), 'provenance/source-fingerprint.json');
   await assertRegularFile(sourceFingerprintPath, 'source provenance fingerprint');
   const actualFingerprint = await hashFile(sourceFingerprintPath);
   if (actualFingerprint !== expectedFingerprint) {
@@ -451,7 +456,7 @@ export async function runReviewContinuation(
   const roundRoot = resolve(input.roundRoot);
   validatePhase0RunRef(input.sourceRunRef);
   assertSha256(input.sourceFingerprintSha256, 'sourceFingerprintSha256');
-  await assertSourceFingerprint(roundRoot, input.sourceRunRef, input.sourceFingerprintSha256);
+  await assertSourceFingerprint(roundRoot, input.sourceRunRef, input.sourceFingerprintSha256, input.sourceProvenanceRoot);
   const base = await readBaseArtifacts(input);
   await preflightFreshBaseline(input, base);
   const authoritativeFingerprint = await captureAuthoritativeFingerprint(repositoryRoot);

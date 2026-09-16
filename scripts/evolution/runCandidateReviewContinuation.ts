@@ -20,6 +20,7 @@ export interface RunCandidateReviewContinuationInput {
   humanFollowupRoot?: string;
   workflowInstanceRef?: string;
   sourceRunRef?: string;
+  sourceProvenanceRoot?: string;
   dependencies?: ReviewContinuationDependencies & {
     runCandidateContinuation?: (input: RunReviewContinuationInput) => Promise<ReviewContinuationResult>;
   };
@@ -100,6 +101,7 @@ export async function runCandidateReviewContinuation(
     roundRoot: resolve(input.candidateLaneRoot),
     sourceRunRef,
     sourceFingerprintSha256: input.sourceFingerprintSha256,
+    sourceProvenanceRoot: input.sourceProvenanceRoot,
     participant: input.participant,
     retainHumanFollowupOnEscalate: false,
     dependencies: input.dependencies,

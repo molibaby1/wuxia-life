@@ -26,6 +26,7 @@ import { validateProblemPackage, type ProblemPackageV1 } from '../../src/evoluti
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
 import { validateSolutionReview, type SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import { validateSolutionWork, type SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
+import { createCodexCurrentParticipant } from '../../scripts/evolution/operator/resolveParticipantBinding';
 
 const SOURCE_RUN_REF = 'cohort-run-000001';
 const PROBLEM_ID = 'problem-000001';
@@ -169,6 +170,9 @@ async function createFixture(): Promise<{
   const roundRoot = join(root, 'round-1');
   await mkdir(join(repositoryRoot, 'src'), { recursive: true });
   await writeFile(join(repositoryRoot, 'src/runtime.ts'), 'export const runtime = true;\n');
+  const skillPath = join(repositoryRoot, 'skills/repository-grounded-investigation/SKILL.md');
+  await mkdir(dirname(skillPath), { recursive: true });
+  await writeFile(skillPath, await readFile(join(process.cwd(), 'skills/repository-grounded-investigation/SKILL.md'), 'utf8'));
   for (const artifact of SOURCE_ARTIFACTS) await writeJson(join(roundRoot, artifact), { artifact });
 
   const problemPackage = baseProblemPackage();
@@ -230,6 +234,49 @@ async function createFixture(): Promise<{
 
 function participant(): { executable: string; buildArgs: () => string[] } {
   return { executable: process.execPath, buildArgs: () => ['-e', ''] };
+}
+
+function streamingParticipant(result: SolutionWorkV1, calls: { count: number }) {
+  const threadId = '01a08753-9e8e-7973-90ef-52893da1c561';
+  const payload = JSON.stringify(JSON.stringify(result));
+  const script = `const payload=${payload}; for (const event of [{type:'thread.started',thread_id:'${threadId}'},{type:'turn.started'},{type:'item.completed',item:{type:'agent_message',text:payload}},{type:'turn.completed',usage:{}}]) console.log(JSON.stringify(event));`;
+  return {
+    ...createCodexCurrentParticipant(process.execPath, 'fixture'),
+    buildArgs: () => {
+      calls.count += 1;
+      return ['-e', script];
+    },
+  };
+}
+
+async function createCandidateLaneFixture(fixture: Awaited<ReturnType<typeof createFixture>>): Promise<{
+  candidateLaneRoot: string;
+  sourceProvenanceRoot: string;
+}> {
+  const candidateLaneRoot = join(fixture.root, 'candidate-lane');
+  const sourceProvenanceRoot = join(fixture.root, 'sealed-source');
+  for (const artifact of SOURCE_ARTIFACTS) await writeJson(join(candidateLaneRoot, artifact), { artifact });
+  await writeJson(join(candidateLaneRoot, 'problem-package.json'), fixture.problemPackage);
+  await writeJson(join(candidateLaneRoot, 'solution-agent/result.json'), fixture.baseSolution);
+  await writeJson(join(candidateLaneRoot, 'reviewer-agent/review.json'), fixture.baseReview);
+  await writeJson(join(candidateLaneRoot, 'decision.json'), fixture.baseDecision);
+  await writeJson(join(sourceProvenanceRoot, 'provenance/source-fingerprint.json'), JSON.parse(await readFile(join(fixture.roundRoot, 'game-runs', SOURCE_RUN_REF, 'provenance/source-fingerprint.json'), 'utf8')) as unknown);
+  const baseline = await prepareAgentWorkspace({
+    authoritativeRoot: fixture.repositoryRoot,
+    destinationRoot: join(fixture.root, 'candidate-base-workspace'),
+    jobKind: 'solution',
+    artifactSourceRoot: candidateLaneRoot,
+    artifactRelativePaths: SOURCE_ARTIFACTS,
+  });
+  await writeJson(join(candidateLaneRoot, 'solution-agent/invocation.json'), {
+    schemaVersion: 'solution-agent-invocation-v2',
+    workspaceBaselineFingerprintSha256: baseline.workspaceBaselineFingerprintSha256,
+  });
+  await writeJson(join(candidateLaneRoot, 'reviewer-agent/invocation.json'), {
+    schemaVersion: 'solution-reviewer-invocation-v2',
+    workspaceBaselineFingerprintSha256: baseline.workspaceBaselineFingerprintSha256,
+  });
+  return { candidateLaneRoot, sourceProvenanceRoot };
 }
 
 function resultPaths(destinationRoot: string): { invocationPath: string; rawOutputPath: string; resultPath: string } {
@@ -581,6 +628,43 @@ export async function runReviewContinuationTests(): Promise<void> {
   assert.equal(continuationJson.participantJobCount, 2);
   assert.equal(continuationJson.continuationDecisionRef, 'review-continuation-000001/decision.json');
   assert.equal(await captureAuthoritativeFingerprint(accepted.repositoryRoot), accepted.authoritativeFingerprint);
+
+  const candidateFixture = await createFixture();
+  const candidateLane = await createCandidateLaneFixture(candidateFixture);
+  const realParticipantCalls = { count: 0 };
+  const realCandidateResult = await runCandidateReviewContinuation({
+    candidateRef: 'candidate-pool-000001/hypothesis-000001',
+    candidateLaneRoot: candidateLane.candidateLaneRoot,
+    baseDecisionPath: join(candidateLane.candidateLaneRoot, 'decision.json'),
+    problemPackagePath: join(candidateLane.candidateLaneRoot, 'problem-package.json'),
+    sourceFingerprintSha256: candidateFixture.sourceFingerprintSha256,
+    sourceProvenanceRoot: candidateLane.sourceProvenanceRoot,
+    participant: streamingParticipant(solutionWork('NO_PROPOSAL'), realParticipantCalls),
+    repositoryRoot: candidateFixture.repositoryRoot,
+  });
+  assert.equal(realCandidateResult.status, 'completed');
+  assert.equal(realParticipantCalls.count, 1);
+  assert.equal(await fileExists(join(candidateLane.candidateLaneRoot, 'game-runs', SOURCE_RUN_REF, 'provenance/source-fingerprint.json')), false);
+  assert.equal(await fileExists(join(candidateLane.candidateLaneRoot, 'review-continuation-000001/agent-workspaces/solution/provenance/source-fingerprint.json')), false);
+
+  const mismatchFixture = await createFixture();
+  const mismatchLane = await createCandidateLaneFixture(mismatchFixture);
+  const mismatchCalls = { count: 0 };
+  await assert.rejects(
+    () => runCandidateReviewContinuation({
+      candidateRef: 'candidate-pool-000001/hypothesis-000001',
+      candidateLaneRoot: mismatchLane.candidateLaneRoot,
+      baseDecisionPath: join(mismatchLane.candidateLaneRoot, 'decision.json'),
+      problemPackagePath: join(mismatchLane.candidateLaneRoot, 'problem-package.json'),
+      sourceFingerprintSha256: 'b'.repeat(64),
+      sourceProvenanceRoot: mismatchLane.sourceProvenanceRoot,
+      participant: streamingParticipant(solutionWork('NO_PROPOSAL'), mismatchCalls),
+      repositoryRoot: mismatchFixture.repositoryRoot,
+    }),
+    /source provenance fingerprint changed/,
+  );
+  assert.equal(mismatchCalls.count, 0);
+  assert.equal(await fileExists(join(mismatchLane.candidateLaneRoot, 'review-continuation-000001')), false);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

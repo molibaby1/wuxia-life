@@ -100,7 +100,7 @@ export interface MultiCandidateSessionSliceDependencies {
   runSourceAnalysis?: (input: { sourceRoot: string; sourceEpochRef: string; analysisRoot: string }) => Promise<CompletedSourceCandidateAnalysisResult>;
   loadSourceAnalysis?: (input: { sourceEpochRef: string; sourceRoot: string; analysisRoot: string }) => Promise<CompletedSourceCandidateAnalysisResult>;
   runCandidateLane?: (input: CandidateSessionSliceLaneInput) => Promise<CandidateLaneResult>;
-  runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string }) => Promise<CandidateReviewContinuationResult>;
+  runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string; sourceProvenanceRoot: string }) => Promise<CandidateReviewContinuationResult>;
   retainHumanFollowup?: typeof retainHumanFollowupWorkItem;
   runSourceTransition?: (input: { candidate: CandidatePoolV1['candidates'][number]; laneResult: Extract<CandidateLaneResult, { status: 'completed' }>; sourceAnalysis: CompletedSourceCandidateAnalysisResult; transitionRoot: string; candidateLaneRoot: string; effectiveDecisionPath: string }) => Promise<BoundedSourceTransitionResult>;
 }
@@ -188,6 +188,7 @@ function buildManifest(input: {
   sourceTransitionCount: 0 | 1;
   repositoryBaseline: RunMultiCandidateSessionSliceInput['repositoryBaseline'];
   participantBindingId: string;
+  failureRef?: string | null;
 }): MultiCandidateSessionManifestV1 {
   return buildMultiCandidateSessionManifestV1({
     logicalSessionId: input.logicalSessionId,
@@ -197,7 +198,7 @@ function buildManifest(input: {
     currentSourceEpochRef: input.currentSourceEpochRef,
     hostSlices: input.hostSlices,
     sourceTransitionCount: input.sourceTransitionCount,
-    failureRef: input.existing?.failureRef ?? null,
+    failureRef: input.failureRef ?? input.existing?.failureRef ?? null,
     repositoryBaseline: input.repositoryBaseline,
     participantBindingId: input.participantBindingId,
     budgetAccounting: {
@@ -395,6 +396,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
   const durablePoolPath = sourceEpochs.find(epoch => epoch.sourceEpochRef === currentSourceEpochRef)?.poolRef;
   if (!durablePoolPath) throw new Error('current Source Epoch has no durable Candidate Pool');
   let pool = parseCandidatePoolV1(JSON.parse(await readFile(join(sessionRoot, durablePoolPath), 'utf8')) as unknown);
+  let failureRef = manifest?.failureRef ?? null;
   if (pool.status === 'EXHAUSTED') {
     sessionState = 'COMPLETED';
     reason = null;
@@ -484,10 +486,26 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         baseDecisionPath: value.baseDecisionPath,
         problemPackagePath: value.problemPackagePath,
         sourceFingerprintSha256: pool.source.sourceFingerprintSha256,
+        sourceProvenanceRoot: value.sourceAnalysis.sourceRoot,
         participant: input.participant,
         repositoryRoot: input.repositoryRoot,
       }));
-      continuation = await continuationRunner({ candidate: pending, sourceAnalysis: analysis, laneRoot, baseDecisionPath: laneResult.baseDecisionPath, problemPackagePath: laneResult.problemPackagePath });
+      try {
+        continuation = await continuationRunner({ candidate: pending, sourceAnalysis: analysis, laneRoot, baseDecisionPath: laneResult.baseDecisionPath, problemPackagePath: laneResult.problemPackagePath, sourceProvenanceRoot: analysis.sourceRoot });
+      } catch (error) {
+        failureRef = 'host-failure.json';
+        await writeAtomicJson(join(sessionRoot, failureRef), {
+          schemaVersion: 'multi-candidate-host-failure-v1',
+          candidateRef: pending.candidateRef,
+          message: String(error),
+        });
+        pool = interruptCandidate(pool, pending.candidateRef, failureRef);
+        await persistPool(join(sessionRoot, durablePoolPath), pool);
+        sessionState = 'FAILED';
+        reason = `HOST_FAILURE: ${String(error)}`;
+        slice = { ...slice, state: 'FAILED', reason, endedAt: now(), participantJobs: budget.usedParticipantJobs };
+        break;
+      }
       budget = consumeHostSliceJobs(budget, continuation.participantJobs);
       slice = { ...slice, participantJobs: budget.usedParticipantJobs };
       if (continuation.status === 'participant_failure') { pool = interruptCandidate(pool, pending.candidateRef, continuation.failureRef); await persistPool(join(sessionRoot, durablePoolPath), pool); sessionState = 'FAILED'; reason = 'PARTICIPANT_FAILURE'; slice = { ...slice, state: 'FAILED', reason, endedAt: now() }; break; }
@@ -574,7 +592,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       : parseCandidatePoolV1(JSON.parse(await readFile(durableSessionArtifactPath(sessionRoot, epoch.poolRef), 'utf8')) as unknown);
     updatedSourceEpochs.push(summaryForPool(epochPool, epoch.sourceEpochRef, epoch.poolRef, epoch, await dispositionCountsForPool(sessionRoot, epochPool)));
   }
-  const finalManifest = buildManifest({ existing: manifest, logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs: updatedSourceEpochs, currentSourceEpochRef, hostSlices: [...priorSlices, slice], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId });
+  const finalManifest = buildManifest({ existing: manifest, logicalSessionId: input.logicalSessionId, sessionState, reason, sourceEpochs: updatedSourceEpochs, currentSourceEpochRef, hostSlices: [...priorSlices, slice], sourceTransitionCount, repositoryBaseline: input.repositoryBaseline, participantBindingId: input.participantBindingId, failureRef });
   await writeMultiCandidateSessionManifestAtomic(input.repositoryRoot, finalManifest);
   return { logicalSessionId: input.logicalSessionId, hostSliceId: input.hostSliceId, sessionState, reason, participantJobs: budget.usedParticipantJobs, currentSourceEpochRef, manifestPath: location.manifestPath, sourceTransitionCount };
 }

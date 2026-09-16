@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { runMultiCandidateSessionSlice } from '../../scripts/evolution/runMultiCandidateSessionSlice';
 import { PHASE0_REQUIRED_SEALED_ARTIFACTS, sealPhase0Run } from '../../scripts/evolution/phase0/provenance';
 import { parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
@@ -10,6 +10,8 @@ import { readDurableMultiCandidateSessionManifest } from '../../scripts/evolutio
 import type { CompletedSourceCandidateAnalysisResult } from '../../scripts/evolution/runSourceCandidateAnalysis';
 import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { buildMultiCandidateOperationalRunReport } from '../../scripts/evolution/reporting/buildMultiCandidateOperationalRunReport';
+import { archiveMultiCandidateSessionReport } from '../../scripts/evolution/reporting/archiveMultiCandidateSessionReport';
+import { retainMultiCandidateSessionEvidence } from '../../scripts/evolution/evidence/retainMultiCandidateSessionEvidence';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
@@ -163,6 +165,76 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(candidateProvenanceMode, 'candidate-activation-v1');
   const continuationPool = parseCandidatePoolV1(JSON.parse(await readFile(join(continuationRoot, 'artifacts/evolution/sessions/logical-session-000004/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
   assert.equal(continuationPool.candidates[0]!.humanFollowupRef, 'candidate-hfl-item.json');
+
+  const hostFailureRoot = await mkdtemp(join(tmpdir(), 'candidate-session-continuation-host-failure-'));
+  let hostFailureContinuationCalls = 0;
+  const hostFailure = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: hostFailureRoot,
+    logicalSessionId: 'logical-session-000006',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => ({ ...analysis, hypotheses: hypotheses.slice(0, 2) }),
+      runCandidateLane: async ({ candidate, laneRoot }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }; laneRoot: string }) => {
+        await mkdir(laneRoot, { recursive: true });
+        const decision = validateSolutionDecision({
+          ...continuationBaseDecision,
+          problemId: `problem-${candidate.hypothesisId}`,
+        });
+        await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision));
+        return {
+          status: 'completed' as const,
+          candidateRef: candidate.candidateRef,
+          hypothesisId: candidate.hypothesisId,
+          sourceIndex: candidate.sourceIndex,
+          candidateActivationPath: 'candidate-activation.json',
+          problemPackagePath: 'problem-package.json',
+          causalAttributionPath: 'diagnostic/causal-attribution.json',
+          decisionPath: join(laneRoot, 'decision.json'),
+          baseDecisionPath: join(laneRoot, 'decision.json'),
+          humanReviewPackagePath: 'human-review-package.md',
+          actualParticipantJobs: 1 as const,
+          decision,
+          solutionInvocationRef: 'solution',
+          reviewerInvocationRef: 'reviewer',
+          problemPackage: {} as never,
+        };
+      },
+      runCandidateContinuation: async () => {
+        hostFailureContinuationCalls += 1;
+        throw new Error('sealed source provenance unavailable');
+      },
+    },
+  });
+  assert.equal(hostFailure.sessionState, 'FAILED');
+  assert.match(hostFailure.reason ?? '', /^HOST_FAILURE:/);
+  assert.equal(hostFailureContinuationCalls, 1);
+  const hostFailurePool = parseCandidatePoolV1(JSON.parse(await readFile(join(hostFailureRoot, 'artifacts/evolution/sessions/logical-session-000006/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(hostFailurePool.status, 'INTERRUPTED');
+  assert.equal(hostFailurePool.candidates[0]!.processingState, 'INTERRUPTED');
+  assert.equal(hostFailurePool.candidates[1]!.processingState, 'PENDING');
+  const hostFailureManifest = await readDurableMultiCandidateSessionManifest(hostFailureRoot, 'logical-session-000006');
+  assert.equal(hostFailureManifest.sessionState, 'FAILED');
+  assert.equal(hostFailureManifest.hostSlices[0]!.state, 'FAILED');
+  assert.equal(hostFailureManifest.failureRef, 'host-failure.json');
+  assert.equal(await readFile(join(hostFailureRoot, 'artifacts/evolution/sessions/logical-session-000006/host-failure.json'), 'utf8').then(value => value.includes('sealed source provenance unavailable')), true);
+  const hostFailureEvidence = await retainMultiCandidateSessionEvidence({ repositoryRoot: hostFailureRoot, logicalSessionId: 'logical-session-000006', createdAt: '2026-09-15T00:01:00.000Z' });
+  assert.equal(hostFailureEvidence.status, 'PUBLISHED');
+  assert.ok(hostFailureEvidence.capsuleRoot);
+  const hostFailureReport = await archiveMultiCandidateSessionReport({
+    repositoryRoot: hostFailureRoot,
+    logicalSessionId: 'logical-session-000006',
+    hostSliceId: 'host-slice-000001',
+    terminalForensicEvidenceRef: relative(hostFailureRoot, hostFailureEvidence.capsuleRoot!).split('/').join('/'),
+    createdAt: '2026-09-15T00:01:00.000Z',
+  });
+  const hostFailureReportJson = JSON.parse(await readFile(hostFailureReport.reportJsonPath, 'utf8')) as { sessionStateAtSnapshot: string; candidates: Array<{ processingState: string; interruptionRef: string | null }>; terminalForensicEvidenceRef: string | null };
+  assert.equal(hostFailureReportJson.sessionStateAtSnapshot, 'FAILED');
+  assert.equal(hostFailureReportJson.candidates[0]!.processingState, 'INTERRUPTED');
+  assert.equal(hostFailureReportJson.candidates[0]!.interruptionRef, 'host-failure.json');
+  assert.equal(hostFailureReportJson.terminalForensicEvidenceRef, relative(hostFailureRoot, hostFailureEvidence.capsuleRoot!).split('/').join('/'));
 
   let resumeAnalysisLoads = 0;
   const resumed = await runMultiCandidateSessionSlice({

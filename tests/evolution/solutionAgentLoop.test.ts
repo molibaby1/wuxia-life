@@ -18,7 +18,7 @@ import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
-import type { SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
+import { validateSolutionWork, type SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
 
 function countingSpawn(counter: { count: number }): typeof spawn {
   return ((...args: Parameters<typeof spawn>) => {
@@ -131,6 +131,19 @@ const originalReview: SolutionReviewV1 = {
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function assertSolutionWorkSchemaGuidance(prompt: string): void {
+  assert.match(prompt, /SolutionWorkV1 top-level required fields/i);
+  assert.match(prompt, /schemaVersion\s*=\s*["']solution-work-v1["']/i);
+  assert.match(prompt, /status[\s\S]*problemId[\s\S]*options[\s\S]*summary[\s\S]*repoRefs[\s\S]*artifactRefs/i);
+  assert.match(prompt, /recommendedOptionId.*optional.*OPTIONS/i);
+  assert.match(prompt, /For OPTIONS, every SolutionOptionV1 requires/i);
+  assert.match(prompt, /optionId[\s\S]*proposedChange[\s\S]*rationale[\s\S]*repoRefs[\s\S]*artifactRefs[\s\S]*changeScope[\s\S]*expectedPlayerObservableDifference[\s\S]*risks[\s\S]*unknowns/i);
+  assert.match(prompt, /SolutionWorkV1\.repoRefs.*top-level|top-level.*SolutionWorkV1\.repoRefs/i);
+  assert.match(prompt, /SolutionWorkV1\.options\[n\]\.repoRefs.*each option|each option.*SolutionWorkV1\.options\[n\]\.repoRefs/i);
+  assert.match(prompt, /SolutionWorkV1\.artifactRefs.*top-level|top-level.*SolutionWorkV1\.artifactRefs/i);
+  assert.match(prompt, /SolutionWorkV1\.options\[n\]\.artifactRefs.*each option|each option.*SolutionWorkV1\.options\[n\]\.artifactRefs/i);
 }
 
 export async function runSolutionAgentLoopTests(): Promise<void> {
@@ -254,6 +267,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     deliveredPrompt,
     /Write\/return only the structured SolutionWorkV1 result as the final job result\./i,
   );
+  assertSolutionWorkSchemaGuidance(deliveredPrompt);
   assert.equal(await readFile(join(root, 'solution-agent/raw-output.txt'), 'utf8'), JSON.stringify(solutionResult));
   assert.equal(await readFile(join(root, 'solution-agent/stderr.txt'), 'utf8'), capturedStderr);
   assert.equal(
@@ -316,6 +330,30 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(revisionPrompt, /unavailable evidence.*INSUFFICIENT_EVIDENCE/i);
   assert.match(revisionPrompt, /Human authority.*ESCALATE/i);
   assert.doesNotMatch(revisionPrompt, /new gameplay sample/i);
+  assertSolutionWorkSchemaGuidance(revisionPrompt);
+
+  const missingRootRefsPayload: Record<string, unknown> = {
+    schemaVersion: 'solution-work-v1',
+    status: 'OPTIONS',
+    problemId: 'problem-x',
+    options: [{
+      optionId: 'option-000001',
+      proposedChange: 'A bounded change.',
+      rationale: 'A bounded rationale.',
+      repoRefs: ['src/example.ts'],
+      artifactRefs: [],
+      changeScope: 'configuration',
+      expectedPlayerObservableDifference: 'A visible difference.',
+      risks: [],
+      unknowns: [],
+    }],
+    recommendedOptionId: 'option-000001',
+    summary: 'A bounded summary.',
+  };
+  assert.throws(
+    () => validateSolutionWork(missingRootRefsPayload),
+    /solution work is missing field: repoRefs/,
+  );
 
   let revisionInvocationRef = '';
   const revisionRun = await runSolutionRevisionAgent({

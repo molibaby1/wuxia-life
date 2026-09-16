@@ -98,6 +98,32 @@ async function validateReferences(result: SolutionWorkV1, input: RunSolutionAgen
   }
 }
 
+function renderSolutionWorkSchemaGuidance(): string {
+  return [
+    'Solution-specific schema guidance for the existing SolutionWorkV1 receiver contract:',
+    'SolutionWorkV1 top-level required fields:',
+    '- schemaVersion = "solution-work-v1"',
+    '- status',
+    '- problemId',
+    '- options',
+    '- summary',
+    '- repoRefs',
+    '- artifactRefs',
+    'recommendedOptionId is optional and is valid only when status is OPTIONS.',
+    'For OPTIONS, every SolutionOptionV1 requires these fields:',
+    '- optionId',
+    '- proposedChange',
+    '- rationale',
+    '- repoRefs',
+    '- artifactRefs',
+    '- changeScope',
+    '- expectedPlayerObservableDifference',
+    '- risks',
+    '- unknowns',
+    'The reference arrays exist at two distinct levels and both levels are required: SolutionWorkV1.repoRefs and SolutionWorkV1.artifactRefs are required top-level fields on the root object, while SolutionWorkV1.options[n].repoRefs and SolutionWorkV1.options[n].artifactRefs are required fields inside every option. Option refs do not replace the required root refs, and root refs do not replace each option\'s refs.',
+  ].join('\n');
+}
+
 export function buildSolutionAgentPrompt(
   problemPackage: ProblemPackage,
   assignedSkills: DeliveredParticipantSkill[],
@@ -129,6 +155,7 @@ export function buildSolutionAgentPrompt(
     renderStructuredFinalOutputContractV1({
       roleSchemaName: 'SolutionWorkV1',
     }),
+    renderSolutionWorkSchemaGuidance(),
     '',
     'Convergence discipline (Solution work only):',
     '- Investigate only far enough to form a small set of plausible, repository-grounded explanations; do not treat the task as an exhaustive repository audit.',
@@ -195,6 +222,7 @@ export function buildSolutionRevisionPrompt(
     'Do not manufacture another player run to satisfy this revision. Do not execute authoritative product changes.',
     'Return a fresh SolutionWorkV1 result using the existing output contract. Preserve authority, permission, and scope boundaries; do not treat the Reviewer request as permission.',
     renderStructuredFinalOutputContractV1({ roleSchemaName: 'SolutionWorkV1' }),
+    renderSolutionWorkSchemaGuidance(),
     '',
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,

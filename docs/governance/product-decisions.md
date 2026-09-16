@@ -2102,3 +2102,113 @@ Auto Evolution 不再把 Improvement Hypothesis Set 的第一条 hypothesis 作�
 - 需要跨 Source / Session semantic dedupe、priority 或 merge；
 - PD-111 evidence boundary 无法支撑 candidate investigation；
 - Source-local Pool 无法在不建设 generic queue 的情况下稳定恢复。
+
+### PD-119：Candidate-local Participant Output Rejection Isolation v1
+
+**产品决策（Human accepted：2026-09-16）**
+
+PD-118 的 Source-local Candidate Pool / Multi-candidate Session 语义继续有效，但 Participant failure 的 containment 边界收窄如下：
+
+> **只有 Host 能以 typed、deterministic facts 证明为 candidate-local output-conformance rejection 的 Participant failure，才允许只结束当前 Candidate；任何无法证明为局部输出拒绝的 failure 继续 Pool / Logical Session fail closed。**
+
+#### Candidate-local isolation
+
+满足全部适用 integrity preconditions 时，以下 completed Participant output rejection 可以分类为 `CANDIDATE_OUTPUT_REJECTED`：
+
+- formal terminal envelope 在 Participant runtime 正常完成后仍为空、不是合法 JSON 或不是 object；若已触发既有 same-thread envelope retransmission，则 retransmission 必须自身正常完成，retransmission runtime / continuation failure 不属于局部失败；
+- formal Role schema validation 失败；
+- 当前 Candidate 输出内部一致性失败，例如 Reviewer 接受当前 supplied SolutionWork 中不存在的 option id；
+- repo/artifact reference locator 语法错误，但不涉及 scope escape；
+- reference 位于 allowed root 内，且 Host 对 authoritative / canonical source 做 deterministic cross-check 后确认目标确实不存在或确实不是 regular file，而不是 disposable workspace materialization 缺失。
+
+`CANDIDATE_OUTPUT_REJECTED` 是 failure-containment classification，不是新的 Candidate state、Decision route 或 Session state。
+
+局部隔离后的正式 lifecycle：
+
+```text
+ACTIVE Candidate
+→ durable typed failure evidence
+→ Candidate.INTERRUPTED
+→ Pool remains PROCESSING
+→ ordinary candidate-boundary scheduling
+```
+
+- 若仍有 PENDING Candidate 且 Host slice budget 允许，继续按既有 source order 激活下一 Candidate；
+- 若当前 Host slice 无法再合法 admit Candidate，则正常 `PAUSED / HOST_SLICE_BUDGET`；
+- 若 Pool 已无 PENDING / ACTIVE Candidate，则 Pool `EXHAUSTED`，Logical Session `COMPLETED`；
+- `COMPLETED` 只表示 workflow processing finished，不表示所有 Candidate 都成功，报告必须保留 `interrupted` count 和失败证据；
+- 已局部中断的 Candidate 不 semantic retry、不 repair、不 rebind 到 Source B；后续 Source change 只按 PD-118 supersede 当时仍 PENDING 的 Candidate。
+
+#### Continue fail-closed
+
+以下 failure 继续 Pool / Logical Session fail closed：
+
+- Participant runtime unavailable、process start / non-zero exit、timeout；
+- provider stream / turn protocol failure、`turn.failed`、completed-turn identity failure、thread / continuation protocol mismatch，或其他发生在 formal Role-output validation 之前的 provider-protocol failure；
+- envelope retransmission 自身的 runtime / timeout / continuation failure；
+- `problemId`、candidate/task identity 或其他 cross-task identity mismatch；
+- absolute reference、`..` / equivalent allowed-root escape、或其他 scope violation；
+- unexpected filesystem I/O failure；
+- authoritative repository fingerprint / repository integrity failure；
+- sealed source、source fingerprint、repository baseline、hypothesis mapping 或其他 provenance integrity failure；
+- Skill delivery、workspace preparation/materialization、required artifact copy、durable-write prerequisite 等 Host infrastructure failure；
+- existing deterministic verification / source-transition verification failure；
+- 任何无法可靠归类的 unknown / ambiguous failure。
+
+#### Classification contract
+
+Containment 必须来自 typed failure origin / reason 与已验证 invariant，不得依赖：
+
+- `message.includes(...)`；
+- `String(error)`；
+- `ENOENT` 文本；
+- 当前粗粒度 `errorKind === "invalid_output"` 本身。
+
+`invalid_output` 可以继续作为 compatibility / diagnostic fact，但没有 containment authority。
+
+同一 classification boundary 必须覆盖：
+
+- initial Solution；
+- initial Reviewer；
+- bounded continuation Solution revision；
+- bounded continuation re-reviewer。
+
+#### Durable evidence and recovery
+
+在激活下一 Candidate 之前，Host 必须先 durable 保留：
+
+1. Participant / Role failure evidence；
+2. typed candidate-lane terminal failure artifact；
+3. Candidate `ACTIVE → INTERRUPTED` transition。
+
+Resume / reconciliation 只有在 durable failure artifact 完整、Contract-valid、identity 匹配且其 containment 为 candidate-local 时，才可恢复为 `Candidate.INTERRUPTED + Pool.PROCESSING`。历史 `candidate-lane-failure-v1`、不完整 artifact、ambiguous artifact 或无法验证 identity 的 artifact 不得 retroactively 获得局部隔离语义，继续 fail closed。
+
+#### 与既有 authority 的调和
+
+- **PD-118**：仅 supersede “Participant failure 一律 Pool / Session fail closed，且失败 Candidate 不可继续下一个 Candidate”这一 blanket containment 语义；其余 Source-local Candidate Pool、source order、budget、resume、source-change、one-transition、report 和 evidence 语义全部保留。
+- **PD-117**：ordinary semantic retry 仍为 `0`；candidate-local isolation 不是 retry；既有 envelope retransmission 仍是独立 serialization recovery。
+- **PD-111**：evidence / diagnostic boundary 不变。
+- **PD-100**：HFL trigger 不变；`CANDIDATE_OUTPUT_REJECTED` 不自动创建 Human Follow-up。
+- repository / provenance / scope / deterministic verification / sealed-source fail-closed boundary继续保留。
+
+#### 明确不做
+
+- 不新增 semantic retry、自动 output repair、repoRef 猜测/修正或 Participant self-correction；
+- 不新增 Candidate / Pool / Logical Session state；
+- 不新增 `PARTIAL_SUCCESS` / `DEGRADED` 等 Session outcome；
+- 不建立失败次数阈值或 systemic-failure circuit breaker；
+- 不把 runtime / provider failures 一并局部隔离；
+- 不改变 Candidate ordering、Selection、ranking、priority、cross-source rebind、Source-change authority 或 PD-111 evidence；
+- 不因本决策修改 Participant reasoning prompt 以追求更低失败率。
+
+#### 允许重新讨论的条件
+
+仅当出现以下情况之一，才重新讨论本条：
+
+- 多次自然运行证明 candidate-local isolation 自身形成新的 systemic failure pattern，需要 failure-count / provider-health circuit breaker；
+- 需要把 runtime / provider-protocol failure 也安全隔离；
+- 产品希望增加 semantic retry、自动 repair 或 same-candidate recovery；
+- 现有 Candidate / Pool / Session lifecycle 无法表达真实恢复需求；
+- authoritative / canonical source cross-check 无法可靠区分 Participant bad reference 与 workspace materialization failure；
+- reconciliation 需要超出完整 typed terminal evidence 的自动推断；
+- 本 containment boundary 与 PD-111、source-change、verification 或 repository-integrity authority 发生真实冲突。

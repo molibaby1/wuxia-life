@@ -379,6 +379,50 @@ async function skillDeliveryFailure(
   };
 }
 
+async function inputIdentityFailure(
+  input: RunSolutionAgentInput,
+  problemPackageSha256: string,
+  message: string,
+): Promise<SolutionAgentRunResult> {
+  const invocationPath = join(input.destinationRoot, 'invocation.json');
+  const rawOutputPath = join(input.destinationRoot, 'raw-output.txt');
+  const failurePath = join(input.destinationRoot, 'failure.json');
+  const failure: ParticipantFailureFacts = {
+    origin: 'OUTPUT_IDENTITY',
+    reason: 'PROBLEM_ID_MISMATCH',
+    participantErrorKind: 'invalid_output',
+    message,
+  };
+  await writeCreateOnly(rawOutputPath, '');
+  await writeCreateOnly(invocationPath, {
+    schemaVersion: 'solution-agent-invocation-v2',
+    invocationRef: input.invocationRef,
+    jobNumber: input.jobNumber,
+    role: 'solution',
+    workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
+    problemPackageSha256,
+    participant: 'workspace-capable-agent',
+    skillAssignments: input.skillAssignments,
+    deliveredSkills: [],
+    status: 'failed',
+    errorKind: 'invalid_output',
+  });
+  await writeCreateOnly(failurePath, {
+    schemaVersion: 'solution-agent-failure-v1',
+    errorKind: 'invalid_output',
+    message,
+  });
+  return {
+    ok: false,
+    errorKind: 'invalid_output',
+    message,
+    failure,
+    invocationPath,
+    rawOutputPath,
+    failurePath,
+  };
+}
+
 export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<SolutionAgentRunResult> {
   const problemPackage = validateProblemPackage(input.problemPackage);
   const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
@@ -403,10 +447,14 @@ export async function runSolutionRevisionAgent(
   const problemPackage = validateProblemPackage(input.problemPackage);
   const originalSolutionWork = validateSolutionWork(input.originalSolutionWork);
   const originalReview = validateSolutionReview(input.originalReview);
-  if (originalSolutionWork.problemId !== problemPackage.problemId || originalReview.problemId !== problemPackage.problemId) {
-    throw new Error('revision source problemId does not match ProblemPackage');
-  }
   const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+  if (originalSolutionWork.problemId !== problemPackage.problemId || originalReview.problemId !== problemPackage.problemId) {
+    return inputIdentityFailure(
+      input,
+      problemPackageSha256,
+      'revision source problemId does not match ProblemPackage',
+    );
+  }
   let assignedSkills: DeliveredParticipantSkill[];
   try {
     assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);

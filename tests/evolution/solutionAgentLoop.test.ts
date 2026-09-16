@@ -505,6 +505,38 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   const revisionInvocation = JSON.parse(await readFile(join(root, 'solution-revision/invocation.json'), 'utf8'));
   assert.equal(revisionInvocation.invocationRef, 'solution-revision-000001');
 
+  let revisionIdentityRuntimeCalls = 0;
+  const revisionIdentityFailure = await runSolutionRevisionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-revision-identity-mismatch',
+    jobNumber: 1,
+    destinationRoot: join(root, 'solution-revision-identity-mismatch'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => {
+        revisionIdentityRuntimeCalls += 1;
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))})`];
+      },
+    },
+    originalSolutionWork: { ...originalSolutionWork, problemId: 'problem-999999' },
+    originalReview,
+  });
+  assert.equal(revisionIdentityFailure.ok, false);
+  if (!revisionIdentityFailure.ok) {
+    assert.deepEqual(revisionIdentityFailure.failure, {
+      origin: 'OUTPUT_IDENTITY',
+      reason: 'PROBLEM_ID_MISMATCH',
+      participantErrorKind: 'invalid_output',
+      message: 'revision source problemId does not match ProblemPackage',
+    });
+  }
+  assert.equal(revisionIdentityRuntimeCalls, 0);
+
   const sidecarFailureRoot = join(root, 'sidecar-write-failure-agent');
   await mkdir(sidecarFailureRoot, { recursive: true });
   await mkdir(join(sidecarFailureRoot, 'stderr.txt'));

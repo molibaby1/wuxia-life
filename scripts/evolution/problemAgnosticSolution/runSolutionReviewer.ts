@@ -247,6 +247,30 @@ async function runSolutionReviewerWithPrompt(
     // Available stderr is forensic sidecar evidence; preserve the semantic review result.
   }
   let review: SolutionReviewV1;
+  const invalidOutputFailure = async (failure: ParticipantFailureFacts): Promise<SolutionReviewerRunResult> => {
+    await writeCreateOnly(rawOutputPath, job.rawOutput);
+    await writeCreateOnly(invocationPath, {
+      ...commonInvocation,
+      deliveredSkills,
+      status: 'failed',
+      errorKind: 'invalid_output',
+    });
+    await writeCreateOnly(failurePath, {
+      schemaVersion: 'solution-reviewer-failure-v1',
+      errorKind: 'invalid_output',
+      message: failure.message,
+    });
+    return {
+      ok: false,
+      errorKind: 'invalid_output',
+      message: failure.message,
+      failure,
+      invocationPath,
+      rawOutputPath,
+      failurePath,
+    };
+  };
+
   try {
     const envelope = validateStructuredTerminalEnvelope(job.rawOutput);
     if (!envelope.ok) {
@@ -262,6 +286,19 @@ async function runSolutionReviewerWithPrompt(
       });
     }
     review = validateSolutionReview(envelope.parsedObject);
+  } catch (error) {
+    const failure: ParticipantFailureFacts = error instanceof ParticipantOutputValidationError
+      ? error.facts
+      : {
+          origin: 'OUTPUT_SCHEMA',
+          reason: 'ROLE_SCHEMA_INVALID',
+          participantErrorKind: 'invalid_output',
+          message: String(error),
+        };
+    return invalidOutputFailure(failure);
+  }
+
+  try {
     if (review.problemId !== problemPackage.problemId) {
       throw new ParticipantOutputValidationError({
         origin: 'OUTPUT_IDENTITY',
@@ -283,28 +320,12 @@ async function runSolutionReviewerWithPrompt(
     const failure: ParticipantFailureFacts = error instanceof ParticipantOutputValidationError
       ? error.facts
       : {
-          origin: 'OUTPUT_SCHEMA',
-          reason: 'ROLE_SCHEMA_INVALID',
-          participantErrorKind: 'invalid_output',
+          origin: 'UNKNOWN',
+          reason: 'UNCLASSIFIED',
+          participantErrorKind: null,
           message: String(error),
         };
-    await writeCreateOnly(rawOutputPath, job.rawOutput);
-    await writeCreateOnly(invocationPath, {
-      ...commonInvocation,
-      deliveredSkills,
-      status: 'failed',
-      errorKind: 'invalid_output',
-    });
-    await writeCreateOnly(failurePath, { schemaVersion: 'solution-reviewer-failure-v1', errorKind: 'invalid_output', message: String(error) });
-    return {
-      ok: false,
-      errorKind: 'invalid_output',
-      message: String(error),
-      failure,
-      invocationPath,
-      rawOutputPath,
-      failurePath,
-    };
+    return invalidOutputFailure(failure);
   }
 
   await writeCreateOnly(rawOutputPath, job.rawOutput);
@@ -357,9 +378,60 @@ async function skillDeliveryFailure(
   };
 }
 
+async function inputIdentityFailure(
+  input: RunSolutionReviewerInput,
+  problemPackageSha256: string,
+  message: string,
+): Promise<SolutionReviewerRunResult> {
+  const invocationPath = join(input.destinationRoot, 'invocation.json');
+  const rawOutputPath = join(input.destinationRoot, 'raw-output.txt');
+  const failurePath = join(input.destinationRoot, 'failure.json');
+  const failure: ParticipantFailureFacts = {
+    origin: 'OUTPUT_IDENTITY',
+    reason: 'PROBLEM_ID_MISMATCH',
+    participantErrorKind: 'invalid_output',
+    message,
+  };
+  await writeCreateOnly(rawOutputPath, '');
+  await writeCreateOnly(invocationPath, {
+    schemaVersion: 'solution-reviewer-invocation-v2',
+    invocationRef: input.invocationRef,
+    jobNumber: input.jobNumber,
+    role: 'reviewer',
+    workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
+    problemPackageSha256,
+    participant: 'workspace-capable-agent',
+    skillAssignments: input.skillAssignments,
+    deliveredSkills: [],
+    status: 'failed',
+    errorKind: 'invalid_output',
+  });
+  await writeCreateOnly(failurePath, {
+    schemaVersion: 'solution-reviewer-failure-v1',
+    errorKind: 'invalid_output',
+    message,
+  });
+  return {
+    ok: false,
+    errorKind: 'invalid_output',
+    message,
+    failure,
+    invocationPath,
+    rawOutputPath,
+    failurePath,
+  };
+}
+
 export async function runSolutionReviewer(input: RunSolutionReviewerInput): Promise<SolutionReviewerRunResult> {
   const problemPackage = validateProblemPackage(input.problemPackage);
   const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+  if (input.solutionWork.problemId !== problemPackage.problemId) {
+    return inputIdentityFailure(
+      input,
+      problemPackageSha256,
+      'SolutionWork problemId does not match ProblemPackage',
+    );
+  }
   let assignedSkills: DeliveredParticipantSkill[];
   try {
     assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);
@@ -382,14 +454,18 @@ export async function runSolutionReReviewer(
   const originalSolutionWork = validateSolutionWork(input.originalSolutionWork);
   const originalReview = validateSolutionReview(input.originalReview);
   const revisedSolutionWork = validateSolutionWork(input.solutionWork);
+  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   if (
     originalSolutionWork.problemId !== problemPackage.problemId
     || originalReview.problemId !== problemPackage.problemId
     || revisedSolutionWork.problemId !== problemPackage.problemId
   ) {
-    throw new Error('re-review source problemId does not match ProblemPackage');
+    return inputIdentityFailure(
+      input,
+      problemPackageSha256,
+      're-review source problemId does not match ProblemPackage',
+    );
   }
-  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
   let assignedSkills: DeliveredParticipantSkill[];
   try {
     assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);

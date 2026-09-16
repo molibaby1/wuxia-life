@@ -168,6 +168,37 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   const packagePath = join(root, 'problem-package.json');
   await writeFile(packagePath, JSON.stringify(problemPackage));
 
+  let mismatchedInputRuntimeCalls = 0;
+  const mismatchedInputSolution = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork: { ...solutionWork, problemId: 'problem-999999' },
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-input-problem-id-mismatch',
+    jobNumber: 4,
+    destinationRoot: join(root, 'reviewer-input-problem-id-mismatch'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => {
+        mismatchedInputRuntimeCalls += 1;
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(review))})`];
+      },
+    },
+  });
+  assert.equal(mismatchedInputSolution.ok, false);
+  if (!mismatchedInputSolution.ok) {
+    assert.deepEqual(mismatchedInputSolution.failure, {
+      origin: 'OUTPUT_IDENTITY',
+      reason: 'PROBLEM_ID_MISMATCH',
+      participantErrorKind: 'invalid_output',
+      message: 'SolutionWork problemId does not match ProblemPackage',
+    });
+  }
+  assert.equal(mismatchedInputRuntimeCalls, 0);
+
   let deliveredPrompt = '';
   const result = await runSolutionReviewer({
     problemPackage,
@@ -283,6 +314,63 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.equal(rereviewerInvocationRef, 'solution-rereviewer-000001');
   const rereviewerInvocation = JSON.parse(await readFile(join(root, 'solution-rereviewer/invocation.json'), 'utf8'));
   assert.equal(rereviewerInvocation.invocationRef, 'solution-rereviewer-000001');
+
+  let rereviewerIdentityRuntimeCalls = 0;
+  const rereviewerIdentityFailure = await runSolutionReReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork: revisedSolutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-rereviewer-identity-mismatch',
+    jobNumber: 2,
+    destinationRoot: join(root, 'solution-rereviewer-identity-mismatch'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => {
+        rereviewerIdentityRuntimeCalls += 1;
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(review))})`];
+      },
+    },
+    originalSolutionWork: solutionWork,
+    originalReview: { ...originalReviewForRereview, problemId: 'problem-999999' },
+  });
+  assert.equal(rereviewerIdentityFailure.ok, false);
+  if (!rereviewerIdentityFailure.ok) {
+    assert.deepEqual(rereviewerIdentityFailure.failure, {
+      origin: 'OUTPUT_IDENTITY',
+      reason: 'PROBLEM_ID_MISMATCH',
+      participantErrorKind: 'invalid_output',
+      message: 're-review source problemId does not match ProblemPackage',
+    });
+  }
+  assert.equal(rereviewerIdentityRuntimeCalls, 0);
+
+  const unknownValidationFailure = await runSolutionReviewer({
+    repositoryRoot: {} as unknown as string,
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-unknown-validation-failure',
+    jobNumber: 4,
+    destinationRoot: join(root, 'reviewer-unknown-validation-failure'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(review))})`],
+    },
+  });
+  assert.equal(unknownValidationFailure.ok, false);
+  if (!unknownValidationFailure.ok) {
+    assert.equal(unknownValidationFailure.failure.origin, 'UNKNOWN');
+    assert.equal(unknownValidationFailure.failure.reason, 'UNCLASSIFIED');
+    assert.equal(unknownValidationFailure.failure.participantErrorKind, null);
+  }
 
   const timeoutRoot = join(root, 'timeout-reviewer-agent');
   let timeoutCalls = 0;

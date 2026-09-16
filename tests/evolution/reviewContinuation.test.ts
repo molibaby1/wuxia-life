@@ -357,6 +357,12 @@ function failureRevisionRunner(
       ok: false,
       errorKind: 'timeout',
       message: 'revision timed out',
+      failure: {
+        origin: 'PARTICIPANT_RUNTIME',
+        reason: 'TIMEOUT',
+        participantErrorKind: 'timeout',
+        message: 'revision timed out',
+      },
       ...paths,
     };
   };
@@ -372,6 +378,12 @@ function failureReviewerRunner(
       ok: false,
       errorKind: 'process',
       message: 're-review failed',
+      failure: {
+        origin: 'PARTICIPANT_RUNTIME',
+        reason: 'PROCESS_FAILURE',
+        participantErrorKind: 'process',
+        message: 're-review failed',
+      },
       ...paths,
     };
   };
@@ -520,6 +532,8 @@ export async function runReviewContinuationTests(): Promise<void> {
   });
   const adapterResult = await runCandidateReviewContinuation({
     candidateRef: 'candidate-pool-000001/hypothesis-000001',
+    hypothesisId: 'hypothesis-000001',
+    sourceIndex: 0,
     candidateLaneRoot: adapterFixture.roundRoot,
     baseDecisionPath: adapterFixture.roundRoot + '/decision.json',
     problemPackagePath: adapterFixture.problemPackagePath,
@@ -587,6 +601,13 @@ export async function runReviewContinuationTests(): Promise<void> {
   assert.equal(revisionFailureResult.participantJobs, 1);
   assert.deepEqual(revisionFailureCalls, { revision: 1, rereview: 0 });
   assert.equal(revisionFailureResult.decision, null);
+  assert.equal(revisionFailureResult.failureStage, 'SOLUTION_REVISION');
+  assert.deepEqual(revisionFailureResult.failure, {
+    origin: 'PARTICIPANT_RUNTIME',
+    reason: 'TIMEOUT',
+    participantErrorKind: 'timeout',
+    message: 'revision timed out',
+  });
 
   const thrownRevision = await createFixture();
   const thrownRevisionResult = await runContinuation(thrownRevision, {
@@ -597,6 +618,13 @@ export async function runReviewContinuationTests(): Promise<void> {
   assert.equal(thrownRevisionResult.status, 'participant_failure');
   assert.equal(thrownRevisionResult.participantJobs, 1);
   assert.equal(thrownRevisionResult.decision, null);
+  assert.equal(thrownRevisionResult.failureStage, 'SOLUTION_REVISION');
+  assert.deepEqual(thrownRevisionResult.failure, {
+    origin: 'HOST_INFRASTRUCTURE',
+    reason: 'UNCLASSIFIED',
+    participantErrorKind: null,
+    message: 'participant runner threw: Error: revision runner threw',
+  });
   assert.equal(
     await fileExists(join(thrownRevision.roundRoot, 'review-continuation-000001/solution-revision/failure.json')),
     true,
@@ -620,6 +648,13 @@ export async function runReviewContinuationTests(): Promise<void> {
   assert.equal(rereviewFailureResult.terminalRoute, 'PARTICIPANT_FAILURE');
   assert.equal(rereviewFailureResult.participantJobs, 2);
   assert.deepEqual(rereviewFailureCalls, { revision: 1, rereview: 1 });
+  assert.equal(rereviewFailureResult.failureStage, 'RE_REVIEWER');
+  assert.deepEqual(rereviewFailureResult.failure, {
+    origin: 'PARTICIPANT_RUNTIME',
+    reason: 'PROCESS_FAILURE',
+    participantErrorKind: 'process',
+    message: 're-review failed',
+  });
 
   const continuationJson = JSON.parse(await readFile(join(accepted.roundRoot, 'review-continuation-000001/continuation.json'), 'utf8')) as {
     participantJobCount: number;
@@ -634,6 +669,8 @@ export async function runReviewContinuationTests(): Promise<void> {
   const realParticipantCalls = { count: 0 };
   const realCandidateResult = await runCandidateReviewContinuation({
     candidateRef: 'candidate-pool-000001/hypothesis-000001',
+    hypothesisId: 'hypothesis-000001',
+    sourceIndex: 0,
     candidateLaneRoot: candidateLane.candidateLaneRoot,
     baseDecisionPath: join(candidateLane.candidateLaneRoot, 'decision.json'),
     problemPackagePath: join(candidateLane.candidateLaneRoot, 'problem-package.json'),
@@ -653,6 +690,8 @@ export async function runReviewContinuationTests(): Promise<void> {
   await assert.rejects(
     () => runCandidateReviewContinuation({
       candidateRef: 'candidate-pool-000001/hypothesis-000001',
+      hypothesisId: 'hypothesis-000001',
+      sourceIndex: 0,
       candidateLaneRoot: mismatchLane.candidateLaneRoot,
       baseDecisionPath: join(mismatchLane.candidateLaneRoot, 'decision.json'),
       problemPackagePath: join(mismatchLane.candidateLaneRoot, 'problem-package.json'),

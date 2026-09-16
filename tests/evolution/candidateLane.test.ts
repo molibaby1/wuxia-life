@@ -32,7 +32,7 @@ export async function runCandidateLaneTests(): Promise<void> {
     unknowns: ['Cause remains unknown.'],
     productSignificance: 'It matters.',
   };
-  const result = await runCandidateLane({
+  const laneInput = {
     repositoryRoot: process.cwd(),
     sourceRoot,
     laneRoot,
@@ -72,7 +72,8 @@ export async function runCandidateLaneTests(): Promise<void> {
         throw new Error('reviewer must not run for insufficient evidence');
       },
     },
-  });
+  } as const;
+  const result = await runCandidateLane(laneInput);
   assert.equal(result.status, 'completed');
   if (result.status !== 'completed') return;
   assert.equal(result.hypothesisId, 'hypothesis-000002');
@@ -83,6 +84,82 @@ export async function runCandidateLaneTests(): Promise<void> {
   assert.equal(await readFile(join(laneRoot, 'diagnostic/causal-attribution.json'), 'utf8').then(value => JSON.parse(value).hypothesisId), 'hypothesis-000002');
   assert.equal(await readFile(join(laneRoot, 'problem-package.json'), 'utf8').then(value => JSON.parse(value).problemId), 'problem-hypothesis-000002');
   assert.equal(await import('node:fs/promises').then(fs => fs.lstat(join(laneRoot, 'selection/selected-hypothesis.json')).then(() => true, () => false)), false);
+
+  const missingRepoLaneRoot = join(root, 'candidates/hypothesis-000002-missing-repo');
+  let missingRepoRepositoryRoot: string | undefined;
+  const missingRepoResult = await runCandidateLane({
+    ...laneInput,
+    laneRoot: missingRepoLaneRoot,
+    dependencies: {
+      ...laneInput.dependencies,
+      runSolutionAgent: async input => {
+        missingRepoRepositoryRoot = input.repositoryRoot;
+        return {
+          ok: false,
+          errorKind: 'invalid_output' as const,
+          message: 'repoRef target missing from canonical repository',
+          failure: {
+            origin: 'OUTPUT_REFERENCE' as const,
+            reason: 'MISSING_TARGET' as const,
+            participantErrorKind: 'invalid_output',
+            message: 'repoRef target missing from canonical repository',
+          },
+          invocationPath: join(input.destinationRoot, 'invocation.json'),
+          rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+          failurePath: join(input.destinationRoot, 'failure.json'),
+        };
+      },
+    },
+  });
+  assert.equal(missingRepoResult.status, 'participant_failure');
+  if (missingRepoResult.status !== 'participant_failure') return;
+  assert.equal(missingRepoRepositoryRoot, process.cwd());
+  assert.deepEqual(JSON.parse(await readFile(join(missingRepoLaneRoot, 'workflow-outcome.json'), 'utf8')), {
+    schemaVersion: 'candidate-lane-failure-v2',
+    candidateRef: 'candidate-pool-test/hypothesis-000002',
+    hypothesisId: 'hypothesis-000002',
+    sourceIndex: 1,
+    stage: 'SOLUTION',
+    actualParticipantJobs: 1,
+    retryCount: 0,
+    failureOrigin: 'OUTPUT_REFERENCE',
+    failureReason: 'MISSING_TARGET',
+    containment: 'CANDIDATE_LOCAL',
+    participantErrorKind: 'invalid_output',
+    message: 'repoRef target missing from canonical repository',
+  });
+  assert.equal(missingRepoResult.failure.schemaVersion, 'candidate-lane-failure-v2');
+  assert.equal(missingRepoResult.failure.containment, 'CANDIDATE_LOCAL');
+
+  const timeoutLaneRoot = join(root, 'candidates/hypothesis-000002-timeout');
+  const timeoutResult = await runCandidateLane({
+    ...laneInput,
+    laneRoot: timeoutLaneRoot,
+    dependencies: {
+      ...laneInput.dependencies,
+      runSolutionAgent: async input => ({
+        ok: false,
+        errorKind: 'timeout' as const,
+        message: 'solution timed out',
+        failure: {
+          origin: 'PARTICIPANT_RUNTIME' as const,
+          reason: 'TIMEOUT' as const,
+          participantErrorKind: 'timeout',
+          message: 'solution timed out',
+        },
+        invocationPath: join(input.destinationRoot, 'invocation.json'),
+        rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+        failurePath: join(input.destinationRoot, 'failure.json'),
+      }),
+    },
+  });
+  assert.equal(timeoutResult.status, 'participant_failure');
+  if (timeoutResult.status !== 'participant_failure') return;
+  assert.equal(timeoutResult.failure.schemaVersion, 'candidate-lane-failure-v2');
+  assert.equal(timeoutResult.failure.failureOrigin, 'PARTICIPANT_RUNTIME');
+  assert.equal(timeoutResult.failure.failureReason, 'TIMEOUT');
+  assert.equal(timeoutResult.failure.containment, 'SESSION_FAIL_CLOSED');
+  assert.equal(timeoutResult.failure.retryCount, 0);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

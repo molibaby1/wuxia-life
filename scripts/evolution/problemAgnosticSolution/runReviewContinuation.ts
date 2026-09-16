@@ -50,6 +50,7 @@ import {
 } from './solutionParticipantSkills';
 import type { WorkspaceAgentParticipantOptions } from './agentParticipant';
 import { routeSolutionDecision } from './routeSolutionDecision';
+import type { ParticipantFailureFacts } from './participantFailureClassification';
 import {
   retainHumanFollowupWorkItem,
   type HumanFollowupContinuationEvidence,
@@ -104,6 +105,8 @@ export type ReviewContinuationResult =
     decisionPath: null;
     effectiveSolutionPath: string | null;
     effectiveReviewPath: string | null;
+    failureStage: 'SOLUTION_REVISION' | 'RE_REVIEWER';
+    failure: ParticipantFailureFacts;
   };
 
 interface BaseArtifacts {
@@ -333,6 +336,8 @@ function selectedOptionScope(solution: SolutionWorkV1, review: SolutionReviewV1)
 
 function participantFailureResult(
   participantJobs: 1 | 2,
+  failureStage: 'SOLUTION_REVISION' | 'RE_REVIEWER',
+  failure: ParticipantFailureFacts,
 ): ReviewContinuationResult {
   return {
     status: 'participant_failure',
@@ -344,6 +349,8 @@ function participantFailureResult(
     decisionPath: null,
     effectiveSolutionPath: null,
     effectiveReviewPath: null,
+    failureStage,
+    failure,
   };
 }
 
@@ -363,6 +370,12 @@ async function participantRunnerThrowResult(
       ok: false,
       errorKind: 'process',
       message: `participant runner threw: ${String(error)}`,
+      failure: {
+        origin: 'HOST_INFRASTRUCTURE',
+        reason: 'UNCLASSIFIED',
+        participantErrorKind: null,
+        message: `participant runner threw: ${String(error)}`,
+      },
       invocationPath: join(destinationRoot, 'invocation.json'),
       rawOutputPath: join(destinationRoot, 'raw-output.txt'),
       failurePath,
@@ -372,6 +385,12 @@ async function participantRunnerThrowResult(
     ok: false,
     errorKind: 'process',
     message: `participant runner threw: ${String(error)}`,
+    failure: {
+      origin: 'HOST_INFRASTRUCTURE',
+      reason: 'UNCLASSIFIED',
+      participantErrorKind: null,
+      message: `participant runner threw: ${String(error)}`,
+    },
     invocationPath: join(destinationRoot, 'invocation.json'),
     rawOutputPath: join(destinationRoot, 'raw-output.txt'),
     failurePath,
@@ -477,6 +496,7 @@ export async function runReviewContinuation(
     problemPackage: base.problemPackage,
     problemPackagePath: base.problemPackagePath,
     workspaceRoot: actualBaseline.solution.workspaceRoot,
+    repositoryRoot,
     artifactRoot: roundRoot,
     workspaceBaselineFingerprintSha256: actualBaseline.solution.workspaceBaselineFingerprintSha256,
     invocationRef: REVISION_INVOCATION_REF,
@@ -494,12 +514,12 @@ export async function runReviewContinuation(
     await assertAuthoritativeFingerprintUnchanged(repositoryRoot, authoritativeFingerprint);
     revision = await participantRunnerThrowResult(revisionDestinationRoot, 'solution', error) as SolutionAgentRunResult;
     await writeParticipantFailureContinuation(input, base, startedAt, revision, null, revisionRequestSha256);
-    return participantFailureResult(1);
+    return participantFailureResult(1, 'SOLUTION_REVISION', revision.failure);
   }
   await assertAuthoritativeFingerprintUnchanged(repositoryRoot, authoritativeFingerprint);
   if (!revision.ok) {
     await writeParticipantFailureContinuation(input, base, startedAt, revision, null, revisionRequestSha256);
-    return participantFailureResult(1);
+    return participantFailureResult(1, 'SOLUTION_REVISION', revision.failure);
   }
 
   let reviewer: SolutionReviewerRunResult | null = null;
@@ -513,6 +533,7 @@ export async function runReviewContinuation(
       problemPackagePath: base.problemPackagePath,
       solutionWork: revision.result,
       workspaceRoot: reviewerWorkspace.workspaceRoot,
+      repositoryRoot,
       artifactRoot: roundRoot,
       workspaceBaselineFingerprintSha256: reviewerWorkspace.workspaceBaselineFingerprintSha256,
       invocationRef: REREVIEW_INVOCATION_REF,
@@ -529,12 +550,12 @@ export async function runReviewContinuation(
       await assertAuthoritativeFingerprintUnchanged(repositoryRoot, authoritativeFingerprint);
       reviewer = await participantRunnerThrowResult(rereviewDestinationRoot, 'reviewer', error) as SolutionReviewerRunResult;
       await writeParticipantFailureContinuation(input, base, startedAt, revision, reviewer, revisionRequestSha256);
-      return participantFailureResult(2);
+      return participantFailureResult(2, 'RE_REVIEWER', reviewer.failure);
     }
     await assertAuthoritativeFingerprintUnchanged(repositoryRoot, authoritativeFingerprint);
     if (!reviewer.ok) {
       await writeParticipantFailureContinuation(input, base, startedAt, revision, reviewer, revisionRequestSha256);
-      return participantFailureResult(2);
+      return participantFailureResult(2, 'RE_REVIEWER', reviewer.failure);
     }
   }
 

@@ -1,4 +1,4 @@
-import { lstat, readFile } from 'node:fs/promises';
+import { lstat, mkdir, open, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
 import {
@@ -8,9 +8,17 @@ import {
   type RunReviewContinuationInput,
 } from './problemAgnosticSolution/runReviewContinuation';
 import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
+import {
+  buildCandidateLaneFailureV2,
+  parseCandidateLaneFailureV2,
+  type CandidateLaneFailureV2,
+} from './candidateLaneFailureContract';
+import { canonicalJson } from './phase0/provenance';
 
 export interface RunCandidateReviewContinuationInput {
   candidateRef: string;
+  hypothesisId: string;
+  sourceIndex: number;
   candidateLaneRoot: string;
   baseDecisionPath: string;
   problemPackagePath: string;
@@ -44,13 +52,28 @@ export type CandidateReviewContinuationResult =
     participantJobs: 1 | 2;
     continuationRef: 'review-continuation-000001';
     failureRef: string;
+    workflowOutcomeRef: 'workflow-outcome.json';
+    failure: CandidateLaneFailureV2;
   };
+
+async function writeCreateOnly(path: string, value: unknown): Promise<void> {
+  await mkdir(resolve(path, '..'), { recursive: true });
+  const handle = await open(path, 'wx');
+  try {
+    await handle.writeFile(`${canonicalJson(value)}\n`);
+  } finally {
+    await handle.close();
+  }
+}
 
 async function readDecision(path: string): Promise<SolutionDecisionV1> {
   return validateSolutionDecision(JSON.parse(await readFile(path, 'utf8')) as unknown);
 }
 
-async function existingContinuation(root: string): Promise<CandidateReviewContinuationResult | null> {
+async function existingContinuation(
+  root: string,
+  identity: { candidateRef: string; hypothesisId: string; sourceIndex: number },
+): Promise<CandidateReviewContinuationResult | null> {
   const continuationPath = resolve(root, 'review-continuation-000001/continuation.json');
   try {
     await lstat(continuationPath);
@@ -64,11 +87,21 @@ async function existingContinuation(root: string): Promise<CandidateReviewContin
     terminalRoute?: string;
   };
   if (continuation.terminalStatus === 'participant_failure') {
+    const failure = parseCandidateLaneFailureV2(await readFile(resolve(root, 'workflow-outcome.json'), 'utf8'));
+    if (
+      failure.candidateRef !== identity.candidateRef
+      || failure.hypothesisId !== identity.hypothesisId
+      || failure.sourceIndex !== identity.sourceIndex
+    ) {
+      throw new Error('existing continuation failure identity does not match candidate continuation input');
+    }
     return {
       status: 'participant_failure',
       participantJobs: continuation.participantJobCount === 2 ? 2 : 1,
       continuationRef: 'review-continuation-000001',
       failureRef: 'review-continuation-000001/continuation.json',
+      workflowOutcomeRef: 'workflow-outcome.json',
+      failure,
     };
   }
   const decisionPath = resolve(root, 'review-continuation-000001/decision.json');
@@ -88,7 +121,7 @@ export async function runCandidateReviewContinuation(
   if (baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED') {
     return { status: 'not_requested', participantJobs: 0, effectiveDecisionPath: input.baseDecisionPath };
   }
-  const existing = await existingContinuation(input.candidateLaneRoot);
+  const existing = await existingContinuation(input.candidateLaneRoot, input);
   if (existing) return existing;
   const packageValue = JSON.parse(await readFile(input.problemPackagePath, 'utf8')) as { source?: { runRef?: unknown } };
   const sourceRunRef = input.sourceRunRef ?? (typeof packageValue.source?.runRef === 'string' ? packageValue.source.runRef : '');
@@ -108,11 +141,25 @@ export async function runCandidateReviewContinuation(
   };
   const result = await (input.dependencies?.runCandidateContinuation ?? runReviewContinuation)(continuationInput);
   if (result.status === 'participant_failure') {
+    const failure = buildCandidateLaneFailureV2({
+      candidateRef: input.candidateRef,
+      hypothesisId: input.hypothesisId,
+      sourceIndex: input.sourceIndex,
+      stage: result.failureStage,
+      actualParticipantJobs: result.participantJobs,
+      failureOrigin: result.failure.origin,
+      failureReason: result.failure.reason,
+      participantErrorKind: result.failure.participantErrorKind,
+      message: result.failure.message,
+    });
+    await writeCreateOnly(resolve(input.candidateLaneRoot, 'workflow-outcome.json'), failure);
     return {
       status: 'participant_failure',
       participantJobs: result.participantJobs,
       continuationRef: 'review-continuation-000001',
       failureRef: 'review-continuation-000001/continuation.json',
+      workflowOutcomeRef: 'workflow-outcome.json',
+      failure,
     };
   }
   return {

@@ -28,6 +28,11 @@ import {
 } from './problemAgnosticSolution/solutionParticipantSkills';
 import { assertRepoReferenceFile } from './problemAgnosticSolution/repoReference';
 import { canonicalJson, sha256Hex } from './phase0/provenance';
+import {
+  buildCandidateLaneFailureV2,
+  type CandidateLaneFailureV2,
+} from './candidateLaneFailureContract';
+import type { ParticipantFailureFacts } from './problemAgnosticSolution/participantFailureClassification';
 
 export interface RunCandidateLaneOptions {
   repositoryRoot: string;
@@ -84,6 +89,7 @@ export interface ParticipantFailureCandidateLaneResult {
   workflowOutcomeRef: string;
   actualParticipantJobs: 1 | 2;
   failureStage: 'SOLUTION' | 'REVIEWER';
+  failure: CandidateLaneFailureV2;
 }
 
 export type CandidateLaneResult = CompletedCandidateLaneResult | ParticipantFailureCandidateLaneResult;
@@ -122,19 +128,21 @@ async function writeFailure(input: {
   sourceIndex: number;
   stage: 'SOLUTION' | 'REVIEWER';
   actualParticipantJobs: 1 | 2;
-  error: string;
+  failure: ParticipantFailureFacts;
 }): Promise<ParticipantFailureCandidateLaneResult> {
   const workflowOutcomeRef = 'workflow-outcome.json';
-  await writeCreateOnly(join(input.laneRoot, workflowOutcomeRef), {
-    schemaVersion: 'candidate-lane-failure-v1',
+  const failure = buildCandidateLaneFailureV2({
     candidateRef: input.candidateRef,
     hypothesisId: input.hypothesisId,
     sourceIndex: input.sourceIndex,
     stage: input.stage,
-    error: input.error,
     actualParticipantJobs: input.actualParticipantJobs,
-    retryCount: 0,
+    failureOrigin: input.failure.origin,
+    failureReason: input.failure.reason,
+    participantErrorKind: input.failure.participantErrorKind,
+    message: input.failure.message,
   });
+  await writeCreateOnly(join(input.laneRoot, workflowOutcomeRef), failure);
   return {
     status: 'participant_failure',
     candidateRef: input.candidateRef,
@@ -143,6 +151,7 @@ async function writeFailure(input: {
     workflowOutcomeRef,
     actualParticipantJobs: input.actualParticipantJobs,
     failureStage: input.stage,
+    failure,
   };
 }
 
@@ -220,6 +229,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
     problemPackage,
     problemPackagePath,
     workspaceRoot: solutionWorkspace.workspaceRoot,
+    repositoryRoot: input.repositoryRoot,
     artifactRoot: input.laneRoot,
     workspaceBaselineFingerprintSha256: solutionWorkspace.workspaceBaselineFingerprintSha256,
     invocationRef: `${input.candidate.hypothesisId}-solution-000001`,
@@ -237,7 +247,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
       sourceIndex: input.sourceIndex,
       stage: 'SOLUTION',
       actualParticipantJobs: 1,
-      error: solution.message,
+      failure: solution.failure,
     });
   }
   let reviewer: SolutionReviewerRunResult | null = null;
@@ -257,6 +267,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
       problemPackagePath,
       solutionWork: solution.result,
       workspaceRoot: reviewerWorkspace.workspaceRoot,
+      repositoryRoot: input.repositoryRoot,
       artifactRoot: input.laneRoot,
       workspaceBaselineFingerprintSha256: reviewerWorkspace.workspaceBaselineFingerprintSha256,
       invocationRef: `${input.candidate.hypothesisId}-reviewer-000001`,
@@ -274,7 +285,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
         sourceIndex: input.sourceIndex,
         stage: 'REVIEWER',
         actualParticipantJobs: 2,
-        error: reviewer.message,
+        failure: reviewer.failure,
       });
     }
   }

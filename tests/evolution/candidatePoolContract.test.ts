@@ -4,7 +4,7 @@ import {
   parseCandidatePoolV1,
   type CandidatePoolV1,
 } from '../../scripts/evolution/candidatePoolContract';
-import { completeCandidate, activateCandidate, nextPendingCandidate, markSourceChangePending, exhaustPoolIfComplete } from '../../scripts/evolution/candidatePoolState';
+import { completeCandidate, activateCandidate, nextPendingCandidate, markSourceChangePending, exhaustPoolIfComplete, interruptCandidateLocally } from '../../scripts/evolution/candidatePoolState';
 
 const hypotheses = [
   {
@@ -97,6 +97,24 @@ export async function runCandidatePoolContractTests(): Promise<void> {
   assert.equal(first.hypothesisId, 'hypothesis-000001');
   const active = activateCandidate(pool, first.candidateRef);
   assert.equal(active.candidates.filter(candidate => candidate.processingState === 'ACTIVE').length, 1);
+  const isolated = interruptCandidateLocally(
+    active,
+    first.candidateRef,
+    'source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json',
+  );
+  assert.equal(isolated.status, 'PROCESSING');
+  assert.equal(isolated.candidates[0]!.processingState, 'INTERRUPTED');
+  assert.equal(isolated.candidates[0]!.interruptionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json');
+  assert.equal(isolated.transitions[isolated.transitions.length - 1]!.reason, 'candidate-local Participant output rejected');
+  assert.equal(nextPendingCandidate(isolated)!.hypothesisId, 'hypothesis-000002');
+  const secondIsolated = interruptCandidateLocally(
+    activateCandidate(isolated, isolated.candidates[1]!.candidateRef),
+    isolated.candidates[1]!.candidateRef,
+    'source-epochs/source-epoch-000001/candidates/hypothesis-000002/workflow-outcome.json',
+  );
+  const exhaustedInterrupted = exhaustPoolIfComplete(secondIsolated);
+  assert.equal(exhaustedInterrupted.status, 'EXHAUSTED');
+  assert.equal(exhaustedInterrupted.candidates.filter(candidate => candidate.processingState === 'INTERRUPTED').length, 2);
   const completed = completeCandidate(active, first.candidateRef, {
     laneRef: 'candidates/hypothesis-000001',
     baseDecisionRef: 'candidates/hypothesis-000001/decision.json',

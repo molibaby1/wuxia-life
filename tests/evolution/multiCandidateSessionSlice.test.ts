@@ -12,10 +12,120 @@ import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/p
 import { buildMultiCandidateOperationalRunReport } from '../../scripts/evolution/reporting/buildMultiCandidateOperationalRunReport';
 import { archiveMultiCandidateSessionReport } from '../../scripts/evolution/reporting/archiveMultiCandidateSessionReport';
 import { retainMultiCandidateSessionEvidence } from '../../scripts/evolution/evidence/retainMultiCandidateSessionEvidence';
+import { buildCandidateLaneFailureV2 } from '../../scripts/evolution/candidateLaneFailureContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
 const hypotheses = [1, 2, 3].map(index => ({ hypothesisId: `hypothesis-${String(index).padStart(6, '0')}`, hypothesis: `H${index}`, observedBasis: 'Observed.', feedbackRefs: ['overallImpression'], evidenceRefs: [], unknowns: ['Unknown.'], productSignificance: 'Significant.' }));
+
+type CandidateIdentity = { candidateRef: string; hypothesisId: string; sourceIndex: number };
+
+function localLaneFailure(candidate: CandidateIdentity, actualParticipantJobs: 1 | 2 = 1, stage: 'SOLUTION' | 'REVIEWER' = 'SOLUTION') {
+  const failure = buildCandidateLaneFailureV2({
+    candidateRef: candidate.candidateRef,
+    hypothesisId: candidate.hypothesisId,
+    sourceIndex: candidate.sourceIndex,
+    stage,
+    actualParticipantJobs,
+    failureOrigin: 'OUTPUT_REFERENCE',
+    failureReason: 'MISSING_TARGET',
+    participantErrorKind: 'invalid_output',
+    message: 'candidate-local output reference is missing',
+  });
+  return {
+    status: 'participant_failure' as const,
+    candidateRef: candidate.candidateRef,
+    hypothesisId: candidate.hypothesisId,
+    sourceIndex: candidate.sourceIndex,
+    workflowOutcomeRef: 'workflow-outcome.json',
+    actualParticipantJobs,
+    failureStage: stage,
+    failure,
+  };
+}
+
+function failClosedLaneFailure(candidate: CandidateIdentity, actualParticipantJobs: 1 | 2 = 1) {
+  const failure = buildCandidateLaneFailureV2({
+    candidateRef: candidate.candidateRef,
+    hypothesisId: candidate.hypothesisId,
+    sourceIndex: candidate.sourceIndex,
+    stage: 'SOLUTION',
+    actualParticipantJobs,
+    failureOrigin: 'PARTICIPANT_RUNTIME',
+    failureReason: 'TIMEOUT',
+    participantErrorKind: 'timeout',
+    message: 'participant timed out',
+  });
+  return {
+    status: 'participant_failure' as const,
+    candidateRef: candidate.candidateRef,
+    hypothesisId: candidate.hypothesisId,
+    sourceIndex: candidate.sourceIndex,
+    workflowOutcomeRef: 'workflow-outcome.json',
+    actualParticipantJobs,
+    failureStage: 'SOLUTION' as const,
+    failure,
+  };
+}
+
+function localContinuationFailure(candidate: CandidateIdentity, actualParticipantJobs: 1 | 2 = 1) {
+  const failure = buildCandidateLaneFailureV2({
+    candidateRef: candidate.candidateRef,
+    hypothesisId: candidate.hypothesisId,
+    sourceIndex: candidate.sourceIndex,
+    stage: 'SOLUTION_REVISION',
+    actualParticipantJobs,
+    failureOrigin: 'OUTPUT_REFERENCE',
+    failureReason: 'MISSING_TARGET',
+    participantErrorKind: 'invalid_output',
+    message: 'candidate-local continuation output reference is missing',
+  });
+  return {
+    status: 'participant_failure' as const,
+    participantJobs: actualParticipantJobs,
+    continuationRef: 'review-continuation-000001' as const,
+    failureRef: 'review-continuation-000001/continuation.json',
+    workflowOutcomeRef: 'workflow-outcome.json' as const,
+    failure,
+  };
+}
+
+function failClosedContinuationFailure(candidate: CandidateIdentity, actualParticipantJobs: 1 | 2 = 1) {
+  const failure = buildCandidateLaneFailureV2({
+    candidateRef: candidate.candidateRef,
+    hypothesisId: candidate.hypothesisId,
+    sourceIndex: candidate.sourceIndex,
+    stage: 'SOLUTION_REVISION',
+    actualParticipantJobs,
+    failureOrigin: 'PARTICIPANT_RUNTIME',
+    failureReason: 'TIMEOUT',
+    participantErrorKind: 'timeout',
+    message: 'continuation participant timed out',
+  });
+  return {
+    status: 'participant_failure' as const,
+    participantJobs: actualParticipantJobs,
+    continuationRef: 'review-continuation-000001' as const,
+    failureRef: 'review-continuation-000001/continuation.json',
+    workflowOutcomeRef: 'workflow-outcome.json' as const,
+    failure,
+  };
+}
+
+function skipDecision(hypothesisId: string) {
+  return validateSolutionDecision({
+    schemaVersion: 'solution-decision-v1',
+    problemId: `problem-${hypothesisId}`,
+    route: 'SKIP',
+    reasonCode: 'NO_PROPOSAL',
+    inputs: {
+      solutionStatus: 'NO_PROPOSAL', reviewerDecision: null,
+      solutionScope: null, reviewScope: null,
+      permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
+      budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+}
 
 export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'candidate-session-slice-'));
@@ -26,12 +136,122 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   const analysis: CompletedSourceCandidateAnalysisResult = { status: 'completed', sourceRunRef: 'cohort-run-000001', sourceRoot, analysisRoot: join(root, 'analysis'), sourceExperimentRootHash: sealed.experimentRootHash, sourceFingerprintSha256: 'b'.repeat(64), authoritativeFingerprintSha256: 'c'.repeat(64), observablePayloadRef: 'source/observable-payload.json', externalFeedbackRef: 'feedback-runs/cohort-run-000001/feedback.json', improvementHypothesisRef: 'hypothesis-runs/cohort-run-000001/hypotheses.json', feedbackInvocationRef: 'feedback-000001', hypothesisInvocationRef: 'hypothesis-000001', hypotheses, noProblemAssessment: null, actualParticipantJobs: 2 };
   const calls: string[] = [];
   const humanFollowupRefs: string[] = [];
+  const scopedAnalysis = (repositoryRoot: string, overrides: Partial<CompletedSourceCandidateAnalysisResult> = {}): CompletedSourceCandidateAnalysisResult => ({
+    ...analysis,
+    ...overrides,
+    analysisRoot: join(repositoryRoot, 'analysis'),
+  });
   const base = { repositoryRoot: root, logicalSessionId: 'logical-session-000001', participantBindingId: 'CODEX_CURRENT', participant, repositoryBaseline: { branch: 'dev', headSha: 'd'.repeat(40), workingTreeFingerprint: 'e'.repeat(64) }, initialSourceRoot: sourceRoot, dependencies: { now: () => '2026-09-15T00:00:00.000Z', runSourceAnalysis: async () => analysis, runCandidateLane: async ({ candidate, laneRoot }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }; laneRoot: string }) => { calls.push(candidate.hypothesisId); const decision = validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'SKIP', reasonCode: 'NO_PROPOSAL', inputs: { solutionStatus: 'NO_PROPOSAL', reviewerDecision: null, solutionScope: null, reviewScope: null, permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } }); await mkdir(laneRoot, { recursive: true }); await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision)); return { status: 'completed' as const, candidateRef: candidate.candidateRef, hypothesisId: candidate.hypothesisId, sourceIndex: candidate.sourceIndex, candidateActivationPath: 'candidate-activation.json', problemPackagePath: 'problem-package.json', causalAttributionPath: 'diagnostic/causal-attribution.json', decisionPath: 'decision.json', baseDecisionPath: 'decision.json', humanReviewPackagePath: 'human-review-package.md', actualParticipantJobs: 1 as const, decision, solutionInvocationRef: 'solution', reviewerInvocationRef: null, problemPackage: {} as never }; } } };
   const first = await runMultiCandidateSessionSlice({ ...base, mode: 'START_NEW_SESSION', hostSliceId: 'host-slice-000001' });
   assert.equal(first.sessionState, 'COMPLETED');
   assert.deepEqual(calls, ['hypothesis-000001', 'hypothesis-000002', 'hypothesis-000003']);
   const pool = parseCandidatePoolV1(JSON.parse(await readFile(join(root, 'artifacts/evolution/sessions/logical-session-000001/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
   assert.equal(pool.status, 'EXHAUSTED');
+
+  const localFirstRoot = await mkdtemp(join(tmpdir(), 'candidate-session-local-first-'));
+  let localFirstHflCalls = 0;
+  const localFirst = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: localFirstRoot,
+    logicalSessionId: 'logical-session-local-first',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(localFirstRoot, { hypotheses: hypotheses.slice(0, 2) }),
+      runCandidateLane: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        if (candidate.sourceIndex === 0) {
+          await mkdir(laneRoot, { recursive: true });
+          const failure = localLaneFailure(candidate);
+          await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+          return failure;
+        }
+        return base.dependencies.runCandidateLane!({ candidate, laneRoot });
+      },
+      retainHumanFollowup: async () => {
+        localFirstHflCalls += 1;
+        return { itemPath: join(localFirstRoot, 'unexpected-hfl-item.json'), item: {} as never, created: true };
+      },
+    },
+  });
+  assert.equal(localFirst.sessionState, 'COMPLETED');
+  const localFirstPool = parseCandidatePoolV1(JSON.parse(await readFile(join(localFirstRoot, 'artifacts/evolution/sessions/logical-session-local-first/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(localFirstPool.status, 'EXHAUSTED');
+  assert.deepEqual(localFirstPool.candidates.map(candidate => candidate.processingState), ['INTERRUPTED', 'COMPLETED']);
+  assert.equal(localFirstPool.candidates[0]!.interruptionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json');
+  assert.equal(await readFile(join(localFirstRoot, 'artifacts/evolution/sessions/logical-session-local-first/source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json'), 'utf8').then(() => true), true);
+  assert.equal(localFirstHflCalls, 0);
+
+  const lastLocalRoot = await mkdtemp(join(tmpdir(), 'candidate-session-last-local-'));
+  const lastLocal = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: lastLocalRoot,
+    logicalSessionId: 'logical-session-last-local',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(lastLocalRoot, { hypotheses: [hypotheses[0]!] }),
+      runCandidateLane: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        await mkdir(laneRoot, { recursive: true });
+        const failure = localLaneFailure(candidate);
+        await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+        return failure;
+      },
+    },
+  });
+  assert.equal(lastLocal.sessionState, 'COMPLETED');
+  const lastLocalPool = parseCandidatePoolV1(JSON.parse(await readFile(join(lastLocalRoot, 'artifacts/evolution/sessions/logical-session-last-local/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(lastLocalPool.status, 'EXHAUSTED');
+  assert.equal(lastLocalPool.candidates[0]!.processingState, 'INTERRUPTED');
+
+  const allLocalRoot = await mkdtemp(join(tmpdir(), 'candidate-session-all-local-'));
+  const allLocal = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: allLocalRoot,
+    logicalSessionId: 'logical-session-all-local',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(allLocalRoot, { hypotheses }),
+      runCandidateLane: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        await mkdir(laneRoot, { recursive: true });
+        const failure = localLaneFailure(candidate);
+        await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+        return failure;
+      },
+    },
+  });
+  assert.equal(allLocal.sessionState, 'COMPLETED');
+  const allLocalPool = parseCandidatePoolV1(JSON.parse(await readFile(join(allLocalRoot, 'artifacts/evolution/sessions/logical-session-all-local/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(allLocalPool.status, 'EXHAUSTED');
+  assert.equal(allLocalPool.candidates.filter(candidate => candidate.processingState === 'INTERRUPTED').length, 3);
+
+  const failClosedRoot = await mkdtemp(join(tmpdir(), 'candidate-session-fail-closed-'));
+  const failClosed = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: failClosedRoot,
+    logicalSessionId: 'logical-session-fail-closed',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(failClosedRoot, { hypotheses: hypotheses.slice(0, 2) }),
+      runCandidateLane: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        await mkdir(laneRoot, { recursive: true });
+        const failure = failClosedLaneFailure(candidate);
+        await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+        return failure;
+      },
+    },
+  });
+  assert.equal(failClosed.sessionState, 'FAILED');
+  assert.equal(failClosed.reason, 'PARTICIPANT_FAILURE');
+  const failClosedPool = parseCandidatePoolV1(JSON.parse(await readFile(join(failClosedRoot, 'artifacts/evolution/sessions/logical-session-fail-closed/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(failClosedPool.status, 'INTERRUPTED');
+  assert.equal(failClosedPool.candidates[0]!.processingState, 'INTERRUPTED');
+  assert.equal(failClosedPool.candidates[0]!.interruptionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json');
 
   const escalationRoot = await mkdtemp(join(tmpdir(), 'candidate-session-hfl-'));
   const escalationSourceRoot = join(escalationRoot, 'sealed-source');
@@ -123,7 +343,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     hostSliceId: 'host-slice-000001',
     dependencies: {
       ...base.dependencies,
-      runSourceAnalysis: async () => ({ ...analysis, hypotheses: [hypotheses[0]!] }),
+      runSourceAnalysis: async () => scopedAnalysis(continuationRoot, { hypotheses: [hypotheses[0]!] }),
       runCandidateLane: async ({ candidate }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number } }) => ({
         status: 'completed' as const,
         candidateRef: candidate.candidateRef,
@@ -165,6 +385,133 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(candidateProvenanceMode, 'candidate-activation-v1');
   const continuationPool = parseCandidatePoolV1(JSON.parse(await readFile(join(continuationRoot, 'artifacts/evolution/sessions/logical-session-000004/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
   assert.equal(continuationPool.candidates[0]!.humanFollowupRef, 'candidate-hfl-item.json');
+
+  const deferredDecisionFor = (candidate: CandidateIdentity) => validateSolutionDecision({
+    ...continuationBaseDecision,
+    problemId: `problem-${candidate.hypothesisId}`,
+  });
+  const continuationFailureLane = async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+    const decision = deferredDecisionFor(candidate);
+    await mkdir(laneRoot, { recursive: true });
+    await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision));
+    return {
+      status: 'completed' as const,
+      candidateRef: candidate.candidateRef,
+      hypothesisId: candidate.hypothesisId,
+      sourceIndex: candidate.sourceIndex,
+      candidateActivationPath: 'candidate-activation.json',
+      problemPackagePath: 'problem-package.json',
+      causalAttributionPath: 'diagnostic/causal-attribution.json',
+      decisionPath: 'decision.json',
+      baseDecisionPath: 'decision.json',
+      humanReviewPackagePath: 'human-review-package.md',
+      actualParticipantJobs: 2 as const,
+      decision,
+      solutionInvocationRef: 'solution',
+      reviewerInvocationRef: 'reviewer',
+      problemPackage: {} as never,
+    };
+  };
+
+  const continuationLocalRoot = await mkdtemp(join(tmpdir(), 'candidate-session-continuation-local-'));
+  let continuationLocalHflCalls = 0;
+  const continuationLocal = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: continuationLocalRoot,
+    logicalSessionId: 'logical-session-continuation-local',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(continuationLocalRoot, { hypotheses: [hypotheses[0]!] }),
+      runCandidateLane: continuationFailureLane,
+      runCandidateContinuation: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        await mkdir(join(laneRoot, 'review-continuation-000001'), { recursive: true });
+        const failure = localContinuationFailure(candidate);
+        await writeFile(join(laneRoot, failure.failureRef), '{}');
+        await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+        return failure;
+      },
+      retainHumanFollowup: async () => {
+        continuationLocalHflCalls += 1;
+        return { itemPath: join(continuationLocalRoot, 'unexpected-hfl-item.json'), item: {} as never, created: true };
+      },
+    },
+  });
+  assert.equal(continuationLocal.sessionState, 'COMPLETED');
+  const continuationLocalPool = parseCandidatePoolV1(JSON.parse(await readFile(join(continuationLocalRoot, 'artifacts/evolution/sessions/logical-session-continuation-local/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(continuationLocalPool.status, 'EXHAUSTED');
+  assert.equal(continuationLocalPool.candidates[0]!.processingState, 'INTERRUPTED');
+  assert.equal(continuationLocalPool.candidates[0]!.interruptionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json');
+  assert.equal(await readFile(join(continuationLocalRoot, 'artifacts/evolution/sessions/logical-session-continuation-local/source-epochs/source-epoch-000001/candidates/hypothesis-000001/review-continuation-000001/continuation.json'), 'utf8').then(() => true), true);
+  assert.equal(continuationLocalHflCalls, 0);
+
+  const budgetRoot = await mkdtemp(join(tmpdir(), 'candidate-session-local-budget-'));
+  const budgetRun = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: budgetRoot,
+    logicalSessionId: 'logical-session-local-budget',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(budgetRoot, { hypotheses }),
+      runCandidateLane: continuationFailureLane,
+      runCandidateContinuation: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        await mkdir(join(laneRoot, 'review-continuation-000001'), { recursive: true });
+        if (candidate.sourceIndex === 0) {
+          const failure = localContinuationFailure(candidate, 2);
+          await writeFile(join(laneRoot, failure.failureRef), '{}');
+          await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+          return failure;
+        }
+        const decision = skipDecision(candidate.hypothesisId);
+        await writeFile(join(laneRoot, 'review-continuation-000001/decision.json'), JSON.stringify(decision));
+        return {
+          status: 'completed' as const,
+          participantJobs: 2 as const,
+          continuationRef: 'review-continuation-000001' as const,
+          effectiveDecisionPath: 'review-continuation-000001/decision.json',
+          effectiveDecision: decision,
+        };
+      },
+    },
+  });
+  assert.equal(budgetRun.sessionState, 'PAUSED');
+  assert.equal(budgetRun.reason, 'HOST_SLICE_BUDGET');
+  assert.equal(budgetRun.participantJobs, 10);
+  const budgetPool = parseCandidatePoolV1(JSON.parse(await readFile(join(budgetRoot, 'artifacts/evolution/sessions/logical-session-local-budget/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(budgetPool.status, 'PROCESSING');
+  assert.deepEqual(budgetPool.candidates.map(candidate => candidate.processingState), ['INTERRUPTED', 'COMPLETED', 'PENDING']);
+  assert.equal(await readFile(join(budgetRoot, 'artifacts/evolution/sessions/logical-session-local-budget/source-epochs/source-epoch-000001/candidates/hypothesis-000001/review-continuation-000001/continuation.json'), 'utf8').then(() => true), true);
+
+  const continuationFailClosedRoot = await mkdtemp(join(tmpdir(), 'candidate-session-continuation-fail-closed-'));
+  const continuationFailClosed = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: continuationFailClosedRoot,
+    logicalSessionId: 'logical-session-continuation-fail-closed',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(continuationFailClosedRoot, { hypotheses: [hypotheses[0]!] }),
+      runCandidateLane: continuationFailureLane,
+      runCandidateContinuation: async ({ candidate, laneRoot }: CandidateIdentity & { laneRoot: string }) => {
+        await mkdir(join(laneRoot, 'review-continuation-000001'), { recursive: true });
+        const failure = failClosedContinuationFailure(candidate);
+        await writeFile(join(laneRoot, failure.failureRef), '{}');
+        await writeFile(join(laneRoot, failure.workflowOutcomeRef), JSON.stringify(failure.failure));
+        return failure;
+      },
+    },
+  });
+  assert.equal(continuationFailClosed.sessionState, 'FAILED');
+  assert.equal(continuationFailClosed.reason, 'PARTICIPANT_FAILURE');
+  const continuationFailClosedPool = parseCandidatePoolV1(JSON.parse(await readFile(join(continuationFailClosedRoot, 'artifacts/evolution/sessions/logical-session-continuation-fail-closed/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(continuationFailClosedPool.status, 'INTERRUPTED');
+  assert.equal(continuationFailClosedPool.candidates[0]!.processingState, 'INTERRUPTED');
+  assert.equal(continuationFailClosedPool.candidates[0]!.interruptionRef, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/workflow-outcome.json');
+  assert.equal(await readFile(join(continuationFailClosedRoot, 'artifacts/evolution/sessions/logical-session-continuation-fail-closed/source-epochs/source-epoch-000001/candidates/hypothesis-000001/review-continuation-000001/continuation.json'), 'utf8').then(() => true), true);
 
   const hostFailureRoot = await mkdtemp(join(tmpdir(), 'candidate-session-continuation-host-failure-'));
   let hostFailureContinuationCalls = 0;

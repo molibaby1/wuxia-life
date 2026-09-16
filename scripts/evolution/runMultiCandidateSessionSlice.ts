@@ -10,6 +10,7 @@ import {
   completeCandidate,
   exhaustPoolIfComplete,
   interruptCandidate,
+  interruptCandidateLocally,
   markSourceChangePending,
   nextPendingCandidate,
   supersedePendingCandidates,
@@ -466,8 +467,25 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
     slice = { ...slice, participantJobs: budget.usedParticipantJobs };
     await retainLaneArtifacts();
     if (laneResult.status === 'participant_failure') {
-      pool = interruptCandidate(pool, pending.candidateRef, laneResult.workflowOutcomeRef);
+      const durableInterruptionRef = durableCandidateArtifactRef({
+        sourceEpochRef: currentSourceEpochRef,
+        hypothesisId: pending.hypothesisId,
+        candidateLaneRoot: laneRoot,
+        artifactPath: laneResult.workflowOutcomeRef,
+      });
+      pool = laneResult.failure.containment === 'CANDIDATE_LOCAL'
+        ? interruptCandidateLocally(pool, pending.candidateRef, durableInterruptionRef)
+        : interruptCandidate(pool, pending.candidateRef, durableInterruptionRef);
+      if (laneResult.failure.containment === 'CANDIDATE_LOCAL') {
+        pool = exhaustPoolIfComplete(pool);
+      }
       await persistPool(join(sessionRoot, durablePoolPath), pool);
+      if (laneResult.failure.containment === 'CANDIDATE_LOCAL' && pool.status === 'EXHAUSTED') {
+        sessionState = 'COMPLETED';
+        slice = { ...slice, state: 'COMPLETED', endedAt: now() };
+        break;
+      }
+      if (laneResult.failure.containment === 'CANDIDATE_LOCAL') continue;
       sessionState = 'FAILED'; reason = 'PARTICIPANT_FAILURE'; slice = { ...slice, state: 'FAILED', reason, endedAt: now() }; break;
     }
     let effectiveDecision = laneResult.decision;
@@ -509,9 +527,30 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       }
       budget = consumeHostSliceJobs(budget, continuation.participantJobs);
       slice = { ...slice, participantJobs: budget.usedParticipantJobs };
-      if (continuation.status === 'participant_failure') { pool = interruptCandidate(pool, pending.candidateRef, continuation.failureRef); await persistPool(join(sessionRoot, durablePoolPath), pool); sessionState = 'FAILED'; reason = 'PARTICIPANT_FAILURE'; slice = { ...slice, state: 'FAILED', reason, endedAt: now() }; break; }
-      if (continuation.status === 'completed') { effectiveDecision = continuation.effectiveDecision; effectiveDecisionPath = continuation.effectiveDecisionPath; }
       await retainLaneArtifacts();
+      if (continuation.status === 'participant_failure') {
+        const durableInterruptionRef = durableCandidateArtifactRef({
+          sourceEpochRef: currentSourceEpochRef,
+          hypothesisId: pending.hypothesisId,
+          candidateLaneRoot: laneRoot,
+          artifactPath: continuation.workflowOutcomeRef,
+        });
+        pool = continuation.failure.containment === 'CANDIDATE_LOCAL'
+          ? interruptCandidateLocally(pool, pending.candidateRef, durableInterruptionRef)
+          : interruptCandidate(pool, pending.candidateRef, durableInterruptionRef);
+        if (continuation.failure.containment === 'CANDIDATE_LOCAL') {
+          pool = exhaustPoolIfComplete(pool);
+        }
+        await persistPool(join(sessionRoot, durablePoolPath), pool);
+        if (continuation.failure.containment === 'CANDIDATE_LOCAL' && pool.status === 'EXHAUSTED') {
+          sessionState = 'COMPLETED';
+          slice = { ...slice, state: 'COMPLETED', endedAt: now() };
+          break;
+        }
+        if (continuation.failure.containment === 'CANDIDATE_LOCAL') continue;
+        sessionState = 'FAILED'; reason = 'PARTICIPANT_FAILURE'; slice = { ...slice, state: 'FAILED', reason, endedAt: now() }; break;
+      }
+      if (continuation.status === 'completed') { effectiveDecision = continuation.effectiveDecision; effectiveDecisionPath = continuation.effectiveDecisionPath; }
     }
     if (effectiveDecision.route === 'READY_FOR_CONFIG_EXECUTION') {
       pool = markSourceChangePending(pool, pending.candidateRef, { laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId), baseDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: laneResult.baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }), sourceTransitionRef: `source-transitions/${pending.hypothesisId}` });

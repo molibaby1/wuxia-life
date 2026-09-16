@@ -113,6 +113,14 @@ export function interruptCandidate(
   return updateCandidate(pool, candidateRef, 'ACTIVE', 'INTERRUPTED', { interruptionRef }, 'INTERRUPTED', 'candidate participant or host failure');
 }
 
+export function interruptCandidateLocally(
+  pool: CandidatePoolV1,
+  candidateRef: string,
+  interruptionRef: string,
+): CandidatePoolV1 {
+  return updateCandidate(pool, candidateRef, 'ACTIVE', 'INTERRUPTED', { interruptionRef }, 'PROCESSING', 'candidate-local Participant output rejected');
+}
+
 export function exhaustPoolIfComplete(pool: CandidatePoolV1): CandidatePoolV1 {
   const parsed = parseCandidatePoolV1(pool);
   if (parsed.status !== 'PROCESSING') return parsed;

@@ -54,6 +54,19 @@ export async function runCandidateLaneFailureContractTests(): Promise<void> {
     message: 'escape',
   }), 'SESSION_FAIL_CLOSED');
 
+  const hostInfrastructureFailure = buildCandidateLaneFailureV2({
+    ...failureInput,
+    failureOrigin: 'HOST_INFRASTRUCTURE',
+    failureReason: 'UNCLASSIFIED',
+    participantErrorKind: 'process',
+    message: 'host runner threw',
+  });
+  assert.equal(hostInfrastructureFailure.containment, 'SESSION_FAIL_CLOSED');
+  assert.deepEqual(
+    parseCandidateLaneFailureV2(JSON.stringify(hostInfrastructureFailure)),
+    hostInfrastructureFailure,
+  );
+
   const failure = buildCandidateLaneFailureV2(failureInput);
   assert.equal(failure.schemaVersion, 'candidate-lane-failure-v2');
   assert.equal(failure.retryCount, 0);

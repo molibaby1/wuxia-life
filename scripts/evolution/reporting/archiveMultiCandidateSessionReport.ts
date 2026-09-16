@@ -65,9 +65,11 @@ export function renderMultiCandidateOperationalRunReportMarkdown(
       ...participantFailureDetails.flatMap((detail, index) => [
         ...(index === 0 ? [] : ['- ---']),
         `- candidate=${markdownCell(detail.candidateRef)}`,
-        `- stage=${detail.stage}`,
-        `- errorKind=${markdownCell(detail.errorKind)}`,
-        `- cause=${markdownCell(detail.cause)}`,
+        `- stage=${markdownCell(detail.stage)}`,
+        `- failureOrigin=${markdownCell(detail.failureOrigin ?? 'typed details unavailable')}`,
+        `- failureReason=${markdownCell(detail.failureReason ?? 'typed details unavailable')}`,
+        `- containment=${markdownCell(detail.containment ?? 'typed details unavailable')}`,
+        `- message=${markdownCell(detail.message ?? detail.cause ?? 'typed details unavailable')}`,
         `- evidence=${markdownCell(detail.evidenceRef)}`,
       ]),
     );

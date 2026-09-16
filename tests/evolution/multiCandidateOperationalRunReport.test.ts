@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { parseOperationalRunReport, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V7 } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
+import { renderMultiCandidateOperationalRunReportMarkdown } from '../../scripts/evolution/reporting/archiveMultiCandidateSessionReport';
 
 const sessionExecution = {
   schemaVersion: 'multi-candidate-session-summary-v1',
@@ -51,6 +52,38 @@ export function runMultiCandidateOperationalRunReportTests(): void {
   }
   assert.throws(() => parseOperationalRunReport(JSON.stringify({ ...report, overallRoute: 'SKIP' }), report.reportId), /unknown field|overallRoute|v7/);
   assert.throws(() => parseOperationalRunReport(JSON.stringify({ ...report, logicalSessionId: '' }), report.reportId), /logicalSessionId/);
+
+  const completedWithLocalInterruption = {
+    ...report,
+    sessionStateAtSnapshot: 'COMPLETED',
+    sessionExecution: {
+      ...sessionExecution,
+      sessionState: 'COMPLETED',
+      pauseOrStopReason: null,
+      sourceEpochs: [{ ...sessionExecution.sourceEpochs[0], poolStatus: 'EXHAUSTED', lifecycle: 'POOL_EXHAUSTED', candidateCounts: { total: 2, pending: 0, active: 0, completed: 1, superseded: 0, interrupted: 1 } }],
+    },
+    candidates: [
+      candidate,
+      { ...candidate, candidateRef: 'candidate-pool-abc/hypothesis-000002', hypothesisId: 'hypothesis-000002', sourceIndex: 1, processingState: 'INTERRUPTED', effectiveRoute: null, effectiveReasonCode: null, effectiveDecisionRef: null, interruptionRef: 'source-epochs/source-epoch-000001/candidates/hypothesis-000002/workflow-outcome.json' },
+    ],
+  };
+  const markdown = renderMultiCandidateOperationalRunReportMarkdown(completedWithLocalInterruption, [{
+    candidateRef: 'candidate-pool-abc/hypothesis-000002',
+    hypothesisId: 'hypothesis-000002',
+    stage: 'SOLUTION',
+    failureOrigin: 'OUTPUT_REFERENCE',
+    failureReason: 'MISSING_TARGET',
+    containment: 'CANDIDATE_LOCAL',
+    message: 'repoRef does not exist: src/data/identity-year-events.json',
+    evidenceRef: 'artifacts/evolution/sessions/logical-session-000001/source-epochs/source-epoch-000001/candidates/hypothesis-000002/workflow-outcome.json',
+    typedDetails: 'AVAILABLE',
+  }]);
+  assert.match(markdown, /Session state：COMPLETED/);
+  assert.match(markdown, /interrupted=1/);
+  assert.match(markdown, /failureOrigin=OUTPUT_REFERENCE/);
+  assert.match(markdown, /failureReason=MISSING_TARGET/);
+  assert.match(markdown, /containment=CANDIDATE_LOCAL/);
+  assert.match(markdown, /message=repoRef does not exist/);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

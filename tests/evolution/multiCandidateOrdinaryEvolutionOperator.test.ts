@@ -8,6 +8,7 @@ import {
   runMultiCandidateOrdinaryEvolution,
   type MultiCandidateOrdinaryEvolutionDependencies,
 } from '../../scripts/evolution/operator/runMultiCandidateOrdinaryEvolution';
+import { formatOrdinaryEvolutionOperatorSummary } from '../../scripts/evolution/operator/runOrdinaryEvolution';
 import { writeMultiCandidateSessionManifestAtomic } from '../../scripts/evolution/candidateSessionStore';
 import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 
@@ -79,6 +80,25 @@ export async function runMultiCandidateOrdinaryEvolutionOperatorTests(): Promise
   assert.equal(phase0Calls, 1);
   assert.equal(participantCalls, 2);
   assert.deepEqual(sidecarEvents, ['evidence', 'report', 'hfl', 'index', 'evidence', 'report', 'hfl', 'index']);
+
+  const terminalSummary = formatOrdinaryEvolutionOperatorSummary({
+    ...started,
+    participantFailureDetails: [{
+      candidateRef: 'candidate-pool-abc/hypothesis-000002',
+      hypothesisId: 'hypothesis-000002',
+      stage: 'SOLUTION',
+      failureOrigin: 'OUTPUT_REFERENCE',
+      failureReason: 'MISSING_TARGET',
+      containment: 'CANDIDATE_LOCAL',
+      message: 'repoRef does not exist: src/data/identity-year-events.json',
+      typedDetails: 'AVAILABLE',
+      evidenceRef: 'artifacts/evolution/sessions/ordinary-run-20260915-000001/workflow-outcome.json',
+    }],
+  } as never);
+  assert.match(terminalSummary, /candidate=candidate-pool-abc\/hypothesis-000002/);
+  assert.match(terminalSummary, /failureOrigin=OUTPUT_REFERENCE/);
+  assert.match(terminalSummary, /failureReason=MISSING_TARGET/);
+  assert.match(terminalSummary, /containment=CANDIDATE_LOCAL/);
 
   for (const state of ['COMPLETED', 'FAILED', 'INTERRUPTED'] as const) {
     const forbiddenRoot = await mkdtemp(join(tmpdir(), `candidate-operator-${state.toLowerCase()}-`));

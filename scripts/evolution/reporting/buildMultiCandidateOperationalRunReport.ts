@@ -6,6 +6,12 @@ import { buildMultiCandidateSessionSummaryV1, type MultiCandidateSessionManifest
 import { readDurableMultiCandidateSessionManifest, resolveCandidateSessionLocation } from '../candidateSessionStore';
 import { validateSolutionDecision } from '../../../src/evolution/solutionDecisionContract';
 import {
+  parseCandidateLaneFailureV2,
+  type CandidateLaneFailureContainment,
+  type CandidateLaneFailureStage,
+} from '../candidateLaneFailureContract';
+import type { ParticipantFailureOrigin, ParticipantFailureReason } from '../problemAgnosticSolution/participantFailureClassification';
+import {
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V7,
   type CandidateDispositionSummaryV1,
   type OperationalRunReportV7,
@@ -22,9 +28,14 @@ export interface BuildMultiCandidateOperationalRunReportInput {
 export interface MultiCandidateParticipantFailureDetailV1 {
   candidateRef: string;
   hypothesisId: string;
-  stage: 'SOLUTION' | 'REVIEWER';
-  errorKind: string;
-  cause: string;
+  stage: CandidateLaneFailureStage | 'typed details unavailable';
+  failureOrigin?: ParticipantFailureOrigin | null;
+  failureReason?: ParticipantFailureReason | null;
+  containment?: CandidateLaneFailureContainment | null;
+  message?: string;
+  typedDetails?: 'AVAILABLE' | 'UNAVAILABLE';
+  errorKind?: string;
+  cause?: string;
   evidenceRef: string;
 }
 
@@ -34,25 +45,6 @@ function safeSessionRelativePath(sessionRoot: string, value: string): string {
   const child = relative(resolve(sessionRoot), candidate);
   if (!child || child === '..' || child.startsWith(`..${sep}`) || isAbsolute(child)) throw new Error(`durable candidate reference escapes session: ${value}`);
   return candidate;
-}
-
-function conciseFailureCause(message: string): string {
-  const repoRef = /lstat ['"].*\/agent-workspaces\/(?:solution|reviewer)\/(.+?)['"]/.exec(message)?.[1];
-  if (repoRef !== undefined && message.includes('ENOENT')) return `repoRef does not exist: ${repoRef}`;
-  return message.replace(/^Error:\s*/, '').split(/\r?\n/, 1)[0]!.slice(0, 240);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-async function readJsonObject(path: string): Promise<Record<string, unknown> | null> {
-  try {
-    const value: unknown = JSON.parse(await readFile(path, 'utf8'));
-    return isRecord(value) ? value : null;
-  } catch {
-    return null;
-  }
 }
 
 export async function readMultiCandidateParticipantFailureDetails(input: {
@@ -66,29 +58,53 @@ export async function readMultiCandidateParticipantFailureDetails(input: {
     if (epoch.poolRef === null) continue;
     const pool = await readPool(location.sessionRoot, epoch.poolRef);
     for (const candidate of pool.candidates) {
-      if (candidate.processingState !== 'INTERRUPTED' || candidate.interruptionRef === null) continue;
-      const laneRef = `source-epochs/${epoch.sourceEpochRef}/candidates/${candidate.hypothesisId}`;
-      const outcomeRef = `${laneRef}/${candidate.interruptionRef}`;
-      const outcomePath = safeSessionRelativePath(location.sessionRoot, outcomeRef);
-      const outcome = await readJsonObject(outcomePath);
-      if (outcome?.schemaVersion !== 'candidate-lane-failure-v1') continue;
-      if (outcome.candidateRef !== candidate.candidateRef || outcome.hypothesisId !== candidate.hypothesisId) continue;
-      if (outcome.stage !== 'SOLUTION' && outcome.stage !== 'REVIEWER') continue;
-      if (typeof outcome.error !== 'string' || outcome.error.length === 0) continue;
-      const failurePath = safeSessionRelativePath(
-        location.sessionRoot,
-        `${laneRef}/${outcome.stage === 'SOLUTION' ? 'solution-agent/failure.json' : 'reviewer-agent/failure.json'}`,
-      );
-      const failure = await readJsonObject(failurePath);
-      if (typeof failure?.errorKind !== 'string' || failure.errorKind.length === 0) continue;
-      details.push({
+      if (candidate.processingState !== 'INTERRUPTED') continue;
+      const unavailable: MultiCandidateParticipantFailureDetailV1 = {
         candidateRef: candidate.candidateRef,
         hypothesisId: candidate.hypothesisId,
-        stage: outcome.stage,
-        errorKind: failure.errorKind,
-        cause: conciseFailureCause(outcome.error),
-        evidenceRef: relative(resolve(input.repositoryRoot), outcomePath).split(sep).join('/'),
-      });
+        stage: 'typed details unavailable',
+        failureOrigin: null,
+        failureReason: null,
+        containment: null,
+        message: 'typed details unavailable',
+        typedDetails: 'UNAVAILABLE',
+        evidenceRef: 'typed details unavailable',
+      };
+      if (candidate.interruptionRef === null) {
+        details.push(unavailable);
+        continue;
+      }
+      let outcomePath: string;
+      try {
+        outcomePath = safeSessionRelativePath(location.sessionRoot, candidate.interruptionRef);
+      } catch {
+        details.push(unavailable);
+        continue;
+      }
+      const evidenceRef = relative(resolve(input.repositoryRoot), outcomePath).split(sep).join('/');
+      const unavailableWithRef = { ...unavailable, evidenceRef };
+      try {
+        const failure = parseCandidateLaneFailureV2(await readFile(outcomePath, 'utf8'));
+        if (failure.candidateRef !== candidate.candidateRef
+          || failure.hypothesisId !== candidate.hypothesisId
+          || failure.sourceIndex !== candidate.sourceIndex) {
+          details.push(unavailableWithRef);
+          continue;
+        }
+        details.push({
+          candidateRef: candidate.candidateRef,
+          hypothesisId: candidate.hypothesisId,
+          stage: failure.stage,
+          failureOrigin: failure.failureOrigin,
+          failureReason: failure.failureReason,
+          containment: failure.containment,
+          message: failure.message,
+          typedDetails: 'AVAILABLE',
+          evidenceRef,
+        });
+      } catch {
+        details.push(unavailableWithRef);
+      }
     }
   }
   return details.sort((left, right) => left.candidateRef.localeCompare(right.candidateRef));

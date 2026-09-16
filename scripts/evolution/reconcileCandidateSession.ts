@@ -58,7 +58,14 @@ export async function reconcileActiveCandidate(input: ReconcileActiveCandidateIn
       if (failure.candidateRef !== active.candidateRef
         || failure.hypothesisId !== active.hypothesisId
         || failure.sourceIndex !== active.sourceIndex) throw new Error('candidate lane failure identity mismatch');
-      if (await exists(baseDecisionPath) || await exists(continuationDecisionPath)) throw new Error('candidate lane failure contradicts a terminal decision');
+      const baseDecisionExists = await exists(baseDecisionPath);
+      const continuationDecisionExists = await exists(continuationDecisionPath);
+      if (baseDecisionExists) {
+        const baseDecision = validateSolutionDecision(JSON.parse(await readFile(baseDecisionPath, 'utf8')) as unknown);
+        if (baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED' || continuationDecisionExists) throw new Error('candidate lane failure contradicts a terminal decision');
+      } else if (continuationDecisionExists) {
+        throw new Error('candidate continuation decision exists without a base continuation request');
+      }
       if (failure.containment === 'CANDIDATE_LOCAL') {
         const laneRef = input.laneRef ?? `${input.pool.source.sealedSourceRef}/candidates/${active.hypothesisId}`;
         const localInterruptionRef = durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: workflowOutcomePath });

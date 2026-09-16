@@ -13,18 +13,19 @@ import { buildCandidateLaneFailureV2 } from '../../scripts/evolution/candidateLa
 const hypothesis = { hypothesisId: 'hypothesis-000002', hypothesis: 'H2', observedBasis: 'Observed.', feedbackRefs: ['overallImpression'], evidenceRefs: [], unknowns: ['Unknown.'], productSignificance: 'Significant.' };
 const secondHypothesis = { hypothesisId: 'hypothesis-000003', hypothesis: 'H3', observedBasis: 'Observed.', feedbackRefs: ['overallImpression'], evidenceRefs: [], unknowns: ['Unknown.'], productSignificance: 'Significant.' };
 const decision = { schemaVersion: 'solution-decision-v1', problemId: 'problem-hypothesis-000002', route: 'DEFER', reasonCode: 'INSUFFICIENT_EVIDENCE', inputs: { solutionStatus: 'INSUFFICIENT_EVIDENCE', reviewerDecision: null, solutionScope: null, reviewScope: null, permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } };
+const continuationBaseDecision = { schemaVersion: 'solution-decision-v1', problemId: 'problem-hypothesis-000002', route: 'DEFER_MORE_WORK_REQUESTED', reasonCode: 'REVIEW_REQUEST_MORE_WORK', inputs: { solutionStatus: 'OPTIONS', reviewerDecision: 'REQUEST_MORE_WORK', solutionScope: 'configuration', reviewScope: 'config_only', permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } };
 
 function activePoolFor(hypotheses: Array<typeof hypothesis>): ReturnType<typeof activateCandidate> {
   const pool = buildCandidatePoolV1({ logicalSessionId: 's3', sourceEpochId: 'e', sourceRunRef: 'cohort-run-000001', sourceFingerprintSha256: 'a'.repeat(64), sealedSourceRef: 'source-epochs/source-epoch-000001', hypothesisSet: { artifactRef: 'hypotheses.json', hypotheses }, baseline: { branch: 'dev', headSha: 'b'.repeat(40), workingTreeFingerprint: 'c'.repeat(64), participantBinding: 'CODEX_CURRENT' } });
   return activateCandidate(pool, pool.candidates[0]!.candidateRef);
 }
 
-function localFailure(candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }) {
+function localFailure(candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }, stage: 'SOLUTION' | 'SOLUTION_REVISION' = 'SOLUTION') {
   return buildCandidateLaneFailureV2({
     candidateRef: candidate.candidateRef,
     hypothesisId: candidate.hypothesisId,
     sourceIndex: candidate.sourceIndex,
-    stage: 'SOLUTION',
+    stage,
     actualParticipantJobs: 1,
     failureOrigin: 'OUTPUT_REFERENCE',
     failureReason: 'MISSING_TARGET',
@@ -164,6 +165,17 @@ export async function runCandidateSessionReconciliationTests(): Promise<void> {
   const identityResult = await reconcileActiveCandidate({ pool: identityPool, candidateLaneRoot: identityLane, poolPath: identityPoolPath });
   assert.equal(identityResult.status, 'INTERRUPTED');
   assert.equal((await readPool(identityPoolPath)).status, 'INTERRUPTED');
+
+  const continuationPool = activePoolFor([hypothesis, secondHypothesis]);
+  const continuationLane = join(root, 'continuation-lane');
+  await writeWorkflowOutcome(continuationLane, localFailure(continuationPool.candidates[0]!, 'SOLUTION_REVISION'));
+  await writeFile(join(continuationLane, 'decision.json'), canonicalJson(continuationBaseDecision));
+  const continuationPoolPath = join(root, 'continuation-pool.json');
+  await writeFile(continuationPoolPath, canonicalJson(continuationPool));
+  const continuationResult = await reconcileActiveCandidate({ pool: continuationPool, candidateLaneRoot: continuationLane, poolPath: continuationPoolPath });
+  assert.equal(continuationResult.status, 'CANDIDATE_LOCAL_FAILURE_RECONCILED');
+  assert.equal((await readPool(continuationPoolPath)).status, 'PROCESSING');
+  assert.deepEqual((await readPool(continuationPoolPath)).candidates.map(candidate => candidate.processingState), ['INTERRUPTED', 'PENDING']);
 
   const contradictoryPool = activePoolFor([hypothesis]);
   const contradictoryLane = join(root, 'contradictory-lane');

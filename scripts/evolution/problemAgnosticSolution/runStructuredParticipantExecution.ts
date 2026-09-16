@@ -20,6 +20,12 @@ import {
   type EnvelopeRetransmissionOutcome,
   renderEnvelopeRetransmissionRequestV1,
 } from './envelopeRetransmission';
+import {
+  classifyWorkspaceAgentFailure,
+  ParticipantOutputValidationError,
+  type ParticipantFailureFacts,
+  type ParticipantFailureReason,
+} from './participantFailureClassification';
 import { persistParticipantPromptAndBinding } from '../participantObservability';
 
 export type StructuredParticipantExecutionResult<T> =
@@ -36,6 +42,7 @@ export type StructuredParticipantExecutionResult<T> =
       ok: false;
       errorKind: WorkspaceAgentJobFailure['errorKind'];
       message: string;
+      failure: ParticipantFailureFacts;
       rawOutput?: string;
       recovery: EnvelopeRetransmissionObservation;
       executionTrace: ParticipantExecutionTraceV1;
@@ -132,6 +139,7 @@ function runtimeFailureResult(
     attempt1ElapsedOffsetMs?: number;
     lifecycleEvents: Omit<ParticipantExecutionTraceEventV1, 'seq'>[];
     recovery: EnvelopeRetransmissionObservation;
+    failure: ParticipantFailureFacts;
   },
 ): StructuredParticipantExecutionResult<never> {
   const terminalOutcome = job.errorKind === 'timeout'
@@ -141,6 +149,7 @@ function runtimeFailureResult(
     ok: false,
     errorKind: job.errorKind,
     message: job.message,
+    failure: input.failure,
     ...(job.rawOutput === undefined ? {} : { rawOutput: job.rawOutput }),
     recovery: input.recovery,
     executionTrace: composeExecutionTrace({
@@ -153,6 +162,42 @@ function runtimeFailureResult(
       lifecycleEvents: input.lifecycleEvents,
       terminalOutcome,
     }),
+  };
+}
+
+function envelopeFailure(
+  reason: 'EMPTY' | 'INVALID_JSON' | 'NON_OBJECT_ROOT',
+  message: string,
+): ParticipantFailureFacts {
+  const reasonByEnvelope: Record<typeof reason, ParticipantFailureReason> = {
+    EMPTY: 'EMPTY_ENVELOPE',
+    INVALID_JSON: 'INVALID_JSON_ENVELOPE',
+    NON_OBJECT_ROOT: 'NON_OBJECT_ENVELOPE',
+  };
+  return {
+    origin: 'OUTPUT_ENVELOPE',
+    reason: reasonByEnvelope[reason],
+    participantErrorKind: 'invalid_output',
+    message,
+  };
+}
+
+function schemaFailure(error: unknown): ParticipantFailureFacts {
+  return {
+    origin: 'OUTPUT_SCHEMA',
+    reason: 'ROLE_SCHEMA_INVALID',
+    participantErrorKind: 'invalid_output',
+    message: String(error),
+  };
+}
+
+function acceptedResultFailure(error: unknown): ParticipantFailureFacts {
+  if (error instanceof ParticipantOutputValidationError) return error.facts;
+  return {
+    origin: 'UNKNOWN',
+    reason: 'UNCLASSIFIED',
+    participantErrorKind: null,
+    message: String(error),
   };
 }
 
@@ -224,6 +269,7 @@ export async function runStructuredParticipantExecution<T>(input: {
       attempt0Trace: attempt0Job.executionTrace,
       lifecycleEvents,
       recovery: notAttemptedRecovery(),
+      failure: classifyWorkspaceAgentFailure(attempt0Job),
     });
   }
 
@@ -259,6 +305,7 @@ export async function runStructuredParticipantExecution<T>(input: {
         ok: false,
         errorKind: 'invalid_output',
         message: String(error),
+        failure: schemaFailure(error),
         rawOutput: attempt0Raw,
         recovery: notAttemptedRecovery(),
         executionTrace: composeExecutionTrace({
@@ -282,6 +329,7 @@ export async function runStructuredParticipantExecution<T>(input: {
         ok: false,
         errorKind: 'invalid_output',
         message: String(error),
+        failure: acceptedResultFailure(error),
         rawOutput: attempt0Raw,
         recovery: notAttemptedRecovery(),
         executionTrace: composeExecutionTrace({
@@ -329,10 +377,15 @@ export async function runStructuredParticipantExecution<T>(input: {
   });
 
   if (!eligible) {
+    const failure = envelopeFailure(
+      attempt0Envelope.reason,
+      'structured terminal envelope validation failed',
+    );
     return {
       ok: false,
       errorKind: 'invalid_output',
       message: 'structured terminal envelope validation failed',
+      failure,
       rawOutput: attempt0Raw,
       recovery: notAttemptedRecovery(),
       executionTrace: composeExecutionTrace({
@@ -400,6 +453,7 @@ export async function runStructuredParticipantExecution<T>(input: {
       attempt1ElapsedOffsetMs,
       lifecycleEvents,
       recovery,
+      failure: classifyWorkspaceAgentFailure(attempt1Job),
     });
   }
 
@@ -432,10 +486,15 @@ export async function runStructuredParticipantExecution<T>(input: {
   if (!attempt1Envelope.ok) {
     lifecycleEvents.push(attempt1Validation);
     recovery = { eligible: true, attempted: true, outcome: 'ENVELOPE_FAILURE' };
+    const failure = envelopeFailure(
+      attempt1Envelope.reason,
+      'structured terminal envelope validation failed on retransmission',
+    );
     return {
       ok: false,
       errorKind: 'invalid_output',
       message: 'structured terminal envelope validation failed on retransmission',
+      failure,
       rawOutput: attempt1Raw,
       recovery,
       executionTrace: composeExecutionTrace(attempt1TraceInput),
@@ -455,6 +514,7 @@ export async function runStructuredParticipantExecution<T>(input: {
       ok: false,
       errorKind: 'invalid_output',
       message: String(error),
+      failure: schemaFailure(error),
       rawOutput: attempt1Raw,
       recovery,
       executionTrace: composeExecutionTrace(attempt1TraceInput),
@@ -474,6 +534,7 @@ export async function runStructuredParticipantExecution<T>(input: {
       ok: false,
       errorKind: 'invalid_output',
       message: String(error),
+      failure: acceptedResultFailure(error),
       rawOutput: attempt1Raw,
       recovery,
       executionTrace: composeExecutionTrace(attempt1TraceInput),

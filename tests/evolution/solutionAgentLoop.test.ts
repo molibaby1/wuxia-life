@@ -11,8 +11,10 @@ import {
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import {
   buildSolutionRevisionPrompt,
-  runSolutionAgent,
-  runSolutionRevisionAgent,
+  runSolutionAgent as runSolutionAgentImpl,
+  runSolutionRevisionAgent as runSolutionRevisionAgentImpl,
+  type RunSolutionAgentInput,
+  type RunSolutionRevisionInput,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
 import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
@@ -133,6 +135,23 @@ function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+type TestSolutionAgentInput = Omit<RunSolutionAgentInput, 'repositoryRoot'> & { repositoryRoot?: string };
+type TestSolutionRevisionInput = Omit<RunSolutionRevisionInput, 'repositoryRoot'> & { repositoryRoot?: string };
+
+function runSolutionAgent(input: TestSolutionAgentInput) {
+  return runSolutionAgentImpl({
+    ...input,
+    repositoryRoot: input.repositoryRoot ?? input.workspaceRoot,
+  });
+}
+
+function runSolutionRevisionAgent(input: TestSolutionRevisionInput) {
+  return runSolutionRevisionAgentImpl({
+    ...input,
+    repositoryRoot: input.repositoryRoot ?? input.workspaceRoot,
+  });
+}
+
 function assertSolutionWorkSchemaGuidance(prompt: string): void {
   assert.match(prompt, /SolutionWorkV1 top-level required fields/i);
   assert.match(prompt, /schemaVersion\s*=\s*["']solution-work-v1["']/i);
@@ -225,6 +244,111 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /stronger.*dynamic.*verification/i);
   assert.match(deliveredPrompt, /source.*configuration.*existing tests/i);
   assert.match(deliveredPrompt, /unresolved remainder/i);
+
+  const wrongProblemId = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-wrong-problem-id',
+    jobNumber: 3,
+    destinationRoot: join(root, 'wrong-problem-id'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...solutionResult, problemId: 'problem-999999' }))})`],
+    },
+  });
+  assert.equal(wrongProblemId.ok, false);
+  if (!wrongProblemId.ok) {
+    assert.deepEqual(wrongProblemId.failure, {
+      origin: 'OUTPUT_IDENTITY',
+      reason: 'PROBLEM_ID_MISMATCH',
+      participantErrorKind: 'invalid_output',
+      message: 'SolutionWork problemId does not match ProblemPackage',
+    });
+  }
+
+  const missingNestedRepoRef = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-missing-nested-repo-ref',
+    jobNumber: 3,
+    destinationRoot: join(root, 'missing-nested-repo-ref'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({
+        ...solutionResult,
+        options: [{ ...solutionResult.options[0], repoRefs: ['src/missing-option-repo-ref.ts'] }],
+      }))})`],
+    },
+  });
+  assert.equal(missingNestedRepoRef.ok, false);
+  if (!missingNestedRepoRef.ok) {
+    assert.equal(missingNestedRepoRef.failure.origin, 'OUTPUT_REFERENCE');
+    assert.equal(missingNestedRepoRef.failure.reason, 'MISSING_TARGET');
+  }
+
+  const authoritativeRoot = join(root, 'authoritative-repository');
+  await mkdir(join(authoritativeRoot, 'src'), { recursive: true });
+  await writeFile(join(authoritativeRoot, 'src/authoritative-only.ts'), 'export const authoritative = true;');
+  const workspaceMaterializationMismatch = await runSolutionAgent({
+    repositoryRoot: authoritativeRoot,
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-workspace-materialization-mismatch',
+    jobNumber: 3,
+    destinationRoot: join(root, 'workspace-materialization-mismatch'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({
+        ...solutionResult,
+        repoRefs: ['src/authoritative-only.ts'],
+        options: [{ ...solutionResult.options[0], repoRefs: ['src/authoritative-only.ts'] }],
+      }))})`],
+    },
+  });
+  assert.equal(workspaceMaterializationMismatch.ok, false);
+  if (!workspaceMaterializationMismatch.ok) {
+    assert.equal(workspaceMaterializationMismatch.failure.origin, 'HOST_INFRASTRUCTURE');
+    assert.equal(workspaceMaterializationMismatch.failure.reason, 'WORKSPACE_MATERIALIZATION_MISMATCH');
+  }
+
+  const invalidRootReferences: readonly (readonly [string, 'ABSOLUTE_PATH' | 'ESCAPES_ALLOWED_ROOT'])[] = [
+    ['/absolute/path.ts', 'ABSOLUTE_PATH'],
+    ['../outside.ts', 'ESCAPES_ALLOWED_ROOT'],
+  ];
+  for (const [index, [repoRef, reason]] of invalidRootReferences.entries()) {
+    const invalidRootReference = await runSolutionAgent({
+      problemPackage,
+      problemPackagePath: packagePath,
+      workspaceRoot,
+      artifactRoot,
+      workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+      invocationRef: `solution-invalid-root-reference-${index}`,
+      jobNumber: 3,
+      destinationRoot: join(root, `invalid-root-reference-${index}`),
+      skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+      participant: {
+        executable: process.execPath,
+        buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...solutionResult, repoRefs: [repoRef] }))})`],
+      },
+    });
+    assert.equal(invalidRootReference.ok, false);
+    if (!invalidRootReference.ok) {
+      assert.equal(invalidRootReference.failure.origin, 'OUTPUT_REFERENCE');
+      assert.equal(invalidRootReference.failure.reason, reason);
+    }
+  }
   const minimumEvidenceIndex = deliveredPrompt.indexOf('minimum sufficient evidence');
   const splitCompoundCheckIndex = deliveredPrompt.indexOf('Split compound checks');
   const completeLocalCheckIndex = deliveredPrompt.indexOf('Complete every local/static investigation part');
@@ -543,6 +667,14 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   });
   assert.equal(deliveryFailure.ok, false);
   assert.equal(deliveryFailure.ok ? undefined : deliveryFailure.errorKind, 'process');
+  if (!deliveryFailure.ok) {
+    assert.deepEqual(deliveryFailure.failure, {
+      origin: 'HOST_INFRASTRUCTURE',
+      reason: 'SKILL_DELIVERY_FAILURE',
+      participantErrorKind: 'process',
+      message: deliveryFailure.message,
+    });
+  }
   assert.equal(runtimeCalls, 0);
   const deliveryFailureInvocation = JSON.parse(
     await readFile(join(root, 'skill-delivery-failure/invocation.json'), 'utf8'),

@@ -1,5 +1,5 @@
-import { lstat, mkdir, open, readFile } from 'node:fs/promises';
-import { dirname, isAbsolute, relative, resolve, sep, join } from 'node:path';
+import { mkdir, open, readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import {
   validateProblemPackage,
   type ProblemPackage,
@@ -20,7 +20,14 @@ import {
 } from './agentParticipant';
 import { isEnvelopeRetransmissionEnabledForRole } from './envelopeRetransmission';
 import { runStructuredParticipantExecution } from './runStructuredParticipantExecution';
-import { assertRepoReferenceFile } from './repoReference';
+import {
+  assertArtifactReferenceFile,
+  assertRepoReferenceFileAgainstAuthoritative,
+} from './repoReference';
+import {
+  ParticipantOutputValidationError,
+  type ParticipantFailureFacts,
+} from './participantFailureClassification';
 import {
   loadParticipantSkills,
   type ParticipantSkillAssignment,
@@ -31,6 +38,7 @@ export interface RunSolutionAgentInput {
   problemPackage: ProblemPackage;
   problemPackagePath: string;
   workspaceRoot: string;
+  repositoryRoot: string;
   artifactRoot: string;
   workspaceBaselineFingerprintSha256: string;
   invocationRef: string;
@@ -57,27 +65,11 @@ export type SolutionAgentRunResult =
     ok: false;
     errorKind: WorkspaceAgentJobFailure['errorKind'];
     message: string;
+    failure: ParticipantFailureFacts;
     invocationPath: string;
     rawOutputPath: string;
     failurePath: string;
   };
-
-function assertPathInside(root: string, reference: string, label: string): string {
-  if (!reference || isAbsolute(reference)) throw new Error(`${label} must be a relative path: ${reference}`);
-  const resolvedRoot = resolve(root);
-  const target = resolve(resolvedRoot, reference);
-  const escaped = relative(resolvedRoot, target);
-  if (!escaped || escaped === '..' || escaped.startsWith(`..${sep}`) || isAbsolute(escaped)) {
-    throw new Error(`${label} escapes its allowed root: ${reference}`);
-  }
-  return target;
-}
-
-async function assertFile(root: string, reference: string, label: string): Promise<void> {
-  const target = assertPathInside(root, reference, label);
-  const stat = await lstat(target);
-  if (!stat.isFile()) throw new Error(`${label} must resolve to a regular file: ${reference}`);
-}
 
 async function validateReferences(result: SolutionWorkV1, input: RunSolutionAgentInput): Promise<void> {
   const repoRefs = [
@@ -88,13 +80,22 @@ async function validateReferences(result: SolutionWorkV1, input: RunSolutionAgen
     ...result.artifactRefs,
     ...result.options.flatMap(option => option.artifactRefs),
   ];
-  for (const reference of repoRefs) await assertRepoReferenceFile(input.workspaceRoot, reference, 'repoRef');
+  for (const reference of repoRefs) {
+    await assertRepoReferenceFileAgainstAuthoritative({
+      workspaceRoot: input.workspaceRoot,
+      authoritativeRoot: input.repositoryRoot,
+      reference,
+      label: 'repoRef',
+    });
+  }
   for (const reference of artifactRefs) {
-    try {
-      await assertFile(input.artifactRoot, reference, 'artifactRef');
-    } catch (error) {
-      await assertFile(input.workspaceRoot, reference, 'artifactRef');
-    }
+    await assertArtifactReferenceFile({
+      artifactRoot: input.artifactRoot,
+      workspaceRoot: input.workspaceRoot,
+      authoritativeRoot: input.repositoryRoot,
+      reference,
+      label: 'artifactRef',
+    });
   }
 }
 
@@ -287,7 +288,12 @@ async function runSolutionAgentWithPrompt(
     validateSchema: validateSolutionWork,
     validateAcceptedResult: async result => {
       if (result.problemId !== problemPackage.problemId) {
-        throw new Error('SolutionWork problemId does not match ProblemPackage');
+        throw new ParticipantOutputValidationError({
+          origin: 'OUTPUT_IDENTITY',
+          reason: 'PROBLEM_ID_MISMATCH',
+          participantErrorKind: 'invalid_output',
+          message: 'SolutionWork problemId does not match ProblemPackage',
+        });
       }
       await validateReferences(result, input);
     },
@@ -311,6 +317,7 @@ async function runSolutionAgentWithPrompt(
       ok: false,
       errorKind: execution.errorKind,
       message: execution.message,
+      failure: execution.failure,
       invocationPath,
       rawOutputPath,
       failurePath,
@@ -360,6 +367,12 @@ async function skillDeliveryFailure(
     ok: false,
     errorKind: 'process',
     message,
+    failure: {
+      origin: 'HOST_INFRASTRUCTURE',
+      reason: 'SKILL_DELIVERY_FAILURE',
+      participantErrorKind: 'process',
+      message,
+    },
     invocationPath,
     rawOutputPath,
     failurePath,

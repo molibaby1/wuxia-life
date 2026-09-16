@@ -7,8 +7,10 @@ import { join } from 'node:path';
 import {
   buildSolutionReReviewerPrompt,
   buildSolutionReviewerPrompt,
-  runSolutionReReviewer,
-  runSolutionReviewer,
+  runSolutionReReviewer as runSolutionReReviewerImpl,
+  runSolutionReviewer as runSolutionReviewerImpl,
+  type RunSolutionReReviewerInput,
+  type RunSolutionReviewerInput,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionReviewer';
 import { REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
@@ -79,6 +81,23 @@ const review: SolutionReviewV1 = {
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+type TestSolutionReviewerInput = Omit<RunSolutionReviewerInput, 'repositoryRoot'> & { repositoryRoot?: string };
+type TestSolutionReReviewerInput = Omit<RunSolutionReReviewerInput, 'repositoryRoot'> & { repositoryRoot?: string };
+
+function runSolutionReviewer(input: TestSolutionReviewerInput) {
+  return runSolutionReviewerImpl({
+    ...input,
+    repositoryRoot: input.repositoryRoot ?? input.workspaceRoot,
+  });
+}
+
+function runSolutionReReviewer(input: TestSolutionReReviewerInput) {
+  return runSolutionReReviewerImpl({
+    ...input,
+    repositoryRoot: input.repositoryRoot ?? input.workspaceRoot,
+  });
 }
 
 export async function runSolutionReviewerLoopTests(): Promise<void> {
@@ -289,6 +308,14 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   });
   assert.equal(timeoutResult.ok, false);
   assert.equal(timeoutResult.ok ? undefined : timeoutResult.errorKind, 'timeout');
+  if (!timeoutResult.ok) {
+    assert.deepEqual(timeoutResult.failure, {
+      origin: 'PARTICIPANT_RUNTIME',
+      reason: 'TIMEOUT',
+      participantErrorKind: 'timeout',
+      message: 'workspace Agent job timed out after 1000ms',
+    });
+  }
   assert.equal(timeoutCalls, 1, 'Reviewer timeout must not cause a retry');
   const timeoutTrace = JSON.parse(await readFile(join(timeoutRoot, 'execution-trace.json'), 'utf8'));
   assert.equal(timeoutTrace.schemaVersion, 'participant-execution-trace-v1');
@@ -297,9 +324,123 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.ok(timeoutTrace.events.some((event: { type: string }) => event.type === 'process_start'));
   assert.ok(timeoutTrace.events.some((event: { type: string }) => event.type === 'output_activity'));
   assert.ok(timeoutTrace.events.some((event: { type: string }) => event.type === 'timeout'));
+  assert.equal(
+    timeoutTrace.events.some((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested'),
+    false,
+  );
   assert.ok(timeoutTrace.terminal.lastObservableActivityElapsedMs <= timeoutTrace.terminal.elapsedMs);
   assert.equal(JSON.parse(await readFile(join(timeoutRoot, 'failure.json'), 'utf8')).errorKind, 'timeout');
   assert.ok(!JSON.stringify(timeoutTrace).includes('reviewer started'), 'Activity trace must not duplicate output payload');
+
+  const malformedEnvelopeResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-malformed-envelope',
+    jobNumber: 4,
+    destinationRoot: join(root, 'malformed-envelope-reviewer-agent'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'process.stdout.write("not-json")'],
+    },
+  });
+  assert.equal(malformedEnvelopeResult.ok, false);
+  if (!malformedEnvelopeResult.ok) {
+    assert.equal(malformedEnvelopeResult.failure.origin, 'OUTPUT_ENVELOPE');
+    assert.equal(malformedEnvelopeResult.failure.reason, 'INVALID_JSON_ENVELOPE');
+  }
+
+  const malformedSchemaResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-malformed-schema',
+    jobNumber: 4,
+    destinationRoot: join(root, 'malformed-schema-reviewer-agent'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'process.stdout.write(JSON.stringify({ schemaVersion: "solution-review-v1" }));'],
+    },
+  });
+  assert.equal(malformedSchemaResult.ok, false);
+  if (!malformedSchemaResult.ok) {
+    assert.equal(malformedSchemaResult.failure.origin, 'OUTPUT_SCHEMA');
+    assert.equal(malformedSchemaResult.failure.reason, 'ROLE_SCHEMA_INVALID');
+  }
+
+  const wrongProblemIdResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-wrong-problem-id',
+    jobNumber: 4,
+    destinationRoot: join(root, 'wrong-problem-id-reviewer-agent'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, problemId: 'problem-999999' }))})`],
+    },
+  });
+  assert.equal(wrongProblemIdResult.ok, false);
+  if (!wrongProblemIdResult.ok) {
+    assert.equal(wrongProblemIdResult.failure.origin, 'OUTPUT_IDENTITY');
+    assert.equal(wrongProblemIdResult.failure.reason, 'PROBLEM_ID_MISMATCH');
+  }
+
+  const optionIdMismatchResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-option-id-mismatch',
+    jobNumber: 4,
+    destinationRoot: join(root, 'option-id-mismatch-reviewer-agent'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, acceptedOptionId: 'option-999999' }))})`],
+    },
+  });
+  assert.equal(optionIdMismatchResult.ok, false);
+  if (!optionIdMismatchResult.ok) {
+    assert.equal(optionIdMismatchResult.failure.origin, 'OUTPUT_INTERNAL_CONSISTENCY');
+    assert.equal(optionIdMismatchResult.failure.reason, 'OPTION_ID_MISMATCH');
+  }
+
+  const missingRepoRefResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-missing-repo-ref',
+    jobNumber: 4,
+    destinationRoot: join(root, 'missing-repo-ref-reviewer-agent'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, repoRefs: ['src/missing-review-repo-ref.ts'] }))})`],
+    },
+  });
+  assert.equal(missingRepoRefResult.ok, false);
+  if (!missingRepoRefResult.ok) {
+    assert.equal(missingRepoRefResult.failure.origin, 'OUTPUT_REFERENCE');
+    assert.equal(missingRepoRefResult.failure.reason, 'MISSING_TARGET');
+  }
 
   const locatorReview = { ...review, repoRefs: ['src/example.ts:1-2'] };
   const locatorResult = await runSolutionReviewer({
@@ -387,6 +528,14 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   });
   assert.equal(deliveryFailure.ok, false);
   assert.equal(deliveryFailure.ok ? undefined : deliveryFailure.errorKind, 'process');
+  if (!deliveryFailure.ok) {
+    assert.deepEqual(deliveryFailure.failure, {
+      origin: 'HOST_INFRASTRUCTURE',
+      reason: 'SKILL_DELIVERY_FAILURE',
+      participantErrorKind: 'process',
+      message: deliveryFailure.message,
+    });
+  }
   assert.equal(runtimeCalls, 0);
   const deliveryFailureInvocation = JSON.parse(
     await readFile(join(root, 'skill-delivery-failure/invocation.json'), 'utf8'),

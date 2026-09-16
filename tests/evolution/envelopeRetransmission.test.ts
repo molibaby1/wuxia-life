@@ -251,6 +251,10 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
   assert.equal(schemaInvalid.ok, false);
   if (!schemaInvalid.ok) {
     assert.equal(schemaInvalid.errorKind, 'invalid_output');
+    assert.equal(schemaInvalid.failure.origin, 'OUTPUT_SCHEMA');
+    assert.equal(schemaInvalid.failure.reason, 'ROLE_SCHEMA_INVALID');
+    assert.equal(schemaInvalid.failure.participantErrorKind, 'invalid_output');
+    assert.match(schemaInvalid.failure.message, /wrong-v1/);
   }
   assert.equal(schemaInvalidCounter.count, 1);
   assert.equal(schemaInvalid.recovery.outcome, 'NOT_ATTEMPTED');
@@ -300,6 +304,10 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
   assert.equal(attempt1SchemaInvalid.ok, false);
   if (!attempt1SchemaInvalid.ok) {
     assert.equal(attempt1SchemaInvalid.errorKind, 'invalid_output');
+    assert.equal(attempt1SchemaInvalid.failure.origin, 'OUTPUT_SCHEMA');
+    assert.equal(attempt1SchemaInvalid.failure.reason, 'ROLE_SCHEMA_INVALID');
+    assert.equal(attempt1SchemaInvalid.failure.participantErrorKind, 'invalid_output');
+    assert.match(attempt1SchemaInvalid.failure.message, /wrong-v1/);
   }
   assert.equal(attempt1SchemaInvalidCounter.count, 2);
   assert.deepEqual(attempt1SchemaInvalid.recovery, {
@@ -341,6 +349,12 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
   assert.equal(timeoutResult.ok, false);
   if (!timeoutResult.ok) {
     assert.equal(timeoutResult.errorKind, 'timeout');
+    assert.deepEqual(timeoutResult.failure, {
+      origin: 'PARTICIPANT_RUNTIME',
+      reason: 'TIMEOUT',
+      participantErrorKind: 'timeout',
+      message: 'workspace Agent job timed out after 60000ms',
+    });
   }
   assert.equal(timeoutCounter.count, 2);
   assert.deepEqual(timeoutResult.recovery, {
@@ -361,6 +375,12 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
   assert.equal(continuationFailure.ok, false);
   if (!continuationFailure.ok) {
     assert.equal(continuationFailure.errorKind, 'continuation');
+    assert.deepEqual(continuationFailure.failure, {
+      origin: 'PROVIDER_PROTOCOL',
+      reason: 'CONTINUATION_PROTOCOL_FAILURE',
+      participantErrorKind: 'continuation',
+      message: 'workspace Agent continuation provider mismatch for fixture-invocation',
+    });
   }
   assert.equal(continuationFailureCounter.count, 1);
   assert.deepEqual(continuationFailure.recovery, {
@@ -368,6 +388,90 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
     attempted: true,
     outcome: 'CONTINUATION_FAILURE',
   });
+
+  const initialTimeoutRoot = await mkdtemp(join(tmpdir(), 'envelope-initial-timeout-'));
+  const initialTimeout = await runExecution(initialTimeoutRoot, {
+    executable: process.execPath,
+    timeoutMs: 20,
+    buildArgs: () => ['-e', 'setInterval(() => {}, 1000)'],
+  });
+  assert.equal(initialTimeout.ok, false);
+  if (!initialTimeout.ok) {
+    assert.equal(initialTimeout.errorKind, 'timeout');
+    assert.equal(initialTimeout.failure.origin, 'PARTICIPANT_RUNTIME');
+    assert.equal(initialTimeout.failure.reason, 'TIMEOUT');
+  }
+
+  const providerProtocolRoot = await mkdtemp(join(tmpdir(), 'envelope-provider-protocol-'));
+  const providerProtocol = await runExecution(providerProtocolRoot, {
+    executable: process.execPath,
+    buildArgs: () => ['-e', 'process.stdout.write(JSON.stringify({ schemaVersion: "fixture-v1" }));'],
+    interpretCompletedOutput: () => ({
+      ok: false as const,
+      errorKind: 'invalid_output' as const,
+      message: 'provider rejected completed output',
+    }),
+  });
+  assert.equal(providerProtocol.ok, false);
+  if (!providerProtocol.ok) {
+    assert.deepEqual(providerProtocol.failure, {
+      origin: 'PROVIDER_PROTOCOL',
+      reason: 'PROVIDER_PROTOCOL_FAILURE',
+      participantErrorKind: 'invalid_output',
+      message: 'provider rejected completed output',
+    });
+  }
+
+  const emptyEnvelopeRoot = await mkdtemp(join(tmpdir(), 'envelope-empty-'));
+  const emptyEnvelope = await runExecution(emptyEnvelopeRoot, {
+    executable: process.execPath,
+    buildArgs: () => ['-e', ''],
+  });
+  assert.equal(emptyEnvelope.ok, false);
+  if (!emptyEnvelope.ok) {
+    assert.deepEqual(emptyEnvelope.failure, {
+      origin: 'OUTPUT_ENVELOPE',
+      reason: 'EMPTY_ENVELOPE',
+      participantErrorKind: 'invalid_output',
+      message: 'structured terminal envelope validation failed',
+    });
+  }
+
+  const invalidJsonAfterRetransmissionRoot = await mkdtemp(join(tmpdir(), 'envelope-invalid-json-after-retransmission-'));
+  const invalidJsonAfterRetransmission = await runExecution(
+    invalidJsonAfterRetransmissionRoot,
+    createContinuationCapableParticipant(
+      { initial: attempt0Raw, continuation: 'not-json' },
+    ),
+  );
+  assert.equal(invalidJsonAfterRetransmission.ok, false);
+  if (!invalidJsonAfterRetransmission.ok) {
+    assert.deepEqual(invalidJsonAfterRetransmission.failure, {
+      origin: 'OUTPUT_ENVELOPE',
+      reason: 'INVALID_JSON_ENVELOPE',
+      participantErrorKind: 'invalid_output',
+      message: 'structured terminal envelope validation failed on retransmission',
+    });
+  }
+
+  const unknownAcceptedResultRoot = await mkdtemp(join(tmpdir(), 'envelope-unknown-accepted-result-'));
+  const unknownAcceptedResult = await runExecution(unknownAcceptedResultRoot, {
+    executable: process.execPath,
+    buildArgs: () => ['-e', 'process.stdout.write(JSON.stringify({ schemaVersion: "fixture-v1" }));'],
+  }, {
+    validateAcceptedResult: async () => {
+      throw new Error('unexpected acceptance failure');
+    },
+  });
+  assert.equal(unknownAcceptedResult.ok, false);
+  if (!unknownAcceptedResult.ok) {
+    assert.deepEqual(unknownAcceptedResult.failure, {
+      origin: 'UNKNOWN',
+      reason: 'UNCLASSIFIED',
+      participantErrorKind: null,
+      message: 'Error: unexpected acceptance failure',
+    });
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

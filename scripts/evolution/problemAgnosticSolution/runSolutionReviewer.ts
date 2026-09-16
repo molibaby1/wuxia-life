@@ -1,23 +1,31 @@
-import { lstat, mkdir, open, readFile } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { mkdir, open, readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import {
   validateProblemPackage,
   type ProblemPackage,
 } from '../../../src/evolution/problemPackageContract';
 import {
-  parseSolutionReview,
   validateSolutionReview,
   type SolutionReviewV1,
 } from '../../../src/evolution/solutionReviewContract';
+import { validateStructuredTerminalEnvelope } from '../../../src/evolution/structuredTerminalEnvelope';
 import { validateSolutionWork, type SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
 import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
+import {
+  classifyWorkspaceAgentFailure,
+  ParticipantOutputValidationError,
+  type ParticipantFailureFacts,
+} from './participantFailureClassification';
 import {
   runWorkspaceAgentJob,
   type WorkspaceAgentJobFailure,
   type WorkspaceAgentParticipantOptions,
 } from './agentParticipant';
-import { assertRepoReferenceFile } from './repoReference';
+import {
+  assertArtifactReferenceFile,
+  assertRepoReferenceFileAgainstAuthoritative,
+} from './repoReference';
 import {
   loadParticipantSkills,
   type ParticipantSkillAssignment,
@@ -30,6 +38,7 @@ export interface RunSolutionReviewerInput {
   problemPackagePath: string;
   solutionWork: SolutionWorkV1;
   workspaceRoot: string;
+  repositoryRoot: string;
   artifactRoot: string;
   workspaceBaselineFingerprintSha256: string;
   invocationRef: string;
@@ -56,37 +65,29 @@ export type SolutionReviewerRunResult =
     ok: false;
     errorKind: WorkspaceAgentJobFailure['errorKind'];
     message: string;
+    failure: ParticipantFailureFacts;
     invocationPath: string;
     rawOutputPath: string;
     failurePath: string;
   };
 
-function assertPathInside(root: string, reference: string, label: string): string {
-  if (!reference || isAbsolute(reference)) throw new Error(`${label} must be a relative path: ${reference}`);
-  const resolvedRoot = resolve(root);
-  const target = resolve(resolvedRoot, reference);
-  const escaped = relative(resolvedRoot, target);
-  if (!escaped || escaped === '..' || escaped.startsWith(`..${sep}`) || isAbsolute(escaped)) {
-    throw new Error(`${label} escapes its allowed root: ${reference}`);
-  }
-  return target;
-}
-
-async function assertFile(root: string, reference: string, label: string): Promise<void> {
-  const stat = await lstat(assertPathInside(root, reference, label));
-  if (!stat.isFile()) throw new Error(`${label} must resolve to a regular file: ${reference}`);
-}
-
 async function validateReferences(review: SolutionReviewV1, input: RunSolutionReviewerInput): Promise<void> {
   for (const reference of review.repoRefs) {
-    await assertRepoReferenceFile(input.workspaceRoot, reference, 'review repoRef');
+    await assertRepoReferenceFileAgainstAuthoritative({
+      workspaceRoot: input.workspaceRoot,
+      authoritativeRoot: input.repositoryRoot,
+      reference,
+      label: 'review repoRef',
+    });
   }
   for (const reference of review.artifactRefs) {
-    try {
-      await assertFile(input.artifactRoot, reference, 'review artifactRef');
-    } catch {
-      await assertFile(input.workspaceRoot, reference, 'review artifactRef');
-    }
+    await assertArtifactReferenceFile({
+      artifactRoot: input.artifactRoot,
+      workspaceRoot: input.workspaceRoot,
+      authoritativeRoot: input.repositoryRoot,
+      reference,
+      label: 'review artifactRef',
+    });
   }
 }
 
@@ -229,7 +230,15 @@ async function runSolutionReviewerWithPrompt(
       errorKind: job.errorKind,
     });
     await writeCreateOnly(failurePath, { schemaVersion: 'solution-reviewer-failure-v1', errorKind: job.errorKind, message: job.message });
-    return { ok: false, errorKind: job.errorKind, message: job.message, invocationPath, rawOutputPath, failurePath };
+    return {
+      ok: false,
+      errorKind: job.errorKind,
+      message: job.message,
+      failure: classifyWorkspaceAgentFailure(job),
+      invocationPath,
+      rawOutputPath,
+      failurePath,
+    };
   }
 
   try {
@@ -239,13 +248,46 @@ async function runSolutionReviewerWithPrompt(
   }
   let review: SolutionReviewV1;
   try {
-    review = parseSolutionReview(job.rawOutput.trim());
-    if (review.problemId !== problemPackage.problemId) throw new Error('SolutionReview problemId does not match ProblemPackage');
+    const envelope = validateStructuredTerminalEnvelope(job.rawOutput);
+    if (!envelope.ok) {
+      throw new ParticipantOutputValidationError({
+        origin: 'OUTPUT_ENVELOPE',
+        reason: envelope.reason === 'EMPTY'
+          ? 'EMPTY_ENVELOPE'
+          : envelope.reason === 'INVALID_JSON'
+            ? 'INVALID_JSON_ENVELOPE'
+            : 'NON_OBJECT_ENVELOPE',
+        participantErrorKind: 'invalid_output',
+        message: 'structured terminal envelope validation failed',
+      });
+    }
+    review = validateSolutionReview(envelope.parsedObject);
+    if (review.problemId !== problemPackage.problemId) {
+      throw new ParticipantOutputValidationError({
+        origin: 'OUTPUT_IDENTITY',
+        reason: 'PROBLEM_ID_MISMATCH',
+        participantErrorKind: 'invalid_output',
+        message: 'SolutionReview problemId does not match ProblemPackage',
+      });
+    }
     if (review.decision === 'ACCEPT_OPTION' && !input.solutionWork.options.some(option => option.optionId === review.acceptedOptionId)) {
-      throw new Error(`acceptedOptionId does not exist in SolutionWork: ${review.acceptedOptionId}`);
+      throw new ParticipantOutputValidationError({
+        origin: 'OUTPUT_INTERNAL_CONSISTENCY',
+        reason: 'OPTION_ID_MISMATCH',
+        participantErrorKind: 'invalid_output',
+        message: `acceptedOptionId does not exist in SolutionWork: ${review.acceptedOptionId}`,
+      });
     }
     await validateReferences(review, input);
   } catch (error) {
+    const failure: ParticipantFailureFacts = error instanceof ParticipantOutputValidationError
+      ? error.facts
+      : {
+          origin: 'OUTPUT_SCHEMA',
+          reason: 'ROLE_SCHEMA_INVALID',
+          participantErrorKind: 'invalid_output',
+          message: String(error),
+        };
     await writeCreateOnly(rawOutputPath, job.rawOutput);
     await writeCreateOnly(invocationPath, {
       ...commonInvocation,
@@ -254,7 +296,15 @@ async function runSolutionReviewerWithPrompt(
       errorKind: 'invalid_output',
     });
     await writeCreateOnly(failurePath, { schemaVersion: 'solution-reviewer-failure-v1', errorKind: 'invalid_output', message: String(error) });
-    return { ok: false, errorKind: 'invalid_output', message: String(error), invocationPath, rawOutputPath, failurePath };
+    return {
+      ok: false,
+      errorKind: 'invalid_output',
+      message: String(error),
+      failure,
+      invocationPath,
+      rawOutputPath,
+      failurePath,
+    };
   }
 
   await writeCreateOnly(rawOutputPath, job.rawOutput);
@@ -291,7 +341,20 @@ async function skillDeliveryFailure(
     errorKind: 'process',
     message,
   });
-  return { ok: false, errorKind: 'process', message, invocationPath, rawOutputPath, failurePath };
+  return {
+    ok: false,
+    errorKind: 'process',
+    message,
+    failure: {
+      origin: 'HOST_INFRASTRUCTURE',
+      reason: 'SKILL_DELIVERY_FAILURE',
+      participantErrorKind: 'process',
+      message,
+    },
+    invocationPath,
+    rawOutputPath,
+    failurePath,
+  };
 }
 
 export async function runSolutionReviewer(input: RunSolutionReviewerInput): Promise<SolutionReviewerRunResult> {

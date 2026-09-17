@@ -163,6 +163,14 @@ function assertSolutionWorkSchemaGuidance(prompt: string): void {
   assert.match(prompt, /SolutionWorkV1\.options\[n\]\.repoRefs.*each option|each option.*SolutionWorkV1\.options\[n\]\.repoRefs/i);
   assert.match(prompt, /SolutionWorkV1\.artifactRefs.*top-level|top-level.*SolutionWorkV1\.artifactRefs/i);
   assert.match(prompt, /SolutionWorkV1\.options\[n\]\.artifactRefs.*each option|each option.*SolutionWorkV1\.options\[n\]\.artifactRefs/i);
+  assert.match(prompt, /status.*OPTIONS.*NO_PROPOSAL.*INSUFFICIENT_EVIDENCE.*ESCALATE/i);
+  assert.match(prompt, /OPTIONS.*1(?:\s*[-–]\s*3|\s*to\s*3).*options/i);
+  assert.match(prompt, /non-OPTIONS.*options.*\[\]/i);
+  assert.match(prompt, /at most three options/i);
+  assert.match(prompt, /optionId.*option-000001.*option-000002.*option-000003.*participant order/i);
+  assert.match(prompt, /changeScope.*configuration.*program.*mixed.*uncertain/i);
+  assert.match(prompt, /recommendedOptionId.*only.*OPTIONS.*actual option/i);
+  assert.match(prompt, /root.*option.*no extra fields|no extra fields.*root.*option/i);
 }
 
 export async function runSolutionAgentLoopTests(): Promise<void> {

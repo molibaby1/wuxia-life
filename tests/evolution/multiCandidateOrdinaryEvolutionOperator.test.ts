@@ -81,6 +81,28 @@ export async function runMultiCandidateOrdinaryEvolutionOperatorTests(): Promise
   assert.equal(participantCalls, 2);
   assert.deepEqual(sidecarEvents, ['evidence', 'report', 'hfl', 'index', 'evidence', 'report', 'hfl', 'index']);
 
+  const failedRoot = await mkdtemp(join(tmpdir(), 'candidate-operator-source-analysis-failed-'));
+  const failedSidecarEvents: string[] = [];
+  const failedLogicalSessionId = 'ordinary-run-source-analysis-failed';
+  const failedDependencies: MultiCandidateOrdinaryEvolutionDependencies = {
+    ...dependencies,
+    preflightGit: async () => ({ ...baseline, statusShort: '', clean: true }),
+    allocateSessionId: async () => failedLogicalSessionId,
+    runPhase0Source: async () => ({ sourceRoot, sourceRunRef: 'source-000001' }),
+    runSessionSlice: async input => {
+      const failedManifest = manifest(failedLogicalSessionId, 'CODEX_CURRENT', input.hostSliceId, 'FAILED', 'SOURCE_ANALYSIS_PARTICIPANT_FAILURE', 'FAILED');
+      await writeMultiCandidateSessionManifestAtomic(failedRoot, failedManifest);
+      return { logicalSessionId: failedLogicalSessionId, hostSliceId: input.hostSliceId, sessionState: 'FAILED', reason: 'SOURCE_ANALYSIS_PARTICIPANT_FAILURE', participantJobs: 2, currentSourceEpochRef: 'source-epoch-000001', manifestPath: join(failedRoot, 'artifacts/evolution/sessions', failedLogicalSessionId, 'session-manifest.json'), sourceTransitionCount: 0 };
+    },
+    retainTerminalEvidence: async () => { failedSidecarEvents.push('evidence'); return { status: 'PUBLISHED', capsuleRoot: join(failedRoot, 'artifacts/evolution/run-evidence', failedLogicalSessionId), manifest: null, reused: false }; },
+    archiveReport: async input => { failedSidecarEvents.push('report'); return { reportId: 'candidate-report-source-analysis-failed', reportDirectory: join(failedRoot, 'artifacts/evolution/run-reports/candidate-report-source-analysis-failed'), reportJsonPath: join(failedRoot, 'artifacts/evolution/run-reports/candidate-report-source-analysis-failed/report.json'), reportMarkdownPath: join(failedRoot, 'artifacts/evolution/run-reports/candidate-report-source-analysis-failed/report.md'), logicalSessionId: input.logicalSessionId, hostSliceId: input.hostSliceId, createdAt: '2026-09-15T00:01:00.000Z' }; },
+    refreshHumanFollowupInbox: async () => { failedSidecarEvents.push('hfl'); return { inboxPath: 'artifacts/evolution/human-follow-up/index.md', activeCount: 0 }; },
+    refreshOperationalIndex: async () => { failedSidecarEvents.push('index'); return { runReportsIndexPath: 'artifacts/evolution/run-reports/index.md', topLevelIndexPath: 'artifacts/evolution/index.md', reportCount: 1, logicalSessionCount: 1, reportSnapshotCount: 1 }; },
+  };
+  const failed = await runMultiCandidateOrdinaryEvolution({ repositoryRoot: failedRoot, operation: { mode: 'START_NEW_SESSION' }, dependencies: failedDependencies });
+  assert.equal(failed.sessionExecution.sessionState, 'FAILED');
+  assert.deepEqual(failedSidecarEvents, ['evidence', 'report', 'hfl', 'index']);
+
   const terminalSummary = formatOrdinaryEvolutionOperatorSummary({
     ...started,
     participantFailureDetails: [{

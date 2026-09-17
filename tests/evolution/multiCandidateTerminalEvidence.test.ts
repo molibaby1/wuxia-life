@@ -15,6 +15,7 @@ async function createSession(root: string, sessionState: 'PAUSED' | 'COMPLETED' 
   await mkdir(join(sourceEpochRoot, 'candidates/hypothesis-000001'), { recursive: true });
   await writeFile(join(sourceEpochRoot, 'source-anchor.json'), '{"schemaVersion":"source-epoch-anchor-v1"}\n');
   await writeFile(join(sourceEpochRoot, 'source-analysis/analysis.json'), '{"analysis":true}\n');
+  if (sessionState === 'FAILED') await writeFile(join(sourceEpochRoot, 'source-analysis/failure.json'), '{"stage":"IMPROVEMENT_HYPOTHESIS"}\n');
   await writeFile(join(sourceEpochRoot, 'candidates/hypothesis-000001/decision.json'), '{"route":"SKIP"}\n');
   await writeFile(join(sourceEpochRoot, 'candidates/hypothesis-000001/continuation.json'), '{"continuation":true}\n');
   if (sourceTransitionCount === 1) {
@@ -65,6 +66,7 @@ export async function runMultiCandidateTerminalEvidenceTests(): Promise<void> {
     assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('source-analysis/analysis.json')));
     assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('decision.json')));
     assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('continuation.json')));
+    if (state === 'FAILED') assert.ok(manifest.objects.some(object => object.sourceRef.endsWith('source-analysis/failure.json')));
     assert.equal(manifest.importantEvents.configurationExecution, false);
     assert.equal(manifest.importantEvents.crossRoundTransition, false);
     assert.equal(manifest.extensions.configurationExecution.status, 'not_applicable');

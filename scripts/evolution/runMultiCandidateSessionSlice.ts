@@ -44,6 +44,8 @@ import {
 import {
   runSourceCandidateAnalysis,
   type CompletedSourceCandidateAnalysisResult,
+  type SourceCandidateAnalysisFailureResult,
+  type SourceCandidateAnalysisResult,
   type RunSourceCandidateAnalysisOptions,
 } from './runSourceCandidateAnalysis';
 import {
@@ -98,7 +100,7 @@ export interface CandidateSessionSliceLaneInput {
 
 export interface MultiCandidateSessionSliceDependencies {
   now?: () => string;
-  runSourceAnalysis?: (input: { sourceRoot: string; sourceEpochRef: string; analysisRoot: string }) => Promise<CompletedSourceCandidateAnalysisResult>;
+  runSourceAnalysis?: (input: { sourceRoot: string; sourceEpochRef: string; analysisRoot: string }) => Promise<SourceCandidateAnalysisResult>;
   loadSourceAnalysis?: (input: { sourceEpochRef: string; sourceRoot: string; analysisRoot: string }) => Promise<CompletedSourceCandidateAnalysisResult>;
   runCandidateLane?: (input: CandidateSessionSliceLaneInput) => Promise<CandidateLaneResult>;
   runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string; sourceProvenanceRoot: string }) => Promise<CandidateReviewContinuationResult>;
@@ -213,7 +215,7 @@ async function persistPool(path: string, pool: CandidatePoolV1): Promise<void> {
   await writeAtomicJson(path, pool);
 }
 
-async function defaultSourceAnalysis(input: RunMultiCandidateSessionSliceInput, sourceRoot: string, analysisRoot: string, sourceEpochRef: string): Promise<CompletedSourceCandidateAnalysisResult> {
+async function defaultSourceAnalysis(input: RunMultiCandidateSessionSliceInput, sourceRoot: string, analysisRoot: string, sourceEpochRef: string): Promise<SourceCandidateAnalysisResult> {
   const options: RunSourceCandidateAnalysisOptions = {
     repositoryRoot: input.repositoryRoot,
     fixedSourceRoot: sourceRoot,
@@ -222,9 +224,40 @@ async function defaultSourceAnalysis(input: RunMultiCandidateSessionSliceInput, 
     participantMode: 'local-subagent',
     authorityRefs: input.authorityRefs,
   } as RunSourceCandidateAnalysisOptions;
-  const result = await runSourceCandidateAnalysis(options);
-  if (result.status !== 'completed') throw new Error(`source analysis failed at ${result.stage}`);
-  return result;
+  return runSourceCandidateAnalysis(options);
+}
+
+async function retainSourceAnalysisFailure(input: {
+  repositoryRoot: string;
+  logicalSessionId: string;
+  sourceEpochRef: string;
+  sessionRoot: string;
+  analysisRoot: string;
+  failure: SourceCandidateAnalysisFailureResult;
+}): Promise<string> {
+  const relativeInvocationPath = `${input.failure.stage === 'EXTERNAL_FEEDBACK' ? 'feedback-runs' : 'hypothesis-runs'}/${input.failure.sourceRunRef}/invocation.json`;
+  const artifacts = await sourceAnalysisFailureArtifacts(input.analysisRoot, input.failure.sourceRunRef);
+  if (artifacts.includes(relativeInvocationPath)) {
+    await retainSourceAnalysisArtifacts({
+      repositoryRoot: input.repositoryRoot,
+      logicalSessionId: input.logicalSessionId,
+      sourceEpochRef: input.sourceEpochRef,
+      sourceRoot: input.analysisRoot,
+      relativePaths: artifacts,
+    });
+    return `source-epochs/${input.sourceEpochRef}/source-analysis/${relativeInvocationPath}`;
+  }
+
+  const failureRef = `source-epochs/${input.sourceEpochRef}/source-analysis/failure.json`;
+  await writeCreateOnly(join(input.sessionRoot, failureRef), {
+    schemaVersion: 'multi-candidate-source-analysis-failure-v1',
+    sourceEpochRef: input.sourceEpochRef,
+    sourceRunRef: input.failure.sourceRunRef,
+    stage: input.failure.stage,
+    actualParticipantJobs: input.failure.actualParticipantJobs,
+    error: String(input.failure.error),
+  });
+  return failureRef;
 }
 
 async function defaultLoadSourceAnalysis(input: RunMultiCandidateSessionSliceInput, value: { sourceEpochRef: string; sourceRoot: string; analysisRoot: string }): Promise<CompletedSourceCandidateAnalysisResult> {
@@ -305,6 +338,30 @@ async function analysisArtifacts(root: string, sourceRunRef: string): Promise<st
   return present;
 }
 
+async function sourceAnalysisFailureArtifacts(root: string, sourceRunRef: string): Promise<string[]> {
+  const runFiles = [
+    'human-review.md',
+    'invocation.json',
+    'participant-binding.json',
+    'participant-execution-trace.json',
+    'participant-prompt.txt',
+    'raw-participant-response.txt',
+    'stderr.txt',
+  ];
+  const candidates = [
+    'source/observable-payload.json',
+    `feedback-runs/${sourceRunRef}/feedback.json`,
+    ...runFiles.map(file => `feedback-runs/${sourceRunRef}/${file}`),
+    `hypothesis-runs/${sourceRunRef}/source-feedback.json`,
+    `hypothesis-runs/${sourceRunRef}/source-feedback-raw-participant-response.txt`,
+    `hypothesis-runs/${sourceRunRef}/source-observable-payload.json`,
+    ...runFiles.map(file => `hypothesis-runs/${sourceRunRef}/${file}`),
+  ];
+  const present: string[] = [];
+  for (const path of candidates) if (await exists(join(root, path))) present.push(path);
+  return present;
+}
+
 async function candidateLaneArtifacts(root: string, current = ''): Promise<string[]> {
   if (current === '' && !(await exists(root))) return [];
   const entries = await readdir(resolve(root, current || '.'), { withFileTypes: true });
@@ -372,9 +429,56 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
   if (input.mode === 'START_NEW_SESSION' || sourceNeedsFreshAnalysis) {
     const sourceRoot = input.initialSourceRoot ?? (await materializeSourceEpochAnchor({ repositoryRoot: input.repositoryRoot, logicalSessionId: input.logicalSessionId, sourceEpochRef: currentSourceEpochRef, hostSliceId: input.hostSliceId })).sourceRoot;
     analysisRoot = join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId, currentSourceEpochRef, 'analysis');
-    analysis = sourceNeedsFreshAnalysis
+    const sourceAnalysisResult = sourceNeedsFreshAnalysis
       ? await (input.dependencies?.runSourceAnalysis ?? (value => defaultSourceAnalysis(input, value.sourceRoot, value.analysisRoot, value.sourceEpochRef)))({ sourceRoot, sourceEpochRef: currentSourceEpochRef, analysisRoot })
       : await (input.dependencies?.loadSourceAnalysis ?? (value => defaultLoadSourceAnalysis(input, value)))({ sourceEpochRef: currentSourceEpochRef, sourceRoot, analysisRoot });
+    if (sourceAnalysisResult.status !== 'completed') {
+      const failureRef = await retainSourceAnalysisFailure({
+        repositoryRoot: input.repositoryRoot,
+        logicalSessionId: input.logicalSessionId,
+        sourceEpochRef: currentSourceEpochRef,
+        sessionRoot,
+        analysisRoot,
+        failure: sourceAnalysisResult,
+      });
+      const reason = 'SOURCE_ANALYSIS_PARTICIPANT_FAILURE';
+      const failedBudget = consumeHostSliceJobs(createHostSliceBudget(), sourceAnalysisResult.actualParticipantJobs);
+      const failedSlice = {
+        ...slice,
+        state: 'FAILED' as const,
+        reason,
+        endedAt: now(),
+        participantJobs: failedBudget.usedParticipantJobs,
+      };
+      const failedSourceEpochs = sourceEpochs.map(epoch => epoch.sourceEpochRef === currentSourceEpochRef
+        ? { ...epoch, sourceRunRef: sourceAnalysisResult.sourceRunRef }
+        : epoch);
+      const finalManifest = buildManifest({
+        existing: manifest,
+        logicalSessionId: input.logicalSessionId,
+        sessionState: 'FAILED',
+        reason,
+        sourceEpochs: failedSourceEpochs,
+        currentSourceEpochRef,
+        hostSlices: [...priorSlices, failedSlice],
+        sourceTransitionCount,
+        repositoryBaseline: input.repositoryBaseline,
+        participantBindingId: input.participantBindingId,
+        failureRef,
+      });
+      await writeMultiCandidateSessionManifestAtomic(input.repositoryRoot, finalManifest);
+      return {
+        logicalSessionId: input.logicalSessionId,
+        hostSliceId: input.hostSliceId,
+        sessionState: 'FAILED',
+        reason,
+        participantJobs: failedBudget.usedParticipantJobs,
+        currentSourceEpochRef,
+        manifestPath: location.manifestPath,
+        sourceTransitionCount,
+      };
+    }
+    analysis = sourceAnalysisResult;
     const sourceFingerprintPath = join(sourceRoot, 'provenance/source-fingerprint.json');
     const sourceFingerprintSha256 = analysis.sourceFingerprintSha256;
     if (input.mode === 'START_NEW_SESSION') {

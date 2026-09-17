@@ -441,12 +441,12 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         analysisRoot,
         failure: sourceAnalysisResult,
       });
-      const reason = 'SOURCE_ANALYSIS_PARTICIPANT_FAILURE';
+      const failureReason = 'SOURCE_ANALYSIS_PARTICIPANT_FAILURE';
       const failedBudget = consumeHostSliceJobs(createHostSliceBudget(), sourceAnalysisResult.actualParticipantJobs);
       const failedSlice = {
         ...slice,
         state: 'FAILED' as const,
-        reason,
+        reason: failureReason,
         endedAt: now(),
         participantJobs: failedBudget.usedParticipantJobs,
       };
@@ -457,7 +457,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         existing: manifest,
         logicalSessionId: input.logicalSessionId,
         sessionState: 'FAILED',
-        reason,
+        reason: failureReason,
         sourceEpochs: failedSourceEpochs,
         currentSourceEpochRef,
         hostSlices: [...priorSlices, failedSlice],
@@ -471,7 +471,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         logicalSessionId: input.logicalSessionId,
         hostSliceId: input.hostSliceId,
         sessionState: 'FAILED',
-        reason,
+        reason: failureReason,
         participantJobs: failedBudget.usedParticipantJobs,
         currentSourceEpochRef,
         manifestPath: location.manifestPath,

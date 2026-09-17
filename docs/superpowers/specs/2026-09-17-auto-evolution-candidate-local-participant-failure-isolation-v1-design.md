@@ -2,7 +2,9 @@
 
 ## 1. Status
 
-**Status: HUMAN ACCEPTED — 2026-09-16. Authority sync is required before runtime implementation.**
+**Status: HUMAN ACCEPTED — 2026-09-16.**
+
+**Current project status note — 2026-09-17:** PD-119 authority sync and runtime implementation have since been completed and validated. References later in this document to authority sync being required before implementation are retained as the original pre-implementation design gate, not as a statement of current repository status.
 
 This design narrows the failure-containment behavior introduced by PD-118 for one evidence-backed case: a Candidate Participant completes its invocation, but the Host rejects that candidate's unaccepted structured output for a deterministic output-conformance defect.
 
@@ -656,3 +658,93 @@ Human review on 2026-09-16 confirmed all of the following design acceptance crit
 - semantic retry remains zero and no automatic repair is introduced;
 - durable typed failure evidence precedes later Candidate activation;
 - authority is synchronized before runtime implementation.
+
+---
+
+## 19. Deferred Design Question: HOST_SLICE_BUDGET Pause vs. Human Decision Boundary
+
+**Status: OPEN / DEFERRED — recorded 2026-09-17. No authority or runtime change is authorized by this section.**
+
+Natural operation after PD-119 has made one pre-existing workflow property more visible: a Logical Session may pause with `HOST_SLICE_BUDGET` while the Source-local Candidate Pool is still `PROCESSING` and still contains `PENDING` candidates. The ordinary operator then requires an explicit resume before the same Logical Session continues.
+
+The current product concern is not that the pause is incorrect under existing authority. The concern is whether this pause represents a meaningful **Human decision boundary** at all.
+
+At the observed `HOST_SLICE_BUDGET` pause:
+
+- the Session is recoverable rather than failed;
+- the Pool remains valid and resumable;
+- remaining candidates retain their existing deterministic source order;
+- resuming does not currently require a new product choice, permission decision, candidate selection, or semantic judgment;
+- doing nothing merely leaves the Session paused;
+- the practical Human action is therefore usually a mechanical `resume`.
+
+This creates a possible mismatch:
+
+```text
+execution segmentation
+→ exposed as manual resume
+→ appears to require Human choice
+→ but no meaningful alternative decision is currently defined
+```
+
+### 19.1 Open product question
+
+The deferred question is:
+
+> Should `HOST_SLICE_BUDGET` remain a manual Human-visible pause, or should exhaustion of one Host Slice be treated as an execution-layer boundary that can automatically continue the same Logical Session in a subsequent Host Slice until a genuine semantic / authority / safety stop is reached?
+
+This question is intentionally **not decided here**.
+
+Until a new Human-accepted design and authority change say otherwise, current resume behavior remains authoritative.
+
+### 19.2 Why this is deferred instead of changed immediately
+
+The absence of a meaningful Human choice is already sufficient to justify re-discussion; repeated observations are not required to establish that concern.
+
+However, the correct replacement behavior should be decided only after observing more of the real workflow, especially:
+
+- exact resume behavior across multiple Host Slices;
+- whether Candidate Pool processing remains stable through exhaustion;
+- Participant latency and cumulative execution cost across slices;
+- interaction with source change and creation of a new Source Epoch;
+- whether any hard execution ceiling, operator stop, or resource authorization boundary is needed to prevent unbounded autonomous continuation;
+- which pauses are merely execution segmentation and which pauses genuinely require Human judgment.
+
+The immediate operational plan is therefore:
+
+```text
+record the design gap
+→ keep current authority unchanged
+→ continue natural AE observation using manual resume when needed
+→ revisit the boundary with accumulated runtime evidence
+```
+
+### 19.3 Scope boundary
+
+This deferred question must not be conflated with existing genuine semantic states.
+
+In particular:
+
+- `ESCALATE_HUMAN` remains a Human Follow-up semantic and is not equivalent to `HOST_SLICE_BUDGET`;
+- fail-closed Session failures remain safety / integrity boundaries;
+- Candidate-local interruption under PD-119 remains a Candidate containment fact, not a Human decision;
+- source-changing execution and subsequent Source-Epoch analysis must be evaluated separately before assuming that every post-transition pause should also become automatic.
+
+A future design may conclude that some or all mechanical resume points should become automatic, but that conclusion requires its own explicit lifecycle, resource, and stopping semantics.
+
+### 19.4 Re-discussion trigger
+
+Reopen this question when either of the following is true:
+
+1. enough natural runs have been resumed across Host Slices to characterize the operational pattern; or
+2. manual resume itself becomes a material source of operator friction before that sample is complete.
+
+At re-discussion time, the decision should explicitly distinguish:
+
+```text
+Human decision boundary
+vs.
+execution scheduling boundary
+```
+
+and should not preserve manual intervention merely because the current implementation happens to expose a `PAUSED` state.

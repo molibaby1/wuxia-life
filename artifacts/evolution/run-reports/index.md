@@ -1,11 +1,12 @@
 # Auto Evolution 运行报告
 
-- 报告总数：60
-- Logical Session 总数：60
-- Report snapshot 总数：60
+- 报告总数：61
+- Logical Session 总数：61
+- Report snapshot 总数：61
 
 | 创建时间 | 报告 | 会话停止原因 | 多轮结果 | 执行状态 | 工作流路由 | Source Run | 人类结论 | 建议动作 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-09-18T01:31:39.870Z | [candidate-session-report-3c992431956a04ca7b0370ebe4a7a162f26f261f1f020746dc70eb0d6874d776](candidate-session-report-3c992431956a04ca7b0370ebe4a7a162f26f261f1f020746dc70eb0d6874d776/report.md) | FAILED | v7 snapshots: 1 | FAILED | candidate dispositions: 8 | source-epoch-000001 | ordinary-run-20260918-000001 | v7: 0 completed, 6 pending; actions: INVESTIGATE_HOST_FAILURE; （无历史 snapshot） |
 | 2026-09-17T06:55:14.370Z | [candidate-session-report-345e3579734f942db382e2ceba32522a5a5a6b00f59fb2580cb8c1068d754381](candidate-session-report-345e3579734f942db382e2ceba32522a5a5a6b00f59fb2580cb8c1068d754381/report.md) | FAILED | v7 snapshots: 1 | FAILED | candidate dispositions: 7 | source-epoch-000001 | ordinary-run-20260917-000004 | v7: 2 completed, 3 pending; actions: INVESTIGATE_HOST_FAILURE, REVIEW_HUMAN_FOLLOWUP:candidate-pool-c83f33db927d527cbf78d8ebc00d81a72d78f91b32b8755acec5806fcd0f856a/hypothesis-000001, REVIEW_HUMAN_FOLLOWUP:candidate-pool-c83f33db927d527cbf78d8ebc00d81a72d78f91b32b8755acec5806fcd0f856a/hypothesis-000002; （无历史 snapshot） |
 | 2026-09-16T21:56:07.247Z | [candidate-session-report-0125be4ea4eeb4814252c18179c882262f970bcc7bc7053195c5d6cda7a60140](candidate-session-report-0125be4ea4eeb4814252c18179c882262f970bcc7bc7053195c5d6cda7a60140/report.md) | PAUSED | v7 snapshots: 1 | PAUSED | candidate dispositions: 6 | source-epoch-000001 | ordinary-run-20260917-000001 | v7: 3 completed, 2 pending; actions: RESUME_SESSION, REVIEW_HUMAN_FOLLOWUP:candidate-pool-fc19499a00b96f7eaa1a6d604ba2ec8e70132db1f9715262444177f2a8132d50/hypothesis-000001, REVIEW_HUMAN_FOLLOWUP:candidate-pool-fc19499a00b96f7eaa1a6d604ba2ec8e70132db1f9715262444177f2a8132d50/hypothesis-000002, REVIEW_HUMAN_FOLLOWUP:candidate-pool-fc19499a00b96f7eaa1a6d604ba2ec8e70132db1f9715262444177f2a8132d50/hypothesis-000003; （无历史 snapshot） |
 | 2026-09-16T05:05:18.688Z | [candidate-session-report-c1f881d18f8bf8d9104820249902501f81de83c5820adef25b1e4d41b018fa4f](candidate-session-report-c1f881d18f8bf8d9104820249902501f81de83c5820adef25b1e4d41b018fa4f/report.md) | FAILED | v7 snapshots: 1 | FAILED | candidate dispositions: 8 | source-epoch-000001 | ordinary-run-20260916-000004 | v7: 1 completed, 6 pending; actions: INVESTIGATE_HOST_FAILURE, REVIEW_HUMAN_FOLLOWUP:candidate-pool-200502b16fe974e157897b819554766b49155631c4a978b96d122666c93fc4c8/hypothesis-000001; （无历史 snapshot） |

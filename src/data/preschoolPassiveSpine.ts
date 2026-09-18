@@ -345,7 +345,7 @@ export function selectPreschoolOriginExclusiveEntry(
   const ageEntries = getPreschoolPassiveEntries(age);
   const originPredicate = (entry: PreschoolPassiveEntry) =>
     isPreschoolPassiveEligible(entry, originTags) && !isNeutralOnlyPreschoolEntry(entry);
-  let pool = filterPreschoolPool(
+  const pool = filterPreschoolPool(
     ageEntries,
     recentTitles,
     entry => originPredicate(entry) && !history.has(entry.id),

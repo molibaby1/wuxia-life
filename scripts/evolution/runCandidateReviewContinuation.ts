@@ -139,6 +139,7 @@ export async function runCandidateReviewContinuation(
     sourceRunRef,
     sourceFingerprintSha256: input.sourceFingerprintSha256,
     sourceProvenanceRoot: input.sourceProvenanceRoot,
+    additionalWorkspaceArtifactRelativePaths: ['candidate-activation.json', 'problem-package.json'],
     participant: input.participant,
     retainHumanFollowupOnEscalate: false,
     dependencies: input.dependencies,

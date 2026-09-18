@@ -22,7 +22,11 @@ import {
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionReviewer';
 import type { RetainHumanFollowupWorkItemInput, RetainedHumanFollowupWorkItem } from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
-import { validateProblemPackage, type ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import {
+  validateProblemPackage,
+  type ProblemPackageV1,
+  type ProblemPackageV2,
+} from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
 import { validateSolutionReview, type SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import { validateSolutionWork, type SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
@@ -35,6 +39,9 @@ const SOURCE_ARTIFACTS = [
   'feedback-runs/cohort-run-000001/feedback.json',
   'hypothesis-runs/cohort-run-000001/hypotheses.json',
 ];
+const CANDIDATE_DIAGNOSTIC_ARTIFACT = 'diagnostic/causal-attribution.json';
+const CANDIDATE_ACTIVATION_ARTIFACT = 'candidate-activation.json';
+const CANDIDATE_ADDITIONAL_ARTIFACTS = [CANDIDATE_ACTIVATION_ARTIFACT, 'problem-package.json'];
 
 function baseProblemPackage(problemId = PROBLEM_ID): ProblemPackageV1 {
   return validateProblemPackage({
@@ -252,31 +259,69 @@ function streamingParticipant(result: SolutionWorkV1, calls: { count: number }) 
 async function createCandidateLaneFixture(fixture: Awaited<ReturnType<typeof createFixture>>): Promise<{
   candidateLaneRoot: string;
   sourceProvenanceRoot: string;
+  baselineFingerprint: string;
 }> {
   const candidateLaneRoot = join(fixture.root, 'candidate-lane');
   const sourceProvenanceRoot = join(fixture.root, 'sealed-source');
   for (const artifact of SOURCE_ARTIFACTS) await writeJson(join(candidateLaneRoot, artifact), { artifact });
-  await writeJson(join(candidateLaneRoot, 'problem-package.json'), fixture.problemPackage);
+  await writeJson(join(candidateLaneRoot, CANDIDATE_DIAGNOSTIC_ARTIFACT), { artifact: CANDIDATE_DIAGNOSTIC_ARTIFACT });
+  await writeJson(join(candidateLaneRoot, CANDIDATE_ACTIVATION_ARTIFACT), {
+    schemaVersion: 'candidate-activation-v1',
+    candidateRef: 'candidate-pool-000001/hypothesis-000001',
+    poolId: 'candidate-pool-000001',
+    hypothesisId: 'hypothesis-000001',
+    sourceIndex: 0,
+    hypothesisSha256: 'a'.repeat(64),
+    hypothesisSetRef: SOURCE_ARTIFACTS[2],
+    hypothesisSetSha256: 'b'.repeat(64),
+    sourceRunRef: SOURCE_RUN_REF,
+  });
+  const candidateProblemPackage = validateProblemPackage({
+    ...fixture.problemPackage,
+    schemaVersion: 'problem-package-v2',
+    source: {
+      ...fixture.problemPackage.source,
+      diagnosticEvidenceRefs: [CANDIDATE_DIAGNOSTIC_ARTIFACT],
+    },
+  }) as ProblemPackageV2;
+  await writeJson(join(candidateLaneRoot, 'problem-package.json'), candidateProblemPackage);
   await writeJson(join(candidateLaneRoot, 'solution-agent/result.json'), fixture.baseSolution);
   await writeJson(join(candidateLaneRoot, 'reviewer-agent/review.json'), fixture.baseReview);
   await writeJson(join(candidateLaneRoot, 'decision.json'), fixture.baseDecision);
   await writeJson(join(sourceProvenanceRoot, 'provenance/source-fingerprint.json'), JSON.parse(await readFile(join(fixture.roundRoot, 'game-runs', SOURCE_RUN_REF, 'provenance/source-fingerprint.json'), 'utf8')) as unknown);
+  const candidateArtifactRelativePaths = [
+    ...SOURCE_ARTIFACTS,
+    CANDIDATE_DIAGNOSTIC_ARTIFACT,
+    ...CANDIDATE_ADDITIONAL_ARTIFACTS,
+  ];
   const baseline = await prepareAgentWorkspace({
     authoritativeRoot: fixture.repositoryRoot,
     destinationRoot: join(fixture.root, 'candidate-base-workspace'),
     jobKind: 'solution',
     artifactSourceRoot: candidateLaneRoot,
-    artifactRelativePaths: SOURCE_ARTIFACTS,
+    artifactRelativePaths: candidateArtifactRelativePaths,
   });
+  const reviewerBaseline = await prepareAgentWorkspace({
+    authoritativeRoot: fixture.repositoryRoot,
+    destinationRoot: join(fixture.root, 'candidate-base-reviewer-workspace'),
+    jobKind: 'reviewer',
+    artifactSourceRoot: candidateLaneRoot,
+    artifactRelativePaths: candidateArtifactRelativePaths,
+  });
+  assert.equal(baseline.workspaceBaselineFingerprintSha256, reviewerBaseline.workspaceBaselineFingerprintSha256);
   await writeJson(join(candidateLaneRoot, 'solution-agent/invocation.json'), {
     schemaVersion: 'solution-agent-invocation-v2',
     workspaceBaselineFingerprintSha256: baseline.workspaceBaselineFingerprintSha256,
   });
   await writeJson(join(candidateLaneRoot, 'reviewer-agent/invocation.json'), {
     schemaVersion: 'solution-reviewer-invocation-v2',
-    workspaceBaselineFingerprintSha256: baseline.workspaceBaselineFingerprintSha256,
+    workspaceBaselineFingerprintSha256: reviewerBaseline.workspaceBaselineFingerprintSha256,
   });
-  return { candidateLaneRoot, sourceProvenanceRoot };
+  return {
+    candidateLaneRoot,
+    sourceProvenanceRoot,
+    baselineFingerprint: baseline.workspaceBaselineFingerprintSha256,
+  };
 }
 
 function resultPaths(destinationRoot: string): { invocationPath: string; rawOutputPath: string; resultPath: string } {
@@ -516,6 +561,7 @@ export async function runReviewContinuationTests(): Promise<void> {
 
   const adapterFixture = await createFixture();
   let adapterRetentionFlag: boolean | undefined;
+  let adapterArtifactPaths: readonly string[] | undefined;
   const adapterDecision = validateSolutionDecision({
     schemaVersion: 'solution-decision-v1',
     problemId: adapterFixture.baseDecision.problemId,
@@ -543,6 +589,7 @@ export async function runReviewContinuationTests(): Promise<void> {
     dependencies: {
       runCandidateContinuation: async input => {
         adapterRetentionFlag = input.retainHumanFollowupOnEscalate;
+        adapterArtifactPaths = input.additionalWorkspaceArtifactRelativePaths;
         return {
           status: 'completed',
           continuationRef: 'review-continuation-000001',
@@ -559,6 +606,7 @@ export async function runReviewContinuationTests(): Promise<void> {
   });
   assert.equal(adapterResult.status, 'completed');
   assert.equal(adapterRetentionFlag, false);
+  assert.deepEqual(adapterArtifactPaths, ['candidate-activation.json', 'problem-package.json']);
 
   const accepted = await createFixture();
   const acceptedCalls = { revision: 0, rereview: 0 };
@@ -681,6 +729,10 @@ export async function runReviewContinuationTests(): Promise<void> {
   });
   assert.equal(realCandidateResult.status, 'completed');
   assert.equal(realParticipantCalls.count, 1);
+  const realRevisionInvocation = JSON.parse(
+    await readFile(join(candidateLane.candidateLaneRoot, 'review-continuation-000001/solution-revision/invocation.json'), 'utf8'),
+  ) as { workspaceBaselineFingerprintSha256: string };
+  assert.equal(realRevisionInvocation.workspaceBaselineFingerprintSha256, candidateLane.baselineFingerprint);
   assert.equal(await fileExists(join(candidateLane.candidateLaneRoot, 'game-runs', SOURCE_RUN_REF, 'provenance/source-fingerprint.json')), false);
   assert.equal(await fileExists(join(candidateLane.candidateLaneRoot, 'review-continuation-000001/agent-workspaces/solution/provenance/source-fingerprint.json')), false);
 

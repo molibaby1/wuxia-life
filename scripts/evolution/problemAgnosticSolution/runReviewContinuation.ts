@@ -78,6 +78,7 @@ export interface RunReviewContinuationInput {
   sourceFingerprintSha256: string;
   /** Host-only sealed source root; never copied into Participant workspaces. */
   sourceProvenanceRoot?: string;
+  additionalWorkspaceArtifactRelativePaths?: readonly string[];
   participant: WorkspaceAgentParticipantOptions;
   retainHumanFollowupOnEscalate?: boolean;
   dependencies?: ReviewContinuationDependencies;
@@ -191,7 +192,10 @@ async function assertSourceFingerprint(
   }
 }
 
-function artifactPaths(problemPackage: ProblemPackage): string[] {
+function artifactPaths(
+  problemPackage: ProblemPackage,
+  additionalWorkspaceArtifactRelativePaths: readonly string[] = [],
+): string[] {
   return [
     problemPackage.source.observablePayloadRef,
     problemPackage.source.externalFeedbackRef,
@@ -199,6 +203,7 @@ function artifactPaths(problemPackage: ProblemPackage): string[] {
     ...(problemPackage.schemaVersion === 'problem-package-v2'
       ? problemPackage.source.diagnosticEvidenceRefs
       : []),
+    ...additionalWorkspaceArtifactRelativePaths,
   ];
 }
 
@@ -261,7 +266,7 @@ async function prepareFreshBaselineWorkspaces(
   base: BaseArtifacts,
   destinationRoot: string,
 ): Promise<{ solution: PreparedAgentWorkspace; reviewer: PreparedAgentWorkspace }> {
-  const sourceArtifacts = artifactPaths(base.problemPackage);
+  const sourceArtifacts = artifactPaths(base.problemPackage, input.additionalWorkspaceArtifactRelativePaths);
   const solution = await prepareAgentWorkspace({
     authoritativeRoot: input.repositoryRoot,
     destinationRoot: join(destinationRoot, 'solution'),

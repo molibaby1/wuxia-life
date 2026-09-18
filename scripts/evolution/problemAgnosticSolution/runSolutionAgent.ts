@@ -127,6 +127,10 @@ function renderSolutionWorkSchemaGuidance(): string {
     '- expectedPlayerObservableDifference',
     '- risks',
     '- unknowns',
+    'Deterministic field shapes: problemId and summary must be non-empty strings.',
+    'At the root, repoRefs and artifactRefs must be arrays; when non-empty, every element must be a non-empty string.',
+    'For each option, proposedChange, rationale, and expectedPlayerObservableDifference must be non-empty strings.',
+    'For each option, repoRefs, artifactRefs, risks, and unknowns must be arrays; when non-empty, every element must be a non-empty string.',
     'The reference arrays exist at two distinct levels and both levels are required: SolutionWorkV1.repoRefs and SolutionWorkV1.artifactRefs are required top-level fields on the root object, while SolutionWorkV1.options[n].repoRefs and SolutionWorkV1.options[n].artifactRefs are required fields inside every option. Option refs do not replace the required root refs, and root refs do not replace each option\'s refs.',
   ].join('\n');
 }

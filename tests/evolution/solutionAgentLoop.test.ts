@@ -159,6 +159,10 @@ function assertSolutionWorkSchemaGuidance(prompt: string): void {
   assert.match(prompt, /recommendedOptionId.*optional.*OPTIONS/i);
   assert.match(prompt, /For OPTIONS, every SolutionOptionV1 requires/i);
   assert.match(prompt, /optionId[\s\S]*proposedChange[\s\S]*rationale[\s\S]*repoRefs[\s\S]*artifactRefs[\s\S]*changeScope[\s\S]*expectedPlayerObservableDifference[\s\S]*risks[\s\S]*unknowns/i);
+  assert.match(prompt, /For each option, repoRefs, artifactRefs, risks, and unknowns must be arrays; when non-empty, every element must be a non-empty string/i);
+  assert.match(prompt, /problemId and summary must be non-empty strings/i);
+  assert.match(prompt, /At the root, repoRefs and artifactRefs must be arrays; when non-empty, every element must be a non-empty string/i);
+  assert.match(prompt, /For each option, proposedChange, rationale, and expectedPlayerObservableDifference must be non-empty strings/i);
   assert.match(prompt, /SolutionWorkV1\.repoRefs.*top-level|top-level.*SolutionWorkV1\.repoRefs/i);
   assert.match(prompt, /SolutionWorkV1\.options\[n\]\.repoRefs.*each option|each option.*SolutionWorkV1\.options\[n\]\.repoRefs/i);
   assert.match(prompt, /SolutionWorkV1\.artifactRefs.*top-level|top-level.*SolutionWorkV1\.artifactRefs/i);

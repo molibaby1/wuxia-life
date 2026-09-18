@@ -1,13 +1,95 @@
 import {
   getPreschoolPassiveEntries,
   isNeutralOnlyPreschoolEntry,
+  selectNeutralOnlyPreschoolEntry,
   selectPreschoolPassiveEntry,
+  selectPreschoolOriginExclusiveEntry,
   validatePreschoolPassiveOriginTags,
 } from '../src/data/preschoolPassiveSpine';
 import type { GameState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
+}
+
+function martialPreschoolState(
+  eventHistory: GameState['eventHistory'],
+  passiveTitleHistory?: string[],
+): GameState {
+  return {
+    player: { age: 5, flags: { origin_wuxia_family: true } },
+    flags: {
+      origin_wuxia_family: true,
+      origin_id: 'martial_family',
+      ...(passiveTitleHistory ? { p16_passive_title_history: passiveTitleHistory } : {}),
+    },
+    eventHistory,
+  } as GameState;
+}
+
+function historyForEntries(entries: Array<{ id: string }>): GameState['eventHistory'] {
+  return entries.map(entry => ({ eventId: entry.id, age: 5 }));
+}
+
+function testOriginHistoryExhaustionFallsBackToGap(): void {
+  const age5Entries = getPreschoolPassiveEntries(5);
+  const martialOrigins = age5Entries.filter(
+    entry => entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry),
+  );
+  const neutralEntries = age5Entries.filter(isNeutralOnlyPreschoolEntry);
+  assert(martialOrigins.length > 0, 'age 5 has martial origin-exclusive entries');
+  assert(neutralEntries.length >= 7, 'age 5 has at least 7 neutral entries for title-window control');
+
+  const state = martialPreschoolState([
+    ...historyForEntries(martialOrigins),
+    ...historyForEntries(neutralEntries.slice(0, 7)),
+  ]);
+  const consumedMartialIds = new Set(martialOrigins.map(entry => entry.id));
+  const picked = selectPreschoolOriginExclusiveEntry(state, () => 0);
+
+  assert(
+    picked.id === 'preschool_passive_gap' || picked.id.startsWith('preschool_passive_gap::'),
+    `exhausted martial origin pool must use gap fallback, got ${picked.id}`,
+  );
+  assert(!consumedMartialIds.has(picked.id), 'exhausted origin selection must not reuse a consumed martial origin');
+}
+
+function testOriginSelectionPreservesUnconsumedEntry(): void {
+  const age5Entries = getPreschoolPassiveEntries(5);
+  const martialOrigins = age5Entries.filter(
+    entry => entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry),
+  );
+  const neutralEntries = age5Entries.filter(isNeutralOnlyPreschoolEntry);
+  assert(martialOrigins.length > 1, 'age 5 has multiple martial origin-exclusive entries');
+  assert(neutralEntries.length >= 7, 'age 5 has at least 7 neutral entries for title-window control');
+
+  const unconsumed = martialOrigins[martialOrigins.length - 1]!;
+  const consumed = martialOrigins.slice(0, -1);
+  const state = martialPreschoolState([
+    ...historyForEntries(consumed),
+    ...historyForEntries(neutralEntries.slice(0, 7)),
+  ]);
+  const picked = selectPreschoolOriginExclusiveEntry(state, () => 0);
+
+  assert(picked.id === unconsumed.id, `selector must preserve the unconsumed martial origin, got ${picked.id}`);
+}
+
+function testNeutralSelectorKeepsExhaustionReuseSemantics(): void {
+  const neutralEntries = getPreschoolPassiveEntries(5).filter(isNeutralOnlyPreschoolEntry);
+  assert(neutralEntries.length > 0, 'age 5 has neutral entries');
+  const state = martialPreschoolState(historyForEntries(neutralEntries), [
+    'unrelated-title-1',
+    'unrelated-title-2',
+    'unrelated-title-3',
+    'unrelated-title-4',
+    'unrelated-title-5',
+    'unrelated-title-6',
+    'unrelated-title-7',
+  ]);
+  const neutralIds = new Set(neutralEntries.map(entry => entry.id));
+  const picked = selectNeutralOnlyPreschoolEntry(state, () => 0);
+
+  assert(neutralIds.has(picked.id), `neutral exhaustion must retain existing reuse behavior, got ${picked.id}`);
 }
 
 export function runPreschoolPassiveSpineTests(): void {
@@ -106,6 +188,10 @@ export function runPreschoolPassiveSpineTests(): void {
     }) !== undefined,
     'multi-exclusive originTags must fail validation',
   );
+
+  testOriginHistoryExhaustionFallsBackToGap();
+  testOriginSelectionPreservesUnconsumedEntry();
+  testNeutralSelectorKeepsExhaustionReuseSemantics();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

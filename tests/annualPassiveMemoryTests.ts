@@ -7,7 +7,7 @@ import {
   prepareAnnualPassiveMemory,
   preparePreschoolSeasonMemory,
 } from '../src/core/activePlanning/annualPassiveMemory';
-import { isNeutralOnlyPreschoolEntry } from '../src/data/preschoolPassiveSpine';
+import { getPreschoolPassiveEntries, isNeutralOnlyPreschoolEntry } from '../src/data/preschoolPassiveSpine';
 import { reactive } from 'vue';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
@@ -148,6 +148,7 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(!isPreschoolSeasonMemoryAge(8), 'age 8 leaves season-memory band');
   testPrepareAnnualPassiveMemoryWithReactiveState();
   testPreparePreschoolSeasonMemory();
+  testPreparePreschoolSeasonMemoryWithExhaustedMartialOrigin();
 
   const state = merchantInfantState(0);
   const plan = prepareAnnualPassiveMemory(state, () => 0);
@@ -211,6 +212,39 @@ function testPreparePreschoolSeasonMemory(): void {
   const result = commitAnnualPassiveMemory(state, plan);
   assert((state.eventHistory ?? []).length === 3, 'all three season beats remain traceable');
   assert(result.entryIds.length === 3, 'commit records three entry ids');
+}
+
+function testPreparePreschoolSeasonMemoryWithExhaustedMartialOrigin(): void {
+  const state = martialPreschoolState(5);
+  const age5Entries = getPreschoolPassiveEntries(5);
+  const martialOrigins = age5Entries.filter(
+    entry => entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry),
+  );
+  const neutralEntries = age5Entries.filter(isNeutralOnlyPreschoolEntry);
+  assert(martialOrigins.length > 0, 'season exhaustion fixture has martial origin entries');
+  assert(neutralEntries.length >= 8, 'season exhaustion fixture keeps an authored neutral entry available');
+  const originalHistory = JSON.stringify(state.eventHistory ?? []);
+  state.eventHistory = [
+    ...martialOrigins.map(entry => ({ eventId: entry.id, age: 5 })),
+    ...neutralEntries.slice(0, 7).map(entry => ({ eventId: entry.id, age: 5 })),
+  ];
+  const historyBeforePrepare = JSON.stringify(state.eventHistory);
+
+  const plan = preparePreschoolSeasonMemory(state, () => 0);
+  const neutralIds = new Set(neutralEntries.map(entry => entry.id));
+
+  assert(plan.entries.length === 3, 'exhausted origin season still has three entries');
+  assert(
+    plan.entries[0]!.id === 'preschool_passive_gap' || plan.entries[0]!.id.startsWith('preschool_passive_gap::'),
+    `exhausted first origin slot must use gap fallback, got ${plan.entries[0]!.id}`,
+  );
+  assert(neutralIds.has(plan.entries[1]!.id), `middle slot must remain an authored neutral texture, got ${plan.entries[1]!.id}`);
+  assert(
+    plan.entries[2]!.id === 'preschool_passive_gap' || plan.entries[2]!.id.startsWith('preschool_passive_gap::'),
+    `exhausted second origin slot must use gap fallback, got ${plan.entries[2]!.id}`,
+  );
+  assert(JSON.stringify(state.eventHistory) === historyBeforePrepare, 'preparing season memory does not mutate input history');
+  assert(originalHistory === JSON.stringify([]), 'season exhaustion fixture starts with an empty source history');
 }
 
 async function testHeadlessSeasonAdvance(): Promise<void> {

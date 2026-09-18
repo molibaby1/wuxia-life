@@ -350,9 +350,6 @@ export function selectPreschoolOriginExclusiveEntry(
     recentTitles,
     entry => originPredicate(entry) && !history.has(entry.id),
   );
-  if (pool.length === 0) {
-    pool = filterPreschoolPool(ageEntries, recentTitles, originPredicate);
-  }
   return (
     pickWeightedPreschoolEntry(pool, originTags, state, random) ??
     buildPreschoolPassiveGapEntry(age, recentTitles)

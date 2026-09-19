@@ -2212,3 +2212,42 @@ Resume / reconciliation 只有在 durable failure artifact 完整、Contract-val
 - authoritative / canonical source cross-check 无法可靠区分 Participant bad reference 与 workspace materialization failure；
 - reconciliation 需要超出完整 typed terminal evidence 的自动推断；
 - 本 containment boundary 与 PD-111、source-change、verification 或 repository-integrity authority 发生真实冲突。
+
+### PD-120：Content Capacity Gap & AE Proposal Authority v2
+
+**产品决策（Human accepted：2026-09-19；本条为当前 Content Authoring Workflow authority）**
+
+PD-106（2026-09-01）保留为历史 Human Accepted 决策，不原地删除或改写。本条原地升级 `docs/product/content-authoring-workflow-contract-design.md` 为当前 **Content Authoring Workflow Contract v2**。
+
+**产品决策**
+
+- 顶层 Gap taxonomy 不变，仍只有：`CONTENT_GAP`、`ACCESS_PROBLEM`、`CAUSALITY_PROBLEM`、`SCHEDULING_PROBLEM`、`MEASUREMENT_PROBLEM`、`PRESENTATION_PROBLEM`、`NO_PROBLEM`。不得新增第八个顶层分类。
+- `CONTENT_CAPACITY_GAP` 是 `CONTENT_GAP` 的正式子类型，不是新的顶层类别。原有“缺少重要人物、人生事件、关键选择或长期回应”语义继续有效；另外，当某年龄阶段 / 主题 / 人物关系 / 故事或生活领域的 authored content 容量或多样性不足，导致正常自然游玩结构性重复、过早耗尽、持续缺乏有意义变化或频繁退化到 generic fallback，且不能仅通过 Access / Causality / Scheduling / Presentation 修正时，可正式诊断为 `CONTENT_GAP`（子类型 `CONTENT_CAPACITY_GAP`）。
+- metric 低、coverage 低、某一次随机重复、单个 route 没命中、scheduler 未合理利用已有内容、内容被错误 prerequisite 挡住、后果未展示给玩家——都不得自动解释为 `CONTENT_CAPACITY_GAP`；仍须先经现有 Gap Diagnosis。
+- Scheduling 与 Capacity 边界：若合理调度现有合法 authored content 即足以解决问题 → `SCHEDULING_PROBLEM`；若 access / causality / scheduling / presentation 已正确，而正常游玩仍结构性耗尽或重复 → `CONTENT_GAP` / `CONTENT_CAPACITY_GAP`。不设机械性“必须 N 个 natural samples”阈值；可用可靠 natural Player-visible evidence + 确定性结构 / pool-capacity evidence 共同证明。
+- Auto Evolution 继续 `RUN / OBSERVE`，但明确允许自动完成：`Player-visible signal → Gap Diagnosis → Content Proposal → Draft Authoring Contract → Human Approval boundary`。AE 可主动研究缺的是人物、事件、长期 payoff、有因果连接的内容序列、Milestone 或某领域 authored variety，并形成完整 Human approval material；不要求 Human 在早期阶段手动替 AE 做设计。
+- Human Approval 仍是硬门。本次不开放 AE 自动实施内容。正式流程：`Gap Diagnosis → Content Proposal → Draft Authoring Contract → HUMAN APPROVAL → Implementation → Semantic Verification → Natural Player-visible Experience Review`。Human Approval 之前禁止新增正式 Person / Event、扩 catalog、新增 Milestone authored semantics、修改正式 story / causal content、进入 implementation。`READY_FOR_FORMAL_TASK`、Agent recommendation、metric failure 都不是 Human Approval 的替代物。
+- Content Proposal 可提议一组具有真实因果关系的内容，但不因此授权新的 generic `TaskLine` / `StoryArc` runtime；连续性继续优先由 event history、choice history、durable facts、prerequisites 表达。若需新 Runtime / Schema / generic Story abstraction，必须单独 Human 决策。
+- 当前权限层级是：AE 自动诊断 + 自动 proposal / draft contract；Human 批准后才 implementation。未来只有该流程经过足够真实生产验证后，才重新讨论 AE 在既有 Contract 内自动 author + implement；本次不授权。
+- 不弱化防滥写规则：Event 是人生意义单位；不得为篇幅堆事件；新内容解释 Past → Present → Future；Person 必须过 Person Necessity Gate；Minimum Event Set 由语义证明；不得因 coverage 数字自动扩 catalog。PD-120 修复“内容容量不足无法被正式诊断”的过严边界，不是取消内容质量门槛。
+
+**与既有 authority 的调和**
+
+- **PD-106**：保留为 2026-09-01 历史 accepted decision；Gap Diagnosis closed categories、Human Approval 硬门、防滥写原则继续成立。本条 supersede 的是：容量不足不可诊断、以及 AE 不得形成完整 proposal / draft contract 的过严权限边界。
+- **PD-100 / HFL**：`READY_FOR_FORMAL_TASK` 仍不是 implementation authorization。
+- 具体领域 Contract（Person Domain、Parenthood、Archetype、Relationship quarantine 等）继续各自生效。
+
+**明确不做**
+
+- 不开放 AE 自动 author + implement；
+- 不新增第八个顶层 Gap 类别；
+- 不因本决策扩写任何 catalog 或新增 Person / Event / Milestone；
+- 不授权 generic TaskLine / StoryArc runtime；
+- 不取消 Person Necessity Gate、Minimum Event Set 语义证明或其他内容质量门槛。
+
+**重新讨论条件**
+
+- 该 AE 自动诊断 + proposal / draft contract 流程经足够真实生产验证后，需要讨论 AE 在既有 Contract 内自动 author + implement；
+- 需要新增或修改 Runtime、Schema、通用 Person/Story/Household/Relationship abstraction；
+- 需要改变 Gap Diagnosis closed categories、Human approval boundary 或 Auto Evolution STOP boundary；
+- 真实 Player-visible Experience Review 证明现有内容语义之外存在新的产品问题。

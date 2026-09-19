@@ -1,6 +1,8 @@
-# PD-106：Content Authoring Workflow Contract v1
+# Content Authoring Workflow Contract v2
 
-**状态：** 当前权威规范（Human accepted：2026-09-01；PD-106 authority closure）
+**状态：** 当前权威规范（Human accepted：2026-09-19；PD-120）
+
+**历史：** PD-106（2026-09-01）保留为历史 Human Accepted 决策；本文件为当前 canonical Content Authoring Workflow Contract。v2 修复“内容容量不足无法被正式诊断”的过严边界，并明确 Auto Evolution 在 Human Approval 之前的 proposal 权限；不取消内容质量门槛。
 
 **目的：** 统一以后人工、ChatGPT、Codex 与 Auto Evolution 发现内容缺口、设计人物/事件、实现和验证内容的流程，防止“看到指标不好就堆事件”、自由扩写和系统性过度设计。
 
@@ -39,7 +41,7 @@
 相遇 → 好感 → 冲突 → 恋爱 → 结婚 → 生子 → 结局
 ```
 
-需要正式 Person 时，人物领域语义由 Character / Relationship **Person Domain Authoring Contract v1.1** 定义（见 §5.2）。PD-106 只规定流程顺序，不维护第二套会独立漂移的人物规则。
+需要正式 Person 时，人物领域语义由 Character / Relationship **Person Domain Authoring Contract v1.1** 定义（见 §5.2）。本 Contract 只规定流程顺序，不维护第二套会独立漂移的人物规则。
 
 事件数量由人物在玩家人生中的真实语义需要决定，而不是由“NPC 完整度”决定。
 
@@ -63,6 +65,8 @@ StoryArc.currentStage
 后续事件必须能够说明：
 
 > 为什么现在可以发生？它消费了什么真实过去？它留下什么以后可能继续消费？
+
+Content Proposal 可以提议一组具有真实因果关系的内容，但这不授权新的 generic `TaskLine` / `StoryArc` runtime。若 proposal 实际需要新 Runtime / Schema / generic Story abstraction，必须单独 Human 决策。
 
 ### 1.4 新内容必须解释“过去—现在—未来”
 
@@ -95,7 +99,7 @@ Future Hook 可以明确为“无”，但不能无意识地生成孤立填充�
 ↓
 2. Content Proposal
 ↓
-3. Authoring Contract
+3. Draft Authoring Contract
 ↓
 4. Human Approval
 ↓
@@ -103,7 +107,7 @@ Future Hook 可以明确为“无”，但不能无意识地生成孤立填充�
 ↓
 6. Semantic Verification
 ↓
-7. Player-visible Experience Review
+7. Natural Player-visible Experience Review
 ```
 
 Player-visible Experience Review 失败后必须回到 Gap Diagnosis，而不是直接继续加内容。
@@ -139,9 +143,11 @@ PRESENTATION_PROBLEM
 NO_PROBLEM
 ```
 
+顶层 Gap taxonomy 只有以上七类，不得新增第八个顶层分类。
+
 定义：
 
-- `CONTENT_GAP`：确实缺少一个重要人物、人生事件、关键选择或长期回应。
+- `CONTENT_GAP`：确实缺少一个重要人物、人生事件、关键选择或长期回应；或在 access / causality / scheduling / presentation 已正确的前提下，某个年龄阶段、主题、人物关系、故事领域或生活领域的 authored content 容量或多样性不足，导致正常自然游玩出现结构性重复、过早耗尽、持续缺乏有意义变化，或频繁退化到 generic fallback（正式子类型见 §3.2.1）。
 - `ACCESS_PROBLEM`：内容已经存在，但资格/前置条件使正确玩家无法进入。
 - `CAUSALITY_PROBLEM`：前后内容存在，但真实历史没有正确连接。
 - `SCHEDULING_PROBLEM`：合适内容已经存在，但选择机制没有合理呈现。
@@ -150,6 +156,53 @@ NO_PROBLEM
 - `NO_PROBLEM`：没有值得产品修改的真实问题。
 
 只有 `CONTENT_GAP` 才允许进入新增内容流程。
+
+#### 3.2.1 `CONTENT_CAPACITY_GAP`（`CONTENT_GAP` 正式子类型）
+
+`CONTENT_CAPACITY_GAP` 不是新的顶层类别。它是 `CONTENT_GAP` 的正式子类型。
+
+定义：
+
+> 当某个年龄阶段、主题、人物关系、故事领域或生活领域的 authored content 容量或多样性不足，导致正常自然游玩出现结构性重复、过早耗尽、持续缺乏有意义变化，或频繁退化到 generic fallback，并且该问题不能仅通过 Access、Causality、Scheduling 或 Presentation 修正时，可以正式诊断为 `CONTENT_GAP`（子类型 `CONTENT_CAPACITY_GAP`）。
+
+不得把以下情况自动解释为 `CONTENT_CAPACITY_GAP`：
+
+```text
+metric 低
+coverage 低
+某一次随机重复
+单个 route 没命中内容
+scheduler 没合理利用已有内容
+已有内容被错误 prerequisite 挡住
+已有后果没有展示给玩家
+```
+
+这些仍必须先经过现有 Gap Diagnosis，并优先考虑 Access / Causality / Scheduling / Presentation / Measurement。
+
+#### 3.2.2 Scheduling 与 Capacity 的边界
+
+正式判断原则：
+
+```text
+如果合理调度现有合法 authored content 就足以解决问题：
+    SCHEDULING_PROBLEM
+
+如果 access / causality / scheduling / presentation 已正确，
+而正常游玩仍会结构性耗尽或重复：
+    CONTENT_GAP / CONTENT_CAPACITY_GAP
+```
+
+不设置机械性的“必须 N 个 natural samples”阈值。
+
+可以使用：
+
+```text
+可靠的 natural Player-visible evidence
++
+确定性的结构 / pool-capacity evidence
+```
+
+共同证明结构性容量不足。
 
 ### 3.3 Hard Gate
 
@@ -164,7 +217,7 @@ STOP
 
 ## 4. Stage 2：Content Proposal
 
-确认 `CONTENT_GAP` 后，模型先提交最小 proposal，不写正式正文和 JSON。
+确认 `CONTENT_GAP` 后，先提交最小 proposal，不写正式正文和 JSON。
 
 必须包括：
 
@@ -184,6 +237,8 @@ Gap
 
 > “这条线还能再写什么？”
 
+Auto Evolution 可以在 Human Approval 之前，主动研究缺的是人物、事件、长期 payoff、有因果连接的内容序列、Milestone，或某个领域的 authored variety，并形成完整的 Human approval material。不要求 Human 在“这里只是内容少吗？”这种早期阶段手动替 AE 做设计。
+
 ### 4.1 扩写已有故事线的审稿问题
 
 新增故事内容前，应先逐项审查：
@@ -192,9 +247,26 @@ Gap
 - 这项缺失是否造成了玩家可感知的连续性或人生意义问题？
 - 还是只是想增加篇幅？如果只是增加篇幅，默认不加。
 
+### 4.2 任务线语义边界
+
+允许 Content Proposal 提议一组具有真实因果关系的内容。
+
+连续性继续优先由现有：
+
+```text
+event history
+choice history
+durable facts
+prerequisites
+```
+
+表达。
+
+不得因此授权新的 generic `TaskLine` / `StoryArc` runtime。如果 proposal 实际需要新 Runtime / Schema / generic Story abstraction，必须单独 Human 决策。
+
 ---
 
-## 5. Stage 3：Authoring Contract
+## 5. Stage 3：Draft Authoring Contract
 
 ### 5.1 Event Authoring Card
 
@@ -230,7 +302,7 @@ produce Event Authoring Cards
 
 权威字段、分类、continuity、validation 与 Card 结构以 `docs/product/character-relationship-product-contract-design.md` §11 Person Domain Authoring Contract v1.1 为准。
 
-PD-106 可保留极简提示，但不维护平行完整人物规则：
+本 Contract 可保留极简提示，但不维护平行完整人物规则：
 
 - 先过 Person Necessity Gate（场景功能角色不得自动升级 Person）
 - 再选择 `actor_class` / `identity_strategy`
@@ -263,6 +335,8 @@ Event Authoring Cards
 
 典型内容可能只需少量关键 Event Cards；如果需要更多，必须由因果语义证明，而不是为了“丰富度”。**不得把“2–5 events”写成硬数量规范。**
 
+不得因为 coverage 数字自动扩 catalog。Minimum Event Set 由语义证明。
+
 ---
 
 ## 6. Stage 4：Human Approval
@@ -281,6 +355,19 @@ Human 主要判断：
 代码 ID、文件名、命令可以保留英文；不应要求 Human 阅读大段英文执行提示后才能判断产品方向。
 
 未经 Human Approval，不进入正式 Implementation。
+
+Human Approval 之前禁止：
+
+```text
+新增正式 Person
+新增 Event
+扩 catalog
+新增 Milestone authored semantics
+修改正式 story / causal content
+进入 implementation
+```
+
+`READY_FOR_FORMAL_TASK`、Agent recommendation、metric failure 都不是 Human Approval 的替代物。
 
 ---
 
@@ -349,7 +436,7 @@ STOP
 
 ---
 
-## 9. Stage 7：Player-visible Experience Review
+## 9. Stage 7：Natural Player-visible Experience Review
 
 语义正确后，再进行定性的玩家可见体验审查。可以使用：
 
@@ -391,18 +478,52 @@ presentation
 
 ### 10.1 Auto Evolution / Analysis Agent
 
-可以：
+Auto Evolution 继续处于：
+
+```text
+RUN / OBSERVE
+```
+
+明确允许 AE 自动完成：
+
+```text
+Player-visible signal
+→ Gap Diagnosis
+→ Content Proposal
+→ Draft Authoring Contract
+→ Human Approval boundary
+```
+
+也就是说 AE 可以：
 
 - 发现异常；
 - 收集 trace；
 - 提出 Gap Hypothesis；
-- 提供可能分类与证据。
+- 完成 Gap Diagnosis；
+- 主动研究缺的是人物、事件、长期 payoff、有因果连接的内容序列、Milestone，或某个领域的 authored variety；
+- 形成完整的 Content Proposal 与 Draft Authoring Contract，作为 Human approval material。
 
 不能：
 
-- 自动决定新增人物；
-- 自动生成正式事件并提交；
-- 因 metric FAIL 自动扩张 catalog。
+- 自动决定并实施新增人物；
+- 自动生成正式事件并提交到 catalog；
+- 因 metric FAIL 自动扩张 catalog；
+- 越过 Human Approval 进入 Implementation。
+
+当前采用的是：
+
+```text
+AE 自动诊断 + 自动 proposal / draft contract
+Human 批准后才 implementation
+```
+
+未来只有在该流程经过足够真实生产验证后，才重新讨论：
+
+```text
+AE 在既有 Contract 内自动 author + implement
+```
+
+本次不授权这一层。
 
 ### 10.2 Product Design Agent
 
@@ -437,14 +558,14 @@ presentation
 
 ## 11. 与具体领域 Contract 的关系
 
-PD-106 是内容生产治理层，不替代具体领域 authority，也不依赖已退休的体验度量实验。
+本 Contract 是内容生产治理层，不替代具体领域 authority，也不依赖已退休的体验度量实验。
 
 ```text
 Human / Auto Evolution / tests / traces
         ↓
 发现 signal
         ↓
-PD-106 Gap Diagnosis
+PD-120 Gap Diagnosis
         ↓
 如果确认 CONTENT_GAP
         ↓
@@ -462,7 +583,7 @@ PD-106 Gap Diagnosis
 - Parenthood 仍受 PD-102 限制；
 - PD-104 deferred relationship events 不是 backlog，不能因“内容缺”自动恢复。
 
-**PD-106 不授权自行扩大 Person capability**，也不维护第二套会独立漂移的完整人物 specification。
+**本 Contract 不授权自行扩大 Person capability**，也不维护第二套会独立漂移的完整人物 specification。
 
 ---
 
@@ -479,13 +600,13 @@ RUN / OBSERVE
 ```text
 Auto Evolution / tests / traces 发现 signal
 ↓
-PD-106 Gap Diagnosis
+PD-120 Gap Diagnosis
 ↓
 如果 CONTENT_GAP
 ↓
-形成受约束的 Content Proposal / Authoring Cards
+AE 形成受约束的 Content Proposal / Draft Authoring Contract
 ↓
-领域 Contract
+领域 Contract（如需要）
 ↓
 Human Approval
 ↓
@@ -493,7 +614,7 @@ Codex Implementation
 ↓
 Semantic Verification
 ↓
-Player-visible Experience Review
+Natural Player-visible Experience Review
 ```
 
 禁止：
@@ -501,6 +622,14 @@ Player-visible Experience Review
 ```text
 metric FAIL
 → 自动生成 5 个事件
+```
+
+也禁止：
+
+```text
+READY_FOR_FORMAL_TASK / Agent recommendation / metric failure
+→ 当作 Human Approval
+→ 直接 Implementation
 ```
 
 ---
@@ -517,6 +646,7 @@ metric FAIL
 - 为什么缺？
 - 玩家可感知的问题是什么？
 - 是 Person/Event/Payoff/Access，还是根本不是 Content Gap？
+- 若主张 `CONTENT_CAPACITY_GAP`，为什么不是 Scheduling / Access / Causality / Presentation？
 
 不写正式事件。
 
@@ -555,26 +685,31 @@ Contract 获批后才生成：
 - 新事件没有 meaningful past connection，也没有明确人生意义；
 - implementation 需要未经批准的 schema/runtime/general abstraction；
 - 为一个样例提前建立 generic Person/Story/Household/Debt runtime；
-- Auto Evolution 试图从指标直接进入正式内容生产；
-- 为了让测试变绿而新增内容，但尚未证明玩家存在 Content Gap。
+- Auto Evolution 试图从指标直接进入正式内容实施（越过 Human Approval）；
+- 为了让测试变绿而新增内容，但尚未证明玩家存在 Content Gap；
+- 因 coverage 数字自动扩 catalog；
+- 未过 Person Necessity Gate 就新增 Person。
 
 默认动作：缩小问题、拆分 Proposal、返回 Gap Diagnosis，而不是继续泛化。
 
 ---
 
-## 15. v1 Acceptance
+## 15. v2 Acceptance
 
-PD-106 v1 成功意味着：
+Content Authoring Workflow Contract v2 成功意味着：
 
 1. 新内容必须先有 Gap Diagnosis。
-2. 只有 `CONTENT_GAP` 可以进入 Authoring。
-3. Person 与 Event 有清晰、轻量的 Authoring Card。
-4. Event 明确是人生意义单位，不是日常日志。
-5. Story continuity 优先由真实 history 构成。
-6. Human 在产品语义层审批，默认看到中文材料。
-7. Codex 不得在 Implementation 阶段自行扩大 scope。
-8. Semantic Verification 在 Player-visible Experience Review 之前。
-9. Player-visible Experience Review failure 必须重新归因，不能自动加内容。
-10. Auto Evolution 保持发现/观察能力，不获得自动扩张 catalog 的权力。
+2. 只有 `CONTENT_GAP` 可以进入 Authoring；顶层 taxonomy 仍只有七类。
+3. `CONTENT_CAPACITY_GAP` 可作为 `CONTENT_GAP` 正式子类型被诊断，但不得绕过 Access / Causality / Scheduling / Presentation 审查。
+4. Scheduling 与 Capacity 有明确边界；不设机械 natural-sample 阈值。
+5. Person 与 Event 有清晰、轻量的 Authoring Card；Person 必须过 Person Necessity Gate；Minimum Event Set 由语义证明。
+6. Event 明确是人生意义单位，不是日常日志；不得为了篇幅堆事件。
+7. Story continuity 优先由真实 history 构成；不因此授权 generic TaskLine / StoryArc runtime。
+8. Human 在产品语义层审批，默认看到中文材料；Human Approval 之前禁止实施内容。
+9. AE 可自动完成 Gap Diagnosis → Content Proposal → Draft Authoring Contract，停在 Human Approval boundary；不得自动 author + implement。
+10. Codex 不得在 Implementation 阶段自行扩大 scope。
+11. Semantic Verification 在 Player-visible Experience Review 之前。
+12. Player-visible Experience Review failure 必须重新归因，不能自动加内容。
+13. Auto Evolution 保持 `RUN / OBSERVE`，不获得自动扩张 catalog 的权力。
 
 该 Contract 不要求立即生成新人物或新事件；它首先是未来内容生产的一致治理边界。

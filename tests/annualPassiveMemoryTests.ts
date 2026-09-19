@@ -7,15 +7,24 @@ import {
   prepareAnnualPassiveMemory,
   preparePreschoolSeasonMemory,
 } from '../src/core/activePlanning/annualPassiveMemory';
-import { getPreschoolPassiveEntries, isNeutralOnlyPreschoolEntry } from '../src/data/preschoolPassiveSpine';
+import {
+  getPreschoolPassiveEntries,
+  isForeignExclusivePreschoolEntry,
+  isNeutralOnlyPreschoolEntry,
+} from '../src/data/preschoolPassiveSpine';
 import { reactive } from 'vue';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
+import type { PassiveNarrativeEntry } from '../src/data/passiveNarrativeTypes';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
+}
+
+function isPreschoolGap(entry: PassiveNarrativeEntry): boolean {
+  return entry.id === 'preschool_passive_gap' || entry.id.startsWith('preschool_passive_gap::');
 }
 
 function merchantInfantState(age = 0): GameState {
@@ -148,7 +157,9 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(!isPreschoolSeasonMemoryAge(8), 'age 8 leaves season-memory band');
   testPrepareAnnualPassiveMemoryWithReactiveState();
   testPreparePreschoolSeasonMemory();
-  testPreparePreschoolSeasonMemoryWithExhaustedMartialOrigin();
+  testPreparePreschoolSeasonMemoryConsumesNeutralBeforeGap();
+  testPreparePreschoolSeasonMemoryNeutralFirstClassWithOriginPresent();
+  testPreparePreschoolSeasonMemoryTitlePreferenceDoesNotForceGap();
 
   const state = merchantInfantState(0);
   const plan = prepareAnnualPassiveMemory(state, () => 0);
@@ -203,18 +214,21 @@ function testPreparePreschoolSeasonMemory(): void {
   assert(plan.entries.length === PRESCHOOL_SEASON_MEMORY_ENTRY_COUNT, 'season card packs three beats');
   assert(plan.headline === '5岁这一季', `unexpected season headline: ${plan.headline}`);
   assert(plan.body.split('\n\n').length === 3, 'season body contains three narrative beats');
-  const textureCount = plan.entries.filter(isNeutralOnlyPreschoolEntry).length;
-  assert(textureCount === 1, `season pack must contain exactly one everyday texture, got ${textureCount}`);
-  assert(isNeutralOnlyPreschoolEntry(plan.entries[1]), 'everyday texture sits in the middle beat');
-  assert(!isNeutralOnlyPreschoolEntry(plan.entries[0]), 'first beat is origin-flavored');
-  assert(!isNeutralOnlyPreschoolEntry(plan.entries[2]), 'third beat is origin-flavored');
+  assert(plan.entries.every(entry => !isPreschoolGap(entry)), 'season with enough authored pool must not use generic gap');
+  const authoredIds = plan.entries.map(entry => entry.id);
+  assert(new Set(authoredIds).size === 3, 'season authored entry IDs must be distinct');
+  assert(
+    plan.entries.every(entry => !isForeignExclusivePreschoolEntry(entry, 'martial')),
+    'season must not surface foreign exclusive origin content',
+  );
   assert((state.eventHistory ?? []).length === 0, 'preparing the season card does not mutate gameplay state');
   const result = commitAnnualPassiveMemory(state, plan);
   assert((state.eventHistory ?? []).length === 3, 'all three season beats remain traceable');
   assert(result.entryIds.length === 3, 'commit records three entry ids');
 }
 
-function testPreparePreschoolSeasonMemoryWithExhaustedMartialOrigin(): void {
+/** Case A: exhausted origin pool must still consume remaining authored neutrals before any gap. */
+function testPreparePreschoolSeasonMemoryConsumesNeutralBeforeGap(): void {
   const state = martialPreschoolState(5);
   const age5Entries = getPreschoolPassiveEntries(5);
   const martialOrigins = age5Entries.filter(
@@ -222,29 +236,106 @@ function testPreparePreschoolSeasonMemoryWithExhaustedMartialOrigin(): void {
   );
   const neutralEntries = age5Entries.filter(isNeutralOnlyPreschoolEntry);
   assert(martialOrigins.length > 0, 'season exhaustion fixture has martial origin entries');
-  assert(neutralEntries.length >= 8, 'season exhaustion fixture keeps an authored neutral entry available');
-  const originalHistory = JSON.stringify(state.eventHistory ?? []);
+  assert(neutralEntries.length >= 3, 'season exhaustion fixture keeps at least three authored neutrals');
   state.eventHistory = [
     ...martialOrigins.map(entry => ({ eventId: entry.id, age: 5 })),
-    ...neutralEntries.slice(0, 7).map(entry => ({ eventId: entry.id, age: 5 })),
+    ...neutralEntries.slice(0, Math.max(0, neutralEntries.length - 3)).map(entry => ({
+      eventId: entry.id,
+      age: 5,
+    })),
   ];
+  const remainingNeutralIds = new Set(
+    neutralEntries
+      .filter(entry => !(state.eventHistory ?? []).some(record => record.eventId === entry.id))
+      .map(entry => entry.id),
+  );
+  assert(remainingNeutralIds.size >= 3, 'fixture leaves at least three unconsumed neutrals');
   const historyBeforePrepare = JSON.stringify(state.eventHistory);
 
   const plan = preparePreschoolSeasonMemory(state, () => 0);
-  const neutralIds = new Set(neutralEntries.map(entry => entry.id));
 
-  assert(plan.entries.length === 3, 'exhausted origin season still has three entries');
+  assert(plan.entries.length === 3, 'season still packs three beats after origin exhaustion');
   assert(
-    plan.entries[0]!.id === 'preschool_passive_gap' || plan.entries[0]!.id.startsWith('preschool_passive_gap::'),
-    `exhausted first origin slot must use gap fallback, got ${plan.entries[0]!.id}`,
+    plan.entries.every(entry => !isPreschoolGap(entry)),
+    'season must consume remaining authored neutral entries before any generic gap',
   );
-  assert(neutralIds.has(plan.entries[1]!.id), `middle slot must remain an authored neutral texture, got ${plan.entries[1]!.id}`);
   assert(
-    plan.entries[2]!.id === 'preschool_passive_gap' || plan.entries[2]!.id.startsWith('preschool_passive_gap::'),
-    `exhausted second origin slot must use gap fallback, got ${plan.entries[2]!.id}`,
+    plan.entries.every(entry => remainingNeutralIds.has(entry.id)),
+    'all three beats must come from the remaining authored neutral pool',
   );
+  assert(new Set(plan.entries.map(entry => entry.id)).size === 3, 'remaining neutrals must stay distinct');
   assert(JSON.stringify(state.eventHistory) === historyBeforePrepare, 'preparing season memory does not mutate input history');
-  assert(originalHistory === JSON.stringify([]), 'season exhaustion fixture starts with an empty source history');
+}
+
+/**
+ * Case B: soft origin affinity must not become hard origin-first quota.
+ * With only one matching-origin and one neutral left, deterministic random can still pick neutral first.
+ */
+function testPreparePreschoolSeasonMemoryNeutralFirstClassWithOriginPresent(): void {
+  const state = martialPreschoolState(5);
+  const age5Entries = getPreschoolPassiveEntries(5);
+  const martialOrigins = age5Entries.filter(
+    entry => entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry),
+  );
+  const neutralEntries = age5Entries.filter(isNeutralOnlyPreschoolEntry);
+  assert(martialOrigins.length > 0, 'neutral-first-class fixture has martial origin entries');
+  assert(neutralEntries.length > 0, 'neutral-first-class fixture has neutral entries');
+
+  const remainingOrigin = martialOrigins[martialOrigins.length - 1]!;
+  const remainingNeutral = neutralEntries[neutralEntries.length - 1]!;
+  state.eventHistory = [
+    ...martialOrigins.filter(entry => entry.id !== remainingOrigin.id).map(entry => ({ eventId: entry.id, age: 5 })),
+    ...neutralEntries.filter(entry => entry.id !== remainingNeutral.id).map(entry => ({ eventId: entry.id, age: 5 })),
+  ];
+
+  const orderedPair = age5Entries.filter(
+    entry => entry.id === remainingOrigin.id || entry.id === remainingNeutral.id,
+  );
+  assert(orderedPair.length === 2, 'remaining authored pair must both remain in age catalog order');
+  const random =
+    orderedPair[0]!.id === remainingNeutral.id
+      ? () => 0
+      : () => 0.999999;
+
+  const plan = preparePreschoolSeasonMemory(state, random);
+
+  assert(plan.entries[0]!.id === remainingNeutral.id, `first beat must remain able to select remaining neutral, got ${plan.entries[0]!.id}`);
+  assert(plan.entries[1]!.id === remainingOrigin.id, `second beat must consume remaining matching-origin, got ${plan.entries[1]!.id}`);
+  assert(isPreschoolGap(plan.entries[2]!), `third beat may gap only after whole-pool exhaustion, got ${plan.entries[2]!.id}`);
+}
+
+/**
+ * Case C: recent-title preference may empty preferred pool, but must fall back to the sole remaining authored entry.
+ */
+function testPreparePreschoolSeasonMemoryTitlePreferenceDoesNotForceGap(): void {
+  const state = martialPreschoolState(5);
+  const age5Entries = getPreschoolPassiveEntries(5);
+  const martialOrigins = age5Entries.filter(
+    entry => entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry),
+  );
+  const neutralEntries = age5Entries.filter(isNeutralOnlyPreschoolEntry);
+  const remaining = neutralEntries[0]!;
+  assert(Boolean(remaining), 'title-preference fixture needs one remaining authored neutral');
+
+  state.eventHistory = [
+    ...martialOrigins.map(entry => ({ eventId: entry.id, age: 5 })),
+    ...neutralEntries.filter(entry => entry.id !== remaining.id).map(entry => ({ eventId: entry.id, age: 5 })),
+  ];
+  state.flags = {
+    ...(state.flags ?? {}),
+    p16_passive_title_history: [remaining.title],
+  };
+  const historyIds = new Set((state.eventHistory ?? []).map(record => record.eventId));
+
+  const plan = preparePreschoolSeasonMemory(state, () => 0);
+
+  assert(plan.entries[0]!.id === remaining.id, `sole remaining authored entry must win over title preference, got ${plan.entries[0]!.id}`);
+  assert(isPreschoolGap(plan.entries[1]!), `second beat gaps only after whole-pool exhaustion, got ${plan.entries[1]!.id}`);
+  assert(isPreschoolGap(plan.entries[2]!), `third beat gaps only after whole-pool exhaustion, got ${plan.entries[2]!.id}`);
+  assert(
+    plan.entries.every(entry => isPreschoolGap(entry) || !historyIds.has(entry.id)),
+    'season must not reuse any authored id already present in eventHistory',
+  );
 }
 
 async function testHeadlessSeasonAdvance(): Promise<void> {

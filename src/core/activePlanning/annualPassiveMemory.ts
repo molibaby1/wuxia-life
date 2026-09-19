@@ -5,8 +5,7 @@ import {
 } from '../../data/infantPassiveNarratives';
 import {
   appendPassiveTitleToHistory,
-  selectNeutralOnlyPreschoolEntry,
-  selectPreschoolOriginExclusiveEntry,
+  selectPreschoolSeasonEntry,
 } from '../../data/preschoolPassiveSpine';
 import type { GameState } from '../../types/eventTypes';
 import type { PassiveNarrativeEntry } from '../../data/passiveNarrativeTypes';
@@ -87,13 +86,12 @@ export function preparePreschoolSeasonMemory(
   random: () => number = Math.random,
 ): AnnualPassiveMemoryPlan {
   const working = JSON.parse(JSON.stringify(state)) as GameState;
-  const originOne = selectPreschoolOriginExclusiveEntry(working, random);
-  applyEntry(working, originOne, {});
-  const texture = selectNeutralOnlyPreschoolEntry(working, random);
-  applyEntry(working, texture, {});
-  const originTwo = selectPreschoolOriginExclusiveEntry(working, random);
-  applyEntry(working, originTwo, {});
-  const entries = [originOne, texture, originTwo];
+  const entries: PassiveNarrativeEntry[] = [];
+  for (let index = 0; index < PRESCHOOL_SEASON_MEMORY_ENTRY_COUNT; index += 1) {
+    const entry = selectPreschoolSeasonEntry(working, random);
+    applyEntry(working, entry, {});
+    entries.push(entry);
+  }
   const age = state.player?.age ?? 0;
   return {
     headline: `${age}岁这一季`,

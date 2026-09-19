@@ -380,3 +380,34 @@ export function selectNeutralOnlyPreschoolEntry(
     buildPreschoolPassiveGapEntry(age, recentTitles)
   );
 }
+
+/**
+ * Unified 4–7 season selector: matching-origin + neutral share one unconsumed authored pool.
+ * Title preference may narrow the preferred subset, but never forces gap while authored remains.
+ */
+export function selectPreschoolSeasonEntry(
+  state: GameState,
+  random: () => number = Math.random,
+): PreschoolPassiveEntry {
+  const age = state.player?.age ?? 0;
+  const originTags = resolveOriginTags(state);
+  const history = new Set((state.eventHistory ?? []).map(record => record.eventId));
+  const recentTitles = getRecentPassiveNarrativeTitles(state);
+  const ageEntries = getPreschoolPassiveEntries(age);
+
+  const availablePool = ageEntries.filter(
+    entry => isPreschoolPassiveEligible(entry, originTags) && !history.has(entry.id),
+  );
+  if (availablePool.length === 0) {
+    return buildPreschoolPassiveGapEntry(age, recentTitles);
+  }
+
+  let preferredPool = suppressRecentTitleRepeats(availablePool, recentTitles);
+  preferredPool = enforceMaxConsecutiveTitleCap(preferredPool, recentTitles, 2);
+  const effectivePool = preferredPool.length > 0 ? preferredPool : availablePool;
+
+  return (
+    pickWeightedPreschoolEntry(effectivePool, originTags, state, random) ??
+    buildPreschoolPassiveGapEntry(age, recentTitles)
+  );
+}

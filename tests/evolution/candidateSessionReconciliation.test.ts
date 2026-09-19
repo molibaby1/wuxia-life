@@ -241,14 +241,12 @@ export async function runCandidateSessionReconciliationTests(): Promise<void> {
   await writeFile(join(crashLane, 'review-continuation-000001/decision.json'), canonicalJson(escalationDecision));
   const crashPoolPath = join(root, 'continuation-escalate-pool.json');
   await writeFile(crashPoolPath, canonicalJson(crashPool));
-  let reconciliationParticipantCalls = 0;
   const crashResult = await reconcileActiveCandidate({
     pool: crashPool,
     candidateLaneRoot: crashLane,
     poolPath: crashPoolPath,
     repositoryRoot: root,
   });
-  assert.equal(reconciliationParticipantCalls, 0);
   assert.equal(crashResult.status, 'RECONCILED');
   const crashAfter = await readPool(crashPoolPath);
   assert.equal(crashAfter.status, 'PROCESSING');
@@ -272,13 +270,14 @@ export async function runCandidateSessionReconciliationTests(): Promise<void> {
       repositoryRoot: root,
       dependencies: {
         retainHumanFollowup: async () => {
+          retentionFailureParticipantCalls += 1;
           throw new Error('injected HFL retention failure');
         },
       },
     }),
     /injected HFL retention failure/,
   );
-  assert.equal(retentionFailureParticipantCalls, 0);
+  assert.equal(retentionFailureParticipantCalls, 1);
   const retentionFailureAfter = await readPool(retentionFailurePoolPath);
   assert.equal(retentionFailureAfter.status, 'PROCESSING');
   assert.equal(retentionFailureAfter.candidates[0]!.processingState, 'ACTIVE');

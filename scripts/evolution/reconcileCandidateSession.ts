@@ -6,6 +6,10 @@ import { canonicalJson } from './phase0/provenance';
 import { parseCandidateLaneFailureV2 } from './candidateLaneFailureContract';
 import { completeCandidate, exhaustPoolIfComplete, interruptCandidate, interruptCandidateLocally, markSourceChangePending } from './candidatePoolState';
 import type { CandidatePoolV1 } from './candidatePoolContract';
+import {
+  deriveHumanFollowupContinuationEvidence,
+  retainHumanFollowupWorkItem,
+} from './humanFollowup/retainHumanFollowupWorkItem';
 
 export type CandidateReconciliationResult =
   | { status: 'NO_ACTIVE_CANDIDATE' }
@@ -18,6 +22,10 @@ export interface ReconcileActiveCandidateInput {
   candidateLaneRoot: string;
   poolPath?: string;
   laneRef?: string;
+  repositoryRoot?: string;
+  dependencies?: {
+    retainHumanFollowup?: typeof retainHumanFollowupWorkItem;
+  };
 }
 
 function durableCandidateArtifactRef(input: { laneRef: string; candidateLaneRoot: string; artifactPath: string }): string {
@@ -88,9 +96,10 @@ export async function reconcileActiveCandidate(input: ReconcileActiveCandidateIn
     if (input.poolPath) await writeAtomic(input.poolPath, next);
     return { status: 'INTERRUPTED', candidateRef: active.candidateRef, interruptionRef };
   }
+  let decision: ReturnType<typeof validateSolutionDecision>;
   try {
     const problemPackage = validateProblemPackage(JSON.parse(await readFile(packagePath, 'utf8')) as unknown);
-    const decision = validateSolutionDecision(JSON.parse(await readFile(effectivePath, 'utf8')) as unknown);
+    decision = validateSolutionDecision(JSON.parse(await readFile(effectivePath, 'utf8')) as unknown);
     const activation = JSON.parse(await readFile(activationPath, 'utf8')) as Record<string, unknown>;
     const activationKeys = ['schemaVersion', 'candidateRef', 'poolId', 'hypothesisId', 'sourceIndex', 'hypothesisSha256', 'hypothesisSetRef', 'hypothesisSetSha256', 'sourceRunRef'];
     if (activationKeys.some(key => !(key in activation)) || Object.keys(activation).some(key => !activationKeys.includes(key))) throw new Error('candidate activation artifact shape mismatch');
@@ -110,15 +119,37 @@ export async function reconcileActiveCandidate(input: ReconcileActiveCandidateIn
     const baseDecision = validateSolutionDecision(JSON.parse(await readFile(baseDecisionPath, 'utf8')) as unknown);
     if (baseDecision.route === 'DEFER_MORE_WORK_REQUESTED' && !await exists(continuationDecisionPath)) throw new Error('candidate continuation terminal decision is missing');
     if (await exists(continuationDecisionPath) && baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED') throw new Error('candidate continuation exists without a base continuation request');
-    const laneRef = input.laneRef ?? `${input.pool.source.sealedSourceRef}/candidates/${active.hypothesisId}`;
-    const next = decision.route === 'READY_FOR_CONFIG_EXECUTION'
-      ? markSourceChangePending(input.pool, active.candidateRef, { laneRef, baseDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: effectivePath }), sourceTransitionRef: `source-transitions/${active.hypothesisId}` })
-      : completeCandidate(input.pool, active.candidateRef, { laneRef, baseDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: effectivePath }) });
-    if (input.poolPath) await writeAtomic(input.poolPath, next);
-    return { status: 'RECONCILED', candidateRef: active.candidateRef, decisionPath: effectivePath };
   } catch {
     const next = interruptCandidate(input.pool, active.candidateRef, interruptionRef);
     if (input.poolPath) await writeAtomic(input.poolPath, next);
     return { status: 'INTERRUPTED', candidateRef: active.candidateRef, interruptionRef };
   }
+  let humanFollowupRef: string | null = null;
+  if (decision.route === 'ESCALATE_HUMAN') {
+    if (!input.repositoryRoot) throw new Error('repositoryRoot is required to retain Human follow-up for an effective ESCALATE_HUMAN decision');
+    const continuationEvidence = await deriveHumanFollowupContinuationEvidence(input.candidateLaneRoot, effectivePath);
+    const retain = input.dependencies?.retainHumanFollowup ?? retainHumanFollowupWorkItem;
+    const retained = await retain({
+      repositoryRoot: input.repositoryRoot,
+      workflowRoot: resolve(input.candidateLaneRoot),
+      workflowInstanceRef: `${input.pool.logicalSessionId}/${active.hypothesisId}`,
+      sourceRunRef: input.pool.source.sourceRunRef,
+      sourceFingerprintSha256: input.pool.source.sourceFingerprintSha256,
+      problemPackagePath: packagePath,
+      decisionPath: effectivePath,
+      ...(continuationEvidence ? { continuation: continuationEvidence } : {}),
+      candidateProvenance: {
+        mode: 'candidate-activation-v1',
+        candidateActivationPath: 'candidate-activation.json',
+        hypothesisSetPath: input.pool.hypothesisSet.artifactRef,
+      },
+    });
+    humanFollowupRef = relative(resolve(input.repositoryRoot), retained.itemPath).split(sep).join('/');
+  }
+  const laneRef = input.laneRef ?? `${input.pool.source.sealedSourceRef}/candidates/${active.hypothesisId}`;
+  const next = decision.route === 'READY_FOR_CONFIG_EXECUTION'
+    ? markSourceChangePending(input.pool, active.candidateRef, { laneRef, baseDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: effectivePath }), sourceTransitionRef: `source-transitions/${active.hypothesisId}` })
+    : completeCandidate(input.pool, active.candidateRef, { laneRef, baseDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ laneRef, candidateLaneRoot: input.candidateLaneRoot, artifactPath: effectivePath }), humanFollowupRef });
+  if (input.poolPath) await writeAtomic(input.poolPath, next);
+  return { status: 'RECONCILED', candidateRef: active.candidateRef, decisionPath: effectivePath };
 }

@@ -7,7 +7,8 @@ import { buildCandidatePoolV1, parseCandidatePoolV1 } from '../../scripts/evolut
 import { activateCandidate } from '../../scripts/evolution/candidatePoolState';
 import { reconcileActiveCandidate } from '../../scripts/evolution/reconcileCandidateSession';
 import { buildProblemPackage } from '../../scripts/evolution/problemAgnosticSolution/buildProblemPackage';
-import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
+import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
+import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import { buildCandidateLaneFailureV2 } from '../../scripts/evolution/candidateLaneFailureContract';
 
 const hypothesis = { hypothesisId: 'hypothesis-000002', hypothesis: 'H2', observedBasis: 'Observed.', feedbackRefs: ['overallImpression'], evidenceRefs: [], unknowns: ['Unknown.'], productSignificance: 'Significant.' };
@@ -186,6 +187,103 @@ export async function runCandidateSessionReconciliationTests(): Promise<void> {
   const contradictoryResult = await reconcileActiveCandidate({ pool: contradictoryPool, candidateLaneRoot: contradictoryLane, poolPath: contradictoryPoolPath });
   assert.equal(contradictoryResult.status, 'INTERRUPTED');
   assert.equal((await readPool(contradictoryPoolPath)).status, 'INTERRUPTED');
+
+  const escalationDecision = validateSolutionDecision({
+    ...continuationBaseDecision,
+    route: 'ESCALATE_HUMAN',
+    reasonCode: 'EXPLICIT_ESCALATION',
+    inputs: { ...continuationBaseDecision.inputs, reviewerDecision: 'ESCALATE' },
+  });
+  const crashPool = activePoolFor([hypothesis, secondHypothesis]);
+  const crashCandidate = crashPool.candidates[0]!;
+  const crashLane = join(root, 'continuation-escalate-lane');
+  await mkdir(crashLane, { recursive: true });
+  for (const relativePath of [
+    'source/observable-payload.json',
+    'feedback-runs/cohort-run-000001/feedback.json',
+    'diagnostic/causal-attribution.json',
+    'solution-agent/result.json',
+    'reviewer-agent/review.json',
+    'review-continuation-000001/revision-request.json',
+    'review-continuation-000001/solution-revision/result.json',
+    'review-continuation-000001/reviewer-agent/review.json',
+    'review-continuation-000001/continuation.json',
+  ]) {
+    await mkdir(join(crashLane, relativePath, '..'), { recursive: true });
+    await writeFile(join(crashLane, relativePath), '{}\n');
+  }
+  await writeFile(join(crashLane, 'hypotheses.json'), `${canonicalJson({ hypotheses: [hypothesis] })}\n`);
+  await writeFile(join(crashLane, 'candidate-activation.json'), canonicalJson({
+    schemaVersion: 'candidate-activation-v1',
+    candidateRef: crashCandidate.candidateRef,
+    poolId: crashPool.poolId,
+    hypothesisId: hypothesis.hypothesisId,
+    sourceIndex: 0,
+    hypothesisSha256: crashCandidate.hypothesisSha256,
+    hypothesisSetRef: crashPool.hypothesisSet.artifactRef,
+    hypothesisSetSha256: crashPool.hypothesisSet.sha256,
+    sourceRunRef: crashPool.source.sourceRunRef,
+  }));
+  await buildProblemPackage({
+    activeCandidate: hypothesis,
+    activeCandidateRef: crashCandidate.candidateRef,
+    activeCandidateSourceIndex: 0,
+    runRef: 'cohort-run-000001',
+    observablePayloadRef: 'source/observable-payload.json',
+    externalFeedbackRef: 'feedback-runs/cohort-run-000001/feedback.json',
+    improvementHypothesisRef: crashPool.hypothesisSet.artifactRef,
+    diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
+    authorityRefs: ['docs/product/auto-evolution-model.md'],
+    productSourceFingerprintSha256: 'a'.repeat(64),
+    destinationPath: join(crashLane, 'problem-package.json'),
+  });
+  await writeFile(join(crashLane, 'decision.json'), canonicalJson(continuationBaseDecision));
+  await writeFile(join(crashLane, 'review-continuation-000001/decision.json'), canonicalJson(escalationDecision));
+  const crashPoolPath = join(root, 'continuation-escalate-pool.json');
+  await writeFile(crashPoolPath, canonicalJson(crashPool));
+  let reconciliationParticipantCalls = 0;
+  const crashResult = await reconcileActiveCandidate({
+    pool: crashPool,
+    candidateLaneRoot: crashLane,
+    poolPath: crashPoolPath,
+    repositoryRoot: root,
+  });
+  assert.equal(reconciliationParticipantCalls, 0);
+  assert.equal(crashResult.status, 'RECONCILED');
+  const crashAfter = await readPool(crashPoolPath);
+  assert.equal(crashAfter.status, 'PROCESSING');
+  assert.deepEqual(crashAfter.candidates.map(candidate => candidate.processingState), ['COMPLETED', 'PENDING']);
+  const humanFollowupRef = crashAfter.candidates[0]!.humanFollowupRef;
+  assert.equal(humanFollowupRef, `artifacts/evolution/human-follow-up/items/item-${sha256Hex(canonicalJson({ workflowInstanceRef: `${crashPool.logicalSessionId}/${hypothesis.hypothesisId}`, sourceRunRef: crashPool.source.sourceRunRef, decisionSha256: sha256Hex(canonicalJson(escalationDecision)) }))}/item.json`);
+  const retained = JSON.parse(await readFile(join(root, humanFollowupRef!), 'utf8')) as { trigger: { route: string }; provenance: { decisionSha256: string }; evidence: Array<{ relativePath: string }> };
+  assert.equal(retained.trigger.route, 'ESCALATE_HUMAN');
+  assert.equal(retained.provenance.decisionSha256, sha256Hex(canonicalJson(escalationDecision)));
+  assert.equal(retained.evidence.some(entry => entry.relativePath === 'review-continuation-000001/decision.json'), true);
+  assert.equal(retained.evidence.some(entry => entry.relativePath === 'selection/selected-hypothesis.json'), false);
+
+  const retentionFailurePoolPath = join(root, 'continuation-escalate-retention-failure-pool.json');
+  await writeFile(retentionFailurePoolPath, canonicalJson(crashPool));
+  let retentionFailureParticipantCalls = 0;
+  await assert.rejects(
+    () => reconcileActiveCandidate({
+      pool: crashPool,
+      candidateLaneRoot: crashLane,
+      poolPath: retentionFailurePoolPath,
+      repositoryRoot: root,
+      dependencies: {
+        retainHumanFollowup: async () => {
+          throw new Error('injected HFL retention failure');
+        },
+      },
+    }),
+    /injected HFL retention failure/,
+  );
+  assert.equal(retentionFailureParticipantCalls, 0);
+  const retentionFailureAfter = await readPool(retentionFailurePoolPath);
+  assert.equal(retentionFailureAfter.status, 'PROCESSING');
+  assert.equal(retentionFailureAfter.candidates[0]!.processingState, 'ACTIVE');
+  assert.notEqual(retentionFailureAfter.candidates[0]!.processingState, 'COMPLETED');
+  assert.notEqual(retentionFailureAfter.candidates[0]!.processingState, 'INTERRUPTED');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

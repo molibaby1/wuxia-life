@@ -4,7 +4,9 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { runMultiCandidateSessionSlice } from '../../scripts/evolution/runMultiCandidateSessionSlice';
-import { PHASE0_REQUIRED_SEALED_ARTIFACTS, canonicalJson, sealPhase0Run } from '../../scripts/evolution/phase0/provenance';
+import { PHASE0_REQUIRED_SEALED_ARTIFACTS, canonicalJson, sealPhase0Run, sha256Hex } from '../../scripts/evolution/phase0/provenance';
+import { buildProblemPackage } from '../../scripts/evolution/problemAgnosticSolution/buildProblemPackage';
+import { retainHumanFollowupWorkItem } from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
 import { buildCandidatePoolV1, parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
 import { activateCandidate } from '../../scripts/evolution/candidatePoolState';
 import { retainCandidateLaneArtifacts, retainSourceEpochAnchor } from '../../scripts/evolution/candidateSessionStore';
@@ -587,6 +589,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     reasonCode: 'EXPLICIT_ESCALATION',
     inputs: { ...continuationBaseDecision.inputs, reviewerDecision: 'ESCALATE' },
   });
+  let retainedFollowup: Awaited<ReturnType<typeof retainHumanFollowupWorkItem>> | null = null;
   const continuation = await runMultiCandidateSessionSlice({
     ...base,
     repositoryRoot: continuationRoot,
@@ -596,38 +599,90 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     dependencies: {
       ...base.dependencies,
       runSourceAnalysis: async () => scopedAnalysis(continuationRoot, { hypotheses: [hypotheses[0]!] }),
-      runCandidateLane: async ({ candidate }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number } }) => ({
-        status: 'completed' as const,
-        candidateRef: candidate.candidateRef,
-        hypothesisId: candidate.hypothesisId,
-        sourceIndex: candidate.sourceIndex,
-        candidateActivationPath: 'candidate-activation.json',
-        problemPackagePath: 'problem-package.json',
-        causalAttributionPath: 'diagnostic/causal-attribution.json',
-        decisionPath: 'decision.json',
-        baseDecisionPath: 'decision.json',
-        humanReviewPackagePath: 'human-review-package.md',
-        actualParticipantJobs: 1 as const,
-        decision: continuationBaseDecision,
-        solutionInvocationRef: 'solution', reviewerInvocationRef: 'reviewer',
-        problemPackage: {} as never,
-      }),
+      runCandidateLane: async ({ candidate, laneRoot, pool }) => {
+        const hypothesis = hypotheses[0]!;
+        for (const relativePath of [
+          'source/observable-payload.json',
+          'feedback-runs/cohort-run-000001/feedback.json',
+          'diagnostic/causal-attribution.json',
+          'solution-agent/result.json',
+          'reviewer-agent/review.json',
+        ]) {
+          await mkdir(join(laneRoot, relativePath, '..'), { recursive: true });
+          await writeFile(join(laneRoot, relativePath), '{}\n');
+        }
+        await mkdir(join(laneRoot, 'hypothesis-runs/cohort-run-000001'), { recursive: true });
+        await writeFile(join(laneRoot, 'hypothesis-runs/cohort-run-000001/hypotheses.json'), `${canonicalJson({ hypotheses: [hypothesis] })}\n`);
+        await writeFile(join(laneRoot, 'candidate-activation.json'), `${canonicalJson({
+          schemaVersion: 'candidate-activation-v1',
+          candidateRef: candidate.candidateRef,
+          poolId: pool.poolId,
+          hypothesisId: candidate.hypothesisId,
+          sourceIndex: candidate.sourceIndex,
+          hypothesisSha256: candidate.hypothesisSha256,
+          hypothesisSetRef: pool.hypothesisSet.artifactRef,
+          hypothesisSetSha256: pool.hypothesisSet.sha256,
+          sourceRunRef: pool.source.sourceRunRef,
+        })}\n`);
+        await writeFile(join(laneRoot, 'decision.json'), `${canonicalJson(continuationBaseDecision)}\n`);
+        const problemPackagePath = join(laneRoot, 'problem-package.json');
+        await buildProblemPackage({
+          activeCandidate: hypothesis,
+          activeCandidateRef: candidate.candidateRef,
+          activeCandidateSourceIndex: candidate.sourceIndex,
+          runRef: 'cohort-run-000001',
+          observablePayloadRef: 'source/observable-payload.json',
+          externalFeedbackRef: 'feedback-runs/cohort-run-000001/feedback.json',
+          improvementHypothesisRef: 'hypothesis-runs/cohort-run-000001/hypotheses.json',
+          diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
+          authorityRefs: ['docs/product/auto-evolution-model.md'],
+          productSourceFingerprintSha256: 'c'.repeat(64),
+          destinationPath: problemPackagePath,
+        });
+        const decisionPath = join(laneRoot, 'decision.json');
+        return {
+          status: 'completed' as const,
+          candidateRef: candidate.candidateRef,
+          hypothesisId: candidate.hypothesisId,
+          sourceIndex: candidate.sourceIndex,
+          candidateActivationPath: 'candidate-activation.json',
+          problemPackagePath,
+          causalAttributionPath: 'diagnostic/causal-attribution.json',
+          decisionPath,
+          baseDecisionPath: decisionPath,
+          humanReviewPackagePath: 'human-review-package.md',
+          actualParticipantJobs: 1 as const,
+          decision: continuationBaseDecision,
+          solutionInvocationRef: 'solution', reviewerInvocationRef: 'reviewer',
+          problemPackage: {} as never,
+        };
+      },
       runCandidateContinuation: async ({ laneRoot }) => {
         candidateContinuationCalls += 1;
-        await mkdir(join(laneRoot, 'review-continuation-000001'), { recursive: true });
-        await writeFile(join(laneRoot, 'review-continuation-000001/decision.json'), JSON.stringify(continuationEscalationDecision));
+        const continuationDecisionPath = join(laneRoot, 'review-continuation-000001/decision.json');
+        for (const relativePath of [
+          'review-continuation-000001/revision-request.json',
+          'review-continuation-000001/solution-revision/result.json',
+          'review-continuation-000001/reviewer-agent/review.json',
+          'review-continuation-000001/continuation.json',
+        ]) {
+          await mkdir(join(laneRoot, relativePath, '..'), { recursive: true });
+          await writeFile(join(laneRoot, relativePath), '{}\n');
+        }
+        await writeFile(continuationDecisionPath, `${canonicalJson(continuationEscalationDecision)}\n`);
         return {
           status: 'completed' as const,
           participantJobs: 1 as const,
           continuationRef: 'review-continuation-000001' as const,
-          effectiveDecisionPath: 'review-continuation-000001/decision.json',
+          effectiveDecisionPath: continuationDecisionPath,
           effectiveDecision: continuationEscalationDecision,
         };
       },
       retainHumanFollowup: async input => {
         candidateAwareHumanFollowupRetentionCalls += 1;
         candidateProvenanceMode = input.candidateProvenance?.mode ?? null;
-        return { itemPath: join(continuationRoot, 'candidate-hfl-item.json'), item: {} as never, created: true };
+        retainedFollowup = await retainHumanFollowupWorkItem(input);
+        return retainedFollowup;
       },
     },
   });
@@ -635,8 +690,27 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(candidateContinuationCalls, 1);
   assert.equal(candidateAwareHumanFollowupRetentionCalls, 1);
   assert.equal(candidateProvenanceMode, 'candidate-activation-v1');
+  assert.equal(retainedFollowup?.created, true);
+  assert.equal(retainedFollowup?.item.trigger.route, 'ESCALATE_HUMAN');
+  assert.equal(retainedFollowup?.item.provenance.decisionSha256, sha256Hex(canonicalJson(continuationEscalationDecision)));
+  const continuationEvidencePaths = retainedFollowup?.item.evidence.map(entry => entry.relativePath) ?? [];
+  for (const relativePath of [
+    'candidate-activation.json',
+    'hypothesis-runs/cohort-run-000001/hypotheses.json',
+    'problem-package.json',
+    'diagnostic/causal-attribution.json',
+    'solution-agent/result.json',
+    'reviewer-agent/review.json',
+    'decision.json',
+    'review-continuation-000001/revision-request.json',
+    'review-continuation-000001/solution-revision/result.json',
+    'review-continuation-000001/reviewer-agent/review.json',
+    'review-continuation-000001/decision.json',
+    'review-continuation-000001/continuation.json',
+  ]) assert.equal(continuationEvidencePaths.includes(relativePath), true, relativePath);
+  assert.equal(continuationEvidencePaths.includes('selection/selected-hypothesis.json'), false);
   const continuationPool = parseCandidatePoolV1(JSON.parse(await readFile(join(continuationRoot, 'artifacts/evolution/sessions/logical-session-000004/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
-  assert.equal(continuationPool.candidates[0]!.humanFollowupRef, 'candidate-hfl-item.json');
+  assert.equal(continuationPool.candidates[0]!.humanFollowupRef, relative(continuationRoot, retainedFollowup!.itemPath).split('/').join('/'));
 
   const deferredDecisionFor = (candidate: CandidateIdentity) => validateSolutionDecision({
     ...continuationBaseDecision,

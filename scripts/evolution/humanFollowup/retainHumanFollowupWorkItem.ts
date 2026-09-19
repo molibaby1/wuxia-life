@@ -50,6 +50,12 @@ const ITEM_ROOT = 'artifacts/evolution/human-follow-up/items';
 const SELECTION_PATH = 'selection/selected-hypothesis.json';
 const SOLUTION_PATH = 'solution-agent/result.json';
 const REVIEWER_PATH = 'reviewer-agent/review.json';
+const BASE_DECISION_RELATIVE_PATH = 'decision.json';
+const CONTINUATION_DECISION_RELATIVE_PATH = 'review-continuation-000001/decision.json';
+const CONTINUATION_REVISION_REQUEST_PATH = 'review-continuation-000001/revision-request.json';
+const CONTINUATION_SOLUTION_RESULT_PATH = 'review-continuation-000001/solution-revision/result.json';
+const CONTINUATION_REVIEW_PATH = 'review-continuation-000001/reviewer-agent/review.json';
+const CONTINUATION_ARTIFACT_PATH = 'review-continuation-000001/continuation.json';
 
 function nonEmpty(value: string, label: string): string {
   if (!value) throw new Error(`${label} must be a non-empty string`);
@@ -249,6 +255,40 @@ function buildEvidenceSources(
     }
   }
   return sources;
+}
+
+// ponytail: PD-117 allows exactly review-continuation-000001. A second continuation id is a contract change, not a search.
+export async function deriveHumanFollowupContinuationEvidence(
+  workflowRoot: string,
+  decisionPath: string,
+): Promise<HumanFollowupContinuationEvidence | undefined> {
+  const root = resolve(nonEmpty(workflowRoot, 'workflowRoot'));
+  const rawDecisionPath = nonEmpty(decisionPath, 'decisionPath');
+  const decisionRelativePath = isAbsolute(rawDecisionPath)
+    ? workflowRelativePath(root, rawDecisionPath, 'decisionPath')
+    : workflowRelativePath(root, resolve(root, safeRelativePath(rawDecisionPath, 'decisionPath')), 'decisionPath');
+  if (decisionRelativePath === BASE_DECISION_RELATIVE_PATH) return undefined;
+  if (decisionRelativePath !== CONTINUATION_DECISION_RELATIVE_PATH) {
+    throw new Error('decisionPath must be workflowRoot/decision.json or workflowRoot/review-continuation-000001/decision.json');
+  }
+  const continuationRelativePaths = [
+    CONTINUATION_REVISION_REQUEST_PATH,
+    CONTINUATION_SOLUTION_RESULT_PATH,
+  ];
+  for (const relativePath of continuationRelativePaths) {
+    await assertRegularFile(join(root, relativePath), relativePath, root);
+  }
+  if (await optionalRegularFile(join(root, CONTINUATION_REVIEW_PATH), CONTINUATION_REVIEW_PATH, root)) {
+    continuationRelativePaths.push(CONTINUATION_REVIEW_PATH);
+  }
+  for (const relativePath of [CONTINUATION_DECISION_RELATIVE_PATH, CONTINUATION_ARTIFACT_PATH]) {
+    await assertRegularFile(join(root, relativePath), relativePath, root);
+    continuationRelativePaths.push(relativePath);
+  }
+  return {
+    effectiveDecisionPath: CONTINUATION_DECISION_RELATIVE_PATH,
+    continuationRelativePaths,
+  };
 }
 
 export async function retainHumanFollowupWorkItem(

@@ -56,7 +56,7 @@ import {
   runCandidateReviewContinuation,
   type CandidateReviewContinuationResult,
 } from './runCandidateReviewContinuation';
-import { retainHumanFollowupWorkItem, type RetainedHumanFollowupWorkItem } from './humanFollowup/retainHumanFollowupWorkItem';
+import { deriveHumanFollowupContinuationEvidence, retainHumanFollowupWorkItem, type RetainedHumanFollowupWorkItem } from './humanFollowup/retainHumanFollowupWorkItem';
 import { runBoundedSourceTransition, type BoundedSourceTransitionResult } from './runBoundedSourceTransition';
 import { runCandidateBoundedSourceTransition } from './runCandidateBoundedSourceTransition';
 import { reconcileActiveCandidate } from './reconcileCandidateSession';
@@ -526,6 +526,8 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       candidateLaneRoot: durableLaneRoot,
       poolPath: join(sessionRoot, durablePoolPath),
       laneRef: durableLaneRef(currentSourceEpochRef, active.hypothesisId),
+      repositoryRoot: input.repositoryRoot,
+      ...(input.dependencies?.retainHumanFollowup ? { dependencies: { retainHumanFollowup: input.dependencies.retainHumanFollowup } } : {}),
     });
     if (reconciliation.status === 'INTERRUPTED') {
       pool = parseCandidatePoolV1(JSON.parse(await readFile(join(sessionRoot, durablePoolPath), 'utf8')) as unknown);
@@ -725,7 +727,8 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
     if (laneResult.status === 'completed' && effectiveDecision.route === 'ESCALATE_HUMAN') {
       const retain = input.dependencies?.retainHumanFollowup ?? retainHumanFollowupWorkItem;
       const candidate = analysis.hypotheses[pending.sourceIndex]!;
-      const hfl: RetainedHumanFollowupWorkItem = await retain({ repositoryRoot: input.repositoryRoot, workflowRoot: laneRoot, workflowInstanceRef: `${input.logicalSessionId}/${candidate.hypothesisId}`, sourceRunRef: pool.source.sourceRunRef, sourceFingerprintSha256: pool.source.sourceFingerprintSha256, problemPackagePath: laneResult.problemPackagePath, decisionPath: effectiveDecisionPath, candidateProvenance: { mode: 'candidate-activation-v1', candidateActivationPath: 'candidate-activation.json', hypothesisSetPath: analysis.improvementHypothesisRef } });
+      const continuationEvidence = await deriveHumanFollowupContinuationEvidence(laneRoot, effectiveDecisionPath);
+      const hfl: RetainedHumanFollowupWorkItem = await retain({ repositoryRoot: input.repositoryRoot, workflowRoot: laneRoot, workflowInstanceRef: `${input.logicalSessionId}/${candidate.hypothesisId}`, sourceRunRef: pool.source.sourceRunRef, sourceFingerprintSha256: pool.source.sourceFingerprintSha256, problemPackagePath: laneResult.problemPackagePath, decisionPath: effectiveDecisionPath, ...(continuationEvidence ? { continuation: continuationEvidence } : {}), candidateProvenance: { mode: 'candidate-activation-v1', candidateActivationPath: 'candidate-activation.json', hypothesisSetPath: analysis.improvementHypothesisRef } });
       humanFollowupRef = relative(input.repositoryRoot, hfl.itemPath).split('/').join('/');
     }
     pool = completeCandidate(pool, pending.candidateRef, { laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId), baseDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: laneResult.baseDecisionPath }), effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }), humanFollowupRef });

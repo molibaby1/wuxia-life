@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { captureAuthoritativeFingerprint } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import { sealPhase0Run } from '../../scripts/evolution/phase0/provenance';
 import {
   materializeSourceEpochAnchor,
+  materializeSourceAnalysisArtifacts,
   readDurableMultiCandidateSessionManifest,
   retainCandidateLaneArtifacts,
   retainSourceAnalysisArtifacts,
@@ -53,13 +54,6 @@ export async function runCandidateSessionStoreTests(): Promise<void> {
   const after = await captureAuthoritativeFingerprint(root);
   assert.equal(after, before);
   assert.equal(anchor.manifestRef, 'source-epochs/source-epoch-000001/source-anchor.json');
-  const materialized = await materializeSourceEpochAnchor({
-    repositoryRoot: root,
-    logicalSessionId: sessionId,
-    sourceEpochRef: 'source-epoch-000001',
-    hostSliceId: 'host-slice-000001',
-  });
-  assert.equal(await readFile(join(materialized.sourceRoot, 'experiment-root.sha256'), 'utf8'), source.rootHash);
 
   await retainSourceAnalysisArtifacts({
     repositoryRoot: root,
@@ -68,6 +62,44 @@ export async function runCandidateSessionStoreTests(): Promise<void> {
     sourceRoot: source.sourceRoot,
     relativePaths: ['reviewer-input/observable-payload.json'],
   });
+
+  const materialized = await materializeSourceEpochAnchor({
+    repositoryRoot: root,
+    logicalSessionId: sessionId,
+    sourceEpochRef: 'source-epoch-000001',
+    hostSliceId: 'host-slice-000001',
+  });
+  assert.equal(materialized.sourceRoot, join(root, '.tmp/evolution', sessionId, 'host-slice-000001', 'source-epoch-000001', 'source'));
+  assert.equal(await readFile(join(materialized.sourceRoot, 'experiment-root.sha256'), 'utf8'), source.rootHash);
+
+  const materializedAnalysis = await materializeSourceAnalysisArtifacts({
+    repositoryRoot: root,
+    logicalSessionId: sessionId,
+    sourceEpochRef: 'source-epoch-000001',
+    sourceRoot: materialized.sourceRoot,
+    sourceRunRef: 'cohort-run-000001',
+    hostSliceId: 'host-slice-000001',
+  });
+  assert.ok(relative(materialized.sourceRoot, materializedAnalysis.analysisRoot).startsWith('..'));
+  assert.ok(relative(materializedAnalysis.analysisRoot, materialized.sourceRoot).startsWith('..'));
+  assert.ok(await readFile(join(materializedAnalysis.analysisRoot, 'game-runs', 'cohort-run-000001', 'experiment-root.json'), 'utf8'));
+  await assert.rejects(
+    () => lstat(join(materialized.sourceRoot, 'analysis', 'game-runs', 'cohort-run-000001', 'analysis')),
+    { code: 'ENOENT' },
+  );
+  await assert.rejects(
+    () => materializeSourceAnalysisArtifacts({
+      repositoryRoot: root,
+      logicalSessionId: sessionId,
+      sourceEpochRef: 'source-epoch-000001',
+      sourceRoot: materialized.sourceRoot,
+      sourceRunRef: 'cohort-run-000001',
+      destinationRoot: join(materialized.sourceRoot, 'nested-analysis'),
+      hostSliceId: 'host-slice-000001',
+    }),
+    /copy destination must not be inside source tree/,
+  );
+
   await retainCandidateLaneArtifacts({
     repositoryRoot: root,
     logicalSessionId: sessionId,

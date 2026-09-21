@@ -119,6 +119,12 @@ async function collectFiles(root: string, current = ''): Promise<string[]> {
 }
 
 async function copyCreateOnlyTree(sourceRoot: string, destinationRoot: string, current = ''): Promise<void> {
+  if (!current) {
+    const destinationRelative = relative(resolve(sourceRoot), resolve(destinationRoot));
+    if (!destinationRelative || (!destinationRelative.startsWith(`..${sep}`) && destinationRelative !== '..')) {
+      throw new Error('copy destination must not be inside source tree');
+    }
+  }
   const directory = resolve(sourceRoot, current || '.');
   for (const entry of (await readdir(directory, { withFileTypes: true })).sort((left, right) => left.name.localeCompare(right.name))) {
     const relativePath = current ? join(current, entry.name) : entry.name;
@@ -190,7 +196,7 @@ export async function materializeSourceEpochAnchor(input: {
   const anchorRoot = sourceAnchorRoot(input.repositoryRoot, input.logicalSessionId, input.sourceEpochRef);
   const manifest = JSON.parse(await readFile(join(anchorRoot, 'source-anchor.json'), 'utf8')) as SourceAnchorManifest;
   if (manifest.schemaVersion !== 'source-epoch-anchor-v1') throw new Error('unsupported source anchor schema');
-  const sourceRoot = resolve(input.destinationRoot ?? join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId ?? 'materialize', input.sourceEpochRef));
+  const sourceRoot = resolve(input.destinationRoot ?? join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId ?? 'materialize', input.sourceEpochRef, 'source'));
   await mkdir(sourceRoot, { recursive: true });
   for (const entry of manifest.entries) {
     const safePath = safeRelativePath(sourceRoot, entry.path, 'source anchor entry path');

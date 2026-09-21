@@ -9,7 +9,7 @@ import { buildProblemPackage } from '../../scripts/evolution/problemAgnosticSolu
 import { retainHumanFollowupWorkItem } from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
 import { buildCandidatePoolV1, parseCandidatePoolV1 } from '../../scripts/evolution/candidatePoolContract';
 import { activateCandidate } from '../../scripts/evolution/candidatePoolState';
-import { retainCandidateLaneArtifacts, retainSourceEpochAnchor } from '../../scripts/evolution/candidateSessionStore';
+import { retainCandidateLaneArtifacts, retainSourceAnalysisArtifacts, retainSourceEpochAnchor } from '../../scripts/evolution/candidateSessionStore';
 import { readDurableMultiCandidateSessionManifest, writeMultiCandidateSessionManifestAtomic } from '../../scripts/evolution/candidateSessionStore';
 import type { CompletedSourceCandidateAnalysisResult, SourceCandidateAnalysisFailureResult } from '../../scripts/evolution/runSourceCandidateAnalysis';
 import { buildMultiCandidateSessionManifestV1 } from '../../scripts/evolution/multiCandidateSessionManifestContract';
@@ -909,19 +909,44 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(hostFailureReportJson.candidates[0]!.interruptionRef, 'host-failure.json');
   assert.equal(hostFailureReportJson.terminalForensicEvidenceRef, relative(hostFailureRoot, hostFailureEvidence.capsuleRoot!).split('/').join('/'));
 
-  let resumeAnalysisLoads = 0;
+  const retainedAnalysisRoot = join(root, 'analysis');
+  const retainedFeedbackRoot = join(retainedAnalysisRoot, 'feedback-runs', analysis.sourceRunRef);
+  const retainedHypothesisRoot = join(retainedAnalysisRoot, 'hypothesis-runs', analysis.sourceRunRef);
+  await mkdir(retainedFeedbackRoot, { recursive: true });
+  await mkdir(retainedHypothesisRoot, { recursive: true });
+  await writeFile(join(retainedFeedbackRoot, 'feedback.json'), JSON.stringify({ overallImpression: 'A retained source analysis.', observations: [] }));
+  await writeFile(join(retainedFeedbackRoot, 'invocation.json'), JSON.stringify({ invocationRef: 'feedback-000001' }));
+  await writeFile(join(retainedHypothesisRoot, 'hypotheses.json'), JSON.stringify({ schemaVersion: 'improvement-hypothesis-set-v2', hypotheses, noProblemAssessment: null }));
+  await writeFile(join(retainedHypothesisRoot, 'invocation.json'), JSON.stringify({ invocationRef: 'hypothesis-000001' }));
+  await retainSourceAnalysisArtifacts({
+    repositoryRoot: root,
+    logicalSessionId: 'logical-session-000001',
+    sourceEpochRef: 'source-epoch-000001',
+    sourceRoot: retainedAnalysisRoot,
+    relativePaths: [
+      `feedback-runs/${analysis.sourceRunRef}/feedback.json`,
+      `feedback-runs/${analysis.sourceRunRef}/invocation.json`,
+      `hypothesis-runs/${analysis.sourceRunRef}/hypotheses.json`,
+      `hypothesis-runs/${analysis.sourceRunRef}/invocation.json`,
+    ],
+  });
+
   const resumed = await runMultiCandidateSessionSlice({
     ...base,
     mode: 'RESUME_SESSION',
     hostSliceId: 'host-slice-000002',
     dependencies: {
       ...base.dependencies,
-      loadSourceAnalysis: async () => { resumeAnalysisLoads += 1; return analysis; },
       runSourceAnalysis: async () => { throw new Error('resume must not rerun source analysis'); },
     },
   });
   assert.equal(resumed.sessionState, 'COMPLETED');
-  assert.equal(resumeAnalysisLoads, 1);
+  const resumedSourceRoot = join(root, '.tmp/evolution', 'logical-session-000001', 'host-slice-000002', 'source-epoch-000001', 'source');
+  const resumedAnalysisRoot = join(root, '.tmp/evolution', 'logical-session-000001', 'host-slice-000002', 'source-epoch-000001', 'analysis');
+  assert.ok(await readFile(join(resumedSourceRoot, 'experiment-root.json'), 'utf8'));
+  assert.ok(await readFile(join(resumedAnalysisRoot, 'game-runs', analysis.sourceRunRef, 'experiment-root.json'), 'utf8'));
+  assert.ok(relative(resumedSourceRoot, resumedAnalysisRoot).startsWith('..'));
+  assert.ok(relative(resumedAnalysisRoot, resumedSourceRoot).startsWith('..'));
   const resumedManifest = await readDurableMultiCandidateSessionManifest(root, 'logical-session-000001');
   assert.equal(resumedManifest.budgetAccounting.hostSliceCount, 2);
   assert.equal(resumedManifest.budgetAccounting.participantJobs, resumedManifest.hostSlices.reduce((sum, item) => sum + item.participantJobs, 0));
@@ -1036,14 +1061,21 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   };
   const resumedSourceB = await runMultiCandidateSessionSlice({
     ...base,
+    initialSourceRoot: undefined,
     repositoryRoot: transitionRoot,
     logicalSessionId: 'logical-session-000003',
     mode: 'RESUME_SESSION',
     hostSliceId: 'host-slice-000002',
     dependencies: {
       ...base.dependencies,
-      runSourceAnalysis: async () => {
+      runSourceAnalysis: async ({ sourceRoot: materializedSourceRoot, analysisRoot }) => {
         sourceBRunAnalysisCalls += 1;
+        const expectedEpochRoot = join(transitionRoot, '.tmp/evolution', 'logical-session-000003', 'host-slice-000002', 'source-epoch-000002');
+        assert.equal(materializedSourceRoot, join(expectedEpochRoot, 'source'));
+        assert.equal(analysisRoot, join(expectedEpochRoot, 'analysis'));
+        assert.ok(relative(materializedSourceRoot, analysisRoot).startsWith('..'));
+        assert.ok(relative(analysisRoot, materializedSourceRoot).startsWith('..'));
+        assert.ok(await readFile(join(materializedSourceRoot, 'experiment-root.json'), 'utf8'));
         return sourceBAnalysis;
       },
       loadSourceAnalysis: async () => {

@@ -157,6 +157,7 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(!isPreschoolSeasonMemoryAge(8), 'age 8 leaves season-memory band');
   testPrepareAnnualPassiveMemoryWithReactiveState();
   testPreparePreschoolSeasonMemory();
+  testApprovedCapacityEntriesAreConsumedBeforeGap();
   testPreparePreschoolSeasonMemoryConsumesNeutralBeforeGap();
   testPreparePreschoolSeasonMemoryNeutralFirstClassWithOriginPresent();
   testPreparePreschoolSeasonMemoryTitlePreferenceDoesNotForceGap();
@@ -225,6 +226,42 @@ function testPreparePreschoolSeasonMemory(): void {
   const result = commitAnnualPassiveMemory(state, plan);
   assert((state.eventHistory ?? []).length === 3, 'all three season beats remain traceable');
   assert(result.entryIds.length === 3, 'commit records three entry ids');
+}
+
+function testApprovedCapacityEntriesAreConsumedBeforeGap(): void {
+  const age5ApprovedIds = new Set([
+    'preschool_neutral_peer_repair',
+    'preschool_neutral_entrusted_task',
+    'preschool_neutral_find_way_back',
+    'preschool_neutral_care_sick_family',
+  ]);
+  const state = martialPreschoolState(5);
+  const age5Entries = getPreschoolPassiveEntries(5);
+  const legalEntries = age5Entries.filter(
+    entry =>
+      isNeutralOnlyPreschoolEntry(entry) ||
+      (entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry)),
+  );
+  state.eventHistory = legalEntries
+    .filter(entry => !age5ApprovedIds.has(entry.id))
+    .map(entry => ({ eventId: entry.id, age: 5 }));
+  const historyBeforePrepare = JSON.stringify(state.eventHistory);
+
+  const plan = preparePreschoolSeasonMemory(state, () => 0);
+  const ids = plan.entries.map(entry => entry.id);
+
+  assert(plan.entries.length === 3, 'season remains three beats');
+  assert(plan.entries.every(entry => !isPreschoolGap(entry)), 'authored entries precede gap');
+  assert(ids.every(id => age5ApprovedIds.has(id)), 'all beats use age-5 approved capacity');
+  assert(new Set(ids).size === 3, 'new authored IDs are distinct within the season');
+  assert(
+    plan.entries.every(entry => !isForeignExclusivePreschoolEntry(entry, 'martial')),
+    'new season does not surface foreign canonical-origin content',
+  );
+  assert(
+    JSON.stringify(state.eventHistory) === historyBeforePrepare,
+    'preparing the season does not mutate input history',
+  );
 }
 
 /** Case A: exhausted origin pool must still consume remaining authored neutrals before any gap. */

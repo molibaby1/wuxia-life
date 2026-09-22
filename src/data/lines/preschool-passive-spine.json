@@ -355,6 +355,70 @@
       "originTags": ["neutral"],
       "ageMin": 4,
       "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_peer_repair",
+      "title": "闹别扭",
+      "text": "你和玩伴为一件小事争得脸红，谁也不肯先开口。过了半日，你把手里的小玩意递回去，对方也悄悄挪近了些，先前那点气便慢慢散了。",
+      "originTags": ["neutral"],
+      "ageMin": 5,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_peer_cooperation",
+      "title": "一起做完",
+      "text": "你和几个孩子合力收拾一件麻烦事，有人做到一半想溜，你们只好重新分工。等事情终于做完，你才明白答应一起做的事，不能只顾自己先走。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_entrusted_task",
+      "title": "交给你的事",
+      "text": "大人临时把一件要紧的小事托给你照看。中途外头很热闹，你几次想跑去看，最后还是守在原处，第一次觉得「交给我」三个字有些分量。",
+      "originTags": ["neutral"],
+      "ageMin": 5,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_care_younger",
+      "title": "牵住小手",
+      "text": "大人腾不开手，让你暂时照看一个更小的孩子。对方一会儿要哭、一会儿乱跑，你手忙脚乱地把人哄住，才知道照顾别人远没有看起来轻松。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_find_way_back",
+      "title": "自己认路",
+      "text": "一次随家人出门，你转眼没看见熟悉的身影。慌了一阵后，你认出先前经过的地方，又向可信的大人问了路，终于自己找回了该去的方向。",
+      "originTags": ["neutral"],
+      "ageMin": 5,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_speak_for_self",
+      "title": "自己开口",
+      "text": "有陌生的大人问起你的来意，身边的人没有替你回答。你起初声音很小，还是把事情一字一句说清楚了，对方也认真听完，没有把你只当小孩子敷衍过去。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_care_sick_family",
+      "title": "递水守静",
+      "text": "家里一个平日照顾你的人病得没什么精神。你学着放轻脚步，递水拿布，还拦住旁人别太吵，第一次发现大人也会有需要别人照顾的时候。",
+      "originTags": ["neutral"],
+      "ageMin": 5,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_household_disruption",
+      "title": "急雨忙家",
+      "text": "一阵急雨来得突然，家里顿时忙着收东西、挪开怕湿的物件。你也抱着能搬动的东西来回跑，雨停以后才发现，原来一个家也要大家一起照应。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
     }
   ]
 }

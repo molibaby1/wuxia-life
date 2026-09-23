@@ -196,6 +196,92 @@ function testApprovedPreschoolCapacityAuthoringSet(): void {
   );
 }
 
+function testApprovedResidualPreschoolCapacityAuthoringSet(): void {
+  const approved = [
+    {
+      id: 'preschool_neutral_fair_play',
+      title: '说好算数',
+      text: '你和几个孩子用石子定先后，这回偏偏轮到你输。你嘟囔着想重来，见大家都照着同一规矩等着，最后还是退回队尾，第一次明白说好的规矩不能只在自己赢时才算。',
+      ageMin: 5,
+      ageMax: 7,
+    },
+    {
+      id: 'preschool_neutral_self_made_project',
+      title: '自己做成',
+      text: '你找来几片木片和细绳，照自己的主意扎一个会转的小玩意。散了两回你都重新绑好，等它终于转起来，旁人没催你，你却比得了夸奖还高兴。',
+      ageMin: 5,
+      ageMax: 7,
+    },
+    {
+      id: 'preschool_neutral_stand_for_peer',
+      title: '替他说话',
+      text: '几个孩子把一件错事都怪在一个沉默的孩子头上，你明明可以装没看见，还是说出自己见到的经过。众人一时都看向你，你脸上发热，却没有把话收回去。',
+      ageMin: 6,
+      ageMax: 7,
+    },
+    {
+      id: 'preschool_neutral_first_farewell',
+      title: '送到路口',
+      text: '常与你一起玩的孩子要随家人离开这里。你一路送到路口，原先还说以后再玩，直到那道身影越走越远，才第一次明白有些人离开后，日子真的会换个样子。',
+      ageMin: 6,
+      ageMax: 7,
+    },
+    {
+      id: 'preschool_neutral_neighborhood_help',
+      title: '邻里搭手',
+      text: '住处附近一片大家常走的空地堆了不少杂物，周围的人一起动手收拾。你也提着小筐来回跑了几趟，忙完以后才觉得，门外这片地方也有自己的一份。',
+      ageMin: 6,
+      ageMax: 7,
+    },
+  ] as const;
+  const entriesById = new Map(
+    [4, 5, 6, 7]
+      .flatMap(age => getPreschoolPassiveEntries(age))
+      .map(entry => [entry.id, entry] as const),
+  );
+
+  for (const spec of approved) {
+    const entry = entriesById.get(spec.id);
+    assert(entry !== undefined, `residual approved id exists: ${spec.id}`);
+    assert(entry.title === spec.title, `residual approved title: ${spec.id}`);
+    assert(entry.text === spec.text, `residual approved text: ${spec.id}`);
+    assert(entry.ageMin === spec.ageMin, `residual approved ageMin: ${spec.id}`);
+    assert(entry.ageMax === spec.ageMax, `residual approved ageMax: ${spec.id}`);
+    assert(
+      entry.originTags.length === 1 && entry.originTags[0] === 'neutral',
+      `residual approved entry is exactly neutral-only: ${spec.id}`,
+    );
+    assert(entry.statDeltas === undefined, `residual approved entry has no statDeltas: ${spec.id}`);
+    assert(entry.flags === undefined, `residual approved entry has no flags: ${spec.id}`);
+  }
+
+  const idsAtAge = (age: number): Set<string> =>
+    new Set(getPreschoolPassiveEntries(age).map(entry => entry.id));
+  const approvedIds = new Set(approved.map(spec => spec.id));
+  const expectedAge5Ids = new Set([
+    'preschool_neutral_fair_play',
+    'preschool_neutral_self_made_project',
+  ]);
+  const age5Ids = new Set([...approvedIds].filter(id => idsAtAge(5).has(id)));
+
+  assert(
+    [...approvedIds].every(id => !idsAtAge(4).has(id)),
+    'none of the residual approved entries is available at age 4',
+  );
+  assert(
+    age5Ids.size === 2 && [...expectedAge5Ids].every(id => age5Ids.has(id)),
+    'age 5 exposes exactly the two ageMin=5 residual approved entries',
+  );
+  assert(
+    [...approvedIds].every(id => idsAtAge(6).has(id)),
+    'age 6 exposes all residual approved entries',
+  );
+  assert(
+    [...approvedIds].every(id => idsAtAge(7).has(id)),
+    'age 7 exposes all residual approved entries',
+  );
+}
+
 export function runPreschoolPassiveSpineTests(): void {
   const preschoolPassiveSpineCatalog = getPreschoolPassiveEntries(3).concat(
     getPreschoolPassiveEntries(4),
@@ -297,6 +383,7 @@ export function runPreschoolPassiveSpineTests(): void {
   testOriginSelectionPreservesUnconsumedEntry();
   testNeutralSelectorKeepsExhaustionReuseSemantics();
   testApprovedPreschoolCapacityAuthoringSet();
+  testApprovedResidualPreschoolCapacityAuthoringSet();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

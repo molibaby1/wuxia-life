@@ -158,6 +158,7 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   testPrepareAnnualPassiveMemoryWithReactiveState();
   testPreparePreschoolSeasonMemory();
   testApprovedCapacityEntriesAreConsumedBeforeGap();
+  testApprovedResidualCapacityEntriesAreConsumedBeforeGap();
   testPreparePreschoolSeasonMemoryConsumesNeutralBeforeGap();
   testPreparePreschoolSeasonMemoryNeutralFirstClassWithOriginPresent();
   testPreparePreschoolSeasonMemoryTitlePreferenceDoesNotForceGap();
@@ -261,6 +262,42 @@ function testApprovedCapacityEntriesAreConsumedBeforeGap(): void {
   assert(
     JSON.stringify(state.eventHistory) === historyBeforePrepare,
     'preparing the season does not mutate input history',
+  );
+}
+
+function testApprovedResidualCapacityEntriesAreConsumedBeforeGap(): void {
+  const residualIds = new Set([
+    'preschool_neutral_fair_play',
+    'preschool_neutral_self_made_project',
+    'preschool_neutral_stand_for_peer',
+    'preschool_neutral_first_farewell',
+    'preschool_neutral_neighborhood_help',
+  ]);
+  const state = martialPreschoolState(6);
+  const legalEntries = getPreschoolPassiveEntries(6).filter(
+    entry =>
+      isNeutralOnlyPreschoolEntry(entry) ||
+      (entry.originTags.includes('martial') && !isNeutralOnlyPreschoolEntry(entry)),
+  );
+  state.eventHistory = legalEntries
+    .filter(entry => !residualIds.has(entry.id))
+    .map(entry => ({ eventId: entry.id, age: 6 }));
+  const historyBeforePrepare = JSON.stringify(state.eventHistory);
+
+  const plan = preparePreschoolSeasonMemory(state, () => 0);
+  const ids = plan.entries.map(entry => entry.id);
+
+  assert(plan.entries.length === 3, 'residual capacity season remains three beats');
+  assert(plan.entries.every(entry => !isPreschoolGap(entry)), 'residual authored entries precede gap');
+  assert(ids.every(id => residualIds.has(id)), 'all beats use residual approved capacity');
+  assert(new Set(ids).size === 3, 'residual authored IDs are distinct within the season');
+  assert(
+    plan.entries.every(entry => !isForeignExclusivePreschoolEntry(entry, 'martial')),
+    'residual season does not surface foreign canonical-origin content',
+  );
+  assert(
+    JSON.stringify(state.eventHistory) === historyBeforePrepare,
+    'preparing residual season does not mutate input history',
   );
 }
 

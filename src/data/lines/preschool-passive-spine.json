@@ -419,6 +419,46 @@
       "originTags": ["neutral"],
       "ageMin": 6,
       "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_fair_play",
+      "title": "说好算数",
+      "text": "你和几个孩子用石子定先后，这回偏偏轮到你输。你嘟囔着想重来，见大家都照着同一规矩等着，最后还是退回队尾，第一次明白说好的规矩不能只在自己赢时才算。",
+      "originTags": ["neutral"],
+      "ageMin": 5,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_self_made_project",
+      "title": "自己做成",
+      "text": "你找来几片木片和细绳，照自己的主意扎一个会转的小玩意。散了两回你都重新绑好，等它终于转起来，旁人没催你，你却比得了夸奖还高兴。",
+      "originTags": ["neutral"],
+      "ageMin": 5,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_stand_for_peer",
+      "title": "替他说话",
+      "text": "几个孩子把一件错事都怪在一个沉默的孩子头上，你明明可以装没看见，还是说出自己见到的经过。众人一时都看向你，你脸上发热，却没有把话收回去。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_first_farewell",
+      "title": "送到路口",
+      "text": "常与你一起玩的孩子要随家人离开这里。你一路送到路口，原先还说以后再玩，直到那道身影越走越远，才第一次明白有些人离开后，日子真的会换个样子。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_neighborhood_help",
+      "title": "邻里搭手",
+      "text": "住处附近一片大家常走的空地堆了不少杂物，周围的人一起动手收拾。你也提着小筐来回跑了几趟，忙完以后才觉得，门外这片地方也有自己的一份。",
+      "originTags": ["neutral"],
+      "ageMin": 6,
+      "ageMax": 7
     }
   ]
 }

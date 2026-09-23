@@ -94,6 +94,20 @@ function buildSurfaceTrace(): HeadlessApiPlayerSurfaceTrace {
         age: 19,
         presentationCards: [{ title: 'Noise', body: 'Unrelated' }],
       },
+      {
+        sequence: 7,
+        kind: 'passive_narrative',
+        age: 20,
+        passiveEntryIds: [
+          'internal-passive-alpha',
+          'internal-passive-beta',
+          'preschool_passive_gap::internal-gap',
+        ],
+        presentationCards: [{
+          title: '20岁这一段',
+          body: 'Visible passive body',
+        }],
+      },
     ],
   };
 }
@@ -269,6 +283,35 @@ export async function runBoundedCausalAttributionBuilderTests(): Promise<void> {
   });
   assert.equal(unavailable.items[0]?.attribution.kind, 'unavailable');
   assert.equal(unavailable.items[0]?.sourceKind, 'period_summary');
+
+  const passivePath = join(root, 'diagnostic/passive-unavailable.json');
+  const passiveSelection = await writeSelection(
+    join(root, 'passive-unavailable'),
+    ['entry-000007'],
+  );
+  const passiveUnavailable = await buildBoundedCausalAttribution({
+    sealedPhase0SourceRoot: sourceRoot,
+    sealedObservablePayloadPath: observablePath,
+    selectedHypothesisPath: passiveSelection,
+    sourceRunRef: 'cohort-run-000001',
+    sourceExperimentRootHash: HASH_A,
+    destinationPath: passivePath,
+  });
+  assert.equal(passiveUnavailable.items[0]?.sourceKind, 'passive_narrative');
+  assert.equal(passiveUnavailable.items[0]?.attribution.kind, 'unavailable');
+
+  const passiveDiagnosticBytes = await readFile(passivePath, 'utf8');
+  for (const internalId of surface.steps[6]!.passiveEntryIds ?? []) {
+    assert.equal(
+      passiveDiagnosticBytes.includes(internalId),
+      false,
+      `bounded causal attribution must not expose passive authored ID ${internalId}`,
+    );
+  }
+
+  const historicalV1 = structuredClone(surface);
+  delete historicalV1.steps[6]!.passiveEntryIds;
+  assert.doesNotThrow(() => projectHeadlessApiPlayerObservablePayload(historicalV1));
 
   const tamperedObservable = join(root, 'source/tampered-observable.json');
   await writeFile(tamperedObservable, `${observableBytes.slice(0, -2)}x"`);

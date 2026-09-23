@@ -114,6 +114,45 @@ export async function runPhase0EndToEndTests(): Promise<void> {
       join(first.outDir, 'internal', 'player-surface-source.json'),
       'utf8',
     ));
+    const passiveSourceSteps = (
+      surfaceSource as {
+        steps?: Array<{
+          kind?: string;
+          age?: number;
+          passiveEntryIds?: string[];
+        }>;
+      }
+    ).steps?.filter(
+      step =>
+        step.kind === 'passive_narrative'
+        && typeof step.age === 'number'
+        && step.age >= 4
+        && step.age <= 7,
+    ) ?? [];
+    assert.ok(passiveSourceSteps.length > 0, 'sealed fixture must contain preschool passive surface steps');
+
+    const firstPreschoolPassive = passiveSourceSteps[0]!;
+    assert.ok(
+      firstPreschoolPassive.passiveEntryIds,
+      'sealed internal player-surface source must preserve packed-passive authored IDs',
+    );
+    assert.equal(
+      firstPreschoolPassive.passiveEntryIds.length,
+      3,
+      'sealed preschool passive provenance preserves three source IDs',
+    );
+    assert.equal(
+      firstPayloadBytes.includes('"passiveEntryIds"'),
+      false,
+      'reviewer payload must not expose internal passive provenance key',
+    );
+    for (const id of firstPreschoolPassive.passiveEntryIds) {
+      assert.equal(
+        firstPayloadBytes.includes(id),
+        false,
+        `reviewer payload must not expose internal passive authored ID ${id}`,
+      );
+    }
     const surfaceKeys = collectObjectKeys(surfaceSource);
     assert.equal(surfaceKeys.has('planningOptions'), false);
 

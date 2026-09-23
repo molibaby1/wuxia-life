@@ -52,6 +52,8 @@ export interface HeadlessApiPlayerSurfaceStep {
   selectedChoiceId?: string;
   /** Formal active-action identity for active_action_result provenance (not player-visible). */
   actionId?: string;
+  /** Exact ordered packed-passive source IDs for Human forensic provenance; never player-visible. */
+  passiveEntryIds?: string[];
   presentationCards?: HeadlessApiSurfacePresentationCard[];
 }
 

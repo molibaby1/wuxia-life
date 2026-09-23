@@ -472,7 +472,9 @@ export async function runDisturbanceAckStep(ctx: RunnerStepContext): Promise<voi
 export async function runPassiveProgressionStep(ctx: RunnerStepContext): Promise<void> {
   if (ctx.session.getTerminalState()) return;
   const stateBefore = snapshotStateForRecord(ctx.session);
-  const passive = ctx.session.getProgressionVolatileState().passiveNarrative;
+  const progression = ctx.session.getProgressionVolatileState();
+  const passive = progression.passiveNarrative;
+  const annualPassiveMemory = progression.annualPassiveMemory;
   if (passive && playerSurfaceCaptureEnabled(ctx)) {
     recordPlayerSurfaceStep(ctx, {
       kind: 'passive_narrative',
@@ -481,6 +483,9 @@ export async function runPassiveProgressionStep(ctx: RunnerStepContext): Promise
         age: stateBefore.player?.age ?? 0,
         kind: 'passive_narrative',
       }),
+      ...(annualPassiveMemory
+        ? { passiveEntryIds: annualPassiveMemory.entries.map(entry => entry.id) }
+        : {}),
       presentationCards: [buildPassiveSurfacePresentation(passive)],
     });
   }

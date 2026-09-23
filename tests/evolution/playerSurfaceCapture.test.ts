@@ -111,6 +111,7 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
     catalogVersion: '1.0.0',
     seed: 101,
     maxSteps: 320,
+    experienceTrace: true,
     playerSurfaceTrace: true,
   });
   assert.equal(capturedRun.playerSurfaceTrace?.schemaVersion, 'headless-api-player-surface-source-v1');
@@ -122,6 +123,67 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
   assert.ok(
     capturedRun.playerSurfaceTrace?.steps.some(step => typeof step.age === 'number'),
     'captured surface should preserve age on at least one step',
+  );
+
+  const preschoolSurfaceSteps = (capturedRun.playerSurfaceTrace?.steps ?? []).filter(
+    step =>
+      step.kind === 'passive_narrative'
+      && typeof step.age === 'number'
+      && step.age >= 4
+      && step.age <= 7,
+  );
+  const preschoolTraceSteps = (capturedRun.experienceTrace?.steps ?? []).filter(
+    step =>
+      step.phaseBefore === 'passive_progression'
+      && step.presentation?.passiveNarrative !== undefined
+      && step.age >= 4
+      && step.age <= 7,
+  );
+
+  assert.ok(preschoolSurfaceSteps.length > 0, 'fixture must capture preschool passive cards');
+  assert.equal(
+    preschoolSurfaceSteps.length,
+    preschoolTraceSteps.length,
+    'player-surface and experience trace must observe the same preschool passive acknowledgements',
+  );
+
+  for (let index = 0; index < preschoolSurfaceSteps.length; index += 1) {
+    const surfaceStep = preschoolSurfaceSteps[index]!;
+    const traceStep = preschoolTraceSteps[index]!;
+    const passiveEntryIds = (
+      surfaceStep as typeof surfaceStep & { passiveEntryIds?: string[] }
+    ).passiveEntryIds;
+
+    assert.equal(surfaceStep.age, traceStep.age, 'paired passive evidence must preserve age');
+    assert.ok(passiveEntryIds, 'packed passive surface step must preserve exact authored IDs');
+    assert.equal(passiveEntryIds.length, 3, 'preschool packed passive card preserves three source IDs');
+    assert.ok(
+      passiveEntryIds.every(id => typeof id === 'string' && id.length > 0),
+      'packed passive provenance contains only non-empty authored IDs',
+    );
+    assert.deepEqual(
+      passiveEntryIds,
+      traceStep.stateDelta.eventHistoryAdded,
+      'captured packed-passive IDs must equal the IDs actually committed by the same acknowledgement',
+    );
+  }
+
+  const withoutSurfaceCapture = await runHeadlessPersona({
+    persona,
+    endAge: 8,
+    catalogVersion: '1.0.0',
+    seed: 101,
+    maxSteps: 320,
+    experienceTrace: true,
+  });
+  const capturedFinalState = structuredClone(capturedRun.finalGameState);
+  const uncapturedFinalState = structuredClone(withoutSurfaceCapture.finalGameState);
+  delete capturedFinalState.gameTimestamp;
+  delete uncapturedFinalState.gameTimestamp;
+  assert.deepEqual(
+    capturedFinalState,
+    uncapturedFinalState,
+    'internal player-surface provenance capture must not change final gameplay state',
   );
 
   const ordinaryRun = await runHeadlessPersona({

@@ -6,7 +6,10 @@ import {
   type ObservablePayload,
 } from '../../src/evolution/playerObservableTranscript';
 import { projectHeadlessApiPlayerObservablePayload } from '../../src/evolution/wuxiaPlayerObservableProjector';
-import type { HeadlessApiPlayerSurfaceTrace } from '../../src/headless/playability/playerSurfaceCapture';
+import {
+  HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION,
+  type HeadlessApiPlayerSurfaceTrace,
+} from '../../src/headless/playability/playerSurfaceCapture';
 
 export function runPlayerObservableTranscriptTests(): void {
   const payload: ObservablePayload = {
@@ -51,7 +54,7 @@ export function runPlayerObservableTranscriptTests(): void {
 
 
   const source: HeadlessApiPlayerSurfaceTrace = {
-    schemaVersion: 'headless-api-player-surface-source-v1',
+    schemaVersion: HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION,
     steps: [{
       sequence: 1,
       kind: 'story_event',
@@ -82,6 +85,48 @@ export function runPlayerObservableTranscriptTests(): void {
       }],
     }],
   };
+
+  const passiveSourceWithIds: HeadlessApiPlayerSurfaceTrace = {
+    schemaVersion: HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION,
+    steps: [{
+      sequence: 1,
+      kind: 'passive_narrative',
+      age: 6,
+      passiveEntryIds: [
+        'internal-passive-alpha',
+        'internal-passive-beta',
+        'preschool_passive_gap::internal-gap',
+      ],
+      presentationCards: [{
+        title: '6岁这一季',
+        body: '【可见甲】正文甲\n\n【可见乙】正文乙\n\n【寻常一季】正文丙',
+      }],
+    }],
+  };
+
+  const passiveSourceWithoutIds = structuredClone(passiveSourceWithIds);
+  delete passiveSourceWithoutIds.steps[0]!.passiveEntryIds;
+
+  const withInternalIds = serializeObservablePayload(
+    projectHeadlessApiPlayerObservablePayload(passiveSourceWithIds),
+  );
+  const withoutInternalIds = serializeObservablePayload(
+    projectHeadlessApiPlayerObservablePayload(passiveSourceWithoutIds),
+  );
+
+  assert.equal(
+    withInternalIds,
+    withoutInternalIds,
+    'internal packed-passive provenance must not change player-observable payload bytes',
+  );
+  assert.equal(withInternalIds.includes('"passiveEntryIds"'), false);
+  for (const internalId of passiveSourceWithIds.steps[0]!.passiveEntryIds ?? []) {
+    assert.equal(
+      withInternalIds.includes(internalId),
+      false,
+      `player-observable payload must not expose ${internalId}`,
+    );
+  }
 
   const projected = projectHeadlessApiPlayerObservablePayload(source);
   const projectedBytes = serializeObservablePayload(projected);

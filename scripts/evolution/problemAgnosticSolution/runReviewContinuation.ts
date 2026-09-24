@@ -570,6 +570,7 @@ export async function runReviewContinuation(
     reviewerDecision: reviewer?.ok ? reviewer.review.decision : null,
     solutionScope: reviewer?.ok ? selectedOptionScope(revision.result, reviewer.review) : null,
     reviewScope: reviewer?.ok ? reviewer.review.scopeAssessment ?? null : null,
+    executionAuthorityAssessment: reviewer?.ok ? reviewer.review.executionAuthorityAssessment ?? null : null,
     permissions: base.problemPackage.permissions,
     budget: { actualParticipantJobs: reviewer === null ? 1 : 2, maxParticipantJobs: 4, retryCount: 0 },
   });

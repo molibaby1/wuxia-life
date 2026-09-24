@@ -322,6 +322,9 @@ async function readAcceptedExecutionInput(
   if (selectedOption.changeScope !== 'configuration' || solutionReview.scopeAssessment !== 'config_only') {
     throw new Error('accepted configuration work has a non-configuration scope');
   }
+  if (solutionReview.executionAuthorityAssessment !== 'WITHIN_CURRENT_AUTHORITY') {
+    throw new Error('accepted configuration work is not within current execution authority');
+  }
   return {
     invocationRef: 'configuration-execution-000001',
     destinationRoot: join(dirname(roundRoot), 'configuration-execution'),

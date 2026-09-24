@@ -45,6 +45,9 @@ export async function runCandidateBoundedSourceTransition(
   if (solutionWork.status !== 'OPTIONS' || solutionReview.decision !== 'ACCEPT_OPTION' || solutionReview.acceptedOptionId === undefined) throw new Error('source transition requires an accepted Solution option');
   const option = solutionWork.options.find(candidate => candidate.optionId === solutionReview.acceptedOptionId);
   if (!option || option.changeScope !== 'configuration' || solutionReview.scopeAssessment !== 'config_only') throw new Error('source transition requires a configuration-only accepted option');
+  if (solutionReview.executionAuthorityAssessment !== 'WITHIN_CURRENT_AUTHORITY') {
+    throw new Error('source transition requires execution authority within current authority');
+  }
   const allowedWritePaths = await deriveAllowedWritePaths({ workspaceRoot: input.authoritativeRoot, solutionOption: option });
   const prepared = await prepareAgentWorkspace({
     authoritativeRoot: input.authoritativeRoot,

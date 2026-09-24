@@ -10,6 +10,7 @@ const base: RouteSolutionDecisionInput = {
   reviewerDecision: 'ACCEPT_OPTION',
   solutionScope: 'configuration',
   reviewScope: 'config_only',
+  executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
   permissions: {
     authoritativeProductWrite: false,
     sandboxWrite: true,
@@ -24,6 +25,20 @@ function route(input: Partial<RouteSolutionDecisionInput>) {
 }
 
 export function runSolutionDecisionRouterTests(): void {
+  const humanAuthorityRequired = {
+    ...base,
+    executionAuthorityAssessment: 'HUMAN_AUTHORITY_REQUIRED',
+  } as RouteSolutionDecisionInput;
+  assert.equal(routeSolutionDecision(humanAuthorityRequired).route, 'ESCALATE_HUMAN');
+  assert.equal(routeSolutionDecision(humanAuthorityRequired).reasonCode, 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY');
+
+  const authorityUncertain = {
+    ...base,
+    executionAuthorityAssessment: 'AUTHORITY_UNCERTAIN',
+  } as RouteSolutionDecisionInput;
+  assert.equal(routeSolutionDecision(authorityUncertain).route, 'ESCALATE_HUMAN');
+  assert.equal(routeSolutionDecision(authorityUncertain).reasonCode, 'EXECUTION_AUTHORITY_UNCERTAIN');
+
   assert.equal(route({}).route, 'READY_FOR_CONFIG_EXECUTION');
   assert.equal(route({ solutionScope: 'program' }).route, 'ESCALATE_HUMAN');
   assert.equal(route({ solutionScope: 'configuration', reviewScope: 'mixed' }).route, 'ESCALATE_HUMAN');

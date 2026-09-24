@@ -25,6 +25,7 @@ function readyDecision(): SolutionDecisionV1 {
       reviewerDecision: 'ACCEPT_OPTION',
       solutionScope: 'configuration',
       reviewScope: 'config_only',
+      executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
       permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
       budget: { actualParticipantJobs: 4, maxParticipantJobs: 4, retryCount: 0 },
     },
@@ -71,7 +72,7 @@ async function writeRoundArtifacts(root: string): Promise<void> {
     recommendedOptionId: 'option-000001', summary: 'One configuration option.', repoRefs: [configPath], artifactRefs: [],
   })}\n`);
   await writeFile(join(root, 'reviewer-agent/review.json'), `${JSON.stringify({
-    schemaVersion: 'solution-review-v1', problemId, decision: 'ACCEPT_OPTION', acceptedOptionId: 'option-000001', scopeAssessment: 'config_only', assessment: 'Accepted.', repoRefs: [], artifactRefs: [], concerns: [],
+    schemaVersion: 'solution-review-v1', problemId, decision: 'ACCEPT_OPTION', acceptedOptionId: 'option-000001', scopeAssessment: 'config_only', executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY', assessment: 'Accepted.', repoRefs: [], artifactRefs: [], concerns: [],
   })}\n`);
 }
 

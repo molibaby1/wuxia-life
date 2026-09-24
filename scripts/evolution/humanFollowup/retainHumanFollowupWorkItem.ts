@@ -362,7 +362,12 @@ export async function retainHumanFollowupWorkItem(
   if (decision.route !== 'ESCALATE_HUMAN') {
     throw new Error('Human follow-up retention requires decision.route ESCALATE_HUMAN');
   }
-  if (decision.reasonCode !== 'EXPLICIT_ESCALATION' && decision.reasonCode !== 'ACCEPTED_OUT_OF_SCOPE') {
+  if (
+    decision.reasonCode !== 'EXPLICIT_ESCALATION'
+    && decision.reasonCode !== 'ACCEPTED_OUT_OF_SCOPE'
+    && decision.reasonCode !== 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY'
+    && decision.reasonCode !== 'EXECUTION_AUTHORITY_UNCERTAIN'
+  ) {
     throw new Error(`Human follow-up retention does not accept reasonCode ${decision.reasonCode}`);
   }
 

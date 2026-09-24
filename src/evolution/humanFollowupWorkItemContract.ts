@@ -10,6 +10,8 @@ export type HumanFollowupStatus =
 
 export type HumanFollowupTriggerReasonCode =
   | 'ACCEPTED_OUT_OF_SCOPE'
+  | 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY'
+  | 'EXECUTION_AUTHORITY_UNCERTAIN'
   | 'EXPLICIT_ESCALATION';
 
 export interface HumanFollowupEvidenceEntry {
@@ -60,6 +62,8 @@ const STATUSES: readonly HumanFollowupStatus[] = [
 
 const TRIGGER_REASONS: readonly HumanFollowupTriggerReasonCode[] = [
   'ACCEPTED_OUT_OF_SCOPE',
+  'ACCEPTED_REQUIRES_HUMAN_AUTHORITY',
+  'EXECUTION_AUTHORITY_UNCERTAIN',
   'EXPLICIT_ESCALATION',
 ];
 

@@ -12,12 +12,18 @@ export type ReviewScopeAssessment =
   | 'mixed'
   | 'uncertain';
 
+export type ExecutionAuthorityAssessment =
+  | 'WITHIN_CURRENT_AUTHORITY'
+  | 'HUMAN_AUTHORITY_REQUIRED'
+  | 'AUTHORITY_UNCERTAIN';
+
 export interface SolutionReviewV1 {
   schemaVersion: 'solution-review-v1';
   problemId: string;
   decision: SolutionReviewDecision;
   acceptedOptionId?: string;
   scopeAssessment?: ReviewScopeAssessment;
+  executionAuthorityAssessment?: ExecutionAuthorityAssessment;
   assessment: string;
   repoRefs: string[];
   artifactRefs: string[];
@@ -25,7 +31,7 @@ export interface SolutionReviewV1 {
 }
 
 const ROOT_REQUIRED_KEYS = ['schemaVersion', 'problemId', 'decision', 'assessment', 'repoRefs', 'artifactRefs', 'concerns'] as const;
-const ROOT_OPTIONAL_KEYS = ['acceptedOptionId', 'scopeAssessment'] as const;
+const ROOT_OPTIONAL_KEYS = ['acceptedOptionId', 'scopeAssessment', 'executionAuthorityAssessment'] as const;
 const DECISIONS: readonly SolutionReviewDecision[] = [
   'ACCEPT_OPTION',
   'ACCEPT_NO_ACTION',
@@ -35,6 +41,11 @@ const DECISIONS: readonly SolutionReviewDecision[] = [
   'ESCALATE',
 ];
 const SCOPES: readonly ReviewScopeAssessment[] = ['config_only', 'code_required', 'mixed', 'uncertain'];
+const EXECUTION_AUTHORITY_ASSESSMENTS: readonly ExecutionAuthorityAssessment[] = [
+  'WITHIN_CURRENT_AUTHORITY',
+  'HUMAN_AUTHORITY_REQUIRED',
+  'AUTHORITY_UNCERTAIN',
+];
 type RecordValue = Record<string, unknown>;
 
 function assertObject(value: unknown, label: string): asserts value is RecordValue {
@@ -78,12 +89,23 @@ export function validateSolutionReview(value: unknown): SolutionReviewV1 {
   const scopeAssessment = value.scopeAssessment === undefined
     ? undefined
     : enumValue(value.scopeAssessment, SCOPES, 'solution review.scopeAssessment');
+  const executionAuthorityAssessment = value.executionAuthorityAssessment === undefined
+    ? undefined
+    : enumValue(
+      value.executionAuthorityAssessment,
+      EXECUTION_AUTHORITY_ASSESSMENTS,
+      'solution review.executionAuthorityAssessment',
+    );
 
   if (decision === 'ACCEPT_OPTION') {
     if (acceptedOptionId === undefined) throw new Error('ACCEPT_OPTION requires acceptedOptionId');
     if (scopeAssessment === undefined) throw new Error('ACCEPT_OPTION requires scopeAssessment');
     if (!/^option-\d{6}$/.test(acceptedOptionId)) throw new Error('acceptedOptionId must use stable option id format');
-  } else if (acceptedOptionId !== undefined || scopeAssessment !== undefined) {
+  } else if (
+    acceptedOptionId !== undefined
+    || scopeAssessment !== undefined
+    || executionAuthorityAssessment !== undefined
+  ) {
     throw new Error(`${decision} must not contain accepted option scope fields`);
   }
 
@@ -93,6 +115,7 @@ export function validateSolutionReview(value: unknown): SolutionReviewV1 {
     decision,
     ...(acceptedOptionId !== undefined ? { acceptedOptionId } : {}),
     ...(scopeAssessment !== undefined ? { scopeAssessment } : {}),
+    ...(executionAuthorityAssessment !== undefined ? { executionAuthorityAssessment } : {}),
     assessment: nonEmptyString(value.assessment, 'solution review.assessment'),
     repoRefs: stringArray(value.repoRefs, 'solution review.repoRefs'),
     artifactRefs: stringArray(value.artifactRefs, 'solution review.artifactRefs'),

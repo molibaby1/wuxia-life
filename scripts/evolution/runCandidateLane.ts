@@ -295,6 +295,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
     reviewerDecision: reviewer?.ok ? reviewer.review.decision : null,
     solutionScope: selectedOptionScope(solution, reviewer),
     reviewScope: reviewer?.ok ? reviewer.review.scopeAssessment ?? null : null,
+    executionAuthorityAssessment: reviewer?.ok ? reviewer.review.executionAuthorityAssessment ?? null : null,
     permissions: problemPackage.permissions,
     budget: {
       actualParticipantJobs: reviewer ? 2 : 1,

@@ -168,7 +168,7 @@ Improvement Hypothesis Set 的 `1..N` 条合法 hypothesis 全部成为当前 So
 
 Host 每次只激活一个 PENDING candidate 进入既有单问题 lane。ordinary SKIP / DEFER / ESCALATE_HUMAN / terminal DEFER_MORE_WORK_REQUESTED 结束当前 candidate 后继续下一 candidate；candidate terminal 不等于 Pool exhausted。
 
-READY_FOR_CONFIG_EXECUTION 是 source-change barrier。只有 authorized execution → verification → real rerun → new sealed source 成功后，旧 Source Epoch 尚未调查的 PENDING candidates 才以 `SUPERSEDED_BY_SOURCE_CHANGE` 明确结束当前-source 生命周期，并由新 Source 重新形成 Feedback / Hypothesis / Pool；不做跨 Source rebind。
+只有 Reviewer 明确给出 typed execution-authority assessment `WITHIN_CURRENT_AUTHORITY`，且 accepted option 与 technical scope 都是 configuration-only，Decision Router 才能产生 `READY_FOR_CONFIG_EXECUTION`。方案方向可接受但需要 Human product/governance approval，或 execution authority 无法确定 / 缺失时，必须路由为 `ESCALATE_HUMAN`；不得从 `assessment`、`concerns` 或其他自由文本推断执行权限。READY_FOR_CONFIG_EXECUTION 是 source-change barrier。只有 authorized execution → verification → real rerun → new sealed source 成功后，旧 Source Epoch 尚未调查的 PENDING candidates 才以 `SUPERSEDED_BY_SOURCE_CHANGE` 明确结束当前-source 生命周期，并由新 Source 重新形成 Feedback / Hypothesis / Pool；不做跨 Source rebind。
 
 每个 Candidate Lane 最多一次 bounded continuation；11 Participant jobs 是 per Host execution slice 的 hard workflow envelope。Budget 只能在 candidate boundary 正常暂停，不能污染 candidate product disposition。
 
@@ -220,7 +220,7 @@ Human work item 是 downstream workflow state，不是新的 reasoning Role、Pa
 
 创建责任固定为：正式 Decision Router outcome 产生后，由 Orchestrator / Host 按机械 workflow rule 创建。Solution Participant、Reviewer Participant 和 Run Report Producer 没有独立创建 authority；Reviewer 的自然语言意见不能绕过 Decision Router 创建正式 work item。
 
-v1 的自动创建入口只有 `decision.route == ESCALATE_HUMAN`，包括明确要求 Human 判断以及超出 configuration authority 的正式 routed outcome。`DEFER`、`DEFER_MORE_WORK_REQUESTED`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 本身不自动创建 Human work item；它们可以成为后续 evidence review 的观察信号，但不把普通失败或不确定性全部转嫁给 Human。
+v1 的自动创建入口只有 `decision.route == ESCALATE_HUMAN`，包括明确要求 Human 判断、方案方向可接受但 execution authority 需要 Human approval、execution authority uncertain，以及超出 configuration authority 的正式 routed outcome。`DEFER`、`DEFER_MORE_WORK_REQUESTED`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 本身不自动创建 Human work item；它们可以成为后续 evidence review 的观察信号，但不把普通失败或不确定性全部转嫁给 Human。
 
 PD-117 定义的 bounded continuation shape、base Decision immutable 与 effective continuation Decision 继续有效；PD-118 将 continuation ownership 改为 candidate-local：每个 Candidate Lane 最多一次 continuation。第二个 `REQUEST_MORE_WORK` 仍终止为 DEFER_MORE_WORK_REQUESTED；ordinary semantic retry 仍为 0；envelope retransmission 仍是独立 transport recovery。11 Participant jobs 改为 per Host execution slice，而不是整个 Logical Session 的总预算。PD-100 HFL trigger scope 与 PD-111 evidence boundary 不变。
 

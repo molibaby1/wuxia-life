@@ -4,7 +4,11 @@ import {
   type SolutionRoute,
   type SolutionDecisionReasonCode,
 } from '../../../src/evolution/solutionDecisionContract';
-import type { SolutionReviewDecision, ReviewScopeAssessment } from '../../../src/evolution/solutionReviewContract';
+import type {
+  ExecutionAuthorityAssessment,
+  SolutionReviewDecision,
+  ReviewScopeAssessment,
+} from '../../../src/evolution/solutionReviewContract';
 import type { SolutionChangeScope, SolutionWorkStatus } from '../../../src/evolution/solutionWorkContract';
 
 export interface RouteSolutionDecisionInput {
@@ -13,6 +17,7 @@ export interface RouteSolutionDecisionInput {
   reviewerDecision: SolutionReviewDecision | null;
   solutionScope: SolutionChangeScope | null;
   reviewScope: ReviewScopeAssessment | null;
+  executionAuthorityAssessment: ExecutionAuthorityAssessment | null;
   permissions: SolutionDecisionV1['inputs']['permissions'];
   budget: SolutionDecisionV1['inputs']['budget'];
 }
@@ -33,7 +38,13 @@ function routeForReview(input: RouteSolutionDecisionInput): {
 } {
   if (input.reviewerDecision === 'ACCEPT_OPTION') {
     if (input.solutionScope === 'configuration' && input.reviewScope === 'config_only') {
-      return { route: 'READY_FOR_CONFIG_EXECUTION', reasonCode: 'ACCEPTED_CONFIGURATION_SCOPE' };
+      if (input.executionAuthorityAssessment === 'WITHIN_CURRENT_AUTHORITY') {
+        return { route: 'READY_FOR_CONFIG_EXECUTION', reasonCode: 'ACCEPTED_CONFIGURATION_SCOPE' };
+      }
+      if (input.executionAuthorityAssessment === 'HUMAN_AUTHORITY_REQUIRED') {
+        return { route: 'ESCALATE_HUMAN', reasonCode: 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY' };
+      }
+      return { route: 'ESCALATE_HUMAN', reasonCode: 'EXECUTION_AUTHORITY_UNCERTAIN' };
     }
     return { route: 'ESCALATE_HUMAN', reasonCode: 'ACCEPTED_OUT_OF_SCOPE' };
   }
@@ -57,6 +68,7 @@ export function routeSolutionDecision(input: RouteSolutionDecisionInput): Soluti
       reviewerDecision: input.reviewerDecision,
       solutionScope: input.solutionScope,
       reviewScope: input.reviewScope,
+      executionAuthorityAssessment: input.executionAuthorityAssessment,
       permissions: input.permissions,
       budget: input.budget,
     },

@@ -121,6 +121,7 @@ function reviewFor(decision: SolutionReviewV1['decision']): SolutionReviewV1 {
       decision,
       acceptedOptionId: 'option-000001',
       scopeAssessment: 'code_required',
+      executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
       assessment: 'The option is reviewable within the requested boundary.',
       repoRefs: [],
       artifactRefs: [],

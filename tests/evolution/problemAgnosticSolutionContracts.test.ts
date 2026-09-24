@@ -75,6 +75,7 @@ const solutionReview: SolutionReviewV1 = {
   decision: 'ACCEPT_OPTION',
   acceptedOptionId: 'option-000001',
   scopeAssessment: 'config_only',
+  executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
   assessment: 'The option is bounded.',
   repoRefs: ['src/example.ts'],
   artifactRefs: ['source/observable-payload.json'],
@@ -91,6 +92,7 @@ const solutionDecision: SolutionDecisionV1 = {
     reviewerDecision: 'ACCEPT_OPTION',
     solutionScope: 'configuration',
     reviewScope: 'config_only',
+    executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
     permissions: {
       authoritativeProductWrite: false,
       sandboxWrite: true,
@@ -109,7 +111,16 @@ export function runProblemAgnosticSolutionContractTests(): void {
   assert.deepEqual(parseProblemPackage(JSON.stringify(problemPackage)), problemPackage);
   assert.deepEqual(parseSolutionWork(JSON.stringify(solutionWork)), solutionWork);
   assert.deepEqual(parseSolutionReview(JSON.stringify(solutionReview)), solutionReview);
+  const historicalSolutionReview = { ...solutionReview };
+  delete historicalSolutionReview.executionAuthorityAssessment;
+  assert.deepEqual(parseSolutionReview(JSON.stringify(historicalSolutionReview)), historicalSolutionReview);
   assert.deepEqual(parseSolutionDecision(JSON.stringify(solutionDecision)), solutionDecision);
+  const historicalSolutionDecision = {
+    ...solutionDecision,
+    inputs: { ...solutionDecision.inputs },
+  };
+  delete historicalSolutionDecision.inputs.executionAuthorityAssessment;
+  assert.deepEqual(parseSolutionDecision(JSON.stringify(historicalSolutionDecision)), historicalSolutionDecision);
 
   const invalidEnvelopes = (json: string): string[] => [
     `Here is the result:\n${json}`,
@@ -266,6 +277,23 @@ export function runProblemAgnosticSolutionContractTests(): void {
       route: 'READY_FOR_CONFIG_EXECUTION',
     })),
     /configuration|scope|route/i,
+  );
+  assert.throws(
+    () => parseSolutionDecision(JSON.stringify({
+      ...solutionDecision,
+      inputs: {
+        ...solutionDecision.inputs,
+        executionAuthorityAssessment: 'HUMAN_AUTHORITY_REQUIRED',
+      },
+    })),
+    /configuration-only scopes/i,
+  );
+  assert.throws(
+    () => parseSolutionReview(JSON.stringify({
+      ...solutionReview,
+      executionAuthorityAssessment: 'not-typed',
+    })),
+    /executionAuthorityAssessment/i,
   );
 }
 

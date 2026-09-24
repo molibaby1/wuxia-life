@@ -46,6 +46,7 @@ function readyDecision(): SolutionDecisionV1 {
       reviewerDecision: 'ACCEPT_OPTION',
       solutionScope: 'configuration',
       reviewScope: 'config_only',
+      executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
       permissions: {
         authoritativeProductWrite: false,
         sandboxWrite: true,
@@ -87,6 +88,7 @@ function readySolutionReview(): Record<string, unknown> {
     decision: 'ACCEPT_OPTION',
     acceptedOptionId: 'option-000001',
     scopeAssessment: 'config_only',
+    executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
     assessment: 'The option is supported and stays inside the configuration boundary.',
     repoRefs: [],
     artifactRefs: [],

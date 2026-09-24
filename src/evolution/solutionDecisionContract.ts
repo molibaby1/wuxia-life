@@ -1,4 +1,8 @@
-import type { SolutionReviewDecision, ReviewScopeAssessment } from './solutionReviewContract';
+import type {
+  ExecutionAuthorityAssessment,
+  SolutionReviewDecision,
+  ReviewScopeAssessment,
+} from './solutionReviewContract';
 import type { SolutionChangeScope, SolutionWorkStatus } from './solutionWorkContract';
 
 export type SolutionRoute =
@@ -10,6 +14,8 @@ export type SolutionRoute =
 
 export type SolutionDecisionReasonCode =
   | 'ACCEPTED_CONFIGURATION_SCOPE'
+  | 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY'
+  | 'EXECUTION_AUTHORITY_UNCERTAIN'
   | 'ACCEPTED_OUT_OF_SCOPE'
   | 'NO_PROBLEM_FORMED'
   | 'NO_PROPOSAL'
@@ -31,6 +37,7 @@ export interface SolutionDecisionV1 {
     reviewerDecision: SolutionReviewDecision | null;
     solutionScope: SolutionChangeScope | null;
     reviewScope: ReviewScopeAssessment | null;
+    executionAuthorityAssessment?: ExecutionAuthorityAssessment | null;
     permissions: {
       authoritativeProductWrite: false;
       sandboxWrite: true;
@@ -46,7 +53,8 @@ export interface SolutionDecisionV1 {
 }
 
 const ROOT_KEYS = ['schemaVersion', 'problemId', 'route', 'reasonCode', 'inputs'] as const;
-const INPUT_KEYS = ['solutionStatus', 'reviewerDecision', 'solutionScope', 'reviewScope', 'permissions', 'budget'] as const;
+const INPUT_REQUIRED_KEYS = ['solutionStatus', 'reviewerDecision', 'solutionScope', 'reviewScope', 'permissions', 'budget'] as const;
+const INPUT_OPTIONAL_KEYS = ['executionAuthorityAssessment'] as const;
 const PERMISSION_KEYS = ['authoritativeProductWrite', 'sandboxWrite', 'productExecution', 'codeExecution'] as const;
 const BUDGET_KEYS = ['actualParticipantJobs', 'maxParticipantJobs', 'retryCount'] as const;
 const ROUTES: readonly SolutionRoute[] = [
@@ -58,6 +66,8 @@ const ROUTES: readonly SolutionRoute[] = [
 ];
 const REASONS: readonly SolutionDecisionReasonCode[] = [
   'ACCEPTED_CONFIGURATION_SCOPE',
+  'ACCEPTED_REQUIRES_HUMAN_AUTHORITY',
+  'EXECUTION_AUTHORITY_UNCERTAIN',
   'ACCEPTED_OUT_OF_SCOPE',
   'NO_PROBLEM_FORMED',
   'NO_PROPOSAL',
@@ -121,6 +131,8 @@ function fixedBoolean<T extends boolean>(value: unknown, expected: T, path: stri
 function assertReasonRoute(reasonCode: SolutionDecisionReasonCode, route: SolutionRoute): void {
   const expectedRoutes: Record<SolutionDecisionReasonCode, SolutionRoute> = {
     ACCEPTED_CONFIGURATION_SCOPE: 'READY_FOR_CONFIG_EXECUTION',
+    ACCEPTED_REQUIRES_HUMAN_AUTHORITY: 'ESCALATE_HUMAN',
+    EXECUTION_AUTHORITY_UNCERTAIN: 'ESCALATE_HUMAN',
     ACCEPTED_OUT_OF_SCOPE: 'ESCALATE_HUMAN',
     NO_PROBLEM_FORMED: 'SKIP',
     NO_PROPOSAL: 'SKIP',
@@ -145,11 +157,25 @@ export function validateSolutionDecision(value: unknown): SolutionDecisionV1 {
   const reasonCode = enumValue(value.reasonCode, REASONS, 'solution decision.reasonCode');
   assertReasonRoute(reasonCode, route);
   assertObject(value.inputs, 'solution decision.inputs');
-  assertExactKeys(value.inputs, INPUT_KEYS, 'solution decision.inputs');
+  const inputKeys = [...INPUT_REQUIRED_KEYS, ...INPUT_OPTIONAL_KEYS];
+  const allowedInputKeys = new Set<string>(inputKeys);
+  for (const key of Object.keys(value.inputs)) {
+    if (!allowedInputKeys.has(key)) throw new Error(`solution decision.inputs contains unknown field: ${key}`);
+  }
+  for (const key of INPUT_REQUIRED_KEYS) {
+    if (!(key in value.inputs)) throw new Error(`solution decision.inputs is missing field: ${key}`);
+  }
   const solutionStatus = enumValue(value.inputs.solutionStatus, SOLUTION_STATUSES, 'solution decision.inputs.solutionStatus');
   const reviewerDecision = nullableEnumValue(value.inputs.reviewerDecision, REVIEW_DECISIONS, 'solution decision.inputs.reviewerDecision');
   const solutionScope = nullableEnumValue(value.inputs.solutionScope, SOLUTION_SCOPES, 'solution decision.inputs.solutionScope');
   const reviewScope = nullableEnumValue(value.inputs.reviewScope, REVIEW_SCOPES, 'solution decision.inputs.reviewScope');
+  const executionAuthorityAssessment = value.inputs.executionAuthorityAssessment === undefined
+    ? undefined
+    : nullableEnumValue(
+      value.inputs.executionAuthorityAssessment,
+      [null, 'WITHIN_CURRENT_AUTHORITY', 'HUMAN_AUTHORITY_REQUIRED', 'AUTHORITY_UNCERTAIN'] as const,
+      'solution decision.inputs.executionAuthorityAssessment',
+    );
 
   assertObject(value.inputs.permissions, 'solution decision.inputs.permissions');
   assertExactKeys(value.inputs.permissions, PERMISSION_KEYS, 'solution decision.inputs.permissions');
@@ -179,8 +205,9 @@ export function validateSolutionDecision(value: unknown): SolutionDecisionV1 {
     || reviewerDecision !== 'ACCEPT_OPTION'
     || solutionScope !== 'configuration'
     || reviewScope !== 'config_only'
+    || (executionAuthorityAssessment !== undefined && executionAuthorityAssessment !== 'WITHIN_CURRENT_AUTHORITY')
   )) {
-    throw new Error('READY_FOR_CONFIG_EXECUTION requires accepted configuration-only scopes');
+    throw new Error('READY_FOR_CONFIG_EXECUTION requires accepted configuration-only scopes and WITHIN_CURRENT_AUTHORITY');
   }
 
   return {
@@ -193,6 +220,7 @@ export function validateSolutionDecision(value: unknown): SolutionDecisionV1 {
       reviewerDecision,
       solutionScope,
       reviewScope,
+      ...(executionAuthorityAssessment !== undefined ? { executionAuthorityAssessment } : {}),
       permissions,
       budget,
     },

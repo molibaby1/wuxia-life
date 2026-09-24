@@ -14,6 +14,7 @@ const requestMoreWorkInput = {
   reviewerDecision: 'REQUEST_MORE_WORK',
   solutionScope: 'configuration',
   reviewScope: 'uncertain',
+  executionAuthorityAssessment: 'AUTHORITY_UNCERTAIN',
   permissions: {
     authoritativeProductWrite: false,
     sandboxWrite: true,
@@ -31,6 +32,7 @@ const acceptedConfigurationInput = {
   ...requestMoreWorkInput,
   reviewerDecision: 'ACCEPT_OPTION',
   reviewScope: 'config_only',
+  executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
 } as const;
 
 function cloneRequestMoreWorkInput(): Record<string, unknown> {
@@ -51,6 +53,12 @@ export async function runSolutionDecisionReplayTests(): Promise<void> {
   const acceptedConfiguration = replay(acceptedConfigurationInput);
   assert.equal(acceptedConfiguration.route, 'READY_FOR_CONFIG_EXECUTION');
   assert.equal(acceptedConfiguration.reasonCode, 'ACCEPTED_CONFIGURATION_SCOPE');
+
+  const missingAuthority = { ...acceptedConfigurationInput };
+  delete (missingAuthority as { executionAuthorityAssessment?: string }).executionAuthorityAssessment;
+  const missingAuthorityDecision = replay(missingAuthority);
+  assert.equal(missingAuthorityDecision.route, 'ESCALATE_HUMAN');
+  assert.equal(missingAuthorityDecision.reasonCode, 'EXECUTION_AUTHORITY_UNCERTAIN');
 
   assert.deepEqual(replay(requestMoreWorkInput), replay(requestMoreWorkInput));
   assert.deepEqual(validateSolutionDecision(output), output);

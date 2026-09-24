@@ -5,12 +5,13 @@ import {
   validateSolutionDecision,
   type SolutionDecisionV1,
 } from '../../../src/evolution/solutionDecisionContract';
+import type { ExecutionAuthorityAssessment } from '../../../src/evolution/solutionReviewContract';
 import {
   routeSolutionDecision,
   type RouteSolutionDecisionInput,
 } from '../problemAgnosticSolution/routeSolutionDecision';
 
-const INPUT_KEYS = [
+const INPUT_REQUIRED_KEYS = [
   'problemId',
   'solutionStatus',
   'reviewerDecision',
@@ -19,6 +20,7 @@ const INPUT_KEYS = [
   'permissions',
   'budget',
 ] as const;
+const INPUT_OPTIONAL_KEYS = ['executionAuthorityAssessment'] as const;
 const PERMISSION_KEYS = [
   'authoritativeProductWrite',
   'sandboxWrite',
@@ -34,12 +36,17 @@ function assertObject(value: unknown, label: string): asserts value is RecordVal
   }
 }
 
-function assertExactKeys(value: RecordValue, allowed: readonly string[], label: string): void {
-  const allowedSet = new Set(allowed);
+function assertExactKeys(
+  value: RecordValue,
+  required: readonly string[],
+  label: string,
+  optional: readonly string[] = [],
+): void {
+  const allowedSet = new Set([...required, ...optional]);
   for (const key of Object.keys(value)) {
     if (!allowedSet.has(key)) throw new Error(`${label} contains unknown field: ${key}`);
   }
-  for (const key of allowed) {
+  for (const key of required) {
     if (!(key in value)) throw new Error(`${label} is missing field: ${key}`);
   }
 }
@@ -78,7 +85,7 @@ function parseReplayInput(raw: string): RouteSolutionDecisionInput {
   }
 
   assertObject(parsed, 'decision replay input');
-  assertExactKeys(parsed, INPUT_KEYS, 'decision replay input');
+  assertExactKeys(parsed, INPUT_REQUIRED_KEYS, 'decision replay input', INPUT_OPTIONAL_KEYS);
   assertObject(parsed.permissions, 'decision replay input.permissions');
   assertExactKeys(parsed.permissions, PERMISSION_KEYS, 'decision replay input.permissions');
   assertObject(parsed.budget, 'decision replay input.budget');
@@ -91,6 +98,9 @@ function parseReplayInput(raw: string): RouteSolutionDecisionInput {
     reviewerDecision: assertNullableString(parsed.reviewerDecision, 'decision replay input.reviewerDecision') as RouteSolutionDecisionInput['reviewerDecision'],
     solutionScope: assertNullableString(parsed.solutionScope, 'decision replay input.solutionScope') as RouteSolutionDecisionInput['solutionScope'],
     reviewScope: assertNullableString(parsed.reviewScope, 'decision replay input.reviewScope') as RouteSolutionDecisionInput['reviewScope'],
+    executionAuthorityAssessment: parsed.executionAuthorityAssessment === undefined
+      ? null
+      : assertNonEmptyString(parsed.executionAuthorityAssessment, 'decision replay input.executionAuthorityAssessment') as ExecutionAuthorityAssessment,
     permissions: {
       authoritativeProductWrite: assertBoolean(parsed.permissions.authoritativeProductWrite, 'decision replay input.permissions.authoritativeProductWrite'),
       sandboxWrite: assertBoolean(parsed.permissions.sandboxWrite, 'decision replay input.permissions.sandboxWrite'),

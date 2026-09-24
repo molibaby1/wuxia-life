@@ -618,6 +618,7 @@ export async function runProblemAgnosticAgentSolutionLoop(
     reviewerDecision,
     solutionScope: selectedOptionScope(solution, reviewer ?? { ok: false } as SolutionReviewerRunResult),
     reviewScope: reviewer?.ok ? reviewer.review.scopeAssessment ?? null : null,
+    executionAuthorityAssessment: reviewer?.ok ? reviewer.review.executionAuthorityAssessment ?? null : null,
     permissions: problemPackage.permissions,
     budget: { actualParticipantJobs: reviewer ? 4 : 3, maxParticipantJobs: 4, retryCount: 0 },
   });

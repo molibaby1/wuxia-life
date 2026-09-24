@@ -567,6 +567,78 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   const escalationReport = await buildMultiCandidateOperationalRunReport({ repositoryRoot: escalationRoot, logicalSessionId: 'logical-session-000002', hostSliceId: 'host-slice-000001' });
   assert.equal(escalationReport.candidates[0]!.effectiveRoute, 'ESCALATE_HUMAN');
 
+  const authorityEscalationRoot = await mkdtemp(join(tmpdir(), 'candidate-session-authority-escalation-'));
+  const authorityEscalationCalls: string[] = [];
+  let authorityEscalationSourceTransitionCalls = 0;
+  const authorityEscalation = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: authorityEscalationRoot,
+    logicalSessionId: 'logical-session-000002-authority',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(authorityEscalationRoot, { hypotheses: hypotheses.slice(0, 2) }),
+      runSourceTransition: async () => {
+        authorityEscalationSourceTransitionCalls += 1;
+        throw new Error('source transition must not run for Human-authority-required candidate');
+      },
+      runCandidateLane: async ({ candidate, laneRoot }: { candidate: CandidateIdentity; laneRoot: string }) => {
+        authorityEscalationCalls.push(candidate.hypothesisId);
+        await mkdir(laneRoot, { recursive: true });
+        const decision = candidate.sourceIndex === 0
+          ? validateSolutionDecision({
+            schemaVersion: 'solution-decision-v1',
+            problemId: `problem-${candidate.hypothesisId}`,
+            route: 'ESCALATE_HUMAN',
+            reasonCode: 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY',
+            inputs: {
+              solutionStatus: 'OPTIONS',
+              reviewerDecision: 'ACCEPT_OPTION',
+              solutionScope: 'configuration',
+              reviewScope: 'config_only',
+              executionAuthorityAssessment: 'HUMAN_AUTHORITY_REQUIRED',
+              permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
+              budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
+            },
+          })
+          : skipDecision(candidate.hypothesisId);
+        await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision));
+        return {
+          status: 'completed' as const,
+          candidateRef: candidate.candidateRef,
+          hypothesisId: candidate.hypothesisId,
+          sourceIndex: candidate.sourceIndex,
+          candidateActivationPath: 'candidate-activation.json',
+          problemPackagePath: 'problem-package.json',
+          causalAttributionPath: 'diagnostic/causal-attribution.json',
+          decisionPath: 'decision.json',
+          baseDecisionPath: 'decision.json',
+          humanReviewPackagePath: 'human-review-package.md',
+          actualParticipantJobs: 2 as const,
+          decision,
+          solutionInvocationRef: 'solution',
+          reviewerInvocationRef: 'reviewer',
+          problemPackage: {} as never,
+        };
+      },
+      retainHumanFollowup: async ({ workflowRoot }) => {
+        humanFollowupRefs.push(workflowRoot);
+        return { itemPath: join(authorityEscalationRoot, 'hfl-item.json'), item: {} as never, created: true };
+      },
+    },
+  });
+  assert.equal(authorityEscalation.sessionState, 'COMPLETED');
+  assert.deepEqual(authorityEscalationCalls, ['hypothesis-000001', 'hypothesis-000002']);
+  assert.equal(authorityEscalationSourceTransitionCalls, 0);
+  assert.equal(humanFollowupRefs.length, 2);
+  const authorityEscalationPool = parseCandidatePoolV1(JSON.parse(await readFile(join(authorityEscalationRoot, 'artifacts/evolution/sessions/logical-session-000002-authority/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  const authorityEscalationReport = await buildMultiCandidateOperationalRunReport({ repositoryRoot: authorityEscalationRoot, logicalSessionId: 'logical-session-000002-authority', hostSliceId: 'host-slice-000001' });
+  assert.equal(authorityEscalationReport.candidates[0]!.effectiveRoute, 'ESCALATE_HUMAN');
+  assert.equal(authorityEscalationReport.candidates[1]!.effectiveRoute, 'SKIP');
+  assert.equal(authorityEscalationPool.candidates[0]!.processingState, 'COMPLETED');
+  assert.equal(authorityEscalationPool.candidates[1]!.processingState, 'COMPLETED');
+
   const continuationRoot = await mkdtemp(join(tmpdir(), 'candidate-session-continuation-'));
   let candidateContinuationCalls = 0;
   let candidateAwareHumanFollowupRetentionCalls = 0;

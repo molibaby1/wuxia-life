@@ -115,6 +115,7 @@ function baseReview(decision: SolutionReviewV1['decision'] = 'REQUEST_MORE_WORK'
       decision,
       acceptedOptionId: 'option-000001',
       scopeAssessment: 'config_only',
+      executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
       assessment: 'The bounded option is acceptable.',
       repoRefs: [],
       artifactRefs: [],

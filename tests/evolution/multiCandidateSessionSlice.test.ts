@@ -1118,13 +1118,21 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
         decisionPath: 'decision.json',
         baseDecisionPath: 'decision.json',
         humanReviewPackagePath: 'human-review-package.md',
+        effectiveSolutionPath: 'exact-solution-artifact.json',
+        effectiveReviewPath: 'exact-review-artifact.json',
+        autonomousAuthoringAdmissionPath: null,
         actualParticipantJobs: 1 as const,
         decision: validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'READY_FOR_CONFIG_EXECUTION', reasonCode: 'ACCEPTED_CONFIGURATION_SCOPE', inputs: { solutionStatus: 'OPTIONS', reviewerDecision: 'ACCEPT_OPTION', solutionScope: 'configuration', reviewScope: 'config_only', permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } }),
         solutionInvocationRef: 'solution',
         reviewerInvocationRef: 'reviewer',
         problemPackage: {} as never,
       }),
-      runSourceTransition: async () => ({ status: 'succeeded' as const, participantJobs: 1 as const, executionRef: 'execution-000001', resultingRunRef: 'cohort-run-000004', resultingSourceRoot: transitionSourceB, executionEvidenceRef: 'execution.json' }),
+      runSourceTransition: async input => {
+        assert.equal(input.effectiveSolutionPath, 'exact-solution-artifact.json');
+        assert.equal(input.effectiveReviewPath, 'exact-review-artifact.json');
+        assert.equal(input.autonomousAuthoringAdmissionPath, null);
+        return { status: 'succeeded' as const, participantJobs: 1 as const, executionRef: 'execution-000001', resultingRunRef: 'cohort-run-000004', resultingSourceRoot: transitionSourceB, executionEvidenceRef: 'execution.json' };
+      },
     },
   });
   assert.equal(transition.sessionState, 'PAUSED');

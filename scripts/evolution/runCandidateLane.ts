@@ -35,6 +35,7 @@ import {
 import type { ParticipantFailureFacts } from './problemAgnosticSolution/participantFailureClassification';
 import { buildPreschoolAutonomousAuthoringContractPacket } from './autonomousAuthoring/buildPreschoolContractPacket';
 import { evaluatePreschoolAutonomousAuthoringAdmission } from './autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
+import type { AutonomousAuthoringAdmissionStatus } from '../../src/evolution/autonomousAuthoringAdmissionContract';
 
 export interface RunCandidateLaneOptions {
   repositoryRoot: string;
@@ -76,6 +77,9 @@ export interface CompletedCandidateLaneResult {
   decisionPath: string;
   baseDecisionPath: string;
   humanReviewPackagePath: string;
+  effectiveSolutionPath: string;
+  effectiveReviewPath: string | null;
+  autonomousAuthoringAdmissionPath: string | null;
   actualParticipantJobs: 1 | 2;
   decision: SolutionDecisionV1;
   solutionInvocationRef: string;
@@ -312,20 +316,22 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
       });
     }
   }
-  if (reviewer?.ok) {
-    const option = autonomousAuthoringOption(solution, reviewer);
-    if (option?.autonomousAuthoring) {
-      const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
-        repositoryRoot: input.repositoryRoot,
-        sourceRoot: input.sourceRoot,
-        sourceRunRef: input.sourceRunRef,
-        selectedOption: option,
-        review: reviewer.review,
-        proposalSha256: sha256Hex(canonicalJson(option.autonomousAuthoring)),
-        reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
-      });
-      await writeCreateOnly(join(input.laneRoot, 'autonomous-authoring-admission.json'), admission);
-    }
+  const selectedAuthoringOption = reviewer?.ok ? autonomousAuthoringOption(solution, reviewer) : null;
+  let autonomousAuthoringAdmissionStatus: AutonomousAuthoringAdmissionStatus | null = null;
+  let autonomousAuthoringAdmissionPath: string | null = null;
+  if (selectedAuthoringOption?.autonomousAuthoring && reviewer?.ok) {
+    const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
+      repositoryRoot: input.repositoryRoot,
+      sourceRoot: input.sourceRoot,
+      sourceRunRef: input.sourceRunRef,
+      selectedOption: selectedAuthoringOption,
+      review: reviewer.review,
+      proposalSha256: sha256Hex(canonicalJson(selectedAuthoringOption.autonomousAuthoring)),
+      reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
+    });
+    autonomousAuthoringAdmissionPath = join(input.laneRoot, 'autonomous-authoring-admission.json');
+    await writeCreateOnly(autonomousAuthoringAdmissionPath, admission);
+    autonomousAuthoringAdmissionStatus = admission.status;
   }
   const decision = routeSolutionDecision({
     problemId: problemPackage.problemId,
@@ -334,6 +340,12 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
     solutionScope: selectedOptionScope(solution, reviewer),
     reviewScope: reviewer?.ok ? reviewer.review.scopeAssessment ?? null : null,
     executionAuthorityAssessment: reviewer?.ok ? reviewer.review.executionAuthorityAssessment ?? null : null,
+    ...(selectedAuthoringOption?.autonomousAuthoring
+      ? {
+        autonomousAuthoringRequested: true,
+        autonomousAuthoringAdmissionStatus,
+      }
+      : {}),
     permissions: problemPackage.permissions,
     budget: {
       actualParticipantJobs: reviewer ? 2 : 1,
@@ -381,6 +393,9 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
     decisionPath,
     baseDecisionPath: decisionPath,
     humanReviewPackagePath,
+    effectiveSolutionPath: solution.resultPath,
+    effectiveReviewPath: reviewer?.ok ? reviewer.reviewPath : null,
+    autonomousAuthoringAdmissionPath,
     actualParticipantJobs: reviewer ? 2 : 1,
     decision,
     solutionInvocationRef: `${input.candidate.hypothesisId}-solution-000001`,

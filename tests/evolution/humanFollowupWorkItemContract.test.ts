@@ -42,6 +42,16 @@ function cloneItem(): HumanFollowupWorkItemV1 {
 export function runHumanFollowupWorkItemContractTests(): void {
   assert.deepEqual(validateHumanFollowupWorkItem(cloneItem()), validItem);
 
+  for (const reasonCode of [
+    'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED',
+    'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED',
+    'AUTONOMOUS_AUTHORING_AUTHORITY_STALE',
+  ] as const) {
+    const item = cloneItem();
+    item.trigger.reasonCode = reasonCode;
+    assert.equal(validateHumanFollowupWorkItem(item).trigger.reasonCode, reasonCode);
+  }
+
   for (const status of [
     'OPEN',
     'INVESTIGATING',

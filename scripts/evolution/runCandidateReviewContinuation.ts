@@ -48,6 +48,9 @@ export type CandidateReviewContinuationResult =
     continuationRef: 'review-continuation-000001';
     effectiveDecisionPath: string;
     effectiveDecision: SolutionDecisionV1;
+    effectiveSolutionPath: string;
+    effectiveReviewPath: string | null;
+    autonomousAuthoringAdmissionPath: string | null;
   }
   | {
     status: 'participant_failure';
@@ -70,6 +73,18 @@ async function writeCreateOnly(path: string, value: unknown): Promise<void> {
 
 async function readDecision(path: string): Promise<SolutionDecisionV1> {
   return validateSolutionDecision(JSON.parse(await readFile(path, 'utf8')) as unknown);
+}
+
+async function existingArtifactPath(root: string, relativePath: string): Promise<string | null> {
+  const path = resolve(root, relativePath);
+  try {
+    const info = await lstat(path);
+    if (!info.isFile()) throw new Error(`existing continuation artifact is not a file: ${relativePath}`);
+    return path;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
 }
 
 async function existingContinuation(
@@ -111,12 +126,17 @@ async function existingContinuation(
     };
   }
   const decisionPath = resolve(root, 'review-continuation-000001/decision.json');
+  const effectiveSolutionPath = await existingArtifactPath(root, 'review-continuation-000001/solution-revision/result.json');
+  if (effectiveSolutionPath === null) throw new Error('completed continuation is missing its effective Solution artifact');
   return {
     status: 'completed',
     participantJobs: continuation.participantJobCount === 2 ? 2 : 1,
     continuationRef: 'review-continuation-000001',
     effectiveDecisionPath: decisionPath,
     effectiveDecision: await readDecision(decisionPath),
+    effectiveSolutionPath,
+    effectiveReviewPath: await existingArtifactPath(root, 'review-continuation-000001/reviewer-agent/review.json'),
+    autonomousAuthoringAdmissionPath: await existingArtifactPath(root, 'review-continuation-000001/autonomous-authoring-admission.json'),
   };
 }
 
@@ -176,5 +196,8 @@ export async function runCandidateReviewContinuation(
     continuationRef: 'review-continuation-000001',
     effectiveDecisionPath: result.decisionPath,
     effectiveDecision: result.decision,
+    effectiveSolutionPath: result.effectiveSolutionPath,
+    effectiveReviewPath: result.effectiveReviewPath,
+    autonomousAuthoringAdmissionPath: result.autonomousAuthoringAdmissionPath,
   };
 }

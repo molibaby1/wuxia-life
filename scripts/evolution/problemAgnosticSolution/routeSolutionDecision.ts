@@ -10,6 +10,7 @@ import type {
   ReviewScopeAssessment,
 } from '../../../src/evolution/solutionReviewContract';
 import type { SolutionChangeScope, SolutionWorkStatus } from '../../../src/evolution/solutionWorkContract';
+import type { AutonomousAuthoringAdmissionStatus } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
 
 export interface RouteSolutionDecisionInput {
   problemId: string;
@@ -18,6 +19,8 @@ export interface RouteSolutionDecisionInput {
   solutionScope: SolutionChangeScope | null;
   reviewScope: ReviewScopeAssessment | null;
   executionAuthorityAssessment: ExecutionAuthorityAssessment | null;
+  autonomousAuthoringRequested?: boolean;
+  autonomousAuthoringAdmissionStatus?: AutonomousAuthoringAdmissionStatus | null;
   permissions: SolutionDecisionV1['inputs']['permissions'];
   budget: SolutionDecisionV1['inputs']['budget'];
 }
@@ -37,6 +40,29 @@ function routeForReview(input: RouteSolutionDecisionInput): {
   reasonCode: SolutionDecisionReasonCode;
 } {
   if (input.reviewerDecision === 'ACCEPT_OPTION') {
+    if (input.autonomousAuthoringRequested) {
+      if (input.executionAuthorityAssessment === 'HUMAN_AUTHORITY_REQUIRED') {
+        return { route: 'ESCALATE_HUMAN', reasonCode: 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY' };
+      }
+      if (input.executionAuthorityAssessment !== 'WITHIN_CURRENT_AUTHORITY') {
+        return { route: 'ESCALATE_HUMAN', reasonCode: 'EXECUTION_AUTHORITY_UNCERTAIN' };
+      }
+      switch (input.autonomousAuthoringAdmissionStatus ?? null) {
+        case 'ELIGIBLE':
+          return { route: 'READY_FOR_SHADOW_AUTHORING', reasonCode: 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE' };
+        case 'INSUFFICIENT_EVIDENCE':
+          return { route: 'DEFER', reasonCode: 'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE' };
+        case 'CONTRACT_CHANGE_REQUIRED':
+          return { route: 'ESCALATE_HUMAN', reasonCode: 'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED' };
+        case 'EXECUTION_ENVELOPE_EXCEEDED':
+          return { route: 'ESCALATE_HUMAN', reasonCode: 'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED' };
+        case 'AUTHORITY_STALE':
+          return { route: 'ESCALATE_HUMAN', reasonCode: 'AUTONOMOUS_AUTHORING_AUTHORITY_STALE' };
+        case 'NOT_APPLICABLE':
+        case null:
+          return { route: 'ESCALATE_HUMAN', reasonCode: 'ACCEPTED_OUT_OF_SCOPE' };
+      }
+    }
     if (input.solutionScope === 'configuration' && input.reviewScope === 'config_only') {
       if (input.executionAuthorityAssessment === 'WITHIN_CURRENT_AUTHORITY') {
         return { route: 'READY_FOR_CONFIG_EXECUTION', reasonCode: 'ACCEPTED_CONFIGURATION_SCOPE' };
@@ -69,6 +95,12 @@ export function routeSolutionDecision(input: RouteSolutionDecisionInput): Soluti
       solutionScope: input.solutionScope,
       reviewScope: input.reviewScope,
       executionAuthorityAssessment: input.executionAuthorityAssessment,
+      ...(input.autonomousAuthoringRequested !== undefined
+        ? { autonomousAuthoringRequested: input.autonomousAuthoringRequested }
+        : {}),
+      ...(input.autonomousAuthoringAdmissionStatus !== undefined || input.autonomousAuthoringRequested === true
+        ? { autonomousAuthoringAdmissionStatus: input.autonomousAuthoringAdmissionStatus ?? null }
+        : {}),
       permissions: input.permissions,
       budget: input.budget,
     },

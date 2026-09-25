@@ -790,6 +790,13 @@ export async function runReviewContinuationTests(): Promise<void> {
   });
   assert.equal(authoringContinuationResult.status, 'completed');
   assert.deepEqual(authoringCalls, { revision: 1, rereview: 1 });
+  if (authoringContinuationResult.status === 'completed') {
+    assert.equal(authoringContinuationResult.decision.route, 'DEFER');
+    assert.equal(authoringContinuationResult.decision.reasonCode, 'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE');
+    assert.equal(authoringContinuationResult.effectiveSolutionPath, join(authoringContinuation.roundRoot, 'review-continuation-000001/solution-revision/result.json'));
+    assert.equal(authoringContinuationResult.effectiveReviewPath, join(authoringContinuation.roundRoot, 'review-continuation-000001/reviewer-agent/review.json'));
+    assert.equal(authoringContinuationResult.autonomousAuthoringAdmissionPath, authoringAdmissionPath);
+  }
   const continuationAdmission = JSON.parse(await readFile(authoringAdmissionPath, 'utf8')) as {
     status: string;
   };

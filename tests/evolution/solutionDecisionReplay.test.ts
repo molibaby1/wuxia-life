@@ -53,6 +53,34 @@ export async function runSolutionDecisionReplayTests(): Promise<void> {
   const acceptedConfiguration = replay(acceptedConfigurationInput);
   assert.equal(acceptedConfiguration.route, 'READY_FOR_CONFIG_EXECUTION');
   assert.equal(acceptedConfiguration.reasonCode, 'ACCEPTED_CONFIGURATION_SCOPE');
+  assert.equal(Object.hasOwn(acceptedConfiguration.inputs, 'autonomousAuthoringRequested'), false);
+
+  const acceptedShadowAuthoring = replay({
+    ...acceptedConfigurationInput,
+    solutionScope: 'program',
+    reviewScope: 'code_required',
+    autonomousAuthoringRequested: true,
+    autonomousAuthoringAdmissionStatus: 'ELIGIBLE',
+  });
+  assert.equal(acceptedShadowAuthoring.route, 'READY_FOR_SHADOW_AUTHORING');
+  assert.equal(acceptedShadowAuthoring.reasonCode, 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE');
+  assert.equal(acceptedShadowAuthoring.inputs.autonomousAuthoringAdmissionStatus, 'ELIGIBLE');
+
+  const insufficientShadowEvidence = replay({
+    ...acceptedConfigurationInput,
+    solutionScope: 'program',
+    reviewScope: 'code_required',
+    autonomousAuthoringRequested: true,
+    autonomousAuthoringAdmissionStatus: 'INSUFFICIENT_EVIDENCE',
+  });
+  assert.equal(insufficientShadowEvidence.route, 'DEFER');
+  assert.equal(insufficientShadowEvidence.reasonCode, 'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE');
+
+  const shadowWithoutAdmission = replay({
+    ...acceptedConfigurationInput,
+    autonomousAuthoringRequested: true,
+  });
+  assert.notEqual(shadowWithoutAdmission.route, 'READY_FOR_CONFIG_EXECUTION');
 
   const missingAuthority = { ...acceptedConfigurationInput };
   delete (missingAuthority as { executionAuthorityAssessment?: string }).executionAuthorityAssessment;
@@ -94,6 +122,12 @@ export async function runSolutionDecisionReplayTests(): Promise<void> {
   const invalidBudget = cloneRequestMoreWorkInput();
   (invalidBudget.budget as Record<string, unknown>).actualParticipantJobs = 5;
   assert.throws(() => replay(invalidBudget), /actualParticipantJobs/i);
+
+  const invalidAutonomousFlag = { ...acceptedConfigurationInput, autonomousAuthoringRequested: 'yes' };
+  assert.throws(() => replay(invalidAutonomousFlag), /autonomousAuthoringRequested.*boolean/i);
+
+  const invalidAdmissionStatus = { ...acceptedConfigurationInput, autonomousAuthoringAdmissionStatus: 'UNKNOWN' };
+  assert.throws(() => replay(invalidAdmissionStatus), /autonomousAuthoringAdmissionStatus.*invalid/i);
 
   assert.throws(() => replaySolutionDecision('{'), /valid JSON/i);
 

@@ -63,12 +63,18 @@ export async function runCandidateReviewContinuationTests(): Promise<void> {
             decisionPath: join(lane, 'review-continuation-000001/decision.json'),
             effectiveSolutionPath: join(lane, 'review-continuation-000001/solution-revision/result.json'),
             effectiveReviewPath: null,
+            autonomousAuthoringAdmissionPath: null,
           };
         },
       },
     });
     assert.equal(result.status, 'completed');
-    if (result.status === 'completed') assert.equal(result.effectiveDecision.problemId, `problem-${id}`);
+    if (result.status === 'completed') {
+      assert.equal(result.effectiveDecision.problemId, `problem-${id}`);
+      assert.equal(result.effectiveSolutionPath, join(lane, 'review-continuation-000001/solution-revision/result.json'));
+      assert.equal(result.effectiveReviewPath, null);
+      assert.equal(result.autonomousAuthoringAdmissionPath, null);
+    }
   }
   assert.deepEqual(calls, ['pool/hypothesis-000001', 'pool/hypothesis-000002']);
 

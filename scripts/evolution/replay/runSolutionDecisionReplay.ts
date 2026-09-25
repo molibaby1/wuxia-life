@@ -6,6 +6,7 @@ import {
   type SolutionDecisionV1,
 } from '../../../src/evolution/solutionDecisionContract';
 import type { ExecutionAuthorityAssessment } from '../../../src/evolution/solutionReviewContract';
+import type { AutonomousAuthoringAdmissionStatus } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
 import {
   routeSolutionDecision,
   type RouteSolutionDecisionInput,
@@ -20,7 +21,19 @@ const INPUT_REQUIRED_KEYS = [
   'permissions',
   'budget',
 ] as const;
-const INPUT_OPTIONAL_KEYS = ['executionAuthorityAssessment'] as const;
+const INPUT_OPTIONAL_KEYS = [
+  'executionAuthorityAssessment',
+  'autonomousAuthoringRequested',
+  'autonomousAuthoringAdmissionStatus',
+] as const;
+const AUTONOMOUS_AUTHORING_ADMISSION_STATUSES: readonly AutonomousAuthoringAdmissionStatus[] = [
+  'ELIGIBLE',
+  'NOT_APPLICABLE',
+  'INSUFFICIENT_EVIDENCE',
+  'CONTRACT_CHANGE_REQUIRED',
+  'EXECUTION_ENVELOPE_EXCEEDED',
+  'AUTHORITY_STALE',
+];
 const PERMISSION_KEYS = [
   'authoritativeProductWrite',
   'sandboxWrite',
@@ -91,6 +104,21 @@ function parseReplayInput(raw: string): RouteSolutionDecisionInput {
   assertObject(parsed.budget, 'decision replay input.budget');
   assertExactKeys(parsed.budget, BUDGET_KEYS, 'decision replay input.budget');
 
+  const autonomousAuthoringRequested = Object.hasOwn(parsed, 'autonomousAuthoringRequested')
+    ? assertBoolean(parsed.autonomousAuthoringRequested, 'decision replay input.autonomousAuthoringRequested')
+    : undefined;
+  let autonomousAuthoringAdmissionStatus: AutonomousAuthoringAdmissionStatus | null | undefined;
+  if (Object.hasOwn(parsed, 'autonomousAuthoringAdmissionStatus')) {
+    const value = parsed.autonomousAuthoringAdmissionStatus;
+    if (value === null) {
+      autonomousAuthoringAdmissionStatus = null;
+    } else if (typeof value === 'string' && AUTONOMOUS_AUTHORING_ADMISSION_STATUSES.includes(value as AutonomousAuthoringAdmissionStatus)) {
+      autonomousAuthoringAdmissionStatus = value as AutonomousAuthoringAdmissionStatus;
+    } else {
+      throw new Error(`decision replay input.autonomousAuthoringAdmissionStatus has invalid value: ${String(value)}`);
+    }
+  }
+
   // Input shape/types are enforced here; enum/policy legality remains with route + validateSolutionDecision.
   return {
     problemId: assertNonEmptyString(parsed.problemId, 'decision replay input.problemId'),
@@ -101,6 +129,10 @@ function parseReplayInput(raw: string): RouteSolutionDecisionInput {
     executionAuthorityAssessment: parsed.executionAuthorityAssessment === undefined
       ? null
       : assertNonEmptyString(parsed.executionAuthorityAssessment, 'decision replay input.executionAuthorityAssessment') as ExecutionAuthorityAssessment,
+    ...(autonomousAuthoringRequested !== undefined ? { autonomousAuthoringRequested } : {}),
+    ...(autonomousAuthoringAdmissionStatus !== undefined
+      ? { autonomousAuthoringAdmissionStatus }
+      : {}),
     permissions: {
       authoritativeProductWrite: assertBoolean(parsed.permissions.authoritativeProductWrite, 'decision replay input.permissions.authoritativeProductWrite'),
       sandboxWrite: assertBoolean(parsed.permissions.sandboxWrite, 'decision replay input.permissions.sandboxWrite'),

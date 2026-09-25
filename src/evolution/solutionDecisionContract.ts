@@ -4,9 +4,11 @@ import type {
   ReviewScopeAssessment,
 } from './solutionReviewContract';
 import type { SolutionChangeScope, SolutionWorkStatus } from './solutionWorkContract';
+import type { AutonomousAuthoringAdmissionStatus } from './autonomousAuthoringAdmissionContract';
 
 export type SolutionRoute =
   | 'READY_FOR_CONFIG_EXECUTION'
+  | 'READY_FOR_SHADOW_AUTHORING'
   | 'SKIP'
   | 'DEFER'
   | 'DEFER_MORE_WORK_REQUESTED'
@@ -14,6 +16,11 @@ export type SolutionRoute =
 
 export type SolutionDecisionReasonCode =
   | 'ACCEPTED_CONFIGURATION_SCOPE'
+  | 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE'
+  | 'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE'
+  | 'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED'
+  | 'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED'
+  | 'AUTONOMOUS_AUTHORING_AUTHORITY_STALE'
   | 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY'
   | 'EXECUTION_AUTHORITY_UNCERTAIN'
   | 'ACCEPTED_OUT_OF_SCOPE'
@@ -38,6 +45,8 @@ export interface SolutionDecisionV1 {
     solutionScope: SolutionChangeScope | null;
     reviewScope: ReviewScopeAssessment | null;
     executionAuthorityAssessment?: ExecutionAuthorityAssessment | null;
+    autonomousAuthoringRequested?: boolean;
+    autonomousAuthoringAdmissionStatus?: AutonomousAuthoringAdmissionStatus | null;
     permissions: {
       authoritativeProductWrite: false;
       sandboxWrite: true;
@@ -54,11 +63,16 @@ export interface SolutionDecisionV1 {
 
 const ROOT_KEYS = ['schemaVersion', 'problemId', 'route', 'reasonCode', 'inputs'] as const;
 const INPUT_REQUIRED_KEYS = ['solutionStatus', 'reviewerDecision', 'solutionScope', 'reviewScope', 'permissions', 'budget'] as const;
-const INPUT_OPTIONAL_KEYS = ['executionAuthorityAssessment'] as const;
+const INPUT_OPTIONAL_KEYS = [
+  'executionAuthorityAssessment',
+  'autonomousAuthoringRequested',
+  'autonomousAuthoringAdmissionStatus',
+] as const;
 const PERMISSION_KEYS = ['authoritativeProductWrite', 'sandboxWrite', 'productExecution', 'codeExecution'] as const;
 const BUDGET_KEYS = ['actualParticipantJobs', 'maxParticipantJobs', 'retryCount'] as const;
 const ROUTES: readonly SolutionRoute[] = [
   'READY_FOR_CONFIG_EXECUTION',
+  'READY_FOR_SHADOW_AUTHORING',
   'SKIP',
   'DEFER',
   'DEFER_MORE_WORK_REQUESTED',
@@ -66,6 +80,11 @@ const ROUTES: readonly SolutionRoute[] = [
 ];
 const REASONS: readonly SolutionDecisionReasonCode[] = [
   'ACCEPTED_CONFIGURATION_SCOPE',
+  'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE',
+  'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE',
+  'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED',
+  'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED',
+  'AUTONOMOUS_AUTHORING_AUTHORITY_STALE',
   'ACCEPTED_REQUIRES_HUMAN_AUTHORITY',
   'EXECUTION_AUTHORITY_UNCERTAIN',
   'ACCEPTED_OUT_OF_SCOPE',
@@ -91,6 +110,14 @@ const REVIEW_DECISIONS: readonly (SolutionReviewDecision | null)[] = [
 ];
 const SOLUTION_SCOPES: readonly (SolutionChangeScope | null)[] = [null, 'configuration', 'program', 'mixed', 'uncertain'];
 const REVIEW_SCOPES: readonly (ReviewScopeAssessment | null)[] = [null, 'config_only', 'code_required', 'mixed', 'uncertain'];
+const AUTONOMOUS_AUTHORING_ADMISSION_STATUSES: readonly AutonomousAuthoringAdmissionStatus[] = [
+  'ELIGIBLE',
+  'NOT_APPLICABLE',
+  'INSUFFICIENT_EVIDENCE',
+  'CONTRACT_CHANGE_REQUIRED',
+  'EXECUTION_ENVELOPE_EXCEEDED',
+  'AUTHORITY_STALE',
+];
 type RecordValue = Record<string, unknown>;
 
 function assertObject(value: unknown, label: string): asserts value is RecordValue {
@@ -128,9 +155,19 @@ function fixedBoolean<T extends boolean>(value: unknown, expected: T, path: stri
   return expected;
 }
 
+function booleanValue(value: unknown, path: string): boolean {
+  if (typeof value !== 'boolean') throw new Error(`${path} must be a boolean`);
+  return value;
+}
+
 function assertReasonRoute(reasonCode: SolutionDecisionReasonCode, route: SolutionRoute): void {
   const expectedRoutes: Record<SolutionDecisionReasonCode, SolutionRoute> = {
     ACCEPTED_CONFIGURATION_SCOPE: 'READY_FOR_CONFIG_EXECUTION',
+    ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE: 'READY_FOR_SHADOW_AUTHORING',
+    AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE: 'DEFER',
+    AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED: 'ESCALATE_HUMAN',
+    AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED: 'ESCALATE_HUMAN',
+    AUTONOMOUS_AUTHORING_AUTHORITY_STALE: 'ESCALATE_HUMAN',
     ACCEPTED_REQUIRES_HUMAN_AUTHORITY: 'ESCALATE_HUMAN',
     EXECUTION_AUTHORITY_UNCERTAIN: 'ESCALATE_HUMAN',
     ACCEPTED_OUT_OF_SCOPE: 'ESCALATE_HUMAN',
@@ -176,6 +213,18 @@ export function validateSolutionDecision(value: unknown): SolutionDecisionV1 {
       [null, 'WITHIN_CURRENT_AUTHORITY', 'HUMAN_AUTHORITY_REQUIRED', 'AUTHORITY_UNCERTAIN'] as const,
       'solution decision.inputs.executionAuthorityAssessment',
     );
+  const autonomousAuthoringRequested = value.inputs.autonomousAuthoringRequested === undefined
+    ? undefined
+    : booleanValue(value.inputs.autonomousAuthoringRequested, 'solution decision.inputs.autonomousAuthoringRequested');
+  const autonomousAuthoringAdmissionStatus = value.inputs.autonomousAuthoringAdmissionStatus === undefined
+    ? undefined
+    : value.inputs.autonomousAuthoringAdmissionStatus === null
+      ? null
+      : enumValue(
+        value.inputs.autonomousAuthoringAdmissionStatus,
+        AUTONOMOUS_AUTHORING_ADMISSION_STATUSES,
+        'solution decision.inputs.autonomousAuthoringAdmissionStatus',
+      );
 
   assertObject(value.inputs.permissions, 'solution decision.inputs.permissions');
   assertExactKeys(value.inputs.permissions, PERMISSION_KEYS, 'solution decision.inputs.permissions');
@@ -209,6 +258,15 @@ export function validateSolutionDecision(value: unknown): SolutionDecisionV1 {
   )) {
     throw new Error('READY_FOR_CONFIG_EXECUTION requires accepted configuration-only scopes and WITHIN_CURRENT_AUTHORITY');
   }
+  if (route === 'READY_FOR_SHADOW_AUTHORING' && (
+    solutionStatus !== 'OPTIONS'
+    || reviewerDecision !== 'ACCEPT_OPTION'
+    || executionAuthorityAssessment !== 'WITHIN_CURRENT_AUTHORITY'
+    || autonomousAuthoringRequested !== true
+    || autonomousAuthoringAdmissionStatus !== 'ELIGIBLE'
+  )) {
+    throw new Error('READY_FOR_SHADOW_AUTHORING requires accepted options, current authority, autonomous request, and ELIGIBLE admission');
+  }
 
   return {
     schemaVersion: 'solution-decision-v1',
@@ -221,6 +279,8 @@ export function validateSolutionDecision(value: unknown): SolutionDecisionV1 {
       solutionScope,
       reviewScope,
       ...(executionAuthorityAssessment !== undefined ? { executionAuthorityAssessment } : {}),
+      ...(autonomousAuthoringRequested !== undefined ? { autonomousAuthoringRequested } : {}),
+      ...(autonomousAuthoringAdmissionStatus !== undefined ? { autonomousAuthoringAdmissionStatus } : {}),
       permissions,
       budget,
     },

@@ -474,6 +474,11 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
     });
     assert.equal(laneResult.status, 'completed');
     assert.equal(reviewerRan, true);
+    assert.equal(laneResult.decision.route, 'READY_FOR_SHADOW_AUTHORING');
+    assert.equal(laneResult.decision.reasonCode, 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE');
+    assert.equal(laneResult.effectiveSolutionPath, join(laneRoot, 'solution-agent/result.json'));
+    assert.equal(laneResult.effectiveReviewPath, join(laneRoot, 'reviewer-agent/review.json'));
+    assert.equal(laneResult.autonomousAuthoringAdmissionPath, join(laneRoot, 'autonomous-authoring-admission.json'));
     const persistedAdmission = JSON.parse(await readFile(join(laneRoot, 'autonomous-authoring-admission.json'), 'utf8'));
     assert.equal(persistedAdmission.status, 'ELIGIBLE');
     for (const manifestRef of [

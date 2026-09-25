@@ -3,6 +3,7 @@ import {
   routeSolutionDecision,
   type RouteSolutionDecisionInput,
 } from '../../scripts/evolution/problemAgnosticSolution/routeSolutionDecision';
+import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 
 const base: RouteSolutionDecisionInput = {
   problemId: 'problem-000001',
@@ -55,6 +56,74 @@ export function runSolutionDecisionRouterTests(): void {
   const second = route({ problemId: 'problem-b', solutionText: 'another domain-shaped prose' } as Partial<RouteSolutionDecisionInput>);
   assert.equal(first.route, second.route);
   assert.equal(first.reasonCode, second.reasonCode);
+
+  const shadowEligible = route({
+    solutionScope: 'program',
+    reviewScope: 'code_required',
+    autonomousAuthoringRequested: true,
+    autonomousAuthoringAdmissionStatus: 'ELIGIBLE',
+  } as unknown as Partial<RouteSolutionDecisionInput>);
+  assert.equal(shadowEligible.route, 'READY_FOR_SHADOW_AUTHORING');
+  assert.equal(shadowEligible.reasonCode, 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE');
+  assert.equal(shadowEligible.inputs.autonomousAuthoringRequested, true);
+  assert.equal(shadowEligible.inputs.autonomousAuthoringAdmissionStatus, 'ELIGIBLE');
+  assert.deepEqual(validateSolutionDecision(shadowEligible), shadowEligible);
+
+  const admissionRoutes = [
+    ['INSUFFICIENT_EVIDENCE', 'DEFER', 'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE'],
+    ['CONTRACT_CHANGE_REQUIRED', 'ESCALATE_HUMAN', 'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED'],
+    ['EXECUTION_ENVELOPE_EXCEEDED', 'ESCALATE_HUMAN', 'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED'],
+    ['AUTHORITY_STALE', 'ESCALATE_HUMAN', 'AUTONOMOUS_AUTHORING_AUTHORITY_STALE'],
+  ] as const;
+  for (const [status, expectedRoute, expectedReason] of admissionRoutes) {
+    const decision = route({
+      solutionScope: 'program',
+      reviewScope: 'code_required',
+      autonomousAuthoringRequested: true,
+      autonomousAuthoringAdmissionStatus: status,
+    } as unknown as Partial<RouteSolutionDecisionInput>);
+    assert.equal(decision.route, expectedRoute);
+    assert.equal(decision.reasonCode, expectedReason);
+  }
+
+  const notApplicable = route({
+    solutionScope: 'program',
+    reviewScope: 'code_required',
+    autonomousAuthoringRequested: true,
+    autonomousAuthoringAdmissionStatus: 'NOT_APPLICABLE',
+  } as unknown as Partial<RouteSolutionDecisionInput>);
+  assert.equal(notApplicable.route, 'ESCALATE_HUMAN');
+  assert.equal(notApplicable.reasonCode, 'ACCEPTED_OUT_OF_SCOPE');
+
+  const notApplicableConfiguration = route({
+    autonomousAuthoringRequested: true,
+    autonomousAuthoringAdmissionStatus: 'NOT_APPLICABLE',
+  });
+  assert.notEqual(notApplicableConfiguration.route, 'READY_FOR_CONFIG_EXECUTION');
+  assert.equal(notApplicableConfiguration.route, 'ESCALATE_HUMAN');
+  assert.equal(notApplicableConfiguration.reasonCode, 'ACCEPTED_OUT_OF_SCOPE');
+
+  const missingAdmission = route({
+    autonomousAuthoringRequested: true,
+  } as unknown as Partial<RouteSolutionDecisionInput>);
+  assert.notEqual(missingAdmission.route, 'READY_FOR_CONFIG_EXECUTION');
+  assert.equal(missingAdmission.route, 'ESCALATE_HUMAN');
+
+  const nullAdmission = route({
+    autonomousAuthoringRequested: true,
+    autonomousAuthoringAdmissionStatus: null,
+  } as unknown as Partial<RouteSolutionDecisionInput>);
+  assert.notEqual(nullAdmission.route, 'READY_FOR_CONFIG_EXECUTION');
+  assert.equal(nullAdmission.route, 'ESCALATE_HUMAN');
+
+  assert.throws(() => validateSolutionDecision({
+    ...shadowEligible,
+    inputs: { ...shadowEligible.inputs, autonomousAuthoringAdmissionStatus: null },
+  }), /READY_FOR_SHADOW_AUTHORING.*requires/i);
+
+  const ordinaryConfiguration = route({});
+  assert.equal(ordinaryConfiguration.route, 'READY_FOR_CONFIG_EXECUTION');
+  assert.equal(Object.hasOwn(ordinaryConfiguration.inputs, 'autonomousAuthoringRequested'), false);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -367,6 +367,9 @@ export async function retainHumanFollowupWorkItem(
     && decision.reasonCode !== 'ACCEPTED_OUT_OF_SCOPE'
     && decision.reasonCode !== 'ACCEPTED_REQUIRES_HUMAN_AUTHORITY'
     && decision.reasonCode !== 'EXECUTION_AUTHORITY_UNCERTAIN'
+    && decision.reasonCode !== 'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED'
+    && decision.reasonCode !== 'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED'
+    && decision.reasonCode !== 'AUTONOMOUS_AUTHORING_AUTHORITY_STALE'
   ) {
     throw new Error(`Human follow-up retention does not accept reasonCode ${decision.reasonCode}`);
   }

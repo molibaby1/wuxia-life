@@ -217,6 +217,32 @@ export async function runWorkflowDecisionAuditTests(): Promise<void> {
   assert.equal(normalAudit.reviewer.decision, 'ACCEPT_OPTION');
   assert.equal(normalAudit.decision.route, 'READY_FOR_CONFIG_EXECUTION');
 
+  const shadowDecision = JSON.parse(await readFile(join(normalRoot, 'decision.json'), 'utf8')) as Record<string, unknown>;
+  const shadowSolution = JSON.parse(await readFile(join(normalRoot, 'solution-agent/result.json'), 'utf8')) as {
+    options: Array<Record<string, unknown>>;
+  };
+  shadowSolution.options[0]!.changeScope = 'program';
+  await writeJson(join(normalRoot, 'solution-agent/result.json'), shadowSolution);
+  const shadowReview = JSON.parse(await readFile(join(normalRoot, 'reviewer-agent/review.json'), 'utf8')) as Record<string, unknown>;
+  shadowReview.scopeAssessment = 'code_required';
+  await writeJson(join(normalRoot, 'reviewer-agent/review.json'), shadowReview);
+  await writeJson(join(normalRoot, 'decision.json'), {
+    ...shadowDecision,
+    route: 'READY_FOR_SHADOW_AUTHORING',
+    reasonCode: 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE',
+    inputs: {
+      ...(shadowDecision.inputs as Record<string, unknown>),
+      solutionScope: 'program',
+      reviewScope: 'code_required',
+      executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
+      autonomousAuthoringRequested: true,
+      autonomousAuthoringAdmissionStatus: 'ELIGIBLE',
+    },
+  });
+  const shadowAudit = await buildWorkflowDecisionAudit({ workflowRoot: normalRoot });
+  assert.equal(shadowAudit.decision.route, 'READY_FOR_SHADOW_AUTHORING');
+  assert.equal(shadowAudit.decision.reasonCode, 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE');
+
   await writeJson(join(normalRoot, 'workflow-outcome.json'), {
     outcome: 'PARTICIPANT_FAILURE',
     failedStage: 'SOLUTION',

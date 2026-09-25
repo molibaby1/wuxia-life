@@ -14,7 +14,7 @@ import {
 } from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
 import { validateProblemPackage, type ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
-import { validateHumanFollowupWorkItem } from '../../src/evolution/humanFollowupWorkItemContract';
+import { validateHumanFollowupWorkItem, type HumanFollowupTriggerReasonCode } from '../../src/evolution/humanFollowupWorkItemContract';
 
 const sourceRunRef = 'cohort-run-000001';
 const sourceFingerprintSha256 = 'c'.repeat(64);
@@ -47,7 +47,7 @@ const problemPackage: ProblemPackageV1 = validateProblemPackage({
   },
 });
 
-function createDecision(reasonCode: 'EXPLICIT_ESCALATION' | 'ACCEPTED_OUT_OF_SCOPE'): SolutionDecisionV1 {
+function createDecision(reasonCode: HumanFollowupTriggerReasonCode): SolutionDecisionV1 {
   return validateSolutionDecision({
     schemaVersion: 'solution-decision-v1',
     problemId: problemPackage.problemId,
@@ -124,7 +124,7 @@ async function writeJson(path: string, value: unknown): Promise<void> {
 }
 
 async function createFixture(input: {
-  reasonCode?: 'EXPLICIT_ESCALATION' | 'ACCEPTED_OUT_OF_SCOPE';
+  reasonCode?: HumanFollowupTriggerReasonCode;
   reviewer?: boolean;
   repositoryRoot?: string;
   workflowDirectory?: string;
@@ -218,6 +218,16 @@ export async function runHumanFollowupRetentionTests(): Promise<void> {
   const fixture = await createFixture();
   const first = await retain(fixture);
   assert.equal(first.created, true);
+
+  for (const reasonCode of [
+    'AUTONOMOUS_AUTHORING_CONTRACT_CHANGE_REQUIRED',
+    'AUTONOMOUS_AUTHORING_EXECUTION_ENVELOPE_EXCEEDED',
+    'AUTONOMOUS_AUTHORING_AUTHORITY_STALE',
+  ] as const) {
+    const authoringFixture = await createFixture({ reasonCode });
+    const authoringRetained = await retain(authoringFixture);
+    assert.equal(authoringRetained.item.trigger.reasonCode, reasonCode);
+  }
   assert.equal(first.item.status, 'OPEN');
   assert.equal(first.item.itemId, expectedItemId(fixture.decision));
   assert.equal(first.item.provenance.workflowRef, '.tmp/evolution/problem-agnostic-agent-solution-loop');

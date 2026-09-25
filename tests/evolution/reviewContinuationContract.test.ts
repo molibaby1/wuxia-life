@@ -60,6 +60,10 @@ export function runReviewContinuationContractTests(): void {
   const completed = validateReviewContinuation(continuation());
   assert.equal(completed.participantJobCount, 2);
   assert.deepEqual(parseReviewContinuation(JSON.stringify(continuation())), completed);
+  assert.equal(
+    validateReviewContinuation(continuation({ terminalRoute: 'READY_FOR_SHADOW_AUTHORING' })).terminalRoute,
+    'READY_FOR_SHADOW_AUTHORING',
+  );
 
   assert.throws(
     () => validateReviewContinuationRevisionRequest({ ...revisionRequest(), unexpected: true }),

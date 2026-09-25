@@ -58,6 +58,7 @@ const RE_REVIEW_STATUSES: readonly ReviewContinuationV1['reReviewStatus'][] = [
 ];
 const SOLUTION_ROUTES: readonly SolutionRoute[] = [
   'READY_FOR_CONFIG_EXECUTION',
+  'READY_FOR_SHADOW_AUTHORING',
   'SKIP',
   'DEFER',
   'DEFER_MORE_WORK_REQUESTED',

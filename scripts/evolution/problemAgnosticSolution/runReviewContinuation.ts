@@ -52,6 +52,7 @@ import type { WorkspaceAgentParticipantOptions } from './agentParticipant';
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from '../autonomousAuthoring/buildPreschoolContractPacket';
 import { routeSolutionDecision } from './routeSolutionDecision';
 import { evaluatePreschoolAutonomousAuthoringAdmission } from '../autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
+import type { AutonomousAuthoringAdmissionStatus } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
 import type { ParticipantFailureFacts } from './participantFailureClassification';
 import {
   retainHumanFollowupWorkItem,
@@ -100,6 +101,7 @@ export type ReviewContinuationResult =
     decisionPath: string;
     effectiveSolutionPath: string;
     effectiveReviewPath: string | null;
+    autonomousAuthoringAdmissionPath: string | null;
   }
   | {
     status: 'participant_failure';
@@ -111,6 +113,7 @@ export type ReviewContinuationResult =
     decisionPath: null;
     effectiveSolutionPath: string | null;
     effectiveReviewPath: string | null;
+    autonomousAuthoringAdmissionPath: null;
     failureStage: 'SOLUTION_REVISION' | 'RE_REVIEWER';
     failure: ParticipantFailureFacts;
   };
@@ -367,6 +370,7 @@ function participantFailureResult(
     decisionPath: null,
     effectiveSolutionPath: null,
     effectiveReviewPath: null,
+    autonomousAuthoringAdmissionPath: null,
     failureStage,
     failure,
   };
@@ -579,20 +583,24 @@ export async function runReviewContinuation(
     }
   }
 
-  if (reviewer?.ok && revision.result.status === 'OPTIONS') {
-    const option = autonomousAuthoringOption(revision.result, reviewer.review);
-    if (option?.autonomousAuthoring) {
-      const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
-        repositoryRoot,
-        sourceRoot: input.sourceRoot ?? resolve(input.roundRoot, '../..'),
-        sourceRunRef: input.sourceRunRef,
-        selectedOption: option,
-        review: reviewer.review,
-        proposalSha256: sha256Hex(canonicalJson(option.autonomousAuthoring)),
-        reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
-      });
-      await writeCreateOnly(join(continuationRoot, 'autonomous-authoring-admission.json'), admission);
-    }
+  const selectedAuthoringOption = reviewer?.ok && revision.result.status === 'OPTIONS'
+    ? autonomousAuthoringOption(revision.result, reviewer.review)
+    : null;
+  let autonomousAuthoringAdmissionStatus: AutonomousAuthoringAdmissionStatus | null = null;
+  let autonomousAuthoringAdmissionPath: string | null = null;
+  if (selectedAuthoringOption?.autonomousAuthoring && reviewer?.ok) {
+    const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
+      repositoryRoot,
+      sourceRoot: input.sourceRoot ?? resolve(input.roundRoot, '../..'),
+      sourceRunRef: input.sourceRunRef,
+      selectedOption: selectedAuthoringOption,
+      review: reviewer.review,
+      proposalSha256: sha256Hex(canonicalJson(selectedAuthoringOption.autonomousAuthoring)),
+      reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
+    });
+    autonomousAuthoringAdmissionPath = join(continuationRoot, 'autonomous-authoring-admission.json');
+    await writeCreateOnly(autonomousAuthoringAdmissionPath, admission);
+    autonomousAuthoringAdmissionStatus = admission.status;
   }
 
   const decision = routeSolutionDecision({
@@ -602,6 +610,12 @@ export async function runReviewContinuation(
     solutionScope: reviewer?.ok ? selectedOptionScope(revision.result, reviewer.review) : null,
     reviewScope: reviewer?.ok ? reviewer.review.scopeAssessment ?? null : null,
     executionAuthorityAssessment: reviewer?.ok ? reviewer.review.executionAuthorityAssessment ?? null : null,
+    ...(selectedAuthoringOption?.autonomousAuthoring
+      ? {
+        autonomousAuthoringRequested: true,
+        autonomousAuthoringAdmissionStatus,
+      }
+      : {}),
     permissions: base.problemPackage.permissions,
     budget: { actualParticipantJobs: reviewer === null ? 1 : 2, maxParticipantJobs: 4, retryCount: 0 },
   });
@@ -648,5 +662,6 @@ export async function runReviewContinuation(
     decisionPath,
     effectiveSolutionPath: revision.resultPath,
     effectiveReviewPath: reviewer?.ok ? reviewer.reviewPath : null,
+    autonomousAuthoringAdmissionPath,
   };
 }

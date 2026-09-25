@@ -1,5 +1,5 @@
 import { lstat, mkdir, open, readFile, readdir, rename } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   buildCandidatePoolV1,
   parseCandidatePoolV1,
@@ -106,7 +106,7 @@ export interface MultiCandidateSessionSliceDependencies {
   runCandidateLane?: (input: CandidateSessionSliceLaneInput) => Promise<CandidateLaneResult>;
   runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string; sourceProvenanceRoot: string; autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1 }) => Promise<CandidateReviewContinuationResult>;
   retainHumanFollowup?: typeof retainHumanFollowupWorkItem;
-  runSourceTransition?: (input: { candidate: CandidatePoolV1['candidates'][number]; laneResult: Extract<CandidateLaneResult, { status: 'completed' }>; sourceAnalysis: CompletedSourceCandidateAnalysisResult; transitionRoot: string; candidateLaneRoot: string; effectiveDecisionPath: string }) => Promise<BoundedSourceTransitionResult>;
+  runSourceTransition?: (input: { candidate: CandidatePoolV1['candidates'][number]; laneResult: Extract<CandidateLaneResult, { status: 'completed' }>; sourceAnalysis: CompletedSourceCandidateAnalysisResult; transitionRoot: string; candidateLaneRoot: string; effectiveDecisionPath: string; effectiveSolutionPath: string; effectiveReviewPath: string; autonomousAuthoringAdmissionPath: string | null }) => Promise<BoundedSourceTransitionResult>;
 }
 
 const DEFAULT_AUTHORITY_REFS = [
@@ -693,7 +693,18 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       if (sourceTransitionCount === 1) { sessionState = 'PAUSED'; reason = 'SOURCE_CHANGE_LIMIT_REACHED'; slice = { ...slice, state: 'PAUSED', reason, endedAt: now() }; break; }
       if (budget.remainingParticipantJobs < 1) { sessionState = 'PAUSED'; reason = 'HOST_SLICE_BUDGET'; slice = { ...slice, state: 'PAUSED', reason, endedAt: now(), participantJobs: budget.usedParticipantJobs }; break; }
       const candidateLaneRoot = laneRoot;
-      const effectiveArtifactRoot = dirname(effectiveDecisionPath);
+      const effectiveSolutionPath = continuation?.status === 'completed'
+        ? continuation.effectiveSolutionPath
+        : laneResult.effectiveSolutionPath;
+      const effectiveReviewPath = continuation?.status === 'completed'
+        ? continuation.effectiveReviewPath
+        : laneResult.effectiveReviewPath;
+      const autonomousAuthoringAdmissionPath = continuation?.status === 'completed'
+        ? continuation.autonomousAuthoringAdmissionPath
+        : laneResult.autonomousAuthoringAdmissionPath;
+      if (typeof effectiveSolutionPath !== 'string' || typeof effectiveReviewPath !== 'string') {
+        throw new Error('READY_FOR_CONFIG_EXECUTION is missing its effective Solution or Reviewer artifact');
+      }
       let transition: BoundedSourceTransitionResult;
       try {
         const transitionRunner = input.dependencies?.runSourceTransition ?? (value => runCandidateBoundedSourceTransition({
@@ -704,12 +715,22 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
           candidateLaneRoot: value.candidateLaneRoot,
           acceptedCandidateArtifacts: {
             problemPackagePath: value.laneResult.problemPackagePath,
-            solutionPath: join(effectiveArtifactRoot, 'solution-agent/result.json'),
-            reviewPath: join(effectiveArtifactRoot, 'reviewer-agent/review.json'),
+            solutionPath: effectiveSolutionPath,
+            reviewPath: effectiveReviewPath,
           },
           participant: input.participant,
         }));
-        transition = await transitionRunner({ candidate: pending, laneResult, sourceAnalysis: analysis, transitionRoot: join(sessionRoot, 'source-transitions', pending.hypothesisId), candidateLaneRoot, effectiveDecisionPath });
+        transition = await transitionRunner({
+          candidate: pending,
+          laneResult,
+          sourceAnalysis: analysis,
+          transitionRoot: join(sessionRoot, 'source-transitions', pending.hypothesisId),
+          candidateLaneRoot,
+          effectiveDecisionPath,
+          effectiveSolutionPath,
+          effectiveReviewPath,
+          autonomousAuthoringAdmissionPath,
+        });
       } catch (error) {
         sessionState = 'FAILED';
         reason = `SOURCE_TRANSITION_FAILED: ${String(error)}`;

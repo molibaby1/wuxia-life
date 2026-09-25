@@ -214,6 +214,41 @@ async function testRevisionTerminatesWithoutReReview(): Promise<void> {
   assert.equal(audit.continuationDecision.route, 'ESCALATE_HUMAN');
 }
 
+async function testShadowAuthoringRouteProjection(): Promise<void> {
+  const root = await createWorkflowRoot();
+  await writeCompletedContinuation(root);
+  await writeJson(join(root, 'review-continuation-000001/decision.json'), {
+    schemaVersion: 'solution-decision-v1',
+    problemId: 'problem-hypothesis-000001',
+    route: 'READY_FOR_SHADOW_AUTHORING',
+    reasonCode: 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE',
+    inputs: {
+      solutionStatus: 'OPTIONS',
+      reviewerDecision: 'ACCEPT_OPTION',
+      solutionScope: 'program',
+      reviewScope: 'code_required',
+      executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
+      autonomousAuthoringRequested: true,
+      autonomousAuthoringAdmissionStatus: 'ELIGIBLE',
+      permissions: {
+        authoritativeProductWrite: false,
+        codeExecution: false,
+        productExecution: false,
+        sandboxWrite: true,
+      },
+      budget: { actualParticipantJobs: 4, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+  await writeJson(join(root, 'review-continuation-000001/continuation.json'), continuation({
+    reReviewStatus: 'ACCEPT_OPTION',
+    terminalRoute: 'READY_FOR_SHADOW_AUTHORING',
+  }));
+  const audit = await buildWorkflowContinuationAudit({ workflowRoot: root });
+  assert.ok(audit);
+  assert.equal(audit.continuationDecision.route, 'READY_FOR_SHADOW_AUTHORING');
+  assert.equal(audit.continuationDecision.reasonCode, 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE');
+}
+
 async function testContinuationParticipantFailure(): Promise<void> {
   const root = await createWorkflowRoot();
   await writeJson(join(root, 'review-continuation-000001/revision-request.json'), revisionRequest);
@@ -266,6 +301,7 @@ export async function runWorkflowContinuationAuditTests(): Promise<void> {
   await testNoContinuation();
   await testHistoricalCompletedContinuation();
   await testRevisionTerminatesWithoutReReview();
+  await testShadowAuthoringRouteProjection();
   await testContinuationParticipantFailure();
 }
 

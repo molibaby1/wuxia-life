@@ -94,6 +94,9 @@ export async function runCandidateLaneTests(): Promise<void> {
   assert.equal(result.sourceIndex, 1);
   assert.equal(result.actualParticipantJobs, 1);
   assert.equal(result.decision.route, 'DEFER');
+  assert.equal(result.effectiveSolutionPath, join(laneRoot, 'solution-agent/result.json'));
+  assert.equal(result.effectiveReviewPath, null);
+  assert.equal(result.autonomousAuthoringAdmissionPath, null);
   assert.equal(JSON.parse(await readFile(join(laneRoot, 'candidate-activation.json'), 'utf8')).hypothesisId, 'hypothesis-000002');
   assert.equal(await readFile(join(laneRoot, 'diagnostic/causal-attribution.json'), 'utf8').then(value => JSON.parse(value).hypothesisId), 'hypothesis-000002');
   assert.equal(await readFile(join(laneRoot, 'problem-package.json'), 'utf8').then(value => JSON.parse(value).problemId), 'problem-hypothesis-000002');

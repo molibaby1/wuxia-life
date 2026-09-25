@@ -989,7 +989,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   await writeFile(join(retainedFeedbackRoot, 'feedback.json'), JSON.stringify({ overallImpression: 'A retained source analysis.', observations: [] }));
   await writeFile(join(retainedFeedbackRoot, 'invocation.json'), JSON.stringify({ invocationRef: 'feedback-000001' }));
   await writeFile(join(retainedHypothesisRoot, 'hypotheses.json'), JSON.stringify({ schemaVersion: 'improvement-hypothesis-set-v2', hypotheses, noProblemAssessment: null }));
-  await writeFile(join(retainedHypothesisRoot, 'invocation.json'), JSON.stringify({ invocationRef: 'hypothesis-000001' }));
+  await writeFile(join(retainedHypothesisRoot, 'invocation.json'), JSON.stringify({ hypothesisInvocationRef: 'hypothesis-000001' }));
   await retainSourceAnalysisArtifacts({
     repositoryRoot: root,
     logicalSessionId: 'logical-session-000001',

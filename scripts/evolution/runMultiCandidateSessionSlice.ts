@@ -278,8 +278,8 @@ async function defaultLoadSourceAnalysis(input: RunMultiCandidateSessionSliceInp
   const feedback = parseExternalFeedback(await readFile(join(retained.analysisRoot, feedbackRef), 'utf8'));
   const hypothesisSet = parseStoredImprovementHypothesisSet(await readFile(join(retained.analysisRoot, hypothesisRef), 'utf8'));
   const feedbackInvocation = JSON.parse(await readFile(join(retained.analysisRoot, `feedback-runs/${sourceRunRef}/invocation.json`), 'utf8')) as { invocationRef?: unknown };
-  const hypothesisInvocation = JSON.parse(await readFile(join(retained.analysisRoot, `hypothesis-runs/${sourceRunRef}/invocation.json`), 'utf8')) as { invocationRef?: unknown };
-  if (typeof feedbackInvocation.invocationRef !== 'string' || typeof hypothesisInvocation.invocationRef !== 'string') throw new Error('durable source analysis invocation refs are missing');
+  const hypothesisInvocation = JSON.parse(await readFile(join(retained.analysisRoot, `hypothesis-runs/${sourceRunRef}/invocation.json`), 'utf8')) as { hypothesisInvocationRef?: unknown };
+  if (typeof feedbackInvocation.invocationRef !== 'string' || typeof hypothesisInvocation.hypothesisInvocationRef !== 'string') throw new Error('durable source analysis invocation refs are missing');
   const sourceFingerprint = await readFile(join(value.sourceRoot, 'provenance/source-fingerprint.json'));
   const experimentRootHash = (await readFile(join(value.sourceRoot, 'experiment-root.sha256'), 'utf8')).trim();
   return {
@@ -294,7 +294,7 @@ async function defaultLoadSourceAnalysis(input: RunMultiCandidateSessionSliceInp
     externalFeedbackRef: feedbackRef,
     improvementHypothesisRef: hypothesisRef,
     feedbackInvocationRef: feedbackInvocation.invocationRef,
-    hypothesisInvocationRef: hypothesisInvocation.invocationRef,
+    hypothesisInvocationRef: hypothesisInvocation.hypothesisInvocationRef,
     hypotheses: hypothesisSet.hypotheses,
     noProblemAssessment: hypothesisSet.noProblemAssessment,
     actualParticipantJobs: 2,

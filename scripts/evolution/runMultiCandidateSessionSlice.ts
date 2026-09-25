@@ -814,10 +814,10 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       let verification: PreschoolShadowAuthoringVerificationResultV1 | null = null;
       let promotionPackage: ReturnType<typeof buildPromotionPackage> | null = null;
       let shadowFailure: string | null = null;
-      let shadowTerminalStatus: ShadowAuthoringTerminalStatus = 'SHADOW_AUTHORING_CONFORMANCE_FAILED';
-      let proposalSha256 = '';
-      let reviewSha256 = '';
-      let admissionSha256 = '';
+      let shadowTerminalStatus: ShadowAuthoringTerminalStatus = 'SHADOW_AUTHORING_PRE_EXECUTION_FAILED';
+      let proposalSha256: string | null = null;
+      let reviewSha256: string | null = null;
+      let admissionSha256: string | null = null;
 
       try {
         if (typeof effectiveSolutionPath !== 'string' || typeof effectiveReviewPath !== 'string' || typeof autonomousAuthoringAdmissionPath !== 'string') {
@@ -829,7 +829,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         const acceptedProposal = solution.status === 'OPTIONS'
           ? solution.options.find(option => option.optionId === review.acceptedOptionId)?.autonomousAuthoring
           : undefined;
-        proposalSha256 = acceptedProposal ? sha256Hex(canonicalJson(acceptedProposal)) : '';
+        proposalSha256 = acceptedProposal ? sha256Hex(canonicalJson(acceptedProposal)) : null;
         reviewSha256 = sha256Hex(canonicalJson(review));
         admissionSha256 = sha256Hex(canonicalJson(admission));
         if (admission.status === 'CONTRACT_CHANGE_REQUIRED') {
@@ -841,6 +841,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
           throw new Error('Host admission exceeded the execution envelope');
         }
         const executor = input.dependencies?.runShadowAuthoringExecution ?? runShadowAuthoringExecution;
+        shadowTerminalStatus = 'SHADOW_AUTHORING_EXECUTION_FAILED';
         execution = await executor({
           repositoryRoot: input.repositoryRoot,
           workspaceDestinationRoot: join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId, 'shadow-authoring', pending.hypothesisId, 'workspace'),
@@ -927,15 +928,15 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         terminalStatus: shadowTerminalStatus,
         contractId: PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
         contractVersion: PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
-        proposalSha256: execution?.proposalSha256 ?? proposalSha256,
-        reviewSha256: execution?.reviewSha256 ?? reviewSha256,
-        admissionSha256: execution?.admissionSha256 ?? admissionSha256,
+        proposalSha256,
+        reviewSha256,
+        admissionSha256,
         canonicalChangedFileRefs: execution?.canonicalChanges.map(change => change.path) ?? [],
         verificationArtifactRef: 'shadow-authoring/verification.json',
         promotionPackageRef: promotionPackage ? 'shadow-authoring/promotion-package.json' : null,
         authoritativeFingerprintBefore: execution?.authoritativeFingerprintBefore ?? input.repositoryBaseline.workingTreeFingerprint,
         authoritativeFingerprintAfter: execution?.authoritativeFingerprintAfter ?? input.repositoryBaseline.workingTreeFingerprint,
-        participantJobs: 1,
+        participantJobs: execution?.participantJobs ?? 0,
       };
       await writeAtomicJson(join(shadowRoot, 'result.json'), shadowResult);
       await retainLaneArtifacts();

@@ -6,6 +6,7 @@ import {
 export type ShadowAuthoringTerminalStatus =
   | 'SHADOW_AUTHORING_VERIFIED'
   | 'SHADOW_AUTHORING_EXECUTION_FAILED'
+  | 'SHADOW_AUTHORING_PRE_EXECUTION_FAILED'
   | 'SHADOW_AUTHORING_CONFORMANCE_FAILED'
   | 'SHADOW_AUTHORING_VERIFICATION_FAILED'
   | 'CONTRACT_CHANGE_REQUIRED'
@@ -24,15 +25,15 @@ export interface ShadowAuthoringResultV1 {
   terminalStatus: ShadowAuthoringTerminalStatus;
   contractId: typeof PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID;
   contractVersion: typeof PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION;
-  proposalSha256: string;
-  reviewSha256: string;
-  admissionSha256: string;
+  proposalSha256: string | null;
+  reviewSha256: string | null;
+  admissionSha256: string | null;
   canonicalChangedFileRefs: string[];
   verificationArtifactRef: string | null;
   promotionPackageRef: string | null;
   authoritativeFingerprintBefore: string;
   authoritativeFingerprintAfter: string;
-  participantJobs: 1;
+  participantJobs: 0 | 1;
 }
 
 type RecordValue = Record<string, unknown>;

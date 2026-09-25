@@ -5,7 +5,10 @@ import { join } from 'node:path';
 import {
   evaluatePreschoolAutonomousAuthoringAdmission,
 } from '../../scripts/evolution/autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
+import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import { runCandidateLane } from '../../scripts/evolution/runCandidateLane';
+import { infantPassiveNarrativeCatalog } from '../../src/data/infantPassiveNarrativeCatalog';
+import { getPreschoolPassiveEntries, isPreschoolPassiveEligible } from '../../src/data/preschoolPassiveSpine';
 import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import { projectHeadlessApiPlayerObservablePayload } from '../../src/evolution/wuxiaPlayerObservableProjector';
@@ -13,11 +16,13 @@ import { serializeObservablePayload } from '../../src/evolution/playerObservable
 import { HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION } from '../../src/headless/playability/playerSurfaceCapture';
 import {
   validateAutonomousAuthoringAdmission,
+  validatePreschoolCapacityEvidence,
   type PreschoolCapacityEvidenceV1,
 } from '../../src/evolution/autonomousAuthoringAdmissionContract';
 import { validateSolutionWork, type SolutionOptionV1 } from '../../src/evolution/solutionWorkContract';
 import { validateSolutionReview, type SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import type { AutonomousAuthoringProposalV1 } from '../../src/evolution/autonomousAuthoringContract';
+import { PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS } from '../../src/evolution/preschoolSharedNeutralAuthoringContract';
 import type { PreschoolSharedNeutralAuthoringCardV1 } from '../../src/evolution/preschoolSharedNeutralAuthoringContract';
 
 const RUN_REF = 'cohort-run-000001';
@@ -159,8 +164,16 @@ function review(input: {
   });
 }
 
-async function createRepositoryFixture(parent: string, options: { authority?: boolean; entries?: ReturnType<typeof catalogEntries> } = {}): Promise<string> {
-  const root = join(parent, options.authority === false ? 'stale-repository' : 'current-repository');
+async function createRepositoryFixture(parent: string, options: {
+  authority?: boolean;
+  entries?: ReturnType<typeof catalogEntries>;
+  mutateAcceptedAuthority?: boolean;
+} = {}): Promise<string> {
+  const root = join(parent, options.authority === false
+    ? 'stale-repository'
+    : options.mutateAcceptedAuthority
+      ? 'mutated-authority-repository'
+      : 'current-repository');
   await mkdir(join(root, 'src/data/lines'), { recursive: true });
   await writeFile(join(root, 'src/data/lines/preschool-passive-spine.json'), JSON.stringify({ entries: options.entries ?? catalogEntries() }));
   if (options.authority !== false) {
@@ -172,6 +185,17 @@ async function createRepositoryFixture(parent: string, options: { authority?: bo
       const target = join(root, ref);
       await mkdir(join(target, '..'), { recursive: true });
       await copyFile(join(process.cwd(), ref), target);
+    }
+    if (options.mutateAcceptedAuthority) {
+      const path = join(root, SOURCE_AUTHORITY);
+      const accepted = await readFile(path, 'utf8');
+      const mutated = accepted.replace(
+        '# Contract-Constrained Autonomous Authoring v1',
+        '# Contract-Constrained Autonomous Authoring V1',
+      );
+      assert.notEqual(mutated, accepted);
+      assert.ok(mutated.includes('**HUMAN ACCEPTED — 2026-09-24**'));
+      await writeFile(path, mutated);
     }
   }
   return root;
@@ -203,13 +227,20 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
+function expectedEffectiveCatalogForFixture() {
+  return [
+    ...infantPassiveNarrativeCatalog.filter(entry => entry.ageMin >= 3 && entry.ageMax <= 7),
+    ...catalogEntries(),
+  ];
+}
+
 function structuralEvidence(): PreschoolCapacityEvidenceV1 {
   return {
     schemaVersion: 'preschool-capacity-evidence-v1',
     runRef: RUN_REF,
     evidenceMode: 'STRUCTURAL_EXHAUSTION',
     canonicalOriginTag: 'martial',
-    preConsumedEntryIds: ['preschool_martial_seed'],
+    preConsumedEntryIds: ['preschool_martial_seed', 'child_martial_wooden_dummy', 'toddler_martial_watch', 'toddler_neutral_season'],
     beats: [
       { sequence: 1, age: 4, selectedEntryId: 'preschool_neutral_age_four', kind: 'AUTHORED', legalUnconsumedCountBeforeSelection: 1 },
       { sequence: 2, age: 5, selectedEntryId: 'preschool_martial_age_five', kind: 'AUTHORED', legalUnconsumedCountBeforeSelection: 2 },
@@ -236,12 +267,135 @@ function input(repositoryRoot: string, sourceRoot: string, selectedOption = opti
   };
 }
 
+async function testExactAuthorityPacketAndAdmissionIdentity(): Promise<void> {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-authority-identity-'));
+  try {
+    const sourceRoot = join(temporaryRoot, 'source');
+    await mkdir(sourceRoot, { recursive: true });
+    const repositoryRoot = await createRepositoryFixture(temporaryRoot);
+    const acceptedPacket = await buildPreschoolAutonomousAuthoringContractPacket({ repositoryRoot });
+    assert.equal(
+      acceptedPacket.authoritySourceSha256,
+      'bbaa62ed26baa416dc094156189472b8c4ea9b5b84cb4e5dac9a575ddb2ffdbb',
+    );
+    assert.equal(acceptedPacket.productionPath, 'src/data/lines/preschool-passive-spine.json');
+    assert.deepEqual(acceptedPacket.testPaths, [
+      'tests/preschoolPassiveSpineTests.ts',
+      'tests/annualPassiveMemoryTests.ts',
+    ]);
+    assert.deepEqual(PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS, [
+      'src/data/lines/preschool-passive-spine.json',
+      'tests/preschoolPassiveSpineTests.ts',
+      'tests/annualPassiveMemoryTests.ts',
+    ]);
+
+    const mutatedRepositoryRoot = await createRepositoryFixture(temporaryRoot, { mutateAcceptedAuthority: true });
+    const mutatedSpec = await readFile(join(mutatedRepositoryRoot, SOURCE_AUTHORITY), 'utf8');
+    assert.ok(mutatedSpec.includes('**HUMAN ACCEPTED — 2026-09-24**'));
+    const mutatedPacketOutcome = await buildPreschoolAutonomousAuthoringContractPacket({
+      repositoryRoot: mutatedRepositoryRoot,
+    }).then(() => 'returned', () => 'rejected');
+    const mutatedAdmission = await evaluatePreschoolAutonomousAuthoringAdmission(
+      input(mutatedRepositoryRoot, sourceRoot),
+    );
+    assert.deepEqual({
+      packet: mutatedPacketOutcome,
+      admission: mutatedAdmission.status,
+    }, {
+      packet: 'rejected',
+      admission: 'AUTHORITY_STALE',
+    });
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+}
+
 export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<void> {
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-authoring-admission-'));
   try {
     const repositoryRoot = await createRepositoryFixture(temporaryRoot);
     const sourceRoot = join(temporaryRoot, 'source');
     await mkdir(sourceRoot, { recursive: true });
+
+    const runtimeAgeFour = getPreschoolPassiveEntries(4);
+    assert.ok(runtimeAgeFour.some(entry => entry.id === 'toddler_martial_watch'));
+    assert.ok(runtimeAgeFour.some(entry => entry.id === 'toddler_neutral_season'));
+
+    await writeSource(sourceRoot, [
+      passive(1, 3, ['preschool_martial_seed']),
+      passive(2, 4, ['toddler_martial_watch']),
+    ]);
+    const legacySelected = await evaluatePreschoolAutonomousAuthoringAdmission(input(repositoryRoot, sourceRoot));
+    assert.equal(legacySelected.status, 'ELIGIBLE');
+    assert.deepEqual(legacySelected.capacityEvidence?.preConsumedEntryIds, ['preschool_martial_seed']);
+    assert.equal(legacySelected.capacityEvidence?.beats[0]?.selectedEntryId, 'toddler_martial_watch');
+
+    await writeSource(sourceRoot, [
+      passive(1, 3, ['child_martial_wooden_dummy']),
+      passive(2, 4, ['preschool_neutral_age_four']),
+    ]);
+    const legacyOriginEvidence = await evaluatePreschoolAutonomousAuthoringAdmission(input(repositoryRoot, sourceRoot));
+    assert.equal(legacyOriginEvidence.status, 'ELIGIBLE');
+    assert.deepEqual(legacyOriginEvidence.capacityEvidence?.preConsumedEntryIds, ['child_martial_wooden_dummy']);
+
+    const preConsumedForPool = new Set(['preschool_martial_seed']);
+    const expectedAgeFourPool = expectedEffectiveCatalogForFixture().filter(entry =>
+      isPreschoolPassiveEligible(entry, new Set(['martial']))
+      && entry.ageMin <= 4
+      && entry.ageMax >= 4
+      && !preConsumedForPool.has(entry.id),
+    );
+    assert.ok(expectedAgeFourPool.some(entry => entry.id === 'toddler_martial_watch'));
+    assert.ok(expectedAgeFourPool.some(entry => entry.id === 'toddler_neutral_season'));
+    const legacyPoolEvidence = validatePreschoolCapacityEvidence({
+      schemaVersion: 'preschool-capacity-evidence-v1',
+      runRef: RUN_REF,
+      evidenceMode: 'SEMANTIC_VARIETY',
+      canonicalOriginTag: 'martial',
+      preConsumedEntryIds: [...preConsumedForPool],
+      beats: [{
+        sequence: 1,
+        age: 4,
+        selectedEntryId: 'preschool_neutral_age_four',
+        kind: 'AUTHORED',
+        legalUnconsumedCountBeforeSelection: expectedAgeFourPool.length,
+      }],
+      demandBeats: 1,
+      authoredBeats: 1,
+      gapBeats: 0,
+      foreignOriginLeakCount: 0,
+      duplicateAuthoredCount: 0,
+    });
+    const legacyPoolAdmission = await evaluatePreschoolAutonomousAuthoringAdmission({
+      ...input(repositoryRoot, sourceRoot),
+      fixedCapacityEvidence: legacyPoolEvidence,
+    });
+    assert.equal(legacyPoolAdmission.status, 'ELIGIBLE');
+    assert.equal(
+      legacyPoolAdmission.capacityEvidence?.beats[0]?.legalUnconsumedCountBeforeSelection,
+      expectedAgeFourPool.length,
+    );
+
+    await writeSource(sourceRoot, [
+      passive(1, 3, ['child_martial_wooden_dummy']),
+      passive(2, 5, ['child_scholar_copybook']),
+    ]);
+    const foreignLegacy = await evaluatePreschoolAutonomousAuthoringAdmission(input(repositoryRoot, sourceRoot));
+    assert.equal(foreignLegacy.status, 'NOT_APPLICABLE');
+
+    await writeSource(sourceRoot, [
+      passive(1, 3, ['child_martial_wooden_dummy']),
+      passive(2, 5, ['toddler_martial_watch']),
+    ]);
+    const ageIllegalLegacy = await evaluatePreschoolAutonomousAuthoringAdmission(input(repositoryRoot, sourceRoot));
+    assert.equal(ageIllegalLegacy.status, 'NOT_APPLICABLE');
+
+    await writeSource(sourceRoot, [
+      passive(1, 3, ['child_martial_wooden_dummy']),
+      passive(2, 4, ['child_martial_wooden_dummy']),
+    ]);
+    const reusedLegacy = await evaluatePreschoolAutonomousAuthoringAdmission(input(repositoryRoot, sourceRoot));
+    assert.equal(reusedLegacy.status, 'NOT_APPLICABLE');
 
     await writeSource(sourceRoot, [
       passive(1, 3, ['preschool_martial_seed']),
@@ -307,7 +461,7 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
     assert.equal(structural.capacityEvidence?.preConsumedEntryIds[0], 'preschool_martial_seed');
 
     await writeSource(sourceRoot, [
-      passive(1, 3, ['preschool_martial_seed']),
+      passive(1, 3, ['preschool_martial_seed', 'child_martial_wooden_dummy', 'toddler_martial_watch', 'toddler_neutral_season']),
       passive(2, 4, ['preschool_neutral_age_four']),
       passive(3, 5, ['preschool_martial_age_five']),
       passive(4, 5, ['preschool_neutral_through_seven']),
@@ -331,7 +485,7 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
     assert.equal(wrongScope.status, 'CONTRACT_CHANGE_REQUIRED');
 
     await writeSource(sourceRoot, [
-      passive(1, 3, ['preschool_martial_seed']),
+      passive(1, 3, ['preschool_martial_seed', 'child_martial_wooden_dummy', 'toddler_martial_watch', 'toddler_neutral_season']),
       passive(2, 4, ['preschool_neutral_age_four']),
       passive(3, 5, ['preschool_martial_age_five']),
       passive(4, 6, ['preschool_martial_age_six']),
@@ -362,7 +516,7 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
       fixedCapacityEvidence: {
         ...structuralEvidence(),
         evidenceMode: 'SEMANTIC_VARIETY',
-        preConsumedEntryIds: ['preschool_martial_seed'],
+        preConsumedEntryIds: ['preschool_martial_seed', 'child_martial_wooden_dummy', 'toddler_martial_watch', 'toddler_neutral_season'],
         beats: [],
         demandBeats: 0,
         authoredBeats: 0,
@@ -377,7 +531,7 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
     };
     const laneRoot = join(temporaryRoot, 'candidate-lane');
     const sourceSteps = [
-      passive(1, 3, ['preschool_martial_seed']),
+      passive(1, 3, ['preschool_martial_seed', 'child_martial_wooden_dummy', 'toddler_martial_watch', 'toddler_neutral_season']),
       passive(2, 4, ['preschool_neutral_age_four']),
       passive(3, 5, ['preschool_martial_age_five']),
       passive(4, 5, ['preschool_neutral_through_seven']),
@@ -500,7 +654,9 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runPreschoolAutonomousAuthoringAdmissionTests()
+  (process.argv[2] === '--authority-only'
+    ? testExactAuthorityPacketAndAdmissionIdentity()
+    : runPreschoolAutonomousAuthoringAdmissionTests())
     .then(() => console.log('preschoolAutonomousAuthoringAdmission.test.ts: ok'))
     .catch(error => {
       console.error(error);

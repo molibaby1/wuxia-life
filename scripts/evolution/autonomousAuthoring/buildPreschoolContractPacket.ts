@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
+  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
   PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES,
@@ -38,6 +39,9 @@ export async function buildPreschoolAutonomousAuthoringContractPacket(input: {
   const authoritySourceSha256 = sha256Hex(
     await readFile(join(input.repositoryRoot, AUTHORITY_SOURCE_REF)),
   );
+  if (authoritySourceSha256 !== PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256) {
+    throw new Error('The accepted preschool Contract authority bytes do not match the immutable v1 identity.');
+  }
   return {
     schemaVersion: 'preschool-autonomous-authoring-contract-packet-v1',
     authorityIdentifier: AUTHORITY_IDENTIFIER,

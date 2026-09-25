@@ -61,7 +61,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       await put(currentRoot, path, `${currentAuthorityText[index]}\nPD-121 current authority\n`);
       await put(historicalRoot, path, `${path}\nhistorical authority\n`);
     }
-    await put(currentRoot, ACCEPTED_DESIGN_PATH, `accepted design reference section\n${ANSWER_IDS.join('\n')}\n`);
+    await put(currentRoot, ACCEPTED_DESIGN_PATH, await readFile(join(process.cwd(), ACCEPTED_DESIGN_PATH), 'utf8'));
     await put(currentRoot, RESIDUAL_DESIGN_PATH, `later approved design\n${ANSWER_IDS.join('\n')}\n`);
     await put(currentRoot, 'src/data/lines/preschool-passive-spine.json', JSON.stringify({ entries: ANSWER_IDS.map(id => ({ id })) }));
     await put(currentRoot, 'tests/preschoolPassiveSpineTests.ts', `current tests ${ANSWER_IDS.join(' ')}`);

@@ -2,12 +2,15 @@ import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import type { SolutionReviewV1 } from '../../../src/evolution/solutionReviewContract';
 import type { SolutionOptionV1 } from '../../../src/evolution/solutionWorkContract';
+import { composePreschoolPassiveCatalog, isPreschoolPassiveEligible } from '../../../src/data/preschoolPassiveSpine';
+import type { PreschoolPassiveEntry } from '../../../src/data/preschoolPassiveSpine';
 import {
   validateAutonomousAuthoringProposal,
   type AutonomousAuthoringApplicability,
 } from '../../../src/evolution/autonomousAuthoringContract';
 import {
   PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS,
+  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
   PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES,
@@ -81,7 +84,8 @@ function readCatalog(value: unknown): Catalog | null {
   if (!isRecord(value) || !Array.isArray(value.entries)) return null;
   const entries: CatalogEntry[] = [];
   const byId = new Map<string, CatalogEntry>();
-  for (const [index, raw] of value.entries.entries()) {
+  const effectiveEntries = composePreschoolPassiveCatalog(value.entries as PreschoolPassiveEntry[]);
+  for (const [index, raw] of effectiveEntries.entries()) {
     if (!isRecord(raw)
       || typeof raw.id !== 'string' || raw.id.length === 0
       || !Array.isArray(raw.originTags) || raw.originTags.length === 0
@@ -114,13 +118,16 @@ async function readJson(path: string): Promise<unknown | null> {
 }
 
 async function hasCurrentAuthority(repositoryRoot: string): Promise<boolean> {
-  const [decisions, workflow, spec] = await Promise.all(
-    AUTHORITY_REFS.map(async ref => readFile(join(repositoryRoot, ref), 'utf8').catch(() => '')),
-  );
+  const [decisions, workflow, spec] = await Promise.all([
+    readFile(join(repositoryRoot, AUTHORITY_REFS[0]), 'utf8').catch(() => ''),
+    readFile(join(repositoryRoot, AUTHORITY_REFS[1]), 'utf8').catch(() => ''),
+    readFile(join(repositoryRoot, AUTHORITY_REFS[2])).catch(() => Buffer.alloc(0)),
+  ]);
   return decisions.includes('### PD-121：Contract-Constrained Autonomous Authoring v1')
     && workflow.startsWith('# Content Authoring Workflow Contract v3')
     && workflow.includes('PD-121')
-    && spec.includes('**HUMAN ACCEPTED — 2026-09-24**');
+    && spec.toString('utf8').includes('**HUMAN ACCEPTED — 2026-09-24**')
+    && sha256Hex(spec) === PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256;
 }
 
 function participantVisibleEvidenceRef(ref: string): boolean {
@@ -154,8 +161,9 @@ function participantEvidenceRefsArePresent(
 }
 
 function legalPool(catalog: Catalog, origin: string, age: number, consumed: Set<string>): CatalogEntry[] {
+  const playerOriginTags = new Set([origin]);
   return catalog.entries.filter(entry =>
-    (entry.originTags.includes(origin) || entry.originTags.includes('neutral'))
+    isPreschoolPassiveEligible(entry as PreschoolPassiveEntry, playerOriginTags)
     && entry.ageMin <= age
     && entry.ageMax >= age
     && !consumed.has(entry.id));

@@ -3,8 +3,10 @@ import { cp, lstat, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/pr
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import type { PassiveNarrativeEntry } from '../../../src/data/passiveNarrativeTypes';
+import { composePreschoolPassiveCatalog, isPreschoolPassiveEligible } from '../../../src/data/preschoolPassiveSpine';
 import {
   PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS,
+  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
   PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES,
@@ -166,9 +168,11 @@ function gitHead(repositoryRoot: string): string | null {
 }
 
 async function assertAuthorityFiles(root: string): Promise<void> {
-  const [decisions, workflow, spec] = await Promise.all(
-    AUTHORITY_PATHS.map(path => readFile(join(root, path), 'utf8')),
-  );
+  const [decisions, workflow, spec] = await Promise.all([
+    readFile(join(root, AUTHORITY_PATHS[0]), 'utf8'),
+    readFile(join(root, AUTHORITY_PATHS[1]), 'utf8'),
+    readFile(join(root, AUTHORITY_PATHS[2])),
+  ]);
   if (!decisions.includes('### PD-121：Contract-Constrained Autonomous Authoring v1')) {
     throw new Error('PD-121 is missing from the current product decisions.');
   }
@@ -178,8 +182,11 @@ async function assertAuthorityFiles(root: string): Promise<void> {
     || !workflow.includes('Human exact-patch promotion')) {
     throw new Error('The canonical Content Authoring Workflow does not identify the PD-121 shadow exception.');
   }
-  if (!spec.includes('**HUMAN ACCEPTED — 2026-09-24**')) {
+  if (!spec.toString('utf8').includes('**HUMAN ACCEPTED — 2026-09-24**')) {
     throw new Error('The accepted autonomous authoring design is missing or no longer accepted.');
+  }
+  if (sha256Hex(spec) !== PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256) {
+    throw new Error('The accepted autonomous authoring design bytes do not match the immutable v1 authority identity.');
   }
 }
 
@@ -240,7 +247,7 @@ function isRecord(value: unknown): value is RecordValue {
 async function readCatalog(root: string): Promise<PassiveNarrativeEntry[]> {
   const raw = JSON.parse(await readFile(join(root, PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH), 'utf8')) as unknown;
   if (!isRecord(raw) || !Array.isArray(raw.entries)) throw new Error('Preschool catalog must contain an entries array.');
-  return raw.entries as PassiveNarrativeEntry[];
+  return composePreschoolPassiveCatalog(raw.entries as PassiveNarrativeEntry[]);
 }
 
 function assertCatalogEntries(entries: PassiveNarrativeEntry[], label: string): void {
@@ -508,9 +515,10 @@ export function computePreschoolCapacityDeficit(input: {
     }
     unique.set(entry.id, entry);
   }
+  const playerOriginTags = new Set([input.canonicalOriginTag]);
   const candidates = input.demandAges.map(age => [...unique.values()].filter(entry =>
     !consumed.has(entry.id)
-    && (entry.originTags.includes(input.canonicalOriginTag) || entry.originTags.includes('neutral'))
+    && isPreschoolPassiveEligible(entry, playerOriginTags)
     && entry.ageMin <= age
     && entry.ageMax >= age,
   ));

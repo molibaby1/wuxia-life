@@ -24,11 +24,17 @@ export const NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW = 7;
 
 const preschoolConfigEntries = (preschoolPassiveSpineJson as { entries: PreschoolPassiveEntry[] }).entries;
 
-function mergedPreschoolCatalog(): PreschoolPassiveEntry[] {
+export function composePreschoolPassiveCatalog(
+  configEntries: readonly PreschoolPassiveEntry[],
+): PreschoolPassiveEntry[] {
   return [
-    ...infantPassiveNarrativeCatalog.filter(e => e.ageMin >= 3 && e.ageMax <= 7),
-    ...preschoolConfigEntries,
+    ...infantPassiveNarrativeCatalog.filter(entry => entry.ageMin >= 3 && entry.ageMax <= 7),
+    ...configEntries,
   ];
+}
+
+function mergedPreschoolCatalog(): PreschoolPassiveEntry[] {
+  return composePreschoolPassiveCatalog(preschoolConfigEntries);
 }
 
 /** Single primary origin tag — reuses resolvePrimaryOriginFamilyFlag (Stage-5 / Stage-6 FR-4). */

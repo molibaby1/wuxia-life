@@ -3,6 +3,8 @@ import type { AutonomousAuthoringResponsibilityV1 } from './autonomousAuthoringC
 export const PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID =
   'preschool-shared-neutral-passive-capacity-v1' as const;
 export const PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION = 1 as const;
+export const PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256 =
+  'bbaa62ed26baa416dc094156189472b8c4ea9b5b84cb4e5dac9a575ddb2ffdbb' as const;
 export const PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES = 8 as const;
 
 export const PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH =

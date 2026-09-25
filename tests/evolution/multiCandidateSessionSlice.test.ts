@@ -222,6 +222,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   function shadowAuthoringStubs(repositoryRoot: string, options: {
     executorStatus?: 'completed' | 'failed';
     executorFailure?: string;
+    executorThrows?: boolean;
     authoritativeMutation?: boolean;
     verificationFailure?: string;
     verifierThrows?: boolean;
@@ -233,6 +234,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
       dependencies: {
         runShadowAuthoringExecution: async (input: { artifactRoot: string; solution: { marker?: string }; review: { marker?: string }; admission: { marker?: string }; invocationRef: string }) => {
           calls.executor += 1;
+          if (options.executorThrows) throw new Error('Shadow Executor runner failed before returning an execution record');
           assert.equal(input.solution.marker, 'effective-solution');
           assert.equal(input.review.marker, 'effective-review');
           assert.equal(input.admission.marker, 'effective-admission');
@@ -1370,9 +1372,9 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(retainedShadowResult.terminalStatus, 'SHADOW_AUTHORING_VERIFIED');
   assert.equal(retainedShadowResult.contractId, 'preschool-shared-neutral-passive-capacity-v1');
   assert.equal(retainedShadowResult.contractVersion, 1);
-  assert.equal(retainedShadowResult.proposalSha256, 'c'.repeat(64));
-  assert.equal(retainedShadowResult.reviewSha256, 'd'.repeat(64));
-  assert.equal(retainedShadowResult.admissionSha256, 'e'.repeat(64));
+  assert.equal(retainedShadowResult.proposalSha256, null);
+  assert.equal(retainedShadowResult.reviewSha256, sha256Hex(canonicalJson({ marker: 'effective-review' })));
+  assert.equal(retainedShadowResult.admissionSha256, sha256Hex(canonicalJson({ marker: 'effective-admission' })));
   assert.deepEqual(retainedShadowResult.canonicalChangedFileRefs, ['src/data/lines/preschool-passive-spine.json']);
   assert.equal(retainedShadowResult.verificationArtifactRef, 'shadow-authoring/verification.json');
   assert.equal(retainedShadowResult.promotionPackageRef, 'shadow-authoring/promotion-package.json');
@@ -1429,9 +1431,75 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     const retainedFailureResult = JSON.parse(await readFile(retainedFailureResultPath, 'utf8')) as Partial<ShadowAuthoringResultV1>;
     assert.equal(retainedFailureResult.schemaVersion, 'shadow-authoring-result-v1', failureCase.name);
     assert.equal(retainedFailureResult.terminalStatus, failureCase.terminalStatus, failureCase.name);
+    assert.equal(retainedFailureResult.participantJobs, 1, failureCase.name);
     const retainedFailureVerification = JSON.parse(await readFile(join(retainedFailureShadowRoot, 'verification.json'), 'utf8')) as { failure?: string; failures?: string[] };
     assert.ok(retainedFailureVerification.failure || retainedFailureVerification.failures?.length, failureCase.name);
     assert.equal(await readFile(join(retainedFailureShadowRoot, 'result.json'), 'utf8').then(() => true), true, failureCase.name);
+  }
+
+  for (const failureCase of [
+    {
+      name: 'executor-runner-throws',
+      terminalStatus: 'SHADOW_AUTHORING_EXECUTION_FAILED',
+      options: { executorThrows: true },
+    },
+    {
+      name: 'effective-review-read-fails',
+      terminalStatus: 'SHADOW_AUTHORING_PRE_EXECUTION_FAILED',
+      options: {},
+    },
+  ] as const) {
+    const failureRoot = await mkdtemp(join(tmpdir(), `candidate-session-shadow-pre-execution-${failureCase.name}-`));
+    const shadowFailure = shadowAuthoringStubs(failureRoot, failureCase.options);
+    const failureLaneCalls: string[] = [];
+    let failureSourceTransitionCalls = 0;
+    const shadowFailureResult = await runMultiCandidateSessionSlice({
+      ...base,
+      repositoryRoot: failureRoot,
+      logicalSessionId: `logical-session-shadow-pre-execution-${failureCase.name}`,
+      initialSourceRoot: sourceRoot,
+      hostSliceId: 'host-slice-000001',
+      dependencies: {
+        ...base.dependencies,
+        runSourceAnalysis: async () => scopedAnalysis(failureRoot, { hypotheses: hypotheses.slice(0, 2) }),
+        runCandidateLane: async input => {
+          failureLaneCalls.push(input.candidate.hypothesisId);
+          if (input.candidate.sourceIndex !== 0) return base.dependencies.runCandidateLane!(input);
+          const result = await shadowLaneResult(input.candidate, input.laneRoot);
+          if (failureCase.name === 'effective-review-read-fails') {
+            await rm(join(input.laneRoot, result.effectiveReviewPath!));
+          }
+          return result;
+        },
+        ...shadowFailure.dependencies,
+        runSourceTransition: async () => { failureSourceTransitionCalls += 1; throw new Error('pre-execution failure must not run a source transition'); },
+      },
+    });
+    assert.equal(shadowFailureResult.sessionState, 'FAILED', failureCase.name);
+    assert.equal(shadowFailureResult.sourceTransitionCount, 0, failureCase.name);
+    assert.deepEqual(failureLaneCalls, ['hypothesis-000001'], failureCase.name);
+    assert.equal(failureSourceTransitionCalls, 0, failureCase.name);
+    assert.equal(shadowFailure.calls.executor, failureCase.name === 'executor-runner-throws' ? 1 : 0, failureCase.name);
+
+    const logicalSessionId = `logical-session-shadow-pre-execution-${failureCase.name}`;
+    const failureManifest = await readDurableMultiCandidateSessionManifest(failureRoot, logicalSessionId);
+    assert.ok(failureManifest.failureRef, failureCase.name);
+    const retainedFailureShadowRoot = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring');
+    const retainedFailureResult = JSON.parse(await readFile(join(retainedFailureShadowRoot, 'result.json'), 'utf8')) as Partial<ShadowAuthoringResultV1>;
+    assert.equal(retainedFailureResult.schemaVersion, 'shadow-authoring-result-v1', failureCase.name);
+    assert.equal(retainedFailureResult.participantJobs, 0, failureCase.name);
+    assert.equal(retainedFailureResult.terminalStatus, failureCase.terminalStatus, failureCase.name);
+    for (const digest of [retainedFailureResult.proposalSha256, retainedFailureResult.reviewSha256, retainedFailureResult.admissionSha256]) {
+      assert.ok(digest === null || /^[a-f0-9]{64}$/.test(digest), failureCase.name);
+    }
+    if (failureCase.name === 'effective-review-read-fails') {
+      assert.equal(retainedFailureResult.proposalSha256, null, failureCase.name);
+      assert.equal(retainedFailureResult.reviewSha256, null, failureCase.name);
+      assert.equal(retainedFailureResult.admissionSha256, null, failureCase.name);
+    }
+    const failurePool = parseCandidatePoolV1(JSON.parse(await readFile(join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+    assert.equal(failurePool.candidates[0]!.processingState, 'INTERRUPTED', failureCase.name);
+    assert.equal(failurePool.candidates[1]!.processingState, 'PENDING', failureCase.name);
   }
 }
 

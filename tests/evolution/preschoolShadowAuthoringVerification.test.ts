@@ -12,6 +12,8 @@ import {
   type PreschoolShadowAuthoringVerificationResultV1,
 } from '../../scripts/evolution/autonomousAuthoring/verifyPreschoolShadowAuthoring';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
+import { infantPassiveNarrativeCatalog } from '../../src/data/infantPassiveNarrativeCatalog';
+import { isPreschoolPassiveEligible } from '../../src/data/preschoolPassiveSpine';
 import { captureAuthoritativeFingerprint } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import {
   validateAutonomousAuthoringAdmission,
@@ -186,7 +188,7 @@ function acceptedInputs(
     runRef: RUN_REF,
     evidenceMode: 'STRUCTURAL_EXHAUSTION',
     canonicalOriginTag: 'martial',
-    preConsumedEntryIds: [],
+    preConsumedEntryIds: ['child_martial_wooden_dummy', 'toddler_martial_watch', 'toddler_neutral_season'],
     beats: [
       { sequence: 1, age: 4, selectedEntryId: 'preschool_neutral_existing_age_four', kind: 'AUTHORED', legalUnconsumedCountBeforeSelection: 1 },
       { sequence: 2, age: 4, selectedEntryId: 'preschool_passive_gap', kind: 'GAP', legalUnconsumedCountBeforeSelection: 0 },
@@ -230,6 +232,7 @@ async function createFixture(options: {
   appendBothTests?: boolean;
   extraChangedPath?: boolean;
   adjacentFailure?: boolean;
+  mutateAcceptedAuthority?: boolean;
 } = {}) {
   const tempRoot = await mkdtemp(join(tmpdir(), 'preschool-shadow-verification-'));
   FIXTURE_ROOTS.push(tempRoot);
@@ -244,7 +247,18 @@ async function createFixture(options: {
   await writeFileAt(repositoryRoot, 'docs/governance/product-decisions.md', '# Decisions\n\n### PD-121：Contract-Constrained Autonomous Authoring v1\n');
   await writeFileAt(repositoryRoot, 'docs/product/content-authoring-workflow-contract-design.md', '# Content Authoring Workflow Contract v3\n\nPD-121 includes bounded shadow authoring and Human exact-patch promotion.\n');
   if (!options.historicalCandidate) {
-    await writeFileAt(repositoryRoot, 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md', '**HUMAN ACCEPTED — 2026-09-24**\n');
+    const authorityPath = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
+    await writeFileAt(repositoryRoot, authorityPath, await readFile(join(process.cwd(), authorityPath), 'utf8'));
+    if (options.mutateAcceptedAuthority) {
+      const accepted = await readFile(join(repositoryRoot, authorityPath), 'utf8');
+      const mutated = accepted.replace(
+        '# Contract-Constrained Autonomous Authoring v1',
+        '# Contract-Constrained Autonomous Authoring V1',
+      );
+      assert.notEqual(mutated, accepted);
+      assert.ok(mutated.includes('**HUMAN ACCEPTED — 2026-09-24**'));
+      await writeFileAt(repositoryRoot, authorityPath, mutated);
+    }
   }
   const baselineEntries = options.baselineEntries ?? INITIAL_CATALOG.entries;
   await writeFileAt(repositoryRoot, PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH, `${JSON.stringify({ entries: baselineEntries }, null, 2)}\n`);
@@ -301,7 +315,8 @@ async function createFixture(options: {
     await mkdir(authoritativeRepositoryRoot, { recursive: true });
     const authorityCopy = spawnSync('cp', ['-R', `${repositoryRoot}/.`, authoritativeRepositoryRoot], { encoding: 'utf8' });
     if (authorityCopy.status !== 0) throw new Error(`authority fixture copy failed: ${authorityCopy.stderr}`);
-    await writeFileAt(authoritativeRepositoryRoot, 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md', '**HUMAN ACCEPTED — 2026-09-24**\n');
+    const authorityPath = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
+    await writeFileAt(authoritativeRepositoryRoot, authorityPath, await readFile(join(process.cwd(), authorityPath), 'utf8'));
   }
   const candidateBaselineGitSha = options.historicalCandidate
     ? 'e80eecc868a6ca99f4a53ff5d2493a13b4c0a8bf'
@@ -350,6 +365,23 @@ async function testV1RejectsCandidateBaselineShaAndFingerprintMismatch(): Promis
   });
   assert.equal(fingerprintMismatch.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
   assert.equal(fingerprintMismatch.checks.authorityIntegrity, 'FAIL');
+}
+
+async function testV1RejectsMutatedAcceptedAuthorityBytes(): Promise<void> {
+  const fixture = await createFixture({ mutateAcceptedAuthority: true });
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture));
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
+  assert.equal(result.checks.authorityIntegrity, 'FAIL');
+  assert.equal(result.promotionPatch, null);
+  assert.throws(
+    () => buildPromotionPackage({
+      verification: result,
+      solution: fixture.solution,
+      review: fixture.review,
+      admission: fixture.admission,
+    }),
+    /Promotion Package requires a complete V1-V5 SHADOW_AUTHORING_VERIFIED result/,
+  );
 }
 
 async function testV1SupportsHistoricalArchiveWithSeparateAuthorityRoot(): Promise<void> {
@@ -529,6 +561,66 @@ async function testV5UsesOneToOneMaximumMatchingForStructuralAndSemanticEvidence
   assert.equal(wrongAge.structuralDeficit, 1);
 }
 
+async function testV5UsesEffectiveLegacyAndConfiguredCatalogForBaseline(): Promise<void> {
+  const fixture = await createFixture();
+  const effectiveBaseline = [
+    ...infantPassiveNarrativeCatalog.filter(entry => entry.ageMin >= 3 && entry.ageMax <= 7),
+    ...INITIAL_CATALOG.entries,
+  ];
+  const availableBefore = effectiveBaseline.filter(entry =>
+    isPreschoolPassiveEligible(entry, new Set(['martial']))
+    && entry.ageMin <= 4
+    && entry.ageMax >= 4,
+  );
+  const firstSelectedId = 'preschool_neutral_existing_age_four';
+  const secondSelectedId = 'toddler_martial_watch';
+  assert.ok(availableBefore.some(entry => entry.id === secondSelectedId));
+  const evidence: PreschoolCapacityEvidenceV1 = {
+    schemaVersion: 'preschool-capacity-evidence-v1',
+    runRef: RUN_REF,
+    evidenceMode: 'SEMANTIC_VARIETY',
+    canonicalOriginTag: 'martial',
+    preConsumedEntryIds: [],
+    beats: [
+      {
+        sequence: 1,
+        age: 4,
+        selectedEntryId: firstSelectedId,
+        kind: 'AUTHORED',
+        legalUnconsumedCountBeforeSelection: availableBefore.length,
+      },
+      {
+        sequence: 2,
+        age: 4,
+        selectedEntryId: secondSelectedId,
+        kind: 'AUTHORED',
+        legalUnconsumedCountBeforeSelection: availableBefore.length - 1,
+      },
+    ],
+    demandBeats: 2,
+    authoredBeats: 2,
+    gapBeats: 0,
+    foreignOriginLeakCount: 0,
+    duplicateAuthoredCount: 0,
+  };
+  fixture.admission = validateAutonomousAuthoringAdmission({
+    ...fixture.admission,
+    capacityEvidence: evidence,
+  });
+
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture));
+  const expectedBefore = computePreschoolCapacityDeficit({
+    demandAges: [4, 4],
+    canonicalOriginTag: 'martial',
+    catalogEntries: effectiveBaseline,
+    preConsumedEntryIds: [],
+  });
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFIED');
+  assert.deepEqual(result.capacityBefore, expectedBefore);
+  assert.equal(result.capacityBefore?.structuralDeficit, 0);
+  assert.equal(result.capacityAfter?.structuralDeficit, 0);
+}
+
 async function testV5RejectsUnresolvedStructuralDeficitAndAllowsSemanticZeroToZero(): Promise<void> {
   const unresolvedStructural = await createFixture({ entry: entry(7) });
   const structuralResult = await verifyPreschoolShadowAuthoring(verificationInput(unresolvedStructural));
@@ -673,6 +765,7 @@ async function testPromotionPackageRejectsProposalChangedAfterVerification(): Pr
 export async function runPreschoolShadowAuthoringVerificationTests(): Promise<void> {
   try {
     await testV1RejectsCandidateBaselineShaAndFingerprintMismatch();
+    await testV1RejectsMutatedAcceptedAuthorityBytes();
     await testV1SupportsHistoricalArchiveWithSeparateAuthorityRoot();
     await testV2RejectsOutOfScopeChangeAndChangedBaselineCatalogRow();
     await testV2RejectsForbiddenFieldsCardMismatchAndTestPrefixRemoval();
@@ -682,6 +775,7 @@ export async function runPreschoolShadowAuthoringVerificationTests(): Promise<vo
     await testV4RejectsSyntaxErrorAsRedAndGreenRegressionFailure();
     await testV4RejectsAdjacentRegressionFailure();
     await testV5UsesOneToOneMaximumMatchingForStructuralAndSemanticEvidence();
+    await testV5UsesEffectiveLegacyAndConfiguredCatalogForBaseline();
     await testV5RejectsUnresolvedStructuralDeficitAndAllowsSemanticZeroToZero();
     await testSuccessBuildsExactPatchAndPromotionPackage();
     await testPromotionPackageRejectsProposalChangedAfterVerification();
@@ -693,7 +787,9 @@ export async function runPreschoolShadowAuthoringVerificationTests(): Promise<vo
 if (import.meta.url === `file://${process.argv[1]}`) {
   (process.argv[2] === '--package-only'
     ? testPromotionPackageRejectsProposalChangedAfterVerification()
-    : runPreschoolShadowAuthoringVerificationTests())
+    : process.argv[2] === '--authority-only'
+      ? testV1RejectsMutatedAcceptedAuthorityBytes()
+      : runPreschoolShadowAuthoringVerificationTests())
     .then(async () => {
       await cleanupFixtures();
       console.log('preschoolShadowAuthoringVerification.test.ts: ok');

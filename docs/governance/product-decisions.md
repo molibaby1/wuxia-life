@@ -2251,3 +2251,53 @@ PD-106（2026-09-01）保留为历史 Human Accepted 决策，不原地删除或
 - 需要新增或修改 Runtime、Schema、通用 Person/Story/Household/Relationship abstraction；
 - 需要改变 Gap Diagnosis closed categories、Human approval boundary 或 Auto Evolution STOP boundary；
 - 真实 Player-visible Experience Review 证明现有内容语义之外存在新的产品问题。
+
+### PD-121：Contract-Constrained Autonomous Authoring v1
+
+**产品决策（Human accepted：2026-09-24）**
+
+PD-120 的默认规则继续有效：正式内容实例在 authoritative repository 中实施之前，默认需要 instance-level Human Approval。
+
+新增且仅新增以下 delegated-authority 例外：
+
+```text
+Human-approved Autonomous Authoring Contract
++ current case proven APPLICABLE
++ independent semantic conformance
++ Host mechanical admission
+→ AE may author + implement + verify a shadow-only patch
+```
+
+该例外只授权 isolated mutable workspace 中的 shadow authoring / implementation / verification，不授权 commit、push、merge 或任何 authoritative repository mutation。
+
+v1 只激活：
+
+```text
+contractId: preschool-shared-neutral-passive-capacity-v1
+version: 1
+```
+
+其完整语义由：
+
+```text
+docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md
+```
+
+定义。
+
+`SHADOW_AUTHORING_VERIFIED` 不是 source change，不触发 PD-118 source-change barrier，不创建新 Phase 0 source，不 supersede 当前 Source Epoch 的 PENDING candidates，也不消费一次 authoritative source-changing transition。
+
+PD-111、PD-118、PD-119、repository fingerprint / baseline integrity、Human authoritative-promotion authority 全部保持不变。
+
+**明确不做**
+
+- 不开放 autonomous commit / push / merge；
+- 不开放 generic Event / Person / Milestone / origin-specific authoring；
+- 不新增 generic Contract registry / DSL / executor plugin framework；
+- 不扩大 raw Phase 0 Participant evidence；
+- 不把 Reviewer acceptance 单独解释为 execution authority；
+- 不把 shadow success 解释为 Natural PVER 或 generalized effectiveness。
+
+**重新讨论条件**
+
+只按 accepted design §28 的 re-discussion triggers 重新讨论。

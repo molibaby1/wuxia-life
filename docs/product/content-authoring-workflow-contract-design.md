@@ -1,8 +1,8 @@
-# Content Authoring Workflow Contract v2
+# Content Authoring Workflow Contract v3
 
-**状态：** 当前权威规范（Human accepted：2026-09-19；PD-120）
+**状态：** 当前权威规范（Human accepted：2026-09-24；PD-121）
 
-**历史：** PD-106（2026-09-01）保留为历史 Human Accepted 决策；本文件为当前 canonical Content Authoring Workflow Contract。v2 修复“内容容量不足无法被正式诊断”的过严边界，并明确 Auto Evolution 在 Human Approval 之前的 proposal 权限；不取消内容质量门槛。
+**历史：** PD-106（2026-09-01）保留为历史 Human Accepted 决策；PD-120（2026-09-19）保留为默认 Content Authoring Workflow authority。v2 修复“内容容量不足无法被正式诊断”的过严边界，并明确 Auto Evolution 在 Human Approval 之前的 proposal 权限；不取消内容质量门槛。v3 仅增加 PD-121 规定的 Human-approved Contract shadow-only delegated-authority 例外。
 
 **目的：** 统一以后人工、ChatGPT、Codex 与 Auto Evolution 发现内容缺口、设计人物/事件、实现和验证内容的流程，防止“看到指标不好就堆事件”、自由扩写和系统性过度设计。
 
@@ -90,25 +90,26 @@ Future Hook 可以明确为“无”，但不能无意识地生成孤立填充�
 
 ## 2. 标准工作流
 
-正式流程：
+标准流程：
 
 ```text
-发现问题
-↓
-1. Gap Diagnosis
-↓
-2. Content Proposal
-↓
-3. Draft Authoring Contract
-↓
-4. Human Approval
-↓
-5. Implementation
-↓
-6. Semantic Verification
-↓
-7. Natural Player-visible Experience Review
+Gap Diagnosis
+→ Content Proposal
+→ Draft Authoring Contract
+→ Does a Human-approved Autonomous Authoring Contract apply?
+   ├─ no / unknown / contract-changing
+   │    → existing Human Approval boundary
+   └─ yes, Host-proven APPLICABLE
+        → bounded shadow authoring
+        → semantic + mechanical verification
+        → SHADOW_AUTHORING_VERIFIED
+        → Human exact-patch promotion boundary
 ```
+
+默认路径继续遵循 PD-120：Human Approval 在 authoritative implementation 之前。只有 Human-approved Contract 明确覆盖、当前 case 经 Host 证明 APPLICABLE、独立语义审查通过且 Host mechanical admission 合格时，才可在 isolated workspace 中执行 shadow authoring。
+
+Shadow authoring never equals authoritative implementation.
+A Natural Player-visible Experience Review still occurs only after a Human-authorized authoritative promotion.
 
 Player-visible Experience Review 失败后必须回到 Gap Diagnosis，而不是直接继续加内容。
 
@@ -354,7 +355,7 @@ Human 主要判断：
 
 代码 ID、文件名、命令可以保留英文；不应要求 Human 阅读大段英文执行提示后才能判断产品方向。
 
-未经 Human Approval，不进入正式 Implementation。
+未经 Human Approval，不进入 authoritative Implementation。PD-121 仅允许符合已批准 Autonomous Authoring Contract 的 case 在 isolated workspace 中进行 shadow authoring；Reviewer acceptance 本身不构成执行 authority，shadow result 也不是正式内容实施。
 
 Human Approval 之前禁止：
 
@@ -364,8 +365,10 @@ Human Approval 之前禁止：
 扩 catalog
 新增 Milestone authored semantics
 修改正式 story / causal content
-进入 implementation
+进入 authoritative implementation
 ```
+
+PD-121 的 shadow-only Contract 例外不改变上述 authoritative promotion 边界；任何 shadow patch 进入 authoritative repository 前，仍须由 Human 对 exact patch 作出明确 promotion 决定。
 
 `READY_FOR_FORMAL_TASK`、Agent recommendation、metric failure 都不是 Human Approval 的替代物。
 
@@ -374,6 +377,8 @@ Human Approval 之前禁止：
 ## 7. Stage 5：Implementation
 
 进入此阶段后，产品语义已经锁定。
+
+默认 Implementation 仍在 Human Approval 后进行。PD-121 授权的 shadow authoring 属于 isolated workspace 中的预备实现与验证，不改变 authoritative repository，也不替代 Human exact-patch promotion。
 
 Codex/implementation agent 主要负责：
 
@@ -503,21 +508,23 @@ Player-visible signal
 - 主动研究缺的是人物、事件、长期 payoff、有因果连接的内容序列、Milestone，或某个领域的 authored variety；
 - 形成完整的 Content Proposal 与 Draft Authoring Contract，作为 Human approval material。
 
+在 PD-121 唯一启用的 `preschool-shared-neutral-passive-capacity-v1@1` Contract 范围内，且 Host 证明当前 case APPLICABLE、独立语义审查与 Host mechanical admission 均通过时，AE 还可 author、implement、verify isolated shadow patch；产物只进入 Human exact-patch promotion review。
+
 不能：
 
-- 自动决定并实施新增人物；
-- 自动生成正式事件并提交到 catalog；
+- 自动决定并实施超出已批准 Contract 的新增人物；
+- 自动生成正式事件并写入 authoritative catalog；
 - 因 metric FAIL 自动扩张 catalog；
-- 越过 Human Approval 进入 Implementation。
+- 越过 Human Approval 修改 authoritative repository。
 
-当前采用的是：
+当前默认采用的是：
 
 ```text
 AE 自动诊断 + 自动 proposal / draft contract
 Human 批准后才 implementation
 ```
 
-未来只有在该流程经过足够真实生产验证后，才重新讨论：
+PD-121 明确授权的 shadow-only Contract 路径独立于默认流程，不产生 authoritative source change。只有在该流程经过足够真实生产验证后，才重新讨论更广范围的 autonomous author + implement authority：
 
 ```text
 AE 在既有 Contract 内自动 author + implement
@@ -608,13 +615,12 @@ AE 形成受约束的 Content Proposal / Draft Authoring Contract
 ↓
 领域 Contract（如需要）
 ↓
-Human Approval
-↓
-Codex Implementation
-↓
-Semantic Verification
-↓
-Natural Player-visible Experience Review
+Human Approval (default)
+├─ authoritative implementation → Semantic Verification → Natural Player-visible Experience Review
+└─ if PD-121 Contract applies → isolated shadow authoring / verification
+                              → Human exact-patch promotion
+                              → Semantic Verification
+                              → Natural Player-visible Experience Review
 ```
 
 禁止：
@@ -636,7 +642,7 @@ READY_FOR_FORMAL_TASK / Agent recommendation / metric failure
 
 ## 13. LLM-assisted Content Production Contract
 
-未来大模型内容生成采用三阶段接口：
+内容生成继续遵循三阶段接口；authoritative implementation 默认需要 instance-level Human Approval。PD-121 Contract case 可额外在 isolated workspace 产出 shadow patch，等待 Human exact-patch promotion：
 
 ### 13.1 Content Gap Proposal
 
@@ -694,9 +700,9 @@ Contract 获批后才生成：
 
 ---
 
-## 15. v2 Acceptance
+## 15. v3 Acceptance
 
-Content Authoring Workflow Contract v2 成功意味着：
+Content Authoring Workflow Contract v3 成功意味着：
 
 1. 新内容必须先有 Gap Diagnosis。
 2. 只有 `CONTENT_GAP` 可以进入 Authoring；顶层 taxonomy 仍只有七类。
@@ -705,11 +711,11 @@ Content Authoring Workflow Contract v2 成功意味着：
 5. Person 与 Event 有清晰、轻量的 Authoring Card；Person 必须过 Person Necessity Gate；Minimum Event Set 由语义证明。
 6. Event 明确是人生意义单位，不是日常日志；不得为了篇幅堆事件。
 7. Story continuity 优先由真实 history 构成；不因此授权 generic TaskLine / StoryArc runtime。
-8. Human 在产品语义层审批，默认看到中文材料；Human Approval 之前禁止实施内容。
-9. AE 可自动完成 Gap Diagnosis → Content Proposal → Draft Authoring Contract，停在 Human Approval boundary；不得自动 author + implement。
+8. Human 在产品语义层审批，默认看到中文材料；除 PD-121 shadow-only Contract 例外外，Human Approval 之前禁止 authoritative implementation。
+9. AE 可自动完成 Gap Diagnosis → Content Proposal → Draft Authoring Contract；只有已批准且 Host-proven applicable 的 PD-121 Contract case 才可进行 shadow authoring / implementation / verification，且不得自动 promotion。
 10. Codex 不得在 Implementation 阶段自行扩大 scope。
 11. Semantic Verification 在 Player-visible Experience Review 之前。
 12. Player-visible Experience Review failure 必须重新归因，不能自动加内容。
 13. Auto Evolution 保持 `RUN / OBSERVE`，不获得自动扩张 catalog 的权力。
 
-该 Contract 不要求立即生成新人物或新事件；它首先是未来内容生产的一致治理边界。
+该 Contract 不要求立即生成新人物或新事件；它首先是内容生产的一致治理边界。v2 的其余 acceptance criteria 与 PD-120 默认规则继续有效。

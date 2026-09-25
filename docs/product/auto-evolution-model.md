@@ -168,7 +168,7 @@ Improvement Hypothesis Set 的 `1..N` 条合法 hypothesis 全部成为当前 So
 
 Host 每次只激活一个 PENDING candidate 进入既有单问题 lane。ordinary SKIP / DEFER / ESCALATE_HUMAN / terminal DEFER_MORE_WORK_REQUESTED 结束当前 candidate 后继续下一 candidate；candidate terminal 不等于 Pool exhausted。
 
-只有 Reviewer 明确给出 typed execution-authority assessment `WITHIN_CURRENT_AUTHORITY`，且 accepted option 与 technical scope 都是 configuration-only，Decision Router 才能产生 `READY_FOR_CONFIG_EXECUTION`。方案方向可接受但需要 Human product/governance approval，或 execution authority 无法确定 / 缺失时，必须路由为 `ESCALATE_HUMAN`；不得从 `assessment`、`concerns` 或其他自由文本推断执行权限。READY_FOR_CONFIG_EXECUTION 是 source-change barrier。只有 authorized execution → verification → real rerun → new sealed source 成功后，旧 Source Epoch 尚未调查的 PENDING candidates 才以 `SUPERSEDED_BY_SOURCE_CHANGE` 明确结束当前-source 生命周期，并由新 Source 重新形成 Feedback / Hypothesis / Pool；不做跨 Source rebind。
+只有 Reviewer 明确给出 typed execution-authority assessment `WITHIN_CURRENT_AUTHORITY`，且 accepted option 与 technical scope 都是 configuration-only，Decision Router 才能产生 `READY_FOR_CONFIG_EXECUTION`。Human-approved Autonomous Authoring Contract 是独立的 delegated shadow-execution authority；Reviewer acceptance 本身不产生该 authority。方案方向可接受但需要 Human product/governance approval，或 execution authority 无法确定 / 缺失时，必须路由为 `ESCALATE_HUMAN`；不得从 `assessment`、`concerns` 或其他自由文本推断执行权限。`READY_FOR_CONFIG_EXECUTION` 是 source-change barrier。只有 authorized execution → verification → real rerun → new sealed source 成功后，旧 Source Epoch 尚未调查的 PENDING candidates 才以 `SUPERSEDED_BY_SOURCE_CHANGE` 明确结束当前-source 生命周期，并由新 Source 重新形成 Feedback / Hypothesis / Pool；不做跨 Source rebind。
 
 每个 Candidate Lane 最多一次 bounded continuation；11 Participant jobs 是 per Host execution slice 的 hard workflow envelope。Budget 只能在 candidate boundary 正常暂停，不能污染 candidate product disposition。
 
@@ -308,7 +308,7 @@ effective Candidate Decision
 ├─ ESCALATE TO HUMAN
 │      ↓
 │  retained HFL item → candidate completed → next PENDING candidate
-└─ READY_FOR_CONFIG_EXECUTION
+├─ READY_FOR_CONFIG_EXECUTION
        ↓
     Source-change barrier
        ↓
@@ -317,6 +317,11 @@ effective Candidate Decision
     old pending candidates superseded-by-source-change
        ↓
     new Source Epoch → new Feedback / Hypothesis Set / Candidate Pool
+└─ READY_FOR_SHADOW_AUTHORING
+       ↓
+    isolated shadow execution + Host verification
+       ↓
+    candidate completes on the same Source Epoch; no source-change barrier
 ```
 
 普通 unresolved HFL 不阻塞 Pool；v1 一个 Logical Session 最多一次 source-changing transition。ordinary candidate terminal 是 candidate-local outcome，不是 Session terminal。
@@ -410,6 +415,10 @@ ESCALATE TO HUMAN
 
 多轮自动执行也不得静默扩大这个边界。
 
+A Human-approved Autonomous Authoring Contract is a separate delegated shadow-execution authority.
+It does not convert content authoring into ordinary configuration execution.
+该 authority 仅覆盖 PD-121 明确批准且 Host 判定适用的 shadow workspace；不授权修改 authoritative repository。
+
 ## 9. Orchestrator 应该强在哪里
 
 优先增强：
@@ -497,6 +506,8 @@ RUN / OBSERVE + Human Follow-up Loop v1 retain + review + list (real-use pilot c
 ↓
 PD-118 Source-local Candidate Pool / Multi-candidate Session v1 (engineering delivered; deterministic acceptance verified)
 ↓
+Contract-Constrained Autonomous Authoring v1 (PD-121; one Human-approved preschool Contract; shadow-only; Human exact-patch promotion)
+↓
 resume RUN / OBSERVE on migrated workflow; natural effectiveness remains unverified
 ↓
 P3 full consolidation remains DEFERRED
@@ -525,7 +536,7 @@ P1 与 P2 已有当前阶段记录的 delivered / closed 状态；Human Follow-u
 - Report Analysis；
 - Human Control Surface；
 - MCP 平台；
-- autonomous code modification；
+- autonomous code modification beyond PD-121's shadow-only content Contract;
 - 为未来世界观替换提前建设大规模通用框架。
 
 真实运行出现明确需求后再重新裁决。

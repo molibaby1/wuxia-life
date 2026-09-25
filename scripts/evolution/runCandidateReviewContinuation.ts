@@ -14,6 +14,7 @@ import {
   type CandidateLaneFailureV2,
 } from './candidateLaneFailureContract';
 import { canonicalJson } from './phase0/provenance';
+import type { PreschoolAutonomousAuthoringContractPacketV1 } from './autonomousAuthoring/buildPreschoolContractPacket';
 
 export interface RunCandidateReviewContinuationInput {
   candidateRef: string;
@@ -29,6 +30,7 @@ export interface RunCandidateReviewContinuationInput {
   workflowInstanceRef?: string;
   sourceRunRef?: string;
   sourceProvenanceRoot?: string;
+  autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
   dependencies?: ReviewContinuationDependencies & {
     runCandidateContinuation?: (input: RunReviewContinuationInput) => Promise<ReviewContinuationResult>;
   };
@@ -140,6 +142,7 @@ export async function runCandidateReviewContinuation(
     sourceFingerprintSha256: input.sourceFingerprintSha256,
     sourceProvenanceRoot: input.sourceProvenanceRoot,
     additionalWorkspaceArtifactRelativePaths: ['candidate-activation.json', 'problem-package.json'],
+    autonomousAuthoringContractPacket: input.autonomousAuthoringContractPacket,
     participant: input.participant,
     retainHumanFollowupOnEscalate: false,
     dependencies: input.dependencies,

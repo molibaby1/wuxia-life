@@ -33,6 +33,7 @@ import {
   type ParticipantSkillAssignment,
   type DeliveredParticipantSkill,
 } from './solutionParticipantSkills';
+import type { PreschoolAutonomousAuthoringContractPacketV1 } from '../autonomousAuthoring/buildPreschoolContractPacket';
 
 export interface RunSolutionAgentInput {
   problemPackage: ProblemPackage;
@@ -46,6 +47,7 @@ export interface RunSolutionAgentInput {
   destinationRoot: string;
   skillAssignments: readonly ParticipantSkillAssignment[];
   participant: WorkspaceAgentParticipantOptions;
+  autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
 }
 
 export interface RunSolutionRevisionInput extends RunSolutionAgentInput {
@@ -135,9 +137,30 @@ function renderSolutionWorkSchemaGuidance(): string {
   ].join('\n');
 }
 
+function renderAutonomousAuthoringPacket(
+  packet: PreschoolAutonomousAuthoringContractPacketV1 | undefined,
+): string[] {
+  if (!packet) return [];
+  return [
+    'Decide applicability before authoring.',
+    'Only APPLICABLE may contain responsibilities and Cards.',
+    'Derive the Minimum Sufficient Responsibility Set from permitted evidence and current catalog semantics.',
+    'Do not use a target count; max 8 is only an execution ceiling.',
+    'One primary responsibility maps to exactly one Card.',
+    'Do not author new content before applicability is established.',
+    'If evidence is insufficient, preserve INSUFFICIENT_EVIDENCE rather than guessing.',
+    'If a reasonable solution requires new semantics/mechanics, use CONTRACT_CHANGE_REQUIRED.',
+    "Attach autonomousAuthoring only to an option with changeScope='program'; this lane is not ordinary config execution.",
+    '',
+    'Participant-safe Autonomous Authoring Contract Packet:',
+    canonicalJson(packet),
+  ];
+}
+
 export function buildSolutionAgentPrompt(
   problemPackage: ProblemPackage,
   assignedSkills: DeliveredParticipantSkill[],
+  autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1,
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
     `Skill: ${skill.identity}`,
@@ -188,6 +211,8 @@ export function buildSolutionAgentPrompt(
     '- Use INSUFFICIENT_EVIDENCE only after grounded investigation and candidate verification leave a material unknown that the available evidence cannot resolve. Use NO_PROPOSAL only when the evidence supports that no change should be proposed. Neither is a time-budget escape hatch.',
     '- Produce a repository-grounded result that Reviewer can independently assess; do not perform an exhaustive second-pass review yourself.',
     '',
+    ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket),
+    ...(autonomousAuthoringContractPacket ? [''] : []),
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,
     'Reference format requirements:',
@@ -216,6 +241,7 @@ export function buildSolutionRevisionPrompt(
   originalSolutionWork: SolutionWorkV1,
   originalReview: SolutionReviewV1,
   assignedSkills: DeliveredParticipantSkill[],
+  autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1,
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
     `Skill: ${skill.identity}`,
@@ -235,6 +261,8 @@ export function buildSolutionRevisionPrompt(
     renderStructuredFinalOutputContractV1({ roleSchemaName: 'SolutionWorkV1' }),
     renderSolutionWorkSchemaGuidance(),
     '',
+    ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket),
+    ...(autonomousAuthoringContractPacket ? [''] : []),
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,
     'Reference format requirements:',
@@ -447,7 +475,7 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
     problemPackage,
     problemPackageSha256,
     assignedSkills,
-    buildSolutionAgentPrompt(problemPackage, assignedSkills),
+    buildSolutionAgentPrompt(problemPackage, assignedSkills, input.autonomousAuthoringContractPacket),
   );
 }
 
@@ -482,6 +510,12 @@ export async function runSolutionRevisionAgent(
     problemPackage,
     problemPackageSha256,
     assignedSkills,
-    buildSolutionRevisionPrompt(problemPackage, originalSolutionWork, originalReview, assignedSkills),
+    buildSolutionRevisionPrompt(
+      problemPackage,
+      originalSolutionWork,
+      originalReview,
+      assignedSkills,
+      input.autonomousAuthoringContractPacket,
+    ),
   );
 }

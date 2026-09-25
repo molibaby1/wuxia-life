@@ -19,6 +19,7 @@ import { archiveMultiCandidateSessionReport } from '../../scripts/evolution/repo
 import { retainMultiCandidateSessionEvidence } from '../../scripts/evolution/evidence/retainMultiCandidateSessionEvidence';
 import { buildCandidateLaneFailureV2 } from '../../scripts/evolution/candidateLaneFailureContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
+import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
 const hypotheses = [1, 2, 3].map(index => ({ hypothesisId: `hypothesis-${String(index).padStart(6, '0')}`, hypothesis: `H${index}`, observedBasis: 'Observed.', feedbackRefs: ['overallImpression'], evidenceRefs: [], unknowns: ['Unknown.'], productSignificance: 'Significant.' }));
@@ -148,6 +149,9 @@ function skipDecision(hypothesisId: string) {
 }
 
 export async function runMultiCandidateSessionSliceTests(): Promise<void> {
+  const autonomousAuthoringContractPacket = await buildPreschoolAutonomousAuthoringContractPacket({
+    repositoryRoot: process.cwd(),
+  });
   const root = await mkdtemp(join(tmpdir(), 'candidate-session-slice-'));
   const sourceRoot = join(root, 'sealed-source');
   await mkdir(sourceRoot, { recursive: true });
@@ -696,6 +700,10 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
           hypothesisSetSha256: pool.hypothesisSet.sha256,
           sourceRunRef: pool.source.sourceRunRef,
         })}\n`);
+        await writeFile(
+          join(laneRoot, 'autonomous-authoring-contract-packet.json'),
+          `${canonicalJson(autonomousAuthoringContractPacket)}\n`,
+        );
         await writeFile(join(laneRoot, 'decision.json'), `${canonicalJson(continuationBaseDecision)}\n`);
         const problemPackagePath = join(laneRoot, 'problem-package.json');
         await buildProblemPackage({
@@ -729,8 +737,13 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
           problemPackage: {} as never,
         };
       },
-      runCandidateContinuation: async ({ laneRoot }) => {
+      runCandidateContinuation: async continuationInput => {
+        const { laneRoot } = continuationInput;
         candidateContinuationCalls += 1;
+        assert.deepEqual(
+          continuationInput.autonomousAuthoringContractPacket,
+          autonomousAuthoringContractPacket,
+        );
         const continuationDecisionPath = join(laneRoot, 'review-continuation-000001/decision.json');
         for (const relativePath of [
           'review-continuation-000001/revision-request.json',

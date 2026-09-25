@@ -9,6 +9,16 @@ import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/p
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
 
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await readFile(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
 export async function runCandidateLaneTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'candidate-lane-'));
   const sourceRoot = join(root, 'source-analysis');
@@ -32,6 +42,7 @@ export async function runCandidateLaneTests(): Promise<void> {
     unknowns: ['Cause remains unknown.'],
     productSignificance: 'It matters.',
   };
+  let solutionContractPacket: unknown;
   const laneInput = {
     repositoryRoot: process.cwd(),
     sourceRoot,
@@ -53,9 +64,11 @@ export async function runCandidateLaneTests(): Promise<void> {
     participantMode: 'local-subagent',
     dependencies: {
       captureAuthoritativeFingerprint: async () => 'd'.repeat(64),
-      runSolutionAgent: async input => ({
-        ok: true,
-        result: {
+      runSolutionAgent: async input => {
+        solutionContractPacket = input.autonomousAuthoringContractPacket;
+        return {
+          ok: true,
+          result: {
           schemaVersion: 'solution-work-v1',
           problemId: 'problem-hypothesis-000002',
           status: 'INSUFFICIENT_EVIDENCE',
@@ -63,11 +76,12 @@ export async function runCandidateLaneTests(): Promise<void> {
           summary: 'Evidence is insufficient.',
           repoRefs: [],
           artifactRefs: [],
-        },
-        invocationPath: join(input.destinationRoot, 'invocation.json'),
-        rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
-        resultPath: join(input.destinationRoot, 'result.json'),
-      }),
+          },
+          invocationPath: join(input.destinationRoot, 'invocation.json'),
+          rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+          resultPath: join(input.destinationRoot, 'result.json'),
+        };
+      },
       runSolutionReviewer: async () => {
         throw new Error('reviewer must not run for insufficient evidence');
       },
@@ -83,7 +97,85 @@ export async function runCandidateLaneTests(): Promise<void> {
   assert.equal(JSON.parse(await readFile(join(laneRoot, 'candidate-activation.json'), 'utf8')).hypothesisId, 'hypothesis-000002');
   assert.equal(await readFile(join(laneRoot, 'diagnostic/causal-attribution.json'), 'utf8').then(value => JSON.parse(value).hypothesisId), 'hypothesis-000002');
   assert.equal(await readFile(join(laneRoot, 'problem-package.json'), 'utf8').then(value => JSON.parse(value).problemId), 'problem-hypothesis-000002');
+  const persistedContractPacket = JSON.parse(await readFile(join(laneRoot, 'autonomous-authoring-contract-packet.json'), 'utf8'));
+  assert.deepEqual(solutionContractPacket, persistedContractPacket);
+  assert.equal(persistedContractPacket.authorityIdentifier, 'contract-constrained-autonomous-authoring-v1-20260924');
+  assert.equal(
+    await fileExists(join(laneRoot, 'agent-workspaces/solution/game-runs', sourceRunRef, 'internal/player-surface-source.json')),
+    false,
+  );
+  assert.equal(
+    await fileExists(join(laneRoot, 'agent-workspaces/solution/autonomous-authoring-contract-packet.json')),
+    false,
+  );
   assert.equal(await import('node:fs/promises').then(fs => fs.lstat(join(laneRoot, 'selection/selected-hypothesis.json')).then(() => true, () => false)), false);
+
+  const reviewerLaneRoot = join(root, 'candidates/hypothesis-000002-reviewer');
+  let reviewerSolutionPacket: unknown;
+  let reviewerContractPacket: unknown;
+  const reviewerLaneResult = await runCandidateLane({
+    ...laneInput,
+    laneRoot: reviewerLaneRoot,
+    dependencies: {
+      ...laneInput.dependencies,
+      runSolutionAgent: async input => {
+        reviewerSolutionPacket = input.autonomousAuthoringContractPacket;
+        return {
+          ok: true,
+          result: {
+            schemaVersion: 'solution-work-v1',
+            problemId: 'problem-hypothesis-000002',
+            status: 'OPTIONS',
+            options: [{
+              optionId: 'option-000001',
+              proposedChange: 'A bounded change.',
+              rationale: 'It fits the evidence.',
+              repoRefs: [],
+              artifactRefs: [],
+              changeScope: 'configuration',
+              expectedPlayerObservableDifference: 'A visible difference.',
+              risks: [],
+              unknowns: [],
+            }],
+            recommendedOptionId: 'option-000001',
+            summary: 'One option.',
+            repoRefs: [],
+            artifactRefs: [],
+          },
+          invocationPath: join(input.destinationRoot, 'invocation.json'),
+          rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+          resultPath: join(input.destinationRoot, 'result.json'),
+        };
+      },
+      runSolutionReviewer: async input => {
+        reviewerContractPacket = input.autonomousAuthoringContractPacket;
+        return {
+          ok: true,
+          review: {
+            schemaVersion: 'solution-review-v1',
+            problemId: 'problem-hypothesis-000002',
+            decision: 'ACCEPT_OPTION',
+            acceptedOptionId: 'option-000001',
+            scopeAssessment: 'config_only',
+            assessment: 'Independently reviewed.',
+            repoRefs: [],
+            artifactRefs: [],
+            concerns: [],
+          },
+          invocationPath: join(input.destinationRoot, 'invocation.json'),
+          rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+          reviewPath: join(input.destinationRoot, 'review.json'),
+        };
+      },
+    },
+  });
+  assert.equal(reviewerLaneResult.status, 'completed');
+  assert.deepEqual(reviewerSolutionPacket, reviewerContractPacket);
+  assert.deepEqual(reviewerContractPacket, persistedContractPacket);
+  assert.equal(
+    await fileExists(join(reviewerLaneRoot, 'agent-workspaces/reviewer/game-runs', sourceRunRef, 'internal/player-surface-source.json')),
+    false,
+  );
 
   const missingRepoLaneRoot = join(root, 'candidates/hypothesis-000002-missing-repo');
   let missingRepoRepositoryRoot: string | undefined;

@@ -2,13 +2,19 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import {
   assertAuthoritativeFingerprintUnchanged,
   captureAuthoritativeFingerprint,
   prepareAgentWorkspace,
 } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import { isEvolutionWorkspacePathExcluded } from '../../scripts/evolution/workspaceAuthoritySurface';
+
+const ANSWER_BEARING_DOCUMENTS = [
+  'docs/superpowers/specs/2026-09-23-preschool-residual-content-capacity-authoring-design.md',
+  'docs/superpowers/plans/2026-09-23-preschool-residual-content-capacity-implementation.md',
+  'docs/superpowers/plans/2026-09-24-contract-constrained-autonomous-authoring-v1-implementation-plan.md',
+] as const;
 
 const AUTHORITY_SURFACE_CASES: Array<{ path: string; excluded: boolean }> = [
   { path: '.agent-workspace-manifest.json', excluded: true },
@@ -17,6 +23,8 @@ const AUTHORITY_SURFACE_CASES: Array<{ path: string; excluded: boolean }> = [
   { path: '.git/config', excluded: true },
   { path: '.omx/logs/omx-2026-09-03.jsonl', excluded: true },
   { path: '.superpowers/plans/noise.md', excluded: true },
+  ...ANSWER_BEARING_DOCUMENTS.map(path => ({ path, excluded: true })),
+  { path: 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md', excluded: true },
   { path: 'artifacts/evolution/index.md', excluded: true },
   { path: 'agent_docs/noise.md', excluded: true },
   { path: '.tmp/evolution/noise.txt', excluded: true },
@@ -49,6 +57,8 @@ async function fixture(): Promise<string> {
   await mkdir(join(root, 'src'), { recursive: true });
   await mkdir(join(root, 'public/reports'), { recursive: true });
   await mkdir(join(root, 'docs'), { recursive: true });
+  await mkdir(join(root, 'docs/superpowers/specs'), { recursive: true });
+  await mkdir(join(root, 'docs/superpowers/plans'), { recursive: true });
   await mkdir(join(root, 'skills/repository-grounded-investigation'), { recursive: true });
   await mkdir(join(root, '.git'), { recursive: true });
   await mkdir(join(root, 'node_modules/pkg'), { recursive: true });
@@ -60,6 +70,13 @@ async function fixture(): Promise<string> {
   await writeFile(join(root, 'public/reports/generated-report.html'), '<html>generated</html>');
   await writeFile(join(root, 'public/reports/manifest.json'), '{"reports":[]}');
   await writeFile(join(root, 'docs/authority.md'), 'authority');
+  for (const relativePath of [
+    ...ANSWER_BEARING_DOCUMENTS,
+    'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md',
+  ]) {
+    await mkdir(dirname(join(root, relativePath)), { recursive: true });
+    await writeFile(join(root, relativePath), 'answer-bearing design source');
+  }
   await writeFile(
     join(root, 'skills/repository-grounded-investigation/SKILL.md'),
     'repository-grounded investigation method',
@@ -98,6 +115,12 @@ export async function runAgentWorkspaceIsolationTests(): Promise<void> {
   assert.equal(await pathExists(join(solution.workspaceRoot, 'public/reports/generated-report.html')), false);
   assert.equal(await pathExists(join(solution.workspaceRoot, 'public/reports/manifest.json')), true);
   assert.equal(await pathExists(join(solution.workspaceRoot, 'docs/authority.md')), true);
+  for (const relativePath of [
+    ...ANSWER_BEARING_DOCUMENTS,
+    'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md',
+  ]) {
+    assert.equal(await pathExists(join(solution.workspaceRoot, relativePath)), false);
+  }
   assert.equal(
     await pathExists(join(solution.workspaceRoot, 'skills/repository-grounded-investigation/SKILL.md')),
     true,
@@ -120,6 +143,12 @@ export async function runAgentWorkspaceIsolationTests(): Promise<void> {
     true,
   );
   assert.equal(manifest.entries.some(entry => entry.path === 'project.zip'), false);
+  for (const relativePath of [
+    ...ANSWER_BEARING_DOCUMENTS,
+    'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md',
+  ]) {
+    assert.equal(manifest.entries.some(entry => entry.path === relativePath), false);
+  }
   await writeFile(join(root, 'public/reports/generated-report.json'), '{"generated":false,"changed":true}');
   assert.equal(await captureAuthoritativeFingerprint(root), initialFingerprint);
   await assertAuthoritativeFingerprintUnchanged(root, solution.authoritativeFingerprintSha256);

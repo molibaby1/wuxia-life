@@ -66,6 +66,7 @@ import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improve
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import { captureAuthoritativeFingerprint } from './problemAgnosticSolution/agentWorkspace';
 import { sha256Hex } from './phase0/provenance';
+import type { PreschoolAutonomousAuthoringContractPacketV1 } from './autonomousAuthoring/buildPreschoolContractPacket';
 
 export interface RunMultiCandidateSessionSliceInput {
   mode: 'START_NEW_SESSION' | 'RESUME_SESSION';
@@ -103,7 +104,7 @@ export interface MultiCandidateSessionSliceDependencies {
   runSourceAnalysis?: (input: { sourceRoot: string; sourceEpochRef: string; analysisRoot: string }) => Promise<SourceCandidateAnalysisResult>;
   loadSourceAnalysis?: (input: { sourceEpochRef: string; sourceRoot: string; analysisRoot: string }) => Promise<CompletedSourceCandidateAnalysisResult>;
   runCandidateLane?: (input: CandidateSessionSliceLaneInput) => Promise<CandidateLaneResult>;
-  runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string; sourceProvenanceRoot: string }) => Promise<CandidateReviewContinuationResult>;
+  runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string; sourceProvenanceRoot: string; autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1 }) => Promise<CandidateReviewContinuationResult>;
   retainHumanFollowup?: typeof retainHumanFollowupWorkItem;
   runSourceTransition?: (input: { candidate: CandidatePoolV1['candidates'][number]; laneResult: Extract<CandidateLaneResult, { status: 'completed' }>; sourceAnalysis: CompletedSourceCandidateAnalysisResult; transitionRoot: string; candidateLaneRoot: string; effectiveDecisionPath: string }) => Promise<BoundedSourceTransitionResult>;
 }
@@ -115,6 +116,8 @@ const DEFAULT_AUTHORITY_REFS = [
   'docs/governance/product-decisions.md',
   'docs/governance/current-product-stage.md',
   'docs/governance/ai-collaboration-workflow.md',
+  'docs/product/content-authoring-workflow-contract-design.md',
+  'docs/governance/product-decisions.md',
 ];
 
 async function writeAtomicJson(path: string, value: unknown): Promise<void> {
@@ -604,27 +607,45 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
     let effectiveDecisionPath = laneResult.decisionPath;
     let continuation: CandidateReviewContinuationResult | null = null;
     if (laneResult.decision.route === 'DEFER_MORE_WORK_REQUESTED') {
-      const continuationRunner = input.dependencies?.runCandidateContinuation ?? ((value: {
+      const packetPath = join(laneRoot, 'autonomous-authoring-contract-packet.json');
+      const autonomousAuthoringContractPacket = await exists(packetPath)
+        ? JSON.parse(await readFile(packetPath, 'utf8')) as PreschoolAutonomousAuthoringContractPacketV1
+        : undefined;
+      const continuationRunner = input.dependencies?.runCandidateContinuation ?? (async (value: {
         candidate: CandidatePoolV1['candidates'][number];
         sourceAnalysis: CompletedSourceCandidateAnalysisResult;
         laneRoot: string;
         baseDecisionPath: string;
         problemPackagePath: string;
         sourceProvenanceRoot?: string;
-      }) => runCandidateReviewContinuation({
-        candidateRef: value.candidate.candidateRef,
-        hypothesisId: value.candidate.hypothesisId,
-        sourceIndex: value.candidate.sourceIndex,
-        candidateLaneRoot: value.laneRoot,
-        baseDecisionPath: value.baseDecisionPath,
-        problemPackagePath: value.problemPackagePath,
-        sourceFingerprintSha256: pool.source.sourceFingerprintSha256,
-        sourceProvenanceRoot: value.sourceProvenanceRoot ?? value.sourceAnalysis.sourceRoot,
-        participant: input.participant,
-        repositoryRoot: input.repositoryRoot,
-      }));
+        autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
+      }) => {
+        return runCandidateReviewContinuation({
+          candidateRef: value.candidate.candidateRef,
+          hypothesisId: value.candidate.hypothesisId,
+          sourceIndex: value.candidate.sourceIndex,
+          candidateLaneRoot: value.laneRoot,
+          baseDecisionPath: value.baseDecisionPath,
+          problemPackagePath: value.problemPackagePath,
+          sourceFingerprintSha256: pool.source.sourceFingerprintSha256,
+          sourceProvenanceRoot: value.sourceProvenanceRoot ?? value.sourceAnalysis.sourceRoot,
+          participant: input.participant,
+          repositoryRoot: input.repositoryRoot,
+          ...(value.autonomousAuthoringContractPacket
+            ? { autonomousAuthoringContractPacket: value.autonomousAuthoringContractPacket }
+            : {}),
+        });
+      });
       try {
-        continuation = await continuationRunner({ candidate: pending, sourceAnalysis: analysis, laneRoot, baseDecisionPath: laneResult.baseDecisionPath, problemPackagePath: laneResult.problemPackagePath, sourceProvenanceRoot: analysis.sourceRoot });
+        continuation = await continuationRunner({
+          candidate: pending,
+          sourceAnalysis: analysis,
+          laneRoot,
+          baseDecisionPath: laneResult.baseDecisionPath,
+          problemPackagePath: laneResult.problemPackagePath,
+          sourceProvenanceRoot: analysis.sourceRoot,
+          ...(autonomousAuthoringContractPacket ? { autonomousAuthoringContractPacket } : {}),
+        });
       } catch (error) {
         failureRef = 'host-failure.json';
         await writeAtomicJson(join(sessionRoot, failureRef), {

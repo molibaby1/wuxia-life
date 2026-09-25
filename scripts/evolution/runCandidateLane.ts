@@ -33,6 +33,7 @@ import {
   type CandidateLaneFailureV2,
 } from './candidateLaneFailureContract';
 import type { ParticipantFailureFacts } from './problemAgnosticSolution/participantFailureClassification';
+import { buildPreschoolAutonomousAuthoringContractPacket } from './autonomousAuthoring/buildPreschoolContractPacket';
 
 export interface RunCandidateLaneOptions {
   repositoryRoot: string;
@@ -172,6 +173,13 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
     sourceRunRef: input.sourceRunRef,
   });
   for (const authorityRef of input.authorityRefs) await assertRepoReferenceFile(input.repositoryRoot, authorityRef, 'authorityRef');
+  const autonomousAuthoringContractPacket = await buildPreschoolAutonomousAuthoringContractPacket({
+    repositoryRoot: input.repositoryRoot,
+  });
+  await writeCreateOnly(
+    join(input.laneRoot, 'autonomous-authoring-contract-packet.json'),
+    autonomousAuthoringContractPacket,
+  );
   await copySourceArtifact(input.sourceRoot, input.laneRoot, input.observablePayloadRef);
   await copySourceArtifact(input.sourceRoot, input.laneRoot, input.externalFeedbackRef);
   await copySourceArtifact(input.sourceRoot, input.laneRoot, input.improvementHypothesisRef);
@@ -236,6 +244,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
     jobNumber: 1,
     destinationRoot: join(input.laneRoot, 'solution-agent'),
     skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
     participant: input.participant,
   });
   await assertFingerprintUnchanged(input.repositoryRoot, authoritativeFingerprint);
@@ -274,6 +283,7 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
       jobNumber: 2,
       destinationRoot: join(input.laneRoot, 'reviewer-agent'),
       skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+      autonomousAuthoringContractPacket,
       participant: input.participant,
     });
     await assertFingerprintUnchanged(input.repositoryRoot, authoritativeFingerprint);

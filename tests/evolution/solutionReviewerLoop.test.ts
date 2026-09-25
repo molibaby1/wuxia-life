@@ -12,9 +12,14 @@ import {
   type RunSolutionReReviewerInput,
   type RunSolutionReviewerInput,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionReviewer';
+import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import { REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import type {
+  AutonomousAuthoringProposalV1,
+  AutonomousAuthoringReviewAssessmentV1,
+} from '../../src/evolution/autonomousAuthoringContract';
 import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import type { SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
 
@@ -79,6 +84,78 @@ const review: SolutionReviewV1 = {
   concerns: [],
 };
 
+const autonomousAuthoringProposal: AutonomousAuthoringProposalV1 = {
+  schemaVersion: 'autonomous-authoring-proposal-v1',
+  contractId: 'preschool-shared-neutral-passive-capacity-v1',
+  contractVersion: 1,
+  gapClassification: 'CONTENT_GAP',
+  gapSubtype: 'CONTENT_CAPACITY_GAP',
+  applicabilityClaim: 'APPLICABLE',
+  authorityRefs: ['docs/product/content-authoring-workflow-contract-design.md'],
+  sourceEvidenceRefs: ['source/observable-payload.json'],
+  responsibilities: [{
+    responsibilityId: 'responsibility-000001',
+    primaryLifeFunction: 'Shared play.',
+    playerVisibleNeed: 'A child can join a shared activity.',
+    evidenceRefs: ['source/observable-payload.json'],
+  }],
+  contractPayload: {
+    schemaVersion: 'preschool-shared-neutral-passive-authoring-payload-v1',
+    cards: [{
+      responsibilityId: 'responsibility-000001',
+      primaryLifeFunction: 'Shared play.',
+      playerVisibleNeed: 'A child can join a shared activity.',
+      developmentalAgeJustification: {
+        ageMin: 4,
+        whyNotEarlier: 'This requires a simple shared activity.',
+        whyFromThisAge: 'The child can take part in the activity.',
+        whyThroughAgeSeven: 'The activity remains understandable through seven.',
+      },
+      concreteSceneConcept: 'Children arrange a shared play space.',
+      existingContentDistinction: {
+        closestEntryIds: ['existing_entry_000001'],
+        sharedSemanticArea: 'Shared activity.',
+        specificDistinction: 'The scene is about arranging the play space.',
+      },
+      actorClass: 'TRANSIENT_ROLE_ONLY',
+      pastEvidenceConsumed: 'NONE',
+      meaningfulPlayerDecision: 'NONE',
+      durableResult: 'EVENT_HISTORY_ID_ONLY',
+      futureHook: 'NONE',
+      originPortability: 'The scene does not depend on origin.',
+      scopeCheck: 'CONTRACT_PRESERVING',
+      proposedEntry: {
+        id: 'preschool_neutral_shared_play_space',
+        title: 'Shared play space',
+        text: 'Children arrange a space for a shared game.',
+        originTags: ['neutral'],
+        ageMin: 4,
+        ageMax: 7,
+      },
+    }],
+  },
+};
+
+const autonomousAuthoringAssessment: AutonomousAuthoringReviewAssessmentV1 = {
+  schemaVersion: 'autonomous-authoring-review-assessment-v1',
+  contractId: 'preschool-shared-neutral-passive-capacity-v1',
+  contractVersion: 1,
+  applicabilityAssessment: 'APPLICABLE',
+  conformance: 'CONFORMING',
+  executionEnvelope: 'WITHIN_ENVELOPE',
+  assessment: 'The instance fits the reusable Contract.',
+  blockers: [],
+};
+
+const autonomousSolutionWork: SolutionWorkV1 = {
+  ...solutionWork,
+  options: [{
+    ...solutionWork.options[0]!,
+    changeScope: 'program',
+    autonomousAuthoring: autonomousAuthoringProposal,
+  }],
+};
+
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -101,6 +178,16 @@ function runSolutionReReviewer(input: TestSolutionReReviewerInput) {
 }
 
 export async function runSolutionReviewerLoopTests(): Promise<void> {
+  const autonomousAuthoringContractPacket = await buildPreschoolAutonomousAuthoringContractPacket({
+    repositoryRoot: process.cwd(),
+  });
+  const packetJson = canonicalJson(autonomousAuthoringContractPacket);
+  const reviewOutput = (assessment: unknown | undefined) => ({
+    ...review,
+    scopeAssessment: 'code_required',
+    executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
+    ...(assessment !== undefined ? { autonomousAuthoringAssessment: assessment } : {}),
+  });
   const solutionWorkspacePath = '/private/solution-workspace-must-not-leak';
   const canonicalSkillPath = 'skills/repository-grounded-investigation/SKILL.md';
   const canonicalSkillContent = await readFile(join(process.cwd(), canonicalSkillPath), 'utf8');
@@ -112,7 +199,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     content: canonicalSkillContent,
     contentSha256: canonicalSkillSha256,
   };
-  const prompt = buildSolutionReviewerPrompt(problemPackage, solutionWork, [assignedSkill]);
+  const prompt = buildSolutionReviewerPrompt(problemPackage, autonomousSolutionWork, [assignedSkill], autonomousAuthoringContractPacket);
   assert.match(prompt, /independently inspect|independent source inspection/i);
   assert.match(prompt, /reject all options/i);
   assert.match(prompt, /REQUEST_MORE_WORK: concrete, decision-relevant, bounded work achievable in the current execution context\./i);
@@ -129,6 +216,18 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.match(prompt, /HUMAN_AUTHORITY_REQUIRED/i);
   assert.match(prompt, /AUTHORITY_UNCERTAIN/i);
   assert.match(prompt, /do not reject an acceptable option merely because execution authority is not automatic/i);
+  assert.match(prompt, /independently inspect the current catalog and allowed evidence/i);
+  assert.match(prompt, /shared-neutral portability/i);
+  assert.match(prompt, /closest-entry distinction/i);
+  assert.match(prompt, /transient-role boundary/i);
+  assert.match(prompt, /non-filler semantics/i);
+  assert.match(prompt, /no new durable state/i);
+  assert.match(prompt, /ACCEPT_OPTION \+ autonomous authoring requires:/i);
+  assert.match(prompt, /applicabilityAssessment = APPLICABLE/i);
+  assert.match(prompt, /conformance = CONFORMING/i);
+  assert.match(prompt, /executionEnvelope = WITHIN_ENVELOPE/i);
+  assert.match(prompt, /blockers = \[\]/i);
+  assert.match(prompt, new RegExp(escapeRegex(packetJson)));
   assert.match(prompt, /smallest missing evidence or proposal detail/i);
   assert.match(prompt, /Rejecting an option does not establish/i);
   assert.match(prompt, /Host separately enforces execution eligibility and allowedWritePaths/i);
@@ -208,7 +307,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   const result = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
-    solutionWork,
+    solutionWork: autonomousSolutionWork,
     workspaceRoot,
     artifactRoot,
     workspaceBaselineFingerprintSha256: 'b'.repeat(64),
@@ -216,11 +315,12 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
     participant: {
       executable: process.execPath,
       buildArgs: input => {
         deliveredPrompt = input.prompt;
-        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(review))})`];
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(reviewOutput(autonomousAuthoringAssessment)))})`];
       },
     },
   });
@@ -237,6 +337,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /Structured Final Output Contract V1/);
   assert.match(deliveredPrompt, /SolutionReviewV1/);
   assert.match(deliveredPrompt, /bare JSON only/i);
+  assert.match(deliveredPrompt, new RegExp(escapeRegex(packetJson)));
   assert.match(deliveredPrompt, /reject invalid output/i);
   assert.doesNotMatch(
     deliveredPrompt,
@@ -272,12 +373,12 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     concerns: ['Investigate one concrete repository fact.'],
   };
   const revisedSolutionWork: SolutionWorkV1 = {
-    ...solutionWork,
+    ...autonomousSolutionWork,
     summary: 'A revised bounded option.',
   };
   const reReviewerPrompt = buildSolutionReReviewerPrompt(
     problemPackage,
-    solutionWork,
+    autonomousSolutionWork,
     originalReviewForRereview,
     revisedSolutionWork,
     [{
@@ -287,11 +388,13 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
       content: canonicalSkillContent,
       contentSha256: canonicalSkillSha256,
     }],
+    autonomousAuthoringContractPacket,
   );
-  assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(solutionWork))));
+  assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(autonomousSolutionWork))));
   assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(originalReviewForRereview))));
   assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(revisedSolutionWork))));
   assert.match(reReviewerPrompt, /independent/i);
+  assert.match(reReviewerPrompt, new RegExp(escapeRegex(packetJson)));
 
   let rereviewerInvocationRef = '';
   const rereviewResult = await runSolutionReReviewer({
@@ -305,20 +408,74 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 2,
     destinationRoot: join(root, 'solution-rereviewer'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
     participant: {
       executable: process.execPath,
       buildArgs: input => {
         rereviewerInvocationRef = input.invocationRef;
-        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(review))})`];
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(reviewOutput(autonomousAuthoringAssessment)))})`];
       },
     },
-    originalSolutionWork: solutionWork,
+    originalSolutionWork: autonomousSolutionWork,
     originalReview: originalReviewForRereview,
   });
   assert.equal(rereviewResult.ok, true);
   assert.equal(rereviewerInvocationRef, 'solution-rereviewer-000001');
   const rereviewerInvocation = JSON.parse(await readFile(join(root, 'solution-rereviewer/invocation.json'), 'utf8'));
   assert.equal(rereviewerInvocation.invocationRef, 'solution-rereviewer-000001');
+
+  const invalidAcceptedAuthoringReviews = [
+    reviewOutput(undefined),
+    reviewOutput({ ...autonomousAuthoringAssessment, contractId: 'another-contract-v1' }),
+    reviewOutput({ ...autonomousAuthoringAssessment, contractVersion: 2 }),
+    reviewOutput({ ...autonomousAuthoringAssessment, applicabilityAssessment: 'NOT_APPLICABLE' }),
+    reviewOutput({ ...autonomousAuthoringAssessment, conformance: 'NON_CONFORMING' }),
+    reviewOutput({ ...autonomousAuthoringAssessment, executionEnvelope: 'EXECUTION_ENVELOPE_EXCEEDED' }),
+    reviewOutput({ ...autonomousAuthoringAssessment, blockers: ['one blocker'] }),
+  ];
+  for (const [index, invalidReview] of invalidAcceptedAuthoringReviews.entries()) {
+    const invalidAuthoringResult = await runSolutionReviewer({
+      problemPackage,
+      problemPackagePath: packagePath,
+      solutionWork: autonomousSolutionWork,
+      workspaceRoot,
+      artifactRoot,
+      workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+      invocationRef: `reviewer-invalid-authoring-assessment-${index}`,
+      jobNumber: 4,
+      destinationRoot: join(root, `reviewer-invalid-authoring-assessment-${index}`),
+      skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+      autonomousAuthoringContractPacket,
+      participant: {
+        executable: process.execPath,
+        buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(invalidReview))})`],
+      },
+    });
+    assert.equal(invalidAuthoringResult.ok, false);
+    if (!invalidAuthoringResult.ok) {
+      assert.equal(invalidAuthoringResult.failure.origin, 'OUTPUT_SCHEMA');
+      assert.equal(invalidAuthoringResult.failure.reason, 'ROLE_SCHEMA_INVALID');
+    }
+  }
+
+  const acceptedAuthoringReview = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork: autonomousSolutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-valid-authoring-assessment',
+    jobNumber: 4,
+    destinationRoot: join(root, 'reviewer-valid-authoring-assessment'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(reviewOutput(autonomousAuthoringAssessment)))})`],
+    },
+  });
+  assert.equal(acceptedAuthoringReview.ok, true);
 
   let rereviewerIdentityRuntimeCalls = 0;
   const rereviewerIdentityFailure = await runSolutionReReviewer({

@@ -1,4 +1,8 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import {
   validateAutonomousAuthoringProposal,
   validateAutonomousAuthoringReviewAssessment,
@@ -68,6 +72,7 @@ const proposal = {
     cards: [card],
   },
 };
+export const AUTONOMOUS_AUTHORING_PROPOSAL_FIXTURE = proposal;
 
 const reviewAssessment = {
   schemaVersion: 'autonomous-authoring-review-assessment-v1',
@@ -80,7 +85,7 @@ const reviewAssessment = {
   blockers: [],
 };
 
-export function runAutonomousAuthoringContractTests(): void {
+export async function runAutonomousAuthoringContractTests(): Promise<void> {
   assert.equal(PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID, 'preschool-shared-neutral-passive-capacity-v1');
   assert.equal(PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION, 1);
   assert.equal(PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES, 8);
@@ -166,9 +171,55 @@ export function runAutonomousAuthoringContractTests(): void {
     () => validateAutonomousAuthoringReviewAssessment({ ...reviewAssessment, extra: true }),
     /unknown field.*extra/i,
   );
+
+  const repositoryRoot = process.cwd();
+  const authoritySourceRef =
+    'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
+  const expectedAuthoritySha = createHash('sha256')
+    .update(await readFile(join(repositoryRoot, authoritySourceRef)))
+    .digest('hex');
+  const packet = await buildPreschoolAutonomousAuthoringContractPacket({ repositoryRoot });
+  assert.equal(packet.schemaVersion, 'preschool-autonomous-authoring-contract-packet-v1');
+  assert.equal(packet.authorityIdentifier, 'contract-constrained-autonomous-authoring-v1-20260924');
+  assert.equal(packet.authoritySourceRef, authoritySourceRef);
+  assert.equal(packet.authoritySourceSha256, expectedAuthoritySha);
+  assert.equal(packet.contractId, 'preschool-shared-neutral-passive-capacity-v1');
+  assert.equal(packet.contractVersion, 1);
+  assert.equal(packet.maxNewEntries, 8);
+  assert.equal(packet.productionPath, 'src/data/lines/preschool-passive-spine.json');
+  assert.deepEqual(packet.testPaths, [
+    'tests/preschoolPassiveSpineTests.ts',
+    'tests/annualPassiveMemoryTests.ts',
+  ]);
+  assert.deepEqual(packet.allowedOriginTags, ['neutral']);
+  assert.deepEqual(packet.allowedAgeMin, [4, 5, 6, 7]);
+  assert.equal(packet.ageMax, 7);
+  assert.deepEqual(packet.forbiddenFields, ['statDeltas', 'flags']);
+  assert.equal(packet.forbiddenCapabilities.includes('person_or_relationship'), true);
+  assert.equal(packet.applicabilityRules.includes('Decide applicability before authoring.'), true);
+  assert.equal(packet.cardRules.includes('One primary responsibility maps to exactly one Card.'), true);
+  const serializedPacket = JSON.stringify(packet);
+  for (const forbidden of [
+    'preschool_neutral_fair_play',
+    'preschool_neutral_self_made_project',
+    'preschool_neutral_stand_for_peer',
+    'preschool_neutral_first_farewell',
+    'preschool_neutral_neighborhood_help',
+    'fairness',
+    'self-directed persistence',
+    'moral courage',
+    'farewell',
+    'neighborhood participation',
+  ]) {
+    assert.equal(serializedPacket.includes(forbidden), false, `packet must not expose ${forbidden}`);
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runAutonomousAuthoringContractTests();
-  console.log('autonomousAuthoringContracts.test.ts: ok');
+  runAutonomousAuthoringContractTests()
+    .then(() => console.log('autonomousAuthoringContracts.test.ts: ok'))
+    .catch(error => {
+      console.error(error);
+      process.exit(1);
+    });
 }

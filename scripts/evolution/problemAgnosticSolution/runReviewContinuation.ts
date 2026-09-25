@@ -49,6 +49,7 @@ import {
   SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
 } from './solutionParticipantSkills';
 import type { WorkspaceAgentParticipantOptions } from './agentParticipant';
+import type { PreschoolAutonomousAuthoringContractPacketV1 } from '../autonomousAuthoring/buildPreschoolContractPacket';
 import { routeSolutionDecision } from './routeSolutionDecision';
 import type { ParticipantFailureFacts } from './participantFailureClassification';
 import {
@@ -79,6 +80,7 @@ export interface RunReviewContinuationInput {
   /** Host-only sealed source root; never copied into Participant workspaces. */
   sourceProvenanceRoot?: string;
   additionalWorkspaceArtifactRelativePaths?: readonly string[];
+  autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
   participant: WorkspaceAgentParticipantOptions;
   retainHumanFollowupOnEscalate?: boolean;
   dependencies?: ReviewContinuationDependencies;
@@ -508,6 +510,7 @@ export async function runReviewContinuation(
     jobNumber: 1,
     destinationRoot: revisionDestinationRoot,
     skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket: input.autonomousAuthoringContractPacket,
     participant: input.participant,
     originalSolutionWork: base.solution,
     originalReview: base.review,
@@ -545,6 +548,7 @@ export async function runReviewContinuation(
       jobNumber: 2,
       destinationRoot: rereviewDestinationRoot,
       skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+      autonomousAuthoringContractPacket: input.autonomousAuthoringContractPacket,
       participant: input.participant,
       originalSolutionWork: base.solution,
       originalReview: base.review,

@@ -20,6 +20,7 @@ import {
   type RunSolutionReReviewerInput,
   type SolutionReviewerRunResult,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionReviewer';
+import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import type { RetainHumanFollowupWorkItemInput, RetainedHumanFollowupWorkItem } from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
 import {
@@ -438,7 +439,10 @@ function failureReviewerRunner(
 async function runContinuation(
   fixture: Awaited<ReturnType<typeof createFixture>>,
   dependencies: ReviewContinuationDependencies,
-  options: { retainHumanFollowupOnEscalate?: boolean } = {},
+  options: {
+    retainHumanFollowupOnEscalate?: boolean;
+    autonomousAuthoringContractPacket?: Awaited<ReturnType<typeof buildPreschoolAutonomousAuthoringContractPacket>>;
+  } = {},
 ) {
   return runReviewContinuation({
     round: 1,
@@ -484,6 +488,9 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 export async function runReviewContinuationTests(): Promise<void> {
+  const autonomousAuthoringContractPacket = await buildPreschoolAutonomousAuthoringContractPacket({
+    repositoryRoot: process.cwd(),
+  });
   await assertPreflightRejected(async fixture => {
     await writeJson(join(fixture.roundRoot, 'solution-agent/result.json'), solutionWork('NO_PROPOSAL'));
   });
@@ -615,13 +622,23 @@ export async function runReviewContinuationTests(): Promise<void> {
   const acceptedResult = await runContinuation(accepted, {
     runSolutionRevision: fakeRevisionRunner('OPTIONS', acceptedCalls, acceptedSeen),
     runSolutionReReviewer: fakeReviewerRunner('ACCEPT_OPTION', acceptedCalls, acceptedSeen),
-  });
+  }, { autonomousAuthoringContractPacket });
   assert.equal(acceptedResult.status, 'completed');
   assert.equal(acceptedResult.terminalRoute, 'READY_FOR_CONFIG_EXECUTION');
   assert.equal(acceptedResult.participantJobs, 2);
   assert.deepEqual(acceptedCalls, { revision: 1, rereview: 1 });
   assert.equal(acceptedSeen.revision?.invocationRef, 'solution-revision-000001');
   assert.equal(acceptedSeen.rereview?.invocationRef, 'solution-rereviewer-000001');
+  assert.deepEqual(acceptedSeen.revision?.autonomousAuthoringContractPacket, autonomousAuthoringContractPacket);
+  assert.deepEqual(acceptedSeen.rereview?.autonomousAuthoringContractPacket, autonomousAuthoringContractPacket);
+  assert.equal(
+    acceptedSeen.revision?.autonomousAuthoringContractPacket?.contractId,
+    acceptedSeen.rereview?.autonomousAuthoringContractPacket?.contractId,
+  );
+  assert.equal(
+    acceptedSeen.revision?.autonomousAuthoringContractPacket?.contractVersion,
+    acceptedSeen.rereview?.autonomousAuthoringContractPacket?.contractVersion,
+  );
   assert.deepEqual(acceptedSeen.rereview?.originalSolutionWork, accepted.baseSolution);
   assert.deepEqual(acceptedSeen.rereview?.originalReview, accepted.baseReview);
   assert.deepEqual(acceptedSeen.rereview?.solutionWork, solutionWork('OPTIONS'));
@@ -725,11 +742,16 @@ export async function runReviewContinuationTests(): Promise<void> {
     problemPackagePath: join(candidateLane.candidateLaneRoot, 'problem-package.json'),
     sourceFingerprintSha256: candidateFixture.sourceFingerprintSha256,
     sourceProvenanceRoot: candidateLane.sourceProvenanceRoot,
+    autonomousAuthoringContractPacket,
     participant: streamingParticipant(solutionWork('NO_PROPOSAL'), realParticipantCalls),
     repositoryRoot: candidateFixture.repositoryRoot,
   });
   assert.equal(realCandidateResult.status, 'completed');
   assert.equal(realParticipantCalls.count, 1);
+  assert.ok(
+    (await readFile(join(candidateLane.candidateLaneRoot, 'review-continuation-000001/solution-revision/participant-prompt.txt'), 'utf8'))
+      .includes(canonicalJson(autonomousAuthoringContractPacket)),
+  );
   const realRevisionInvocation = JSON.parse(
     await readFile(join(candidateLane.candidateLaneRoot, 'review-continuation-000001/solution-revision/invocation.json'), 'utf8'),
   ) as { workspaceBaselineFingerprintSha256: string };

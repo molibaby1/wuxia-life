@@ -10,12 +10,14 @@ import {
   type WorkspaceAgentParticipantOptions,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import {
+  buildSolutionAgentPrompt,
   buildSolutionRevisionPrompt,
   runSolutionAgent as runSolutionAgentImpl,
   runSolutionRevisionAgent as runSolutionRevisionAgentImpl,
   type RunSolutionAgentInput,
   type RunSolutionRevisionInput,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
+import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
@@ -178,6 +180,31 @@ function assertSolutionWorkSchemaGuidance(prompt: string): void {
 }
 
 export async function runSolutionAgentLoopTests(): Promise<void> {
+  const autonomousAuthoringContractPacket = await buildPreschoolAutonomousAuthoringContractPacket({
+    repositoryRoot: process.cwd(),
+  });
+  const packetJson = canonicalJson(autonomousAuthoringContractPacket);
+  const authoringPrompt = buildSolutionAgentPrompt(problemPackage, [], autonomousAuthoringContractPacket);
+  const authoringInstructions = [
+    'Decide applicability before authoring.',
+    'Only APPLICABLE may contain responsibilities and Cards.',
+    'Derive the Minimum Sufficient Responsibility Set from permitted evidence and current catalog semantics.',
+    'Do not use a target count; max 8 is only an execution ceiling.',
+    'One primary responsibility maps to exactly one Card.',
+    'Do not author new content before applicability is established.',
+    'If evidence is insufficient, preserve INSUFFICIENT_EVIDENCE rather than guessing.',
+    'If a reasonable solution requires new semantics/mechanics, use CONTRACT_CHANGE_REQUIRED.',
+    "Attach autonomousAuthoring only to an option with changeScope='program'; this lane is not ordinary config execution.",
+  ];
+  let previousInstructionIndex = -1;
+  for (const instruction of authoringInstructions) {
+    const instructionIndex = authoringPrompt.indexOf(instruction);
+    assert.ok(instructionIndex > previousInstructionIndex, `missing or unordered authoring instruction: ${instruction}`);
+    previousInstructionIndex = instructionIndex;
+  }
+  assert.ok(authoringPrompt.indexOf(packetJson) > previousInstructionIndex);
+  assert.match(authoringPrompt, new RegExp(escapeRegex(packetJson)));
+
   const root = await mkdtemp(join(tmpdir(), 'solution-agent-loop-'));
   const workspaceRoot = join(root, 'workspace');
   const artifactRoot = join(root, 'artifacts');
@@ -205,6 +232,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     jobNumber: 3,
     destinationRoot: join(root, 'solution-agent'),
     skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
     participant: {
       executable: process.execPath,
       buildArgs: input => {
@@ -223,6 +251,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, new RegExp(canonicalSkillSha256));
   assert.match(deliveredPrompt, /own investigation and solution reasoning/i);
   assert.match(deliveredPrompt, /disposable workspace/i);
+  assert.match(deliveredPrompt, new RegExp(escapeRegex(packetJson)));
   assert.match(deliveredPrompt, /zero to three options/i);
   assert.match(deliveredPrompt, /execution permission is separate/i);
   assert.match(deliveredPrompt, /read the relevant supplied authorityRefs/i);
@@ -458,6 +487,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
       content: canonicalSkillContent,
       contentSha256: canonicalSkillSha256,
     }],
+    autonomousAuthoringContractPacket,
   );
   assert.match(revisionPrompt, new RegExp(escapeRegex(canonicalJson(originalSolutionWork))));
   assert.match(revisionPrompt, new RegExp(escapeRegex(canonicalJson(originalReview))));
@@ -466,6 +496,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(revisionPrompt, /unavailable evidence.*INSUFFICIENT_EVIDENCE/i);
   assert.match(revisionPrompt, /Human authority.*ESCALATE/i);
   assert.doesNotMatch(revisionPrompt, /new gameplay sample/i);
+  assert.match(revisionPrompt, new RegExp(escapeRegex(packetJson)));
   assertSolutionWorkSchemaGuidance(revisionPrompt);
 
   const missingRootRefsPayload: Record<string, unknown> = {

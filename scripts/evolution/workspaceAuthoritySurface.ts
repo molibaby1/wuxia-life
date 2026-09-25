@@ -14,6 +14,10 @@ export function isEvolutionWorkspacePathExcluded(relativePath: string): boolean 
   const path = relativePath.split(sep).join('/');
   if (!path) return false;
   if (path === '.agent-workspace-manifest.json') return true;
+  if (path === 'docs/superpowers/specs/2026-09-23-preschool-residual-content-capacity-authoring-design.md') return true;
+  if (path === 'docs/superpowers/plans/2026-09-23-preschool-residual-content-capacity-implementation.md') return true;
+  if (path === 'docs/superpowers/plans/2026-09-24-contract-constrained-autonomous-authoring-v1-implementation-plan.md') return true;
+  if (path === 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md') return true;
   if (path.toLowerCase().endsWith('.zip')) return true;
   if (
     path === '.tmp/evolution/problem-agnostic-agent-solution-loop'

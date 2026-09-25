@@ -10,6 +10,8 @@
     "test:all": "npm test && npm run test:contracts && npm run test:headless && npm run test:headless:parity && npm run test:sample-lines-routes",
     "test:contracts": "tsx tests/contracts/runContractTests.ts",
     "test:evolution:human-followup": "tsx tests/evolution/humanFollowupWorkItemContract.test.ts && tsx tests/evolution/humanFollowupRetention.test.ts && tsx tests/evolution/humanFollowupSolutionLoopIntegration.test.ts && tsx tests/evolution/humanFollowupReview.test.ts && tsx tests/evolution/humanFollowupInbox.test.ts",
+    "test:evolution:autonomous-authoring": "tsx tests/evolution/autonomousAuthoringContracts.test.ts && tsx tests/evolution/preschoolAutonomousAuthoringAdmission.test.ts && tsx tests/evolution/shadowAuthoringExecution.test.ts && tsx tests/evolution/preschoolShadowAuthoringVerification.test.ts && tsx tests/evolution/preschoolAutonomousAuthoringReferenceTrial.test.ts",
+    "evolution:autonomous-authoring:reference-trial": "tsx scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts",
     "test:evolution:solution-replay": "tsx tests/evolution/solutionDecisionReplay.test.ts && tsx tests/evolution/solutionReviewerReplay.test.ts && tsx tests/evolution/solutionAgentReplay.test.ts",
     "test:evolution:review-continuation": "tsx tests/evolution/reviewContinuationContract.test.ts && tsx tests/evolution/reviewContinuation.test.ts && tsx tests/evolution/reviewContinuationReplay.test.ts",
     "evolution:review-continuation:replay": "tsx scripts/evolution/replay/runReviewContinuationReplay.ts",

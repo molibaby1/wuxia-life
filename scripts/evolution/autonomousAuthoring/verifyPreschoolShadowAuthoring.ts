@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { cp, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, lstat, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import type { PassiveNarrativeEntry } from '../../../src/data/passiveNarrativeTypes';
@@ -277,9 +277,27 @@ function assertExactNewEntry(entry: unknown, acceptedEntry: unknown, label: stri
 }
 
 async function verifyV2(input: VerifyPreschoolShadowAuthoringInput) {
-  const [beforeSnapshot, finalSnapshot, baselineEntries, finalEntries] = await Promise.all([
+  for (const [label, root] of [
+    ['baseline', input.beforeWorkspaceRoot],
+    ['final', input.finalWorkspaceRoot],
+  ] as const) {
+    const stat = await lstat(root);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      throw new Error(`${label} workspace root must be a directory and cannot be a symlink: ${root}.`);
+    }
+  }
+  const [beforeSnapshot, finalSnapshot] = await Promise.all([
     captureWorkspaceSnapshot(input.beforeWorkspaceRoot),
     captureWorkspaceSnapshot(input.finalWorkspaceRoot),
+  ]);
+  const beforeKinds = new Map(beforeSnapshot.entries.map(entry => [entry.path, entry.objectKind]));
+  const finalKinds = new Map(finalSnapshot.entries.map(entry => [entry.path, entry.objectKind]));
+  for (const path of PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS) {
+    if (beforeKinds.get(path) !== 'regular_file' || finalKinds.get(path) !== 'regular_file') {
+      throw new Error(`Shadow write path must remain a regular file in both snapshots: ${path}.`);
+    }
+  }
+  const [baselineEntries, finalEntries] = await Promise.all([
     readCatalog(input.beforeWorkspaceRoot),
     readCatalog(input.finalWorkspaceRoot),
   ]);

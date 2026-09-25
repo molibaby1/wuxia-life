@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
@@ -402,6 +402,47 @@ async function testV2RejectsForbiddenFieldsCardMismatchAndTestPrefixRemoval(): P
   assert.equal((await verifyPreschoolShadowAuthoring(verificationInput(unguarded))).checks.mechanicalConformance, 'FAIL');
 }
 
+async function testV2RejectsSymlinkedTestPathBeforeRunningCommands(): Promise<void> {
+  const fixture = await createFixture();
+  const testPath = join(fixture.finalWorkspaceRoot, PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS[0]);
+  const outsideTestPath = join(fixture.tempRoot, 'outside-preschool-test.ts');
+  const executionMarkerPath = join(fixture.tempRoot, 'outside-test-executed');
+  const testContents = (await readFile(testPath, 'utf8'))
+    .replace(
+      'import { readFileSync } from \'node:fs\';',
+      'import { readFileSync, writeFileSync } from \'node:fs\';',
+    )
+    .replace(
+      "if (process.argv[1]?.endsWith('preschoolPassiveSpineTests.ts') || process.argv[1]?.endsWith('annualPassiveMemoryTests.ts')) {",
+      `if (process.argv[1]?.endsWith('preschoolPassiveSpineTests.ts') || process.argv[1]?.endsWith('annualPassiveMemoryTests.ts')) {\n  writeFileSync(${JSON.stringify(executionMarkerPath)}, 'executed');`,
+    );
+  assert.notEqual(testContents, await readFile(testPath, 'utf8'));
+  await writeFile(outsideTestPath, testContents);
+  await rm(testPath);
+  await symlink(outsideTestPath, testPath);
+
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture));
+
+  assert.equal(result.checks.mechanicalConformance, 'FAIL');
+  assert.equal(result.commandResults.length, 0);
+  await assert.rejects(readFile(executionMarkerPath), { code: 'ENOENT' });
+}
+
+async function testV2RejectsSymlinkedWorkspaceRootBeforeRunningCommands(): Promise<void> {
+  const fixture = await createFixture();
+  const linkedWorkspaceRoot = join(fixture.tempRoot, 'shadow-workspace-link');
+  await symlink(fixture.finalWorkspaceRoot, linkedWorkspaceRoot, 'dir');
+
+  const result = await verifyPreschoolShadowAuthoring({
+    ...verificationInput(fixture),
+    finalWorkspaceRoot: linkedWorkspaceRoot,
+  });
+
+  assert.equal(result.checks.mechanicalConformance, 'FAIL');
+  assert.equal(result.commandResults.length, 0);
+  assert.match(result.failures.join('\n'), /workspace root.*symlink|symlink.*workspace root/i);
+}
+
 async function testV3RequiresConformingReviewerAndCurrentExecutionAuthority(): Promise<void> {
   const fixture = await createFixture();
   const assessment = fixture.review.autonomousAuthoringAssessment!;
@@ -635,6 +676,8 @@ export async function runPreschoolShadowAuthoringVerificationTests(): Promise<vo
     await testV1SupportsHistoricalArchiveWithSeparateAuthorityRoot();
     await testV2RejectsOutOfScopeChangeAndChangedBaselineCatalogRow();
     await testV2RejectsForbiddenFieldsCardMismatchAndTestPrefixRemoval();
+    await testV2RejectsSymlinkedTestPathBeforeRunningCommands();
+    await testV2RejectsSymlinkedWorkspaceRootBeforeRunningCommands();
     await testV3RequiresConformingReviewerAndCurrentExecutionAuthority();
     await testV4RejectsSyntaxErrorAsRedAndGreenRegressionFailure();
     await testV4RejectsAdjacentRegressionFailure();

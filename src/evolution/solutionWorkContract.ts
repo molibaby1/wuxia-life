@@ -1,3 +1,8 @@
+import {
+  validateAutonomousAuthoringProposal,
+  type AutonomousAuthoringProposalV1,
+} from './autonomousAuthoringContract';
+
 export type SolutionWorkStatus =
   | 'OPTIONS'
   | 'NO_PROPOSAL'
@@ -20,6 +25,7 @@ export interface SolutionOptionV1 {
   expectedPlayerObservableDifference: string;
   risks: string[];
   unknowns: string[];
+  autonomousAuthoring?: AutonomousAuthoringProposalV1;
 }
 
 export interface SolutionWorkV1 {
@@ -35,7 +41,7 @@ export interface SolutionWorkV1 {
 
 const ROOT_REQUIRED_KEYS = ['schemaVersion', 'status', 'problemId', 'options', 'summary', 'repoRefs', 'artifactRefs'] as const;
 const ROOT_OPTIONAL_KEYS = ['recommendedOptionId'] as const;
-const OPTION_KEYS = [
+const OPTION_REQUIRED_KEYS = [
   'optionId',
   'proposedChange',
   'rationale',
@@ -46,6 +52,7 @@ const OPTION_KEYS = [
   'risks',
   'unknowns',
 ] as const;
+const OPTION_OPTIONAL_KEYS = ['autonomousAuthoring'] as const;
 const STATUSES: readonly SolutionWorkStatus[] = [
   'OPTIONS',
   'NO_PROPOSAL',
@@ -92,9 +99,12 @@ function stableOptionId(index: number): string {
 function parseOption(value: unknown, index: number): SolutionOptionV1 {
   const path = `solution work.options[${index}]`;
   assertObject(value, path);
-  assertExactKeys(value, OPTION_KEYS, [], path);
+  assertExactKeys(value, OPTION_REQUIRED_KEYS, OPTION_OPTIONAL_KEYS, path);
   const expectedId = stableOptionId(index);
   if (value.optionId !== expectedId) throw new Error(`${path}.optionId must be ${expectedId} in participant order`);
+  const autonomousAuthoring = value.autonomousAuthoring === undefined
+    ? undefined
+    : validateAutonomousAuthoringProposal(value.autonomousAuthoring);
   return {
     optionId: expectedId,
     proposedChange: nonEmptyString(value.proposedChange, `${path}.proposedChange`),
@@ -105,6 +115,7 @@ function parseOption(value: unknown, index: number): SolutionOptionV1 {
     expectedPlayerObservableDifference: nonEmptyString(value.expectedPlayerObservableDifference, `${path}.expectedPlayerObservableDifference`),
     risks: stringArray(value.risks, `${path}.risks`),
     unknowns: stringArray(value.unknowns, `${path}.unknowns`),
+    ...(autonomousAuthoring !== undefined ? { autonomousAuthoring } : {}),
   };
 }
 

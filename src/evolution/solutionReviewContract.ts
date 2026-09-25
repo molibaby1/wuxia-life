@@ -1,3 +1,8 @@
+import {
+  validateAutonomousAuthoringReviewAssessment,
+  type AutonomousAuthoringReviewAssessmentV1,
+} from './autonomousAuthoringContract';
+
 export type SolutionReviewDecision =
   | 'ACCEPT_OPTION'
   | 'ACCEPT_NO_ACTION'
@@ -24,6 +29,7 @@ export interface SolutionReviewV1 {
   acceptedOptionId?: string;
   scopeAssessment?: ReviewScopeAssessment;
   executionAuthorityAssessment?: ExecutionAuthorityAssessment;
+  autonomousAuthoringAssessment?: AutonomousAuthoringReviewAssessmentV1;
   assessment: string;
   repoRefs: string[];
   artifactRefs: string[];
@@ -31,7 +37,12 @@ export interface SolutionReviewV1 {
 }
 
 const ROOT_REQUIRED_KEYS = ['schemaVersion', 'problemId', 'decision', 'assessment', 'repoRefs', 'artifactRefs', 'concerns'] as const;
-const ROOT_OPTIONAL_KEYS = ['acceptedOptionId', 'scopeAssessment', 'executionAuthorityAssessment'] as const;
+const ROOT_OPTIONAL_KEYS = [
+  'acceptedOptionId',
+  'scopeAssessment',
+  'executionAuthorityAssessment',
+  'autonomousAuthoringAssessment',
+] as const;
 const DECISIONS: readonly SolutionReviewDecision[] = [
   'ACCEPT_OPTION',
   'ACCEPT_NO_ACTION',
@@ -96,6 +107,9 @@ export function validateSolutionReview(value: unknown): SolutionReviewV1 {
       EXECUTION_AUTHORITY_ASSESSMENTS,
       'solution review.executionAuthorityAssessment',
     );
+  const autonomousAuthoringAssessment = value.autonomousAuthoringAssessment === undefined
+    ? undefined
+    : validateAutonomousAuthoringReviewAssessment(value.autonomousAuthoringAssessment);
 
   if (decision === 'ACCEPT_OPTION') {
     if (acceptedOptionId === undefined) throw new Error('ACCEPT_OPTION requires acceptedOptionId');
@@ -116,6 +130,7 @@ export function validateSolutionReview(value: unknown): SolutionReviewV1 {
     ...(acceptedOptionId !== undefined ? { acceptedOptionId } : {}),
     ...(scopeAssessment !== undefined ? { scopeAssessment } : {}),
     ...(executionAuthorityAssessment !== undefined ? { executionAuthorityAssessment } : {}),
+    ...(autonomousAuthoringAssessment !== undefined ? { autonomousAuthoringAssessment } : {}),
     assessment: nonEmptyString(value.assessment, 'solution review.assessment'),
     repoRefs: stringArray(value.repoRefs, 'solution review.repoRefs'),
     artifactRefs: stringArray(value.artifactRefs, 'solution review.artifactRefs'),

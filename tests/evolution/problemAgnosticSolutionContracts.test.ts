@@ -111,6 +111,46 @@ export function runProblemAgnosticSolutionContractTests(): void {
   assert.deepEqual(parseProblemPackage(JSON.stringify(problemPackage)), problemPackage);
   assert.deepEqual(parseSolutionWork(JSON.stringify(solutionWork)), solutionWork);
   assert.deepEqual(parseSolutionReview(JSON.stringify(solutionReview)), solutionReview);
+  const historicalOption = {
+    optionId: 'option-000001',
+    proposedChange: 'Adjust an existing configuration value.',
+    rationale: 'Historical option with no authoring companion.',
+    repoRefs: [],
+    artifactRefs: [],
+    changeScope: 'configuration',
+    expectedPlayerObservableDifference: 'A bounded configuration difference.',
+    risks: [],
+    unknowns: [],
+  };
+  assert.equal(
+    parseSolutionWork(JSON.stringify({
+      schemaVersion: 'solution-work-v1',
+      status: 'OPTIONS',
+      problemId: 'problem-historical',
+      options: [historicalOption],
+      recommendedOptionId: 'option-000001',
+      summary: 'historical',
+      repoRefs: [],
+      artifactRefs: [],
+    })).options[0]!.autonomousAuthoring,
+    undefined,
+  );
+  const historicalReview = {
+    schemaVersion: 'solution-review-v1' as const,
+    problemId: 'problem-historical',
+    decision: 'ACCEPT_OPTION' as const,
+    acceptedOptionId: 'option-000001',
+    scopeAssessment: 'config_only' as const,
+    executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY' as const,
+    assessment: 'Historical accepted review.',
+    repoRefs: [],
+    artifactRefs: [],
+    concerns: [],
+  };
+  assert.equal(
+    parseSolutionReview(JSON.stringify(historicalReview)).autonomousAuthoringAssessment,
+    undefined,
+  );
   const historicalSolutionReview = { ...solutionReview };
   delete historicalSolutionReview.executionAuthorityAssessment;
   assert.deepEqual(parseSolutionReview(JSON.stringify(historicalSolutionReview)), historicalSolutionReview);

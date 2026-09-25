@@ -538,6 +538,39 @@ async function testSuccessBuildsExactPatchAndPromotionPackage(): Promise<void> {
   });
   assert.equal(packageResult.packageJson.schemaVersion, 'shadow-authoring-promotion-package-v1');
   assert.equal(packageResult.packageJson.patchSha256, verification.patchSha256);
+  assert.deepEqual(packageResult.packageJson.authorityRefs, fixture.admission.authorityRefs);
+  assert.deepEqual(packageResult.packageJson.sourceEvidenceIdentity, {
+    runRef: fixture.admission.sourceRunRef,
+    refs: fixture.proposal.sourceEvidenceRefs,
+    capacityEvidence: fixture.evidence,
+    sha256: sha256Hex(canonicalJson({
+      runRef: fixture.admission.sourceRunRef,
+      refs: fixture.proposal.sourceEvidenceRefs,
+      capacityEvidence: fixture.evidence,
+    })),
+  });
+  assert.deepEqual(
+    packageResult.packageJson.responsibilitySummaries[0]?.evidenceRefs,
+    fixture.proposal.responsibilities[0]?.evidenceRefs,
+  );
+  assert.equal(
+    Buffer.from(packageResult.packageJson.exactPatchBase64, 'base64').compare(verification.promotionPatch!),
+    0,
+  );
+  assert.deepEqual({
+    authorityIntegrity: packageResult.packageJson.verification.authorityIntegrity,
+    mechanicalConformance: packageResult.packageJson.verification.mechanicalConformance,
+    semanticConformance: packageResult.packageJson.verification.semanticConformance,
+    redGreenRegression: packageResult.packageJson.verification.redGreenRegression,
+    adjacentRegression: packageResult.packageJson.verification.adjacentRegression,
+    evidenceBoundedCompletion: packageResult.packageJson.verification.evidenceBoundedCompletion,
+  }, verification.checks);
+  assert.deepEqual(packageResult.packageJson.verification.commandResults, verification.commandResults);
+  assert.deepEqual(packageResult.packageJson.verification.authoritativeRepositoryIntegrity, {
+    before: verification.authoritativeFingerprintBefore,
+    after: verification.authoritativeFingerprintAfter,
+    unchanged: true,
+  });
   assert.deepEqual(packageResult.packageJson.allowedHumanOutcomes, ['PROMOTE_EXACT_PATCH', 'DEFER', 'REJECT']);
   assert.equal(packageResult.packageJson.naturalPverPerformed, false);
   assert.match(packageResult.markdown, /Natural Player-visible Experience Review has not been performed\./);

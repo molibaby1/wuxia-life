@@ -20,6 +20,13 @@ export interface ShadowAuthoringPromotionPackageV1 {
   contractVersion: typeof PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION;
   problemId: string;
   sourceRunRef: string;
+  authorityRefs: string[];
+  sourceEvidenceIdentity: {
+    runRef: string;
+    refs: string[];
+    capacityEvidence: NonNullable<AutonomousAuthoringAdmissionV1['capacityEvidence']>;
+    sha256: string;
+  };
   gapSummary: {
     classification: 'CONTENT_GAP';
     subtype: 'CONTENT_CAPACITY_GAP';
@@ -38,9 +45,11 @@ export interface ShadowAuthoringPromotionPackageV1 {
     responsibilityId: string;
     primaryLifeFunction: string;
     playerVisibleNeed: string;
+    evidenceRefs: string[];
   }>;
   acceptedCards: NonNullable<NonNullable<ReturnType<typeof validateAutonomousAuthoringProposal>['contractPayload']>['cards']>;
   changedFiles: PreschoolShadowAuthoringVerificationResultV1['changedFiles'];
+  exactPatchBase64: string;
   patchSha256: string;
   allowedHumanOutcomes: ['PROMOTE_EXACT_PATCH', 'DEFER', 'REJECT'];
   promotionRequiresExactPatchSha256: true;
@@ -49,7 +58,14 @@ export interface ShadowAuthoringPromotionPackageV1 {
     mechanicalConformance: 'PASS';
     semanticConformance: 'PASS';
     redGreenRegression: 'PASS';
+    adjacentRegression: 'PASS';
     evidenceBoundedCompletion: 'PASS';
+    commandResults: PreschoolShadowAuthoringVerificationResultV1['commandResults'];
+    authoritativeRepositoryIntegrity: {
+      before: string;
+      after: string;
+      unchanged: true;
+    };
   };
   capacityBefore: NonNullable<PreschoolShadowAuthoringVerificationResultV1['capacityBefore']>;
   capacityAfter: NonNullable<PreschoolShadowAuthoringVerificationResultV1['capacityAfter']>;
@@ -73,6 +89,7 @@ export function buildPromotionPackage(input: {
     || verification.patchSha256 === null
     || sha256Hex(verification.promotionPatch) !== verification.patchSha256
     || verification.authoritativeFingerprintAfter !== verification.candidateBaselineFingerprintSha256
+    || verification.authoritativeFingerprintBefore !== verification.authoritativeFingerprintAfter
     || !verification.capacityBefore
     || !verification.capacityAfter) {
     throw new Error('Promotion Package requires a complete V1-V5 SHADOW_AUTHORING_VERIFIED result.');
@@ -106,12 +123,22 @@ export function buildPromotionPackage(input: {
   }
 
   const evidence = admission.capacityEvidence;
+  const sourceEvidenceIdentity = {
+    runRef: admission.sourceRunRef,
+    refs: [...proposal.sourceEvidenceRefs],
+    capacityEvidence: evidence,
+  };
   const packageJson: ShadowAuthoringPromotionPackageV1 = {
     schemaVersion: 'shadow-authoring-promotion-package-v1',
     contractId: PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
     contractVersion: PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
     problemId: solution.problemId,
     sourceRunRef: admission.sourceRunRef,
+    authorityRefs: [...admission.authorityRefs],
+    sourceEvidenceIdentity: {
+      ...sourceEvidenceIdentity,
+      sha256: sha256Hex(canonicalJson(sourceEvidenceIdentity)),
+    },
     gapSummary: {
       classification: proposal.gapClassification,
       subtype: proposal.gapSubtype,
@@ -130,9 +157,11 @@ export function buildPromotionPackage(input: {
       responsibilityId: responsibility.responsibilityId,
       primaryLifeFunction: responsibility.primaryLifeFunction,
       playerVisibleNeed: responsibility.playerVisibleNeed,
+      evidenceRefs: [...responsibility.evidenceRefs],
     })),
     acceptedCards: proposal.contractPayload!.cards,
     changedFiles: verification.changedFiles,
+    exactPatchBase64: verification.promotionPatch.toString('base64'),
     patchSha256: verification.patchSha256,
     allowedHumanOutcomes: ['PROMOTE_EXACT_PATCH', 'DEFER', 'REJECT'],
     promotionRequiresExactPatchSha256: true,
@@ -141,7 +170,14 @@ export function buildPromotionPackage(input: {
       mechanicalConformance: 'PASS',
       semanticConformance: 'PASS',
       redGreenRegression: 'PASS',
+      adjacentRegression: 'PASS',
       evidenceBoundedCompletion: 'PASS',
+      commandResults: verification.commandResults.map(result => ({ ...result })),
+      authoritativeRepositoryIntegrity: {
+        before: verification.authoritativeFingerprintBefore,
+        after: verification.authoritativeFingerprintAfter!,
+        unchanged: true,
+      },
     },
     capacityBefore: verification.capacityBefore,
     capacityAfter: verification.capacityAfter,

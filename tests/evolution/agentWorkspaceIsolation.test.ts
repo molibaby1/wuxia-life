@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import {
   assertAuthoritativeFingerprintUnchanged,
   captureAuthoritativeFingerprint,
+  captureWorkspaceSnapshot,
   prepareAgentWorkspace,
 } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import { isEvolutionWorkspacePathExcluded } from '../../scripts/evolution/workspaceAuthoritySurface';
@@ -173,6 +174,21 @@ export async function runAgentWorkspaceIsolationTests(): Promise<void> {
   });
   assert.equal(solution.workspaceBaselineFingerprintSha256, reviewer.workspaceBaselineFingerprintSha256);
   assert.notEqual(await readFile(join(reviewer.workspaceRoot, 'src/app.ts'), 'utf8'), 'sandbox-only-change');
+
+  const shadowAuthoring = await prepareAgentWorkspace({
+    authoritativeRoot: root,
+    destinationRoot,
+    jobKind: 'shadow-authoring',
+  });
+  assert.equal(shadowAuthoring.authoritativeFingerprintSha256, solution.authoritativeFingerprintSha256);
+  assert.equal(shadowAuthoring.workspaceBaselineFingerprintSha256, solution.workspaceBaselineFingerprintSha256);
+  assert.equal(await pathExists(join(shadowAuthoring.workspaceRoot, 'project.zip')), false);
+  assert.equal(await pathExists(join(shadowAuthoring.workspaceRoot, 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md')), false);
+  const shadowManifest = JSON.parse(await readFile(shadowAuthoring.manifestPath, 'utf8')) as { jobKind: string };
+  assert.equal(shadowManifest.jobKind, 'shadow-authoring');
+  const shadowSnapshot = await captureWorkspaceSnapshot(shadowAuthoring.workspaceRoot);
+  assert.equal(shadowSnapshot.fingerprintSha256, shadowAuthoring.workspaceBaselineFingerprintSha256);
+  assert.equal(shadowSnapshot.entries.some(entry => entry.path === '.agent-workspace-manifest.json'), false);
 }
 
 export async function runNestedAgentWorkspaceMaterializationTest(): Promise<void> {

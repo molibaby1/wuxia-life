@@ -17,16 +17,23 @@ import { isEvolutionWorkspacePathExcluded } from '../workspaceAuthoritySurface';
 export interface PrepareAgentWorkspaceInput {
   authoritativeRoot: string;
   destinationRoot: string;
-  jobKind: 'solution' | 'reviewer' | 'evolution';
+  jobKind: 'solution' | 'reviewer' | 'evolution' | 'shadow-authoring';
   artifactSourceRoot?: string;
   artifactRelativePaths?: string[];
 }
 
-interface ManifestEntry {
+export interface WorkspaceSnapshotEntry {
   path: string;
   objectKind: 'regular_file' | 'symlink';
   sha256: string;
 }
+
+export interface WorkspaceSnapshot {
+  fingerprintSha256: string;
+  entries: WorkspaceSnapshotEntry[];
+}
+
+type ManifestEntry = WorkspaceSnapshotEntry;
 
 interface WorkspaceManifest {
   schemaVersion: 'agent-workspace-manifest-v1';
@@ -178,6 +185,14 @@ async function writeCreateOnly(path: string, value: unknown): Promise<void> {
 
 export async function captureAuthoritativeFingerprint(authoritativeRoot: string): Promise<string> {
   return (await fingerprint(resolve(authoritativeRoot))).hash;
+}
+
+export async function captureWorkspaceSnapshot(root: string): Promise<WorkspaceSnapshot> {
+  const snapshot = await fingerprint(resolve(root));
+  return {
+    fingerprintSha256: snapshot.hash,
+    entries: snapshot.entries,
+  };
 }
 
 export async function assertAuthoritativeFingerprintUnchanged(

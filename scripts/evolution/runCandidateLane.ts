@@ -34,6 +34,7 @@ import {
 } from './candidateLaneFailureContract';
 import type { ParticipantFailureFacts } from './problemAgnosticSolution/participantFailureClassification';
 import { buildPreschoolAutonomousAuthoringContractPacket } from './autonomousAuthoring/buildPreschoolContractPacket';
+import { evaluatePreschoolAutonomousAuthoringAdmission } from './autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
 
 export interface RunCandidateLaneOptions {
   repositoryRoot: string;
@@ -113,6 +114,18 @@ function selectedOptionScope(
     return solution.ok ? solution.result.options[0]?.changeScope ?? null : null;
   }
   return solution.result.options.find(option => option.optionId === reviewer.review.acceptedOptionId)?.changeScope ?? null;
+}
+
+function autonomousAuthoringOption(
+  solution: SolutionAgentRunResult,
+  review: SolutionReviewerRunResult,
+): SolutionAgentRunResult['result']['options'][number] | null {
+  if (!solution.ok || !review.ok) return null;
+  const selectedId = review.review.decision === 'ACCEPT_OPTION'
+    ? review.review.acceptedOptionId
+    : solution.result.recommendedOptionId;
+  const selected = solution.result.options.find(option => option.optionId === selectedId);
+  return selected?.autonomousAuthoring ? selected : null;
 }
 
 async function copySourceArtifact(sourceRoot: string, laneRoot: string, relativePath: string): Promise<void> {
@@ -297,6 +310,21 @@ export async function runCandidateLane(input: RunCandidateLaneOptions): Promise<
         actualParticipantJobs: 2,
         failure: reviewer.failure,
       });
+    }
+  }
+  if (reviewer?.ok) {
+    const option = autonomousAuthoringOption(solution, reviewer);
+    if (option?.autonomousAuthoring) {
+      const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
+        repositoryRoot: input.repositoryRoot,
+        sourceRoot: input.sourceRoot,
+        sourceRunRef: input.sourceRunRef,
+        selectedOption: option,
+        review: reviewer.review,
+        proposalSha256: sha256Hex(canonicalJson(option.autonomousAuthoring)),
+        reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
+      });
+      await writeCreateOnly(join(input.laneRoot, 'autonomous-authoring-admission.json'), admission);
     }
   }
   const decision = routeSolutionDecision({

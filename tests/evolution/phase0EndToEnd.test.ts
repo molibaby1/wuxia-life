@@ -146,6 +146,11 @@ export async function runPhase0EndToEndTests(): Promise<void> {
       false,
       'reviewer payload must not expose internal passive provenance key',
     );
+    assert.equal(
+      collectObjectKeys(JSON.parse(firstPayloadBytes)).has('passiveEntryIds'),
+      false,
+      'the parsed participant payload must not contain the Host-only provenance field',
+    );
     for (const id of firstPreschoolPassive.passiveEntryIds) {
       assert.equal(
         firstPayloadBytes.includes(id),

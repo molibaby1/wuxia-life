@@ -103,6 +103,7 @@ function renderAutonomousAuthoringReviewGuidance(
     'Assess Contract applicability, every responsibility, developmental age reasoning, shared-neutral portability, closest-entry distinction, transient-role boundary, non-filler semantics, and no new durable state.',
     'Use executionAuthorityAssessment=WITHIN_CURRENT_AUTHORITY only when the reusable Contract itself covers shadow execution.',
     'Authoritative repository promotion remains Human-controlled and is not authorized by this review.',
+    'If the proposed minimum responsibility set exceeds maxNewEntries, set executionEnvelope=EXECUTION_ENVELOPE_EXCEEDED and do not ACCEPT_OPTION; retain the full set for Host admission.',
     'ACCEPT_OPTION + autonomous authoring requires:',
     '- applicabilityAssessment = APPLICABLE',
     '- conformance = CONFORMING',

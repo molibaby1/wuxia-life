@@ -222,6 +222,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.match(prompt, /transient-role boundary/i);
   assert.match(prompt, /non-filler semantics/i);
   assert.match(prompt, /no new durable state/i);
+  assert.match(prompt, /If the proposed minimum responsibility set exceeds maxNewEntries, set executionEnvelope=EXECUTION_ENVELOPE_EXCEEDED and do not ACCEPT_OPTION/i);
   assert.match(prompt, /ACCEPT_OPTION \+ autonomous authoring requires:/i);
   assert.match(prompt, /applicabilityAssessment = APPLICABLE/i);
   assert.match(prompt, /conformance = CONFORMING/i);

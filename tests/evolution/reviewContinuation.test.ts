@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -161,7 +161,7 @@ async function writeJson(path: string, value: unknown): Promise<void> {
   await writeFile(path, `${canonicalJson(value)}\n`);
 }
 
-async function createFixture(): Promise<{
+async function createFixture(options: { withAuthoringAuthority?: boolean } = {}): Promise<{
   root: string;
   repositoryRoot: string;
   roundRoot: string;
@@ -173,6 +173,7 @@ async function createFixture(): Promise<{
   baselineFingerprint: string;
   authoritativeFingerprint: string;
   sourceFingerprintSha256: string;
+  sourceRoot: string;
 }> {
   const root = await mkdtemp(join(tmpdir(), 'review-continuation-'));
   const repositoryRoot = join(root, 'repository');
@@ -196,6 +197,18 @@ async function createFixture(): Promise<{
     branch: 'fixed-source-branch',
     worktreeEntries: [],
   };
+  if (options.withAuthoringAuthority) {
+    for (const ref of [
+      'docs/governance/product-decisions.md',
+      'docs/product/content-authoring-workflow-contract-design.md',
+      'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md',
+      'src/data/lines/preschool-passive-spine.json',
+    ]) {
+      const target = join(repositoryRoot, ref);
+      await mkdir(dirname(target), { recursive: true });
+      await copyFile(join(process.cwd(), ref), target);
+    }
+  }
   await writeJson(problemPackagePath, problemPackage);
   await writeJson(join(roundRoot, 'solution-agent/result.json'), baseSolution);
   await writeJson(join(roundRoot, 'reviewer-agent/review.json'), baseReviewResult);
@@ -238,7 +251,94 @@ async function createFixture(): Promise<{
     baselineFingerprint: solutionWorkspace.workspaceBaselineFingerprintSha256,
     authoritativeFingerprint: await captureAuthoritativeFingerprint(repositoryRoot),
     sourceFingerprintSha256: sha256Hex(await readFile(sourceFingerprintPath)),
+    sourceRoot: join(root, 'sealed-analysis'),
   };
+}
+
+function autonomousAuthoringSolutionWork(): SolutionWorkV1 {
+  const existing = solutionWork('OPTIONS');
+  const baseOption = existing.options[0]!;
+  return validateSolutionWork({
+    ...existing,
+    options: [{
+      ...baseOption,
+      proposedChange: 'Author one bounded shared-neutral passive entry.',
+      changeScope: 'program',
+      repoRefs: ['src/data/lines/preschool-passive-spine.json'],
+      artifactRefs: ['source/observable-payload.json'],
+      autonomousAuthoring: {
+        schemaVersion: 'autonomous-authoring-proposal-v1',
+        contractId: 'preschool-shared-neutral-passive-capacity-v1',
+        contractVersion: 1,
+        gapClassification: 'CONTENT_GAP',
+        gapSubtype: 'CONTENT_CAPACITY_GAP',
+        applicabilityClaim: 'APPLICABLE',
+        authorityRefs: ['docs/governance/product-decisions.md'],
+        sourceEvidenceRefs: ['source/observable-payload.json'],
+        responsibilities: [{
+          responsibilityId: 'responsibility-000001',
+          primaryLifeFunction: 'take part in a shared task',
+          playerVisibleNeed: 'the child notices a neighbor needs help',
+          evidenceRefs: ['source/observable-payload.json'],
+        }],
+        contractPayload: {
+          schemaVersion: 'preschool-shared-neutral-passive-authoring-payload-v1',
+          cards: [{
+            responsibilityId: 'responsibility-000001',
+            primaryLifeFunction: 'take part in a shared task',
+            playerVisibleNeed: 'the child notices a neighbor needs help',
+            developmentalAgeJustification: {
+              ageMin: 4,
+              whyNotEarlier: 'The child is now able to cooperate.',
+              whyFromThisAge: 'The child can carry a small shared task.',
+              whyThroughAgeSeven: 'The need remains useful through age seven.',
+            },
+            concreteSceneConcept: 'A child helps neighbors carry a light basket.',
+            existingContentDistinction: {
+              closestEntryIds: ['preschool_scholar_foreign'],
+              sharedSemanticArea: 'Shared activity.',
+              specificDistinction: 'The child contributes to a neighbor task.',
+            },
+            actorClass: 'TRANSIENT_ROLE_ONLY',
+            pastEvidenceConsumed: 'NONE',
+            meaningfulPlayerDecision: 'NONE',
+            durableResult: 'EVENT_HISTORY_ID_ONLY',
+            futureHook: 'NONE',
+            originPortability: 'The scene works across origins.',
+            scopeCheck: 'CONTRACT_PRESERVING',
+            proposedEntry: {
+              id: 'preschool_neutral_neighbor_basket',
+              title: 'Neighbor basket',
+              text: 'You help carry a light basket with the neighbors.',
+              originTags: ['neutral'],
+              ageMin: 4,
+              ageMax: 7,
+            },
+          }],
+        },
+      },
+    }],
+  });
+}
+
+function autonomousAuthoringReview(): SolutionReviewV1 {
+  const base = baseReview('ACCEPT_OPTION');
+  return validateSolutionReview({
+    ...base,
+    scopeAssessment: 'code_required',
+    executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
+    autonomousAuthoringAssessment: {
+      schemaVersion: 'autonomous-authoring-review-assessment-v1',
+      contractId: 'preschool-shared-neutral-passive-capacity-v1',
+      contractVersion: 1,
+      applicabilityAssessment: 'APPLICABLE',
+      conformance: 'CONFORMING',
+      executionEnvelope: 'WITHIN_ENVELOPE',
+      assessment: 'The proposal is bounded and fits the approved Contract.',
+      blockers: [],
+    },
+    artifactRefs: ['source/observable-payload.json'],
+  });
 }
 
 function participant(): { executable: string; buildArgs: () => string[] } {
@@ -442,6 +542,7 @@ async function runContinuation(
   options: {
     retainHumanFollowupOnEscalate?: boolean;
     autonomousAuthoringContractPacket?: Awaited<ReturnType<typeof buildPreschoolAutonomousAuthoringContractPacket>>;
+    sourceRoot?: string;
   } = {},
 ) {
   return runReviewContinuation({
@@ -644,6 +745,62 @@ export async function runReviewContinuationTests(): Promise<void> {
   assert.deepEqual(acceptedSeen.rereview?.solutionWork, solutionWork('OPTIONS'));
   assert.equal(acceptedResult.effectiveSolutionPath, join(accepted.roundRoot, 'review-continuation-000001/solution-revision/result.json'));
   assert.equal(acceptedResult.effectiveReviewPath, join(accepted.roundRoot, 'review-continuation-000001/reviewer-agent/review.json'));
+
+  const authoringContinuation = await createFixture({ withAuthoringAuthority: true });
+  const authoringSourcePath = join(authoringContinuation.sourceRoot, `game-runs/${SOURCE_RUN_REF}/internal/player-surface-source.json`);
+  await mkdir(dirname(authoringSourcePath), { recursive: true });
+  await writeFile(authoringSourcePath, JSON.stringify({ schemaVersion: 'headless-api-player-surface-source-v1', steps: [] }));
+  const authoringAdmissionPath = join(authoringContinuation.roundRoot, 'review-continuation-000001/autonomous-authoring-admission.json');
+  const authoringCalls = { revision: 0, rereview: 0 };
+  const authoringContinuationResult = await runContinuation(authoringContinuation, {
+    runSolutionRevision: async input => {
+      authoringCalls.revision += 1;
+      const result = autonomousAuthoringSolutionWork();
+      const paths = resultPaths(input.destinationRoot);
+      await writeJson(paths.invocationPath, {
+        schemaVersion: 'solution-agent-invocation-v2',
+        invocationRef: input.invocationRef,
+        workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
+        status: 'completed',
+      });
+      await writeFile(paths.rawOutputPath, `${canonicalJson(result)}\n`);
+      await writeJson(paths.resultPath, result);
+      return { ok: true, result, ...paths };
+    },
+    runSolutionReReviewer: async input => {
+      authoringCalls.rereview += 1;
+      assert.equal(await fileExists(authoringAdmissionPath), false, 'continuation admission must be written after Reviewer completion');
+      assert.equal(await fileExists(join(input.workspaceRoot, 'autonomous-authoring-admission.json')), false);
+      const review = autonomousAuthoringReview();
+      const paths = reviewerResultPaths(input.destinationRoot);
+      await writeJson(paths.invocationPath, {
+        schemaVersion: 'solution-reviewer-invocation-v2',
+        invocationRef: input.invocationRef,
+        workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
+        status: 'completed',
+      });
+      await writeFile(paths.rawOutputPath, `${canonicalJson(review)}\n`);
+      await writeJson(paths.reviewPath, review);
+      return { ok: true, review, ...paths };
+    },
+  }, {
+    autonomousAuthoringContractPacket,
+    retainHumanFollowupOnEscalate: false,
+    sourceRoot: authoringContinuation.sourceRoot,
+  });
+  assert.equal(authoringContinuationResult.status, 'completed');
+  assert.deepEqual(authoringCalls, { revision: 1, rereview: 1 });
+  const continuationAdmission = JSON.parse(await readFile(authoringAdmissionPath, 'utf8')) as {
+    status: string;
+  };
+  assert.equal(continuationAdmission.status, 'INSUFFICIENT_EVIDENCE');
+  for (const role of ['solution', 'reviewer'] as const) {
+    const manifest = JSON.parse(await readFile(
+      join(authoringContinuation.roundRoot, 'review-continuation-000001/agent-workspaces', role, role, '.agent-workspace-manifest.json'),
+      'utf8',
+    )) as { entries: Array<{ path: string }> };
+    assert.equal(manifest.entries.some(entry => entry.path.includes('autonomous-authoring-admission.json')), false);
+  }
 
   const secondRequest = await createFixture();
   const secondRequestCalls = { revision: 0, rereview: 0 };

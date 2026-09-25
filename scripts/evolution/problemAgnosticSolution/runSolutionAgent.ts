@@ -146,6 +146,7 @@ function renderAutonomousAuthoringPacket(
     'Only APPLICABLE may contain responsibilities and Cards.',
     'Derive the Minimum Sufficient Responsibility Set from permitted evidence and current catalog semantics.',
     'Do not use a target count; max 8 is only an execution ceiling.',
+    'If the evidence-derived minimum exceeds 8 responsibilities, preserve the full set with contractPayload=null and do not author Cards; never truncate or split the case.',
     'One primary responsibility maps to exactly one Card.',
     'Do not author new content before applicability is established.',
     'If evidence is insufficient, preserve INSUFFICIENT_EVIDENCE rather than guessing.',

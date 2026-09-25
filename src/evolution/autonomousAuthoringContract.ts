@@ -177,13 +177,20 @@ export function validateAutonomousAuthoringProposal(value: unknown): AutonomousA
 
   let contractPayload: PreschoolSharedNeutralAuthoringPayloadV1 | null;
   if (applicabilityClaim === 'APPLICABLE') {
-    if (responsibilities.length === 0 || responsibilities.length > 8) {
-      throw new Error('APPLICABLE requires 1..8 responsibilities');
+    if (responsibilities.length === 0) {
+      throw new Error('APPLICABLE requires at least one responsibility');
     }
-    if (value.contractPayload === null || value.contractPayload === undefined) {
-      throw new Error('APPLICABLE requires a non-null contractPayload');
+    if (responsibilities.length > 8) {
+      if (value.contractPayload !== null) {
+        throw new Error('APPLICABLE above the execution envelope requires contractPayload to be null');
+      }
+      contractPayload = null;
+    } else {
+      if (value.contractPayload === null || value.contractPayload === undefined) {
+        throw new Error('APPLICABLE requires a non-null contractPayload');
+      }
+      contractPayload = validatePreschoolSharedNeutralPayload(value.contractPayload, responsibilities);
     }
-    contractPayload = validatePreschoolSharedNeutralPayload(value.contractPayload, responsibilities);
   } else {
     if (responsibilities.length !== 0) {
       throw new Error(`${applicabilityClaim} requires empty responsibilities`);

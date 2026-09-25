@@ -51,6 +51,7 @@ import {
 import type { WorkspaceAgentParticipantOptions } from './agentParticipant';
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from '../autonomousAuthoring/buildPreschoolContractPacket';
 import { routeSolutionDecision } from './routeSolutionDecision';
+import { evaluatePreschoolAutonomousAuthoringAdmission } from '../autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
 import type { ParticipantFailureFacts } from './participantFailureClassification';
 import {
   retainHumanFollowupWorkItem,
@@ -79,6 +80,8 @@ export interface RunReviewContinuationInput {
   sourceFingerprintSha256: string;
   /** Host-only sealed source root; never copied into Participant workspaces. */
   sourceProvenanceRoot?: string;
+  /** Parent of game-runs/<sourceRunRef>; used only for Host-side admission evidence. */
+  sourceRoot?: string;
   additionalWorkspaceArtifactRelativePaths?: readonly string[];
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
   participant: WorkspaceAgentParticipantOptions;
@@ -341,6 +344,14 @@ function selectedOptionScope(solution: SolutionWorkV1, review: SolutionReviewV1)
   return option.changeScope;
 }
 
+function autonomousAuthoringOption(solution: SolutionWorkV1, review: SolutionReviewV1): SolutionWorkV1['options'][number] | null {
+  const selectedId = review.decision === 'ACCEPT_OPTION'
+    ? review.acceptedOptionId
+    : solution.recommendedOptionId;
+  const selected = solution.options.find(option => option.optionId === selectedId);
+  return selected?.autonomousAuthoring ? selected : null;
+}
+
 function participantFailureResult(
   participantJobs: 1 | 2,
   failureStage: 'SOLUTION_REVISION' | 'RE_REVIEWER',
@@ -565,6 +576,22 @@ export async function runReviewContinuation(
     if (!reviewer.ok) {
       await writeParticipantFailureContinuation(input, base, startedAt, revision, reviewer, revisionRequestSha256);
       return participantFailureResult(2, 'RE_REVIEWER', reviewer.failure);
+    }
+  }
+
+  if (reviewer?.ok && revision.result.status === 'OPTIONS') {
+    const option = autonomousAuthoringOption(revision.result, reviewer.review);
+    if (option?.autonomousAuthoring) {
+      const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
+        repositoryRoot,
+        sourceRoot: input.sourceRoot ?? resolve(input.roundRoot, '../..'),
+        sourceRunRef: input.sourceRunRef,
+        selectedOption: option,
+        review: reviewer.review,
+        proposalSha256: sha256Hex(canonicalJson(option.autonomousAuthoring)),
+        reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
+      });
+      await writeCreateOnly(join(continuationRoot, 'autonomous-authoring-admission.json'), admission);
     }
   }
 

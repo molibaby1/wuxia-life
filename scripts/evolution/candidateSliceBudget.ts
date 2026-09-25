@@ -30,8 +30,8 @@ export function consumeHostSliceJobs(budget: HostSliceBudgetV1, count: number): 
   };
 }
 
-export function requiredCandidateAdmissionJobs(input: { sourceTransitionAvailable: boolean }): 4 | 5 {
-  return input.sourceTransitionAvailable ? 5 : 4;
+export function requiredCandidateAdmissionJobs(_input: { sourceTransitionAvailable: boolean }): 5 {
+  return 5;
 }
 
 export function canAdmitCandidate(input: { budget: HostSliceBudgetV1; sourceTransitionAvailable: boolean }): boolean {

@@ -67,6 +67,15 @@ import { validateSolutionDecision } from '../../src/evolution/solutionDecisionCo
 import { captureAuthoritativeFingerprint } from './problemAgnosticSolution/agentWorkspace';
 import { sha256Hex } from './phase0/provenance';
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from './autonomousAuthoring/buildPreschoolContractPacket';
+import {
+  runShadowAuthoringExecution,
+  type ShadowAuthoringExecutionRun,
+} from './autonomousAuthoring/shadowAuthoringExecutionParticipant';
+import {
+  verifyPreschoolShadowAuthoring,
+  type PreschoolShadowAuthoringVerificationResultV1,
+} from './autonomousAuthoring/verifyPreschoolShadowAuthoring';
+import { buildPromotionPackage } from './autonomousAuthoring/buildPromotionPackage';
 
 export interface RunMultiCandidateSessionSliceInput {
   mode: 'START_NEW_SESSION' | 'RESUME_SESSION';
@@ -107,6 +116,9 @@ export interface MultiCandidateSessionSliceDependencies {
   runCandidateContinuation?: (input: { candidate: CandidatePoolV1['candidates'][number]; sourceAnalysis: CompletedSourceCandidateAnalysisResult; laneRoot: string; baseDecisionPath: string; problemPackagePath: string; sourceProvenanceRoot: string; autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1 }) => Promise<CandidateReviewContinuationResult>;
   retainHumanFollowup?: typeof retainHumanFollowupWorkItem;
   runSourceTransition?: (input: { candidate: CandidatePoolV1['candidates'][number]; laneResult: Extract<CandidateLaneResult, { status: 'completed' }>; sourceAnalysis: CompletedSourceCandidateAnalysisResult; transitionRoot: string; candidateLaneRoot: string; effectiveDecisionPath: string; effectiveSolutionPath: string; effectiveReviewPath: string; autonomousAuthoringAdmissionPath: string | null }) => Promise<BoundedSourceTransitionResult>;
+  runShadowAuthoringExecution?: typeof runShadowAuthoringExecution;
+  verifyPreschoolShadowAuthoring?: typeof verifyPreschoolShadowAuthoring;
+  buildShadowAuthoringPromotionPackage?: typeof buildPromotionPackage;
 }
 
 const DEFAULT_AUTHORITY_REFS = [
@@ -132,6 +144,12 @@ async function writeCreateOnly(path: string, value: unknown): Promise<void> {
   await mkdir(resolve(path, '..'), { recursive: true });
   const handle = await open(path, 'wx');
   try { await handle.writeFile(`${JSON.stringify(value, null, 2)}\n`); } finally { await handle.close(); }
+}
+
+async function writeCreateOnlyBytes(path: string, bytes: string | Uint8Array): Promise<void> {
+  await mkdir(resolve(path, '..'), { recursive: true });
+  const handle = await open(path, 'wx');
+  try { await handle.writeFile(bytes); } finally { await handle.close(); }
 }
 
 async function exists(path: string): Promise<boolean> {
@@ -170,6 +188,14 @@ function durableSessionArtifactPath(sessionRoot: string, value: string): string 
   const candidate = resolve(sessionRoot, value);
   const child = relative(resolve(sessionRoot), candidate);
   if (!child || child === '..' || child.startsWith(`..${sep}`) || isAbsolute(child)) throw new Error(`durable session reference escapes session: ${value}`);
+  return candidate;
+}
+
+function candidateLaneArtifactPath(laneRoot: string, value: string): string {
+  if (isAbsolute(value) || value.includes('\\')) throw new Error(`candidate lane reference must be relative: ${value}`);
+  const candidate = resolve(laneRoot, value);
+  const child = relative(resolve(laneRoot), candidate);
+  if (!child || child === '..' || child.startsWith(`..${sep}`) || isAbsolute(child)) throw new Error(`candidate lane reference escapes lane: ${value}`);
   return candidate;
 }
 
@@ -764,6 +790,154 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       sourceEpochs = sourceEpochs.map(epoch => epoch.sourceEpochRef === currentSourceEpochRef ? { ...epoch, poolStatus: 'SUPERSEDED', lifecycle: 'SUPERSEDED', candidateCounts: candidateCounts(pool) } : epoch);
       sourceEpochs.push({ sourceEpochRef: newSourceEpochRef, sourceRunRef: transition.resultingRunRef, poolRef: null, poolStatus: 'PROCESSING', lifecycle: 'ANALYSIS_PENDING', candidateCounts: { total: 0, pending: 0, active: 0, completed: 0, superseded: 0, interrupted: 0 }, dispositionCounts: {} });
       currentSourceEpochRef = newSourceEpochRef; sessionState = 'PAUSED'; reason = 'SOURCE_B_ANALYSIS_PENDING'; slice = { ...slice, state: 'PAUSED', reason, endedAt: now(), participantJobs: budget.usedParticipantJobs }; break;
+    }
+    if (effectiveDecision.route === 'READY_FOR_SHADOW_AUTHORING') {
+      const shadowRoot = join(laneRoot, 'shadow-authoring');
+      const effectiveSolutionPath = continuation?.status === 'completed'
+        ? continuation.effectiveSolutionPath
+        : laneResult.effectiveSolutionPath;
+      const effectiveReviewPath = continuation?.status === 'completed'
+        ? continuation.effectiveReviewPath
+        : laneResult.effectiveReviewPath;
+      const autonomousAuthoringAdmissionPath = continuation?.status === 'completed'
+        ? continuation.autonomousAuthoringAdmissionPath
+        : laneResult.autonomousAuthoringAdmissionPath;
+      let execution: ShadowAuthoringExecutionRun | null = null;
+      let verification: PreschoolShadowAuthoringVerificationResultV1 | null = null;
+      let promotionPackage: ReturnType<typeof buildPromotionPackage> | null = null;
+      let shadowFailure: string | null = null;
+
+      try {
+        if (typeof effectiveSolutionPath !== 'string' || typeof effectiveReviewPath !== 'string' || typeof autonomousAuthoringAdmissionPath !== 'string') {
+          throw new Error('READY_FOR_SHADOW_AUTHORING is missing its effective Solution, Reviewer, or Host admission artifact');
+        }
+        const solution = JSON.parse(await readFile(candidateLaneArtifactPath(laneRoot, effectiveSolutionPath), 'utf8')) as Parameters<typeof runShadowAuthoringExecution>[0]['solution'];
+        const review = JSON.parse(await readFile(candidateLaneArtifactPath(laneRoot, effectiveReviewPath), 'utf8')) as Parameters<typeof runShadowAuthoringExecution>[0]['review'];
+        const admission = JSON.parse(await readFile(candidateLaneArtifactPath(laneRoot, autonomousAuthoringAdmissionPath), 'utf8')) as Parameters<typeof runShadowAuthoringExecution>[0]['admission'];
+        const executor = input.dependencies?.runShadowAuthoringExecution ?? runShadowAuthoringExecution;
+        execution = await executor({
+          repositoryRoot: input.repositoryRoot,
+          workspaceDestinationRoot: join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId, 'shadow-authoring', pending.hypothesisId, 'workspace'),
+          artifactRoot: shadowRoot,
+          invocationRef: `${input.logicalSessionId}/${pending.hypothesisId}/shadow-authoring`,
+          solution,
+          review,
+          admission,
+          participant: input.participant,
+        });
+        budget = consumeHostSliceJobs(budget, execution.participantJobs);
+        slice = { ...slice, participantJobs: budget.usedParticipantJobs };
+        await writeAtomicJson(join(shadowRoot, 'change-set.json'), {
+          schemaVersion: 'shadow-authoring-change-set-v1',
+          changes: execution.canonicalChanges,
+          promotionPatchSha256: execution.promotionPatchSha256,
+        });
+        if (!(await exists(join(shadowRoot, 'promotion.patch')))) {
+          await writeCreateOnlyBytes(join(shadowRoot, 'promotion.patch'), execution.promotionPatch);
+        }
+        if (execution.status !== 'completed' || execution.failure !== null) {
+          throw new Error(`Shadow Executor failed: ${execution.failure ?? 'unknown executor failure'}`);
+        }
+        if (execution.authoritativeFingerprintAfter !== execution.authoritativeFingerprintBefore) {
+          throw new Error('authoritative repository fingerprint changed during shadow execution');
+        }
+
+        const verifier = input.dependencies?.verifyPreschoolShadowAuthoring ?? verifyPreschoolShadowAuthoring;
+        verification = await verifier({
+          repositoryRoot: input.repositoryRoot,
+          authoritativeRepositoryRoot: input.repositoryRoot,
+          beforeWorkspaceRoot: input.repositoryRoot,
+          finalWorkspaceRoot: execution.preparedWorkspace.workspaceRoot,
+          candidateBaselineGitSha: input.repositoryBaseline.headSha,
+          candidateBaselineFingerprintSha256: input.repositoryBaseline.workingTreeFingerprint,
+          authoritativeFingerprintBefore: execution.authoritativeFingerprintBefore,
+          solution,
+          review,
+          admission,
+        });
+        const verificationRecord = Object.fromEntries(Object.entries(verification).filter(([key]) => key !== 'promotionPatch'));
+        await writeAtomicJson(join(shadowRoot, 'verification.json'), verificationRecord);
+        if (verification.status !== 'SHADOW_AUTHORING_VERIFIED') {
+          throw new Error(`Host shadow verification failed: ${verification.failures.join('; ') || verification.status}`);
+        }
+        if (!verification.promotionPatch
+          || sha256Hex(execution.promotionPatch) !== execution.promotionPatchSha256
+          || verification.patchSha256 !== execution.promotionPatchSha256
+          || !verification.promotionPatch.equals(execution.promotionPatch)) {
+          throw new Error('Host verifier promotion patch does not match the Shadow Executor patch bytes and SHA-256');
+        }
+
+        const buildPackage = input.dependencies?.buildShadowAuthoringPromotionPackage ?? buildPromotionPackage;
+        promotionPackage = buildPackage({ verification, solution, review, admission });
+        await writeAtomicJson(join(shadowRoot, 'promotion-package.json'), promotionPackage.packageJson);
+        await writeCreateOnlyBytes(join(shadowRoot, 'promotion-package.md'), promotionPackage.markdown);
+      } catch (error) {
+        shadowFailure = String(error);
+      }
+
+      if (!(await exists(join(shadowRoot, 'change-set.json')))) {
+        await writeAtomicJson(join(shadowRoot, 'change-set.json'), {
+          schemaVersion: 'shadow-authoring-change-set-v1',
+          changes: execution?.canonicalChanges ?? [],
+          promotionPatchSha256: execution?.promotionPatchSha256 ?? null,
+        });
+      }
+      if (!(await exists(join(shadowRoot, 'verification.json')))) {
+        await writeAtomicJson(join(shadowRoot, 'verification.json'), {
+          schemaVersion: 'shadow-authoring-verification-record-v1',
+          status: 'NOT_COMPLETED',
+          failure: shadowFailure ?? 'Host verification did not complete',
+        });
+      }
+      const shadowResult = {
+        schemaVersion: 'candidate-shadow-authoring-result-v1',
+        status: shadowFailure === null ? 'SHADOW_AUTHORING_VERIFIED' : 'SHADOW_AUTHORING_FAILED',
+        candidateRef: pending.candidateRef,
+        sourceEpochRef: currentSourceEpochRef,
+        effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }),
+        effectiveSolutionRef: effectiveSolutionPath,
+        effectiveReviewRef: effectiveReviewPath,
+        admissionRef: autonomousAuthoringAdmissionPath,
+        failure: shadowFailure,
+        participantJobs: execution?.participantJobs ?? 0,
+        authoritativeFingerprintBefore: execution?.authoritativeFingerprintBefore ?? null,
+        authoritativeFingerprintAfter: execution?.authoritativeFingerprintAfter ?? null,
+        patchSha256: verification?.patchSha256 ?? execution?.promotionPatchSha256 ?? null,
+        promotionPackageRef: promotionPackage ? 'shadow-authoring/promotion-package.json' : null,
+      };
+      await writeAtomicJson(join(shadowRoot, 'result.json'), shadowResult);
+      await retainLaneArtifacts();
+
+      if (shadowFailure !== null) {
+        failureRef = durableCandidateArtifactRef({
+          sourceEpochRef: currentSourceEpochRef,
+          hypothesisId: pending.hypothesisId,
+          candidateLaneRoot: laneRoot,
+          artifactPath: 'shadow-authoring/result.json',
+        });
+        pool = interruptCandidate(pool, pending.candidateRef, failureRef);
+        await persistPool(join(sessionRoot, durablePoolPath), pool);
+        sessionState = 'FAILED';
+        reason = 'SHADOW_AUTHORING_FAILED';
+        slice = { ...slice, state: 'FAILED', reason, endedAt: now(), participantJobs: budget.usedParticipantJobs };
+        break;
+      }
+
+      pool = completeCandidate(pool, pending.candidateRef, {
+        laneRef: durableLaneRef(currentSourceEpochRef, pending.hypothesisId),
+        baseDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: laneResult.baseDecisionPath }),
+        effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }),
+        humanFollowupRef: null,
+      });
+      await persistPool(join(sessionRoot, durablePoolPath), pool);
+      if (pool.candidates.every(candidate => candidate.processingState !== 'PENDING')) {
+        pool = exhaustPoolIfComplete(pool);
+        await persistPool(join(sessionRoot, durablePoolPath), pool);
+        sessionState = 'COMPLETED';
+        slice = { ...slice, state: 'COMPLETED', endedAt: now(), participantJobs: budget.usedParticipantJobs };
+        break;
+      }
+      continue;
     }
     let humanFollowupRef: string | null = null;
     if (laneResult.status === 'completed' && effectiveDecision.route === 'ESCALATE_HUMAN') {

@@ -167,6 +167,132 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   });
   const base = { repositoryRoot: root, logicalSessionId: 'logical-session-000001', participantBindingId: 'CODEX_CURRENT', participant, repositoryBaseline: { branch: 'dev', headSha: 'd'.repeat(40), workingTreeFingerprint: 'e'.repeat(64) }, initialSourceRoot: sourceRoot, dependencies: { now: () => '2026-09-15T00:00:00.000Z', runSourceAnalysis: async () => analysis, runCandidateLane: async ({ candidate, laneRoot }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number }; laneRoot: string }) => { calls.push(candidate.hypothesisId); const decision = validateSolutionDecision({ schemaVersion: 'solution-decision-v1', problemId: `problem-${candidate.hypothesisId}`, route: 'SKIP', reasonCode: 'NO_PROPOSAL', inputs: { solutionStatus: 'NO_PROPOSAL', reviewerDecision: null, solutionScope: null, reviewScope: null, permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false }, budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 } } }); await mkdir(laneRoot, { recursive: true }); await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision)); return { status: 'completed' as const, candidateRef: candidate.candidateRef, hypothesisId: candidate.hypothesisId, sourceIndex: candidate.sourceIndex, candidateActivationPath: 'candidate-activation.json', problemPackagePath: 'problem-package.json', causalAttributionPath: 'diagnostic/causal-attribution.json', decisionPath: 'decision.json', baseDecisionPath: 'decision.json', humanReviewPackagePath: 'human-review-package.md', actualParticipantJobs: 1 as const, decision, solutionInvocationRef: 'solution', reviewerInvocationRef: null, problemPackage: {} as never }; } } };
 
+  function shadowDecisionFor(candidate: CandidateIdentity) {
+    return validateSolutionDecision({
+      schemaVersion: 'solution-decision-v1',
+      problemId: `problem-${candidate.hypothesisId}`,
+      route: 'READY_FOR_SHADOW_AUTHORING',
+      reasonCode: 'ACCEPTED_AUTONOMOUS_AUTHORING_SCOPE',
+      inputs: {
+        solutionStatus: 'OPTIONS',
+        reviewerDecision: 'ACCEPT_OPTION',
+        solutionScope: 'program',
+        reviewScope: 'code_required',
+        executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
+        autonomousAuthoringRequested: true,
+        autonomousAuthoringAdmissionStatus: 'ELIGIBLE',
+        permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
+        budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
+      },
+    });
+  }
+
+  async function shadowLaneResult(candidate: CandidateIdentity, laneRoot: string) {
+    const decision = shadowDecisionFor(candidate);
+    await mkdir(laneRoot, { recursive: true });
+    await writeFile(join(laneRoot, 'decision.json'), JSON.stringify(decision));
+    await writeFile(join(laneRoot, 'base-solution.json'), JSON.stringify({ marker: 'base-solution' }));
+    await writeFile(join(laneRoot, 'base-review.json'), JSON.stringify({ marker: 'base-review' }));
+    await writeFile(join(laneRoot, 'effective-solution.json'), JSON.stringify({ marker: 'effective-solution' }));
+    await writeFile(join(laneRoot, 'effective-review.json'), JSON.stringify({ marker: 'effective-review' }));
+    await writeFile(join(laneRoot, 'effective-admission.json'), JSON.stringify({ marker: 'effective-admission' }));
+    return {
+      status: 'completed' as const,
+      candidateRef: candidate.candidateRef,
+      hypothesisId: candidate.hypothesisId,
+      sourceIndex: candidate.sourceIndex,
+      candidateActivationPath: 'candidate-activation.json',
+      problemPackagePath: 'problem-package.json',
+      causalAttributionPath: 'diagnostic/causal-attribution.json',
+      decisionPath: 'decision.json',
+      baseDecisionPath: 'decision.json',
+      humanReviewPackagePath: 'human-review-package.md',
+      effectiveSolutionPath: 'effective-solution.json',
+      effectiveReviewPath: 'effective-review.json',
+      autonomousAuthoringAdmissionPath: 'effective-admission.json',
+      actualParticipantJobs: 2 as const,
+      decision,
+      solutionInvocationRef: 'solution',
+      reviewerInvocationRef: 'reviewer',
+      problemPackage: {} as never,
+    };
+  }
+
+  function shadowAuthoringStubs(repositoryRoot: string, options: {
+    executorStatus?: 'completed' | 'failed';
+    executorFailure?: string;
+    authoritativeMutation?: boolean;
+    verificationFailure?: string;
+    verifierThrows?: boolean;
+  } = {}) {
+    const patch = Buffer.from('exact verified promotion patch\n');
+    const calls = { executor: 0, verifier: 0, packageBuilder: 0 };
+    return {
+      calls,
+      dependencies: {
+        runShadowAuthoringExecution: async (input: { artifactRoot: string; solution: { marker?: string }; review: { marker?: string }; admission: { marker?: string }; invocationRef: string }) => {
+          calls.executor += 1;
+          assert.equal(input.solution.marker, 'effective-solution');
+          assert.equal(input.review.marker, 'effective-review');
+          assert.equal(input.admission.marker, 'effective-admission');
+          await mkdir(input.artifactRoot, { recursive: true });
+          await writeFile(join(input.artifactRoot, 'invocation.json'), JSON.stringify({ invocationRef: input.invocationRef }));
+          await writeFile(join(input.artifactRoot, 'raw-output.txt'), '{"status":"completed"}');
+          await writeFile(join(input.artifactRoot, 'participant-binding.json'), '{}');
+          await writeFile(join(input.artifactRoot, 'participant-prompt.txt'), 'accepted Cards');
+          await writeFile(join(input.artifactRoot, 'execution-trace.json'), '{}');
+          await writeFile(join(input.artifactRoot, 'executor-result.json'), JSON.stringify({ status: options.executorStatus ?? 'completed' }));
+          return {
+            status: options.executorStatus ?? 'completed',
+            invocationRef: input.invocationRef,
+            artifactRoot: input.artifactRoot,
+            preparedWorkspace: { workspaceRoot: join(repositoryRoot, 'shadow-workspace') },
+            participantResult: { status: options.executorStatus ?? 'completed' },
+            failure: options.executorFailure ?? null,
+            rawOutput: '{"status":"completed"}',
+            stderr: '',
+            executionTrace: {},
+            canonicalChanges: [{ path: 'src/data/lines/preschool-passive-spine.json', kind: 'modified' }],
+            promotionPatch: patch,
+            promotionPatchSha256: sha256Hex(patch),
+            authoritativeFingerprintBefore: 'a'.repeat(64),
+            authoritativeFingerprintAfter: options.authoritativeMutation ? 'b'.repeat(64) : 'a'.repeat(64),
+            proposalSha256: 'c'.repeat(64),
+            reviewSha256: 'd'.repeat(64),
+            admissionSha256: 'e'.repeat(64),
+            participantJobs: 1 as const,
+          };
+        },
+        verifyPreschoolShadowAuthoring: async (input: { candidateBaselineFingerprintSha256: string; authoritativeFingerprintBefore: string }) => {
+          calls.verifier += 1;
+          assert.equal(input.candidateBaselineFingerprintSha256, 'e'.repeat(64));
+          assert.equal(input.authoritativeFingerprintBefore, 'a'.repeat(64));
+          if (options.verifierThrows) throw new Error('Host verifier infrastructure unavailable');
+          const failed = options.verificationFailure !== undefined;
+          return {
+            schemaVersion: 'preschool-shadow-authoring-verification-v1',
+            status: failed ? 'SHADOW_AUTHORING_FAILED' : 'SHADOW_AUTHORING_VERIFIED',
+            checks: {
+              authorityIntegrity: 'PASS',
+              mechanicalConformance: failed ? 'FAIL' : 'PASS',
+              semanticConformance: 'PASS',
+              redGreenRegression: 'PASS',
+              adjacentRegression: 'PASS',
+              evidenceBoundedCompletion: 'PASS',
+            },
+            failures: failed ? [options.verificationFailure] : [],
+            promotionPatch: patch,
+            patchSha256: sha256Hex(patch),
+          };
+        },
+        buildShadowAuthoringPromotionPackage: () => {
+          calls.packageBuilder += 1;
+          return { packageJson: { schemaVersion: 'shadow-authoring-promotion-package-v1' }, markdown: '# Promotion package' };
+        },
+      },
+    };
+  }
+
   function sourceAnalysisFailure(sourceRunRef: string, stage: 'EXTERNAL_FEEDBACK' | 'IMPROVEMENT_HYPOTHESIS', actualParticipantJobs: 1 | 2): SourceCandidateAnalysisFailureResult {
     return { status: 'participant_failure', sourceRunRef, sourceRoot, stage, actualParticipantJobs, error: new Error(`${stage} participant failed`) };
   }
@@ -1152,6 +1278,9 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     sourceExperimentRootHash: transitionSealB.experimentRootHash,
     hypotheses: [hypotheses[0]!],
   };
+  const sourceBShadow = shadowAuthoringStubs(transitionRoot);
+  let sourceBSourceTransitionCalls = 0;
+  let sourceBHumanFollowupCalls = 0;
   const resumedSourceB = await runMultiCandidateSessionSlice({
     ...base,
     initialSourceRoot: undefined,
@@ -1175,38 +1304,120 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
         sourceBLoadAnalysisCalls += 1;
         throw new Error('fresh Source B must not load non-existent retained analysis');
       },
-      runCandidateLane: async ({ candidate }: { candidate: { candidateRef: string; hypothesisId: string; sourceIndex: number } }) => ({
-        status: 'completed' as const,
-        candidateRef: candidate.candidateRef,
-        hypothesisId: candidate.hypothesisId,
-        sourceIndex: candidate.sourceIndex,
-        candidateActivationPath: 'candidate-activation.json',
-        problemPackagePath: 'problem-package.json',
-        causalAttributionPath: 'diagnostic/causal-attribution.json',
-        decisionPath: 'decision.json',
-        baseDecisionPath: 'decision.json',
-        humanReviewPackagePath: 'human-review-package.md',
-        actualParticipantJobs: 1 as const,
-        decision: validateSolutionDecision({
-          schemaVersion: 'solution-decision-v1',
-          problemId: `problem-${candidate.hypothesisId}`,
-          route: 'SKIP',
-          reasonCode: 'NO_PROPOSAL',
-          inputs: {
-            solutionStatus: 'NO_PROPOSAL', reviewerDecision: null,
-            solutionScope: null, reviewScope: null,
-            permissions: { authoritativeProductWrite: false, sandboxWrite: true, productExecution: false, codeExecution: false },
-            budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
-          },
-        }),
-        solutionInvocationRef: 'solution', reviewerInvocationRef: null,
-        problemPackage: {} as never,
-      }),
+      runCandidateLane: async ({ candidate, laneRoot }: { candidate: CandidateIdentity; laneRoot: string }) => shadowLaneResult(candidate, laneRoot),
+      ...sourceBShadow.dependencies,
+      runSourceTransition: async () => { sourceBSourceTransitionCalls += 1; throw new Error('shadow authoring must not run a source transition'); },
+      retainHumanFollowup: async () => { sourceBHumanFollowupCalls += 1; return { itemPath: join(transitionRoot, 'unexpected-hfl-item.json'), item: {} as never, created: true }; },
     },
   });
   assert.equal(sourceBRunAnalysisCalls, 1);
   assert.equal(sourceBLoadAnalysisCalls, 0);
   assert.equal(resumedSourceB.currentSourceEpochRef, 'source-epoch-000002');
+  assert.equal(resumedSourceB.sessionState, 'COMPLETED');
+  assert.equal(resumedSourceB.sourceTransitionCount, 1);
+  assert.equal(resumedSourceB.participantJobs, 5);
+  assert.deepEqual(sourceBShadow.calls, { executor: 1, verifier: 1, packageBuilder: 1 });
+  assert.equal(sourceBSourceTransitionCalls, 0);
+  assert.equal(sourceBHumanFollowupCalls, 0);
+
+  const shadowSuccessRoot = await mkdtemp(join(tmpdir(), 'candidate-session-shadow-success-'));
+  const shadowSuccess = shadowAuthoringStubs(shadowSuccessRoot);
+  const shadowSuccessLaneCalls: string[] = [];
+  let shadowSuccessSourceTransitionCalls = 0;
+  let shadowSuccessHumanFollowupCalls = 0;
+  const shadowSuccessResult = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: shadowSuccessRoot,
+    logicalSessionId: 'logical-session-shadow-success',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(shadowSuccessRoot, { hypotheses: hypotheses.slice(0, 2) }),
+      runCandidateLane: async input => {
+        shadowSuccessLaneCalls.push(input.candidate.hypothesisId);
+        return input.candidate.sourceIndex === 0
+          ? shadowLaneResult(input.candidate, input.laneRoot)
+          : base.dependencies.runCandidateLane!(input);
+      },
+      ...shadowSuccess.dependencies,
+      runSourceTransition: async () => { shadowSuccessSourceTransitionCalls += 1; throw new Error('shadow authoring must not run a source transition'); },
+      retainHumanFollowup: async () => { shadowSuccessHumanFollowupCalls += 1; return { itemPath: join(shadowSuccessRoot, 'unexpected-hfl-item.json'), item: {} as never, created: true }; },
+    },
+  });
+  assert.equal(shadowSuccessResult.sessionState, 'COMPLETED');
+  assert.equal(shadowSuccessResult.participantJobs, 6);
+  assert.equal(shadowSuccessResult.sourceTransitionCount, 0);
+  assert.deepEqual(shadowSuccessLaneCalls, ['hypothesis-000001', 'hypothesis-000002']);
+  assert.deepEqual(shadowSuccess.calls, { executor: 1, verifier: 1, packageBuilder: 1 });
+  assert.equal(shadowSuccessSourceTransitionCalls, 0);
+  assert.equal(shadowSuccessHumanFollowupCalls, 0);
+  const shadowSuccessPool = parseCandidatePoolV1(JSON.parse(await readFile(join(shadowSuccessRoot, 'artifacts/evolution/sessions/logical-session-shadow-success/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  assert.equal(shadowSuccessPool.status, 'EXHAUSTED');
+  assert.deepEqual(shadowSuccessPool.candidates.map(candidate => candidate.processingState), ['COMPLETED', 'COMPLETED']);
+  assert.equal(shadowSuccessPool.candidates[0]!.sourceTransitionRef, null);
+  assert.equal(shadowSuccessPool.candidates[0]!.humanFollowupRef, null);
+  const retainedShadowRoot = join(shadowSuccessRoot, 'artifacts/evolution/sessions/logical-session-shadow-success/source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring');
+  for (const path of [
+    'invocation.json', 'raw-output.txt', 'participant-binding.json', 'participant-prompt.txt', 'execution-trace.json',
+    'executor-result.json', 'change-set.json', 'verification.json', 'promotion.patch', 'promotion-package.json',
+    'promotion-package.md', 'result.json',
+  ]) assert.equal(await readFile(join(retainedShadowRoot, path), 'utf8').then(() => true), true, path);
+  const retainedShadowResult = JSON.parse(await readFile(join(retainedShadowRoot, 'result.json'), 'utf8')) as { status?: string };
+  const retainedShadowPackage = JSON.parse(await readFile(join(retainedShadowRoot, 'promotion-package.json'), 'utf8')) as { schemaVersion?: string };
+  assert.equal(retainedShadowResult.status, 'SHADOW_AUTHORING_VERIFIED');
+  assert.equal(retainedShadowPackage.schemaVersion, 'shadow-authoring-promotion-package-v1');
+
+  const shadowFailureCases = [
+    { name: 'executor-runtime', options: { executorStatus: 'failed' as const, executorFailure: 'Shadow Executor runtime failed' } },
+    { name: 'scope-verification', options: { verificationFailure: 'mechanical scope verification failed' } },
+    { name: 'authoritative-fingerprint', options: { authoritativeMutation: true } },
+    { name: 'host-verifier-infrastructure', options: { verifierThrows: true } },
+  ];
+  for (const failureCase of shadowFailureCases) {
+    const failureRoot = await mkdtemp(join(tmpdir(), `candidate-session-shadow-${failureCase.name}-`));
+    const shadowFailure = shadowAuthoringStubs(failureRoot, failureCase.options);
+    const failureLaneCalls: string[] = [];
+    let failureSourceTransitionCalls = 0;
+    let failureHumanFollowupCalls = 0;
+    const shadowFailureResult = await runMultiCandidateSessionSlice({
+      ...base,
+      repositoryRoot: failureRoot,
+      logicalSessionId: `logical-session-shadow-${failureCase.name}`,
+      initialSourceRoot: sourceRoot,
+      hostSliceId: 'host-slice-000001',
+      dependencies: {
+        ...base.dependencies,
+        runSourceAnalysis: async () => scopedAnalysis(failureRoot, { hypotheses: hypotheses.slice(0, 2) }),
+        runCandidateLane: async input => {
+          failureLaneCalls.push(input.candidate.hypothesisId);
+          return input.candidate.sourceIndex === 0
+            ? shadowLaneResult(input.candidate, input.laneRoot)
+            : base.dependencies.runCandidateLane!(input);
+        },
+        ...shadowFailure.dependencies,
+        runSourceTransition: async () => { failureSourceTransitionCalls += 1; throw new Error('shadow failure must not run a source transition'); },
+        retainHumanFollowup: async () => { failureHumanFollowupCalls += 1; return { itemPath: join(failureRoot, 'unexpected-hfl-item.json'), item: {} as never, created: true }; },
+      },
+    });
+    assert.equal(shadowFailureResult.sessionState, 'FAILED', failureCase.name);
+    assert.equal(shadowFailureResult.sourceTransitionCount, 0, failureCase.name);
+    assert.deepEqual(failureLaneCalls, ['hypothesis-000001'], failureCase.name);
+    assert.equal(failureSourceTransitionCalls, 0, failureCase.name);
+    assert.equal(failureHumanFollowupCalls, 0, failureCase.name);
+    const logicalSessionId = `logical-session-shadow-${failureCase.name}`;
+    const failurePool = parseCandidatePoolV1(JSON.parse(await readFile(join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+    assert.equal(failurePool.candidates[0]!.processingState, 'INTERRUPTED', failureCase.name);
+    assert.equal(failurePool.candidates[1]!.processingState, 'PENDING', failureCase.name);
+    const failureManifest = await readDurableMultiCandidateSessionManifest(failureRoot, logicalSessionId);
+    assert.ok(failureManifest.failureRef, failureCase.name);
+    const retainedFailureResultPath = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, failureManifest.failureRef!);
+    const retainedFailureResult = JSON.parse(await readFile(retainedFailureResultPath, 'utf8')) as { status?: string; failure?: string };
+    assert.equal(retainedFailureResult.status, 'SHADOW_AUTHORING_FAILED', failureCase.name);
+    assert.ok(retainedFailureResult.failure, failureCase.name);
+    const retainedFailureShadowRoot = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring');
+    assert.equal(await readFile(join(retainedFailureShadowRoot, 'result.json'), 'utf8').then(() => true), true, failureCase.name);
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

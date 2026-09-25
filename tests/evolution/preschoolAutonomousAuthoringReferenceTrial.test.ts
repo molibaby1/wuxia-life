@@ -132,6 +132,39 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     });
     assert.equal(participantBindingResolved, false);
 
+    const fabricatedEvidencePath = join(root, 'fabricated-but-well-formed-evidence.json');
+    await writeFile(fabricatedEvidencePath, JSON.stringify({
+      schemaVersion: 'preschool-capacity-evidence-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      evidenceMode: 'STRUCTURAL_EXHAUSTION',
+      canonicalOriginTag: 'scholar',
+      preConsumedEntryIds: [],
+      beats: Array.from({ length: 30 }, (_, index) => ({
+        sequence: index + 1,
+        age: 4 + (index % 4),
+        selectedEntryId: `fabricated-entry-${index + 1}`,
+        kind: index < 4 ? 'GAP' : 'AUTHORED',
+        legalUnconsumedCountBeforeSelection: index < 4 ? 0 : 1,
+      })),
+      demandBeats: 30,
+      authoredBeats: 26,
+      gapBeats: 4,
+      foreignOriginLeakCount: 0,
+      duplicateAuthoredCount: 0,
+    }), 'utf8');
+    let fabricatedEvidenceResolvedBinding = false;
+    const fabricatedEvidenceStop = await runPreschoolReferenceTrial({
+      liveRepositoryRoot: currentRoot,
+      evidencePath: fabricatedEvidencePath,
+    }, {
+      resolveParticipantBinding: async () => {
+        fabricatedEvidenceResolvedBinding = true;
+        throw new Error('must not resolve a Participant binding for unanchored evidence');
+      },
+    }).catch(() => null);
+    assert.deepEqual(fabricatedEvidenceStop, stop);
+    assert.equal(fabricatedEvidenceResolvedBinding, false);
+
     const safeParticipant: WorkspaceAgentParticipantOptions = {
       executable: 'fake-participant',
       buildArgs: () => ['safe'],

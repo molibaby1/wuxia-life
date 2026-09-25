@@ -42,6 +42,8 @@ import { buildPromotionPackage } from './buildPromotionPackage';
 
 export const PRESCHOOL_REFERENCE_TRIAL_RUN_REF = 'preschool-pver-20260922231805-71297571' as const;
 export const PRESCHOOL_REFERENCE_TRIAL_BASELINE_SHA = 'e80eecc868a6ca99f4a53ff5d2493a13b4c0a8bf' as const;
+// Keep the Participant path closed until the accepted evidence provenance supplies a trusted digest.
+export const PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256: string | null = null;
 export const PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS = [
   'docs/governance/product-decisions.md',
   'docs/product/content-authoring-workflow-contract-design.md',
@@ -108,9 +110,14 @@ async function writeCreateOnlyJson(path: string, value: unknown): Promise<void> 
 }
 
 async function readExactAcceptedEvidence(path: string | null | undefined): Promise<PreschoolCapacityEvidenceV1 | null> {
-  if (typeof path !== 'string' || path.length === 0) return null;
+  const trustedDigest = PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256;
+  if (typeof path !== 'string' || path.length === 0
+    || typeof trustedDigest !== 'string'
+    || !/^[a-f0-9]{64}$/.test(trustedDigest)) return null;
   try {
-    const evidence = validatePreschoolCapacityEvidence(JSON.parse(await readFile(path, 'utf8')) as unknown);
+    const evidenceBytes = await readFile(path);
+    if (sha256Hex(evidenceBytes) !== trustedDigest) return null;
+    const evidence = validatePreschoolCapacityEvidence(JSON.parse(evidenceBytes.toString('utf8')) as unknown);
     if (evidence.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
       || evidence.evidenceMode !== 'STRUCTURAL_EXHAUSTION'
       || evidence.preConsumedEntryIds.length !== 0

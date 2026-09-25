@@ -65,7 +65,15 @@ import { parseExternalFeedback } from '../../src/evolution/externalFeedbackContr
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import { captureAuthoritativeFingerprint } from './problemAgnosticSolution/agentWorkspace';
-import { sha256Hex } from './phase0/provenance';
+import { canonicalJson, sha256Hex } from './phase0/provenance';
+import {
+  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
+  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
+} from '../../src/evolution/preschoolSharedNeutralAuthoringContract';
+import type {
+  ShadowAuthoringResultV1,
+  ShadowAuthoringTerminalStatus,
+} from '../../src/evolution/shadowAuthoringResultContract';
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from './autonomousAuthoring/buildPreschoolContractPacket';
 import {
   runShadowAuthoringExecution,
@@ -806,6 +814,10 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       let verification: PreschoolShadowAuthoringVerificationResultV1 | null = null;
       let promotionPackage: ReturnType<typeof buildPromotionPackage> | null = null;
       let shadowFailure: string | null = null;
+      let shadowTerminalStatus: ShadowAuthoringTerminalStatus = 'SHADOW_AUTHORING_CONFORMANCE_FAILED';
+      let proposalSha256 = '';
+      let reviewSha256 = '';
+      let admissionSha256 = '';
 
       try {
         if (typeof effectiveSolutionPath !== 'string' || typeof effectiveReviewPath !== 'string' || typeof autonomousAuthoringAdmissionPath !== 'string') {
@@ -814,6 +826,20 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         const solution = JSON.parse(await readFile(candidateLaneArtifactPath(laneRoot, effectiveSolutionPath), 'utf8')) as Parameters<typeof runShadowAuthoringExecution>[0]['solution'];
         const review = JSON.parse(await readFile(candidateLaneArtifactPath(laneRoot, effectiveReviewPath), 'utf8')) as Parameters<typeof runShadowAuthoringExecution>[0]['review'];
         const admission = JSON.parse(await readFile(candidateLaneArtifactPath(laneRoot, autonomousAuthoringAdmissionPath), 'utf8')) as Parameters<typeof runShadowAuthoringExecution>[0]['admission'];
+        const acceptedProposal = solution.status === 'OPTIONS'
+          ? solution.options.find(option => option.optionId === review.acceptedOptionId)?.autonomousAuthoring
+          : undefined;
+        proposalSha256 = acceptedProposal ? sha256Hex(canonicalJson(acceptedProposal)) : '';
+        reviewSha256 = sha256Hex(canonicalJson(review));
+        admissionSha256 = sha256Hex(canonicalJson(admission));
+        if (admission.status === 'CONTRACT_CHANGE_REQUIRED') {
+          shadowTerminalStatus = 'CONTRACT_CHANGE_REQUIRED';
+          throw new Error('Host admission requires a Contract change');
+        }
+        if (admission.status === 'EXECUTION_ENVELOPE_EXCEEDED') {
+          shadowTerminalStatus = 'EXECUTION_ENVELOPE_EXCEEDED';
+          throw new Error('Host admission exceeded the execution envelope');
+        }
         const executor = input.dependencies?.runShadowAuthoringExecution ?? runShadowAuthoringExecution;
         execution = await executor({
           repositoryRoot: input.repositoryRoot,
@@ -836,13 +862,16 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
           await writeCreateOnlyBytes(join(shadowRoot, 'promotion.patch'), execution.promotionPatch);
         }
         if (execution.status !== 'completed' || execution.failure !== null) {
+          shadowTerminalStatus = 'SHADOW_AUTHORING_EXECUTION_FAILED';
           throw new Error(`Shadow Executor failed: ${execution.failure ?? 'unknown executor failure'}`);
         }
         if (execution.authoritativeFingerprintAfter !== execution.authoritativeFingerprintBefore) {
+          shadowTerminalStatus = 'SHADOW_AUTHORING_VERIFICATION_FAILED';
           throw new Error('authoritative repository fingerprint changed during shadow execution');
         }
 
         const verifier = input.dependencies?.verifyPreschoolShadowAuthoring ?? verifyPreschoolShadowAuthoring;
+        shadowTerminalStatus = 'SHADOW_AUTHORING_VERIFICATION_FAILED';
         verification = await verifier({
           repositoryRoot: input.repositoryRoot,
           authoritativeRepositoryRoot: input.repositoryRoot,
@@ -858,6 +887,9 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         const verificationRecord = Object.fromEntries(Object.entries(verification).filter(([key]) => key !== 'promotionPatch'));
         await writeAtomicJson(join(shadowRoot, 'verification.json'), verificationRecord);
         if (verification.status !== 'SHADOW_AUTHORING_VERIFIED') {
+          if (verification.checks.mechanicalConformance === 'FAIL' || verification.checks.semanticConformance === 'FAIL') {
+            shadowTerminalStatus = 'SHADOW_AUTHORING_CONFORMANCE_FAILED';
+          }
           throw new Error(`Host shadow verification failed: ${verification.failures.join('; ') || verification.status}`);
         }
         if (!verification.promotionPatch
@@ -871,6 +903,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         promotionPackage = buildPackage({ verification, solution, review, admission });
         await writeAtomicJson(join(shadowRoot, 'promotion-package.json'), promotionPackage.packageJson);
         await writeCreateOnlyBytes(join(shadowRoot, 'promotion-package.md'), promotionPackage.markdown);
+        shadowTerminalStatus = 'SHADOW_AUTHORING_VERIFIED';
       } catch (error) {
         shadowFailure = String(error);
       }
@@ -889,21 +922,20 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
           failure: shadowFailure ?? 'Host verification did not complete',
         });
       }
-      const shadowResult = {
-        schemaVersion: 'candidate-shadow-authoring-result-v1',
-        status: shadowFailure === null ? 'SHADOW_AUTHORING_VERIFIED' : 'SHADOW_AUTHORING_FAILED',
-        candidateRef: pending.candidateRef,
-        sourceEpochRef: currentSourceEpochRef,
-        effectiveDecisionRef: durableCandidateArtifactRef({ sourceEpochRef: currentSourceEpochRef, hypothesisId: pending.hypothesisId, candidateLaneRoot: laneRoot, artifactPath: effectiveDecisionPath }),
-        effectiveSolutionRef: effectiveSolutionPath,
-        effectiveReviewRef: effectiveReviewPath,
-        admissionRef: autonomousAuthoringAdmissionPath,
-        failure: shadowFailure,
-        participantJobs: execution?.participantJobs ?? 0,
-        authoritativeFingerprintBefore: execution?.authoritativeFingerprintBefore ?? null,
-        authoritativeFingerprintAfter: execution?.authoritativeFingerprintAfter ?? null,
-        patchSha256: verification?.patchSha256 ?? execution?.promotionPatchSha256 ?? null,
+      const shadowResult: ShadowAuthoringResultV1 = {
+        schemaVersion: 'shadow-authoring-result-v1',
+        terminalStatus: shadowTerminalStatus,
+        contractId: PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
+        contractVersion: PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
+        proposalSha256: execution?.proposalSha256 ?? proposalSha256,
+        reviewSha256: execution?.reviewSha256 ?? reviewSha256,
+        admissionSha256: execution?.admissionSha256 ?? admissionSha256,
+        canonicalChangedFileRefs: execution?.canonicalChanges.map(change => change.path) ?? [],
+        verificationArtifactRef: 'shadow-authoring/verification.json',
         promotionPackageRef: promotionPackage ? 'shadow-authoring/promotion-package.json' : null,
+        authoritativeFingerprintBefore: execution?.authoritativeFingerprintBefore ?? input.repositoryBaseline.workingTreeFingerprint,
+        authoritativeFingerprintAfter: execution?.authoritativeFingerprintAfter ?? input.repositoryBaseline.workingTreeFingerprint,
+        participantJobs: 1,
       };
       await writeAtomicJson(join(shadowRoot, 'result.json'), shadowResult);
       await retainLaneArtifacts();

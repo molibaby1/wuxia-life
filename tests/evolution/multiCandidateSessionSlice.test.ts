@@ -19,6 +19,7 @@ import { archiveMultiCandidateSessionReport } from '../../scripts/evolution/repo
 import { retainMultiCandidateSessionEvidence } from '../../scripts/evolution/evidence/retainMultiCandidateSessionEvidence';
 import { buildCandidateLaneFailureV2 } from '../../scripts/evolution/candidateLaneFailureContract';
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
+import type { ShadowAuthoringResultV1 } from '../../src/evolution/shadowAuthoringResultContract';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
@@ -1363,16 +1364,28 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     'executor-result.json', 'change-set.json', 'verification.json', 'promotion.patch', 'promotion-package.json',
     'promotion-package.md', 'result.json',
   ]) assert.equal(await readFile(join(retainedShadowRoot, path), 'utf8').then(() => true), true, path);
-  const retainedShadowResult = JSON.parse(await readFile(join(retainedShadowRoot, 'result.json'), 'utf8')) as { status?: string };
+  const retainedShadowResult = JSON.parse(await readFile(join(retainedShadowRoot, 'result.json'), 'utf8')) as Partial<ShadowAuthoringResultV1>;
   const retainedShadowPackage = JSON.parse(await readFile(join(retainedShadowRoot, 'promotion-package.json'), 'utf8')) as { schemaVersion?: string };
-  assert.equal(retainedShadowResult.status, 'SHADOW_AUTHORING_VERIFIED');
+  assert.equal(retainedShadowResult.schemaVersion, 'shadow-authoring-result-v1');
+  assert.equal(retainedShadowResult.terminalStatus, 'SHADOW_AUTHORING_VERIFIED');
+  assert.equal(retainedShadowResult.contractId, 'preschool-shared-neutral-passive-capacity-v1');
+  assert.equal(retainedShadowResult.contractVersion, 1);
+  assert.equal(retainedShadowResult.proposalSha256, 'c'.repeat(64));
+  assert.equal(retainedShadowResult.reviewSha256, 'd'.repeat(64));
+  assert.equal(retainedShadowResult.admissionSha256, 'e'.repeat(64));
+  assert.deepEqual(retainedShadowResult.canonicalChangedFileRefs, ['src/data/lines/preschool-passive-spine.json']);
+  assert.equal(retainedShadowResult.verificationArtifactRef, 'shadow-authoring/verification.json');
+  assert.equal(retainedShadowResult.promotionPackageRef, 'shadow-authoring/promotion-package.json');
+  assert.equal(retainedShadowResult.authoritativeFingerprintBefore, 'a'.repeat(64));
+  assert.equal(retainedShadowResult.authoritativeFingerprintAfter, 'a'.repeat(64));
+  assert.equal(retainedShadowResult.participantJobs, 1);
   assert.equal(retainedShadowPackage.schemaVersion, 'shadow-authoring-promotion-package-v1');
 
   const shadowFailureCases = [
-    { name: 'executor-runtime', options: { executorStatus: 'failed' as const, executorFailure: 'Shadow Executor runtime failed' } },
-    { name: 'scope-verification', options: { verificationFailure: 'mechanical scope verification failed' } },
-    { name: 'authoritative-fingerprint', options: { authoritativeMutation: true } },
-    { name: 'host-verifier-infrastructure', options: { verifierThrows: true } },
+    { name: 'executor-runtime', terminalStatus: 'SHADOW_AUTHORING_EXECUTION_FAILED', options: { executorStatus: 'failed' as const, executorFailure: 'Shadow Executor runtime failed' } },
+    { name: 'scope-verification', terminalStatus: 'SHADOW_AUTHORING_CONFORMANCE_FAILED', options: { verificationFailure: 'mechanical scope verification failed' } },
+    { name: 'authoritative-fingerprint', terminalStatus: 'SHADOW_AUTHORING_VERIFICATION_FAILED', options: { authoritativeMutation: true } },
+    { name: 'host-verifier-infrastructure', terminalStatus: 'SHADOW_AUTHORING_VERIFICATION_FAILED', options: { verifierThrows: true } },
   ];
   for (const failureCase of shadowFailureCases) {
     const failureRoot = await mkdtemp(join(tmpdir(), `candidate-session-shadow-${failureCase.name}-`));
@@ -1412,10 +1425,12 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     const failureManifest = await readDurableMultiCandidateSessionManifest(failureRoot, logicalSessionId);
     assert.ok(failureManifest.failureRef, failureCase.name);
     const retainedFailureResultPath = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, failureManifest.failureRef!);
-    const retainedFailureResult = JSON.parse(await readFile(retainedFailureResultPath, 'utf8')) as { status?: string; failure?: string };
-    assert.equal(retainedFailureResult.status, 'SHADOW_AUTHORING_FAILED', failureCase.name);
-    assert.ok(retainedFailureResult.failure, failureCase.name);
     const retainedFailureShadowRoot = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring');
+    const retainedFailureResult = JSON.parse(await readFile(retainedFailureResultPath, 'utf8')) as Partial<ShadowAuthoringResultV1>;
+    assert.equal(retainedFailureResult.schemaVersion, 'shadow-authoring-result-v1', failureCase.name);
+    assert.equal(retainedFailureResult.terminalStatus, failureCase.terminalStatus, failureCase.name);
+    const retainedFailureVerification = JSON.parse(await readFile(join(retainedFailureShadowRoot, 'verification.json'), 'utf8')) as { failure?: string; failures?: string[] };
+    assert.ok(retainedFailureVerification.failure || retainedFailureVerification.failures?.length, failureCase.name);
     assert.equal(await readFile(join(retainedFailureShadowRoot, 'result.json'), 'utf8').then(() => true), true, failureCase.name);
   }
 }

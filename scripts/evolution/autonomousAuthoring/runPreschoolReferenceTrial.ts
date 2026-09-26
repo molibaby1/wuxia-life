@@ -43,6 +43,7 @@ import { buildPromotionPackage } from './buildPromotionPackage';
 import {
   PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
   PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+  assertPreschoolReferenceResponsibilitiesPreserved,
   readAcceptedPreschoolReferenceResponsibilityBrief,
   type AcceptedPreschoolReferenceResponsibilityBrief,
   type PreschoolReferenceResponsibilityAttestationV1,
@@ -643,6 +644,10 @@ async function runVerifiedHistoricalTrial(input: {
     if (!reviewer.ok) throw new Error(`Reviewer Participant failed: ${reviewer.message}`);
 
     const selectedOption = acceptedAuthoringOption(solution, reviewer);
+    assertPreschoolReferenceResponsibilitiesPreserved({
+      brief: input.responsibilityBrief.brief,
+      proposal: selectedOption.autonomousAuthoring!,
+    });
     const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
       repositoryRoot: hostAuthorityRoot,
       sourceRoot: trialBaselineRoot,

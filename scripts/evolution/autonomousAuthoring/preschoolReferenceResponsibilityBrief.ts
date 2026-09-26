@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { sha256Hex } from '../phase0/provenance';
+import type { AutonomousAuthoringProposalV1 } from '../../../src/evolution/autonomousAuthoringContract';
 
 export const PRESCHOOL_REFERENCE_VALIDATION_LAYER =
   'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM' as const;
@@ -37,6 +38,35 @@ export interface PreschoolReferenceResponsibilityContextV1 {
   briefRef: 'source/reference-trial/reference-responsibility-brief.json';
   attestationRef: 'source/reference-trial/reference-responsibility-attestation.json';
   brief: PreschoolReferenceResponsibilityBriefV1;
+}
+
+export interface PreschoolReferenceResponsibilityMappingV1 {
+  referenceResponsibilityRef: string;
+  proposalResponsibilityId: string;
+}
+
+export function assertPreschoolReferenceResponsibilitiesPreserved(input: {
+  brief: PreschoolReferenceResponsibilityBriefV1;
+  proposal: AutonomousAuthoringProposalV1;
+}): PreschoolReferenceResponsibilityMappingV1[] {
+  if (input.proposal.applicabilityClaim !== 'APPLICABLE'
+    || input.proposal.responsibilities.length !== input.brief.responsibilities.length) {
+    throw new Error('reference responsibility count or applicability does not match the accepted brief');
+  }
+  return input.brief.responsibilities.map((expected, index) => {
+    const actual = input.proposal.responsibilities[index];
+    if (!actual
+      || actual.responsibilityId !== `responsibility-${String(index + 1).padStart(6, '0')}`
+      || actual.primaryLifeFunction !== expected.primaryLifeFunction
+      || actual.playerVisibleNeed !== expected.playerVisibleNeed
+      || actual.evidenceRefs.length !== 0) {
+      throw new Error(`reference responsibility ${expected.responsibilityRef} was not preserved one-to-one`);
+    }
+    return {
+      referenceResponsibilityRef: expected.responsibilityRef,
+      proposalResponsibilityId: actual.responsibilityId,
+    };
+  });
 }
 
 type RecordValue = Record<string, unknown>;

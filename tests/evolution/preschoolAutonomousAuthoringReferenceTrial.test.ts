@@ -5,11 +5,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import {
+  assertPreschoolReferenceResponsibilitiesPreserved,
   readAcceptedPreschoolReferenceResponsibilityBrief,
   validatePreschoolReferenceResponsibilityBrief,
 } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
+import type { AutonomousAuthoringProposalV1 } from '../../src/evolution/autonomousAuthoringContract';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
@@ -99,8 +101,43 @@ function testReferenceResponsibilityBriefContract(): void {
   assert.throws(() => validatePreschoolReferenceResponsibilityBrief({ ...brief, runRef: 'wrong-run' }), /runRef/);
 }
 
+function testReferenceResponsibilityPreservation(): void {
+  const brief = validatePreschoolReferenceResponsibilityBrief({
+    schemaVersion: 'preschool-reference-responsibility-brief-v1',
+    runRef: 'preschool-pver-20260922231805-71297571',
+    responsibilities: [
+      { responsibilityRef: 'reference-responsibility-000001', primaryLifeFunction: 'Shared play', playerVisibleNeed: 'Need shared play.' },
+      { responsibilityRef: 'reference-responsibility-000002', primaryLifeFunction: 'Farewell', playerVisibleNeed: 'Need a farewell.' },
+    ],
+  });
+  const proposal = {
+    applicabilityClaim: 'APPLICABLE',
+    responsibilities: brief.responsibilities.map((responsibility, index) => ({
+      responsibilityId: 'responsibility-' + String(index + 1).padStart(6, '0'),
+      primaryLifeFunction: responsibility.primaryLifeFunction,
+      playerVisibleNeed: responsibility.playerVisibleNeed,
+      evidenceRefs: [],
+    })),
+  } as AutonomousAuthoringProposalV1;
+  assert.deepEqual(assertPreschoolReferenceResponsibilitiesPreserved({ brief, proposal }), [
+    { referenceResponsibilityRef: 'reference-responsibility-000001', proposalResponsibilityId: 'responsibility-000001' },
+    { referenceResponsibilityRef: 'reference-responsibility-000002', proposalResponsibilityId: 'responsibility-000002' },
+  ]);
+  const rejects = (responsibilities: typeof proposal.responsibilities) => assert.throws(
+    () => assertPreschoolReferenceResponsibilitiesPreserved({ brief, proposal: { ...proposal, responsibilities } }),
+    /reference responsibility/i,
+  );
+  rejects(proposal.responsibilities.slice(0, 1));
+  rejects([...proposal.responsibilities, { ...proposal.responsibilities[0]!, responsibilityId: 'responsibility-000003' }]);
+  rejects([...proposal.responsibilities].reverse());
+  rejects([{ ...proposal.responsibilities[0]!, primaryLifeFunction: 'Changed' }, proposal.responsibilities[1]!]);
+  rejects([{ ...proposal.responsibilities[0]!, playerVisibleNeed: 'Changed' }, proposal.responsibilities[1]!]);
+  rejects([{ ...proposal.responsibilities[0]!, evidenceRefs: ['source/observable-payload.json'] }, proposal.responsibilities[1]!]);
+}
+
 export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Promise<void> {
   testReferenceResponsibilityBriefContract();
+  testReferenceResponsibilityPreservation();
   assert.equal(
     PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
     'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3',

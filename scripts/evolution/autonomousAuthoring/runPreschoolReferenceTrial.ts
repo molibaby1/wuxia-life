@@ -41,8 +41,11 @@ import { runShadowAuthoringExecution } from './shadowAuthoringExecutionParticipa
 import { verifyPreschoolShadowAuthoring } from './verifyPreschoolShadowAuthoring';
 import { buildPromotionPackage } from './buildPromotionPackage';
 import {
+  PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+  PRESCHOOL_REFERENCE_VALIDATION_LAYER,
   readAcceptedPreschoolReferenceResponsibilityBrief,
   type AcceptedPreschoolReferenceResponsibilityBrief,
+  type PreschoolReferenceResponsibilityAttestationV1,
   type PreschoolReferenceResponsibilityBriefUnavailableReason,
 } from './preschoolReferenceResponsibilityBrief';
 
@@ -66,6 +69,7 @@ const CAPACITY_SUMMARY_PATH = 'source/reference-trial/capacity-summary.json';
 const OBSERVABLE_SUMMARY_PATH = 'source/reference-trial/observable-summary.json';
 const OBSERVABLE_PAYLOAD_PATH = 'source/reference-trial/observable-payload.json';
 const REFERENCE_RESPONSIBILITY_BRIEF_PATH = 'source/reference-trial/reference-responsibility-brief.json';
+const REFERENCE_RESPONSIBILITY_ATTESTATION_PATH = 'source/reference-trial/reference-responsibility-attestation.json';
 const REFERENCE_SOURCE_ATTESTATION_PATH = 'source/reference-trial/reference-source-attestation.json';
 const FEEDBACK_SUMMARY_PATH = 'source/reference-trial/external-feedback.json';
 const HYPOTHESIS_SUMMARY_PATH = 'source/reference-trial/improvement-hypothesis.json';
@@ -456,6 +460,14 @@ export async function writePreschoolReferenceTrialInputs(input: {
   await mkdir(dirname(join(input.outputRoot, OBSERVABLE_PAYLOAD_PATH)), { recursive: true });
   await writeFile(join(input.outputRoot, OBSERVABLE_PAYLOAD_PATH), input.observablePayloadBytes, { flag: 'wx' });
   await writeFile(join(input.outputRoot, REFERENCE_RESPONSIBILITY_BRIEF_PATH), input.responsibilityBrief.bytes, { flag: 'wx' });
+  await writeCreateOnlyJson(join(input.outputRoot, REFERENCE_RESPONSIBILITY_ATTESTATION_PATH), {
+    schemaVersion: 'preschool-reference-responsibility-attestation-v1',
+    runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
+    validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+    responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+    referenceResponsibilityBriefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+    referenceResponsibilityBriefSha256: input.responsibilityBrief.sha256,
+  } satisfies PreschoolReferenceResponsibilityAttestationV1);
   await writeCreateOnlyJson(join(input.outputRoot, REFERENCE_SOURCE_ATTESTATION_PATH), {
     schemaVersion: 'preschool-reference-source-attestation-v1',
     runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
@@ -515,6 +527,7 @@ export async function writePreschoolReferenceTrialInputs(input: {
       OBSERVABLE_SUMMARY_PATH,
       OBSERVABLE_PAYLOAD_PATH,
       REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+      REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
       REFERENCE_SOURCE_ATTESTATION_PATH,
       FEEDBACK_SUMMARY_PATH,
       HYPOTHESIS_SUMMARY_PATH,

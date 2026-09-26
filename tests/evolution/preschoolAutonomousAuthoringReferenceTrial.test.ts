@@ -325,6 +325,20 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       trialInputs.artifactRelativePaths.includes('source/reference-trial/reference-responsibility-brief.json'),
       true,
     );
+    const responsibilityAttestationPath = 'source/reference-trial/reference-responsibility-attestation.json';
+    assert.deepEqual(
+      JSON.parse(await readFile(join(hostInputRoot, responsibilityAttestationPath), 'utf8')),
+      {
+        schemaVersion: 'preschool-reference-responsibility-attestation-v1',
+        runRef: 'preschool-pver-20260922231805-71297571',
+        validationLayer: 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM',
+        responsibilityProvenance: 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES',
+        referenceResponsibilityBriefRef: 'source/reference-trial/reference-responsibility-brief.json',
+        referenceResponsibilityBriefSha256: syntheticAcceptedBrief.sha256,
+      },
+    );
+    assert.equal(trialInputs.artifactRelativePaths.includes(responsibilityAttestationPath), true);
+    assert.equal(trialInputs.problemPackage.source.diagnosticEvidenceRefs.includes(responsibilityAttestationPath), false);
     if (acceptedBriefTestPath) {
       const accepted = await readAcceptedPreschoolReferenceResponsibilityBrief(acceptedBriefTestPath);
       if (!accepted.ok) throw new Error(accepted.reason);
@@ -405,6 +419,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       assert.equal(visiblePayload.entries[0].body, '你和同伴一起搭起小桥。');
       assert.equal(visiblePayload.entries[0].experienceContext.experienceCategory, 'passive');
       assert.equal(visibleFiles.includes('source/reference-trial/reference-source-attestation.json'), true);
+      assert.equal(visibleFiles.includes(responsibilityAttestationPath), true);
       for (const forbiddenPath of [
         'internal/player-surface-source.json',
         'provenance/source-fingerprint.json',

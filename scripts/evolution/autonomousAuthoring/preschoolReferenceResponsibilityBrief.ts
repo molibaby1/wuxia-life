@@ -22,6 +22,15 @@ export interface PreschoolReferenceResponsibilityBriefV1 {
   responsibilities: PreschoolReferenceResponsibilityV1[];
 }
 
+export interface PreschoolReferenceResponsibilityAttestationV1 {
+  schemaVersion: 'preschool-reference-responsibility-attestation-v1';
+  runRef: PreschoolReferenceResponsibilityBriefV1['runRef'];
+  validationLayer: typeof PRESCHOOL_REFERENCE_VALIDATION_LAYER;
+  responsibilityProvenance: typeof PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE;
+  referenceResponsibilityBriefRef: 'source/reference-trial/reference-responsibility-brief.json';
+  referenceResponsibilityBriefSha256: string;
+}
+
 type RecordValue = Record<string, unknown>;
 
 function assertRecord(value: unknown, path: string): asserts value is RecordValue {

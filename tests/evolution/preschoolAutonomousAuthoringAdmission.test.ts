@@ -6,7 +6,11 @@ import {
   evaluatePreschoolAutonomousAuthoringAdmission,
 } from '../../scripts/evolution/autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
-import { validatePreschoolReferenceResponsibilityBrief } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
+import {
+  PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
+  readAcceptedPreschoolReferenceResponsibilityBrief,
+  validatePreschoolReferenceResponsibilityBrief,
+} from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { runCandidateLane } from '../../scripts/evolution/runCandidateLane';
 import { infantPassiveNarrativeCatalog } from '../../src/data/infantPassiveNarrativeCatalog';
 import { getPreschoolPassiveEntries, isPreschoolPassiveEligible } from '../../src/data/preschoolPassiveSpine';
@@ -497,6 +501,7 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
     });
     const referenceContext = {
       brief: referenceBrief,
+      briefSha256: PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
       briefRef: 'source/reference-trial/reference-responsibility-brief.json' as const,
       attestationRef: 'source/reference-trial/reference-responsibility-attestation.json' as const,
     };
@@ -511,7 +516,7 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
       fixedCapacityEvidence: { ...structuralEvidence(), runRef: referenceBrief.runRef },
       referenceResponsibilityContext: referenceContext,
     };
-    assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission(referenceInput)).status, 'ELIGIBLE');
+    assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission(referenceInput)).status, 'AUTHORITY_STALE');
     assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission({
       ...referenceInput,
       referenceResponsibilityContext: {
@@ -520,11 +525,63 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
           ...referenceBrief.responsibilities[0]!, primaryLifeFunction: 'Changed',
         }] },
       },
-    })).status, 'INSUFFICIENT_EVIDENCE');
+    })).status, 'AUTHORITY_STALE');
     assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission({
       ...referenceInput,
-      review: { ...referenceReview, artifactRefs: ['source/observable-payload.json'] },
-    })).status, 'INSUFFICIENT_EVIDENCE');
+      referenceResponsibilityContext: {
+        ...referenceContext,
+        briefSha256: '0'.repeat(64),
+      },
+    })).status, 'AUTHORITY_STALE');
+
+    const acceptedBriefPath = process.env.PRESCHOOL_REFERENCE_RESPONSIBILITY_BRIEF_PATH;
+    if (acceptedBriefPath) {
+      const accepted = await readAcceptedPreschoolReferenceResponsibilityBrief(acceptedBriefPath);
+      if (!accepted.ok) throw new Error(accepted.reason);
+      const acceptedProposal = proposal({ count: accepted.value.brief.responsibilities.length });
+      for (const [index, responsibility] of accepted.value.brief.responsibilities.entries()) {
+        const proposedResponsibility = acceptedProposal.responsibilities[index]!;
+        proposedResponsibility.primaryLifeFunction = responsibility.primaryLifeFunction;
+        proposedResponsibility.playerVisibleNeed = responsibility.playerVisibleNeed;
+        proposedResponsibility.evidenceRefs = [];
+        const proposedCard = acceptedProposal.contractPayload!.cards[index]!;
+        proposedCard.primaryLifeFunction = responsibility.primaryLifeFunction;
+        proposedCard.playerVisibleNeed = responsibility.playerVisibleNeed;
+      }
+      const acceptedInput = {
+        ...referenceInput,
+        selectedOption: option(acceptedProposal),
+        referenceResponsibilityContext: {
+          ...referenceContext,
+          brief: accepted.value.brief,
+          briefSha256: accepted.value.sha256,
+        },
+      };
+      assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission(acceptedInput)).status, 'ELIGIBLE');
+      for (const field of ['primaryLifeFunction', 'playerVisibleNeed'] as const) {
+        const mutatedBrief = {
+          ...accepted.value.brief,
+          responsibilities: accepted.value.brief.responsibilities.map((item, index) => index === 0
+            ? { ...item, [field]: item[field] + ' changed' }
+            : item),
+        };
+        const mutatedProposal = structuredClone(acceptedProposal);
+        mutatedProposal.responsibilities[0]![field] = mutatedBrief.responsibilities[0]![field];
+        mutatedProposal.contractPayload!.cards[0]![field] = mutatedBrief.responsibilities[0]![field];
+        assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission({
+          ...acceptedInput,
+          selectedOption: option(mutatedProposal),
+          referenceResponsibilityContext: {
+            ...acceptedInput.referenceResponsibilityContext,
+            brief: mutatedBrief,
+          },
+        })).status, 'AUTHORITY_STALE');
+      }
+      assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission({
+        ...acceptedInput,
+        review: { ...referenceReview, artifactRefs: ['source/observable-payload.json'] },
+      })).status, 'INSUFFICIENT_EVIDENCE');
+    }
 
     const wrongScope = await evaluatePreschoolAutonomousAuthoringAdmission(
       input(repositoryRoot, sourceRoot, { ...option(), changeScope: 'configuration' }),

@@ -689,6 +689,7 @@ async function runVerifiedHistoricalTrial(input: {
       fixedCapacityEvidence: input.evidence,
       referenceResponsibilityContext: {
         brief: input.responsibilityBrief.brief,
+        briefSha256: input.responsibilityBrief.sha256,
         briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
         attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
       },

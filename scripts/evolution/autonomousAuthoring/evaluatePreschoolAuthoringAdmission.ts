@@ -24,8 +24,10 @@ import {
 } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
 import { canonicalJson, sha256Hex, validatePhase0RunRef } from '../phase0/provenance';
 import {
+  PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
   assertPreschoolReferenceResponsibilitiesPreserved,
   type PreschoolReferenceResponsibilityBriefV1,
+  validatePreschoolReferenceResponsibilityBrief,
 } from './preschoolReferenceResponsibilityBrief';
 
 const AUTHORITY_REFS = [
@@ -48,6 +50,7 @@ export interface EvaluatePreschoolAutonomousAuthoringAdmissionInput {
   fixedCapacityEvidence?: PreschoolCapacityEvidenceV1;
   referenceResponsibilityContext?: {
     brief: PreschoolReferenceResponsibilityBriefV1;
+    briefSha256: string;
     briefRef: 'source/reference-trial/reference-responsibility-brief.json';
     attestationRef: 'source/reference-trial/reference-responsibility-attestation.json';
   };
@@ -451,6 +454,20 @@ export async function evaluatePreschoolAutonomousAuthoringAdmission(
   }
   if (!await hasCurrentAuthority(input.repositoryRoot)) {
     return makeAdmission(input, 'AUTHORITY_STALE', null, ['PD-121, Content Authoring Workflow v3, or accepted design authority is missing.']);
+  }
+  if (input.referenceResponsibilityContext) {
+    try {
+      const brief = validatePreschoolReferenceResponsibilityBrief(input.referenceResponsibilityContext.brief);
+      const computedSha256 = sha256Hex(canonicalJson(brief));
+      if (computedSha256 !== PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256
+        || input.referenceResponsibilityContext.briefSha256 !== computedSha256) {
+        throw new Error('unaccepted reference responsibility brief');
+      }
+    } catch {
+      return makeAdmission(input, 'AUTHORITY_STALE', null, [
+        'Reference responsibility brief identity does not match the Human-accepted Layer A trust anchor.',
+      ]);
+    }
   }
 
   const claimedStatus = mapApplicability(proposal.applicabilityClaim);

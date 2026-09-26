@@ -42,7 +42,7 @@ const RESIDUAL_DESIGN_PATH = 'docs/superpowers/specs/2026-09-23-preschool-residu
 const ACCEPTED_DESIGN_PATH = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
 const REFERENCE_TRIAL_ROOT_PATH = 'artifacts/evolution/autonomous-authoring/reference-trials/preschool-pver-20260922231805-71297571';
 const REFERENCE_TRIAL_ATTEMPTS_PATH = join(REFERENCE_TRIAL_ROOT_PATH, 'attempts');
-const REFERENCE_HYPOTHESIS_UNKNOWN = 'The minimum sufficient shared-neutral responsibility set and concrete contract-conforming content instances needed to close the evidenced gaps remain to be derived and independently reviewed.';
+const REFERENCE_HYPOTHESIS_UNKNOWN = 'Whether the supplied Human-approved responsibilities admit independently authored contract-conforming content instances remains to be determined and independently reviewed.';
 
 async function put(root: string, relativePath: string, content: string): Promise<void> {
   const path = join(root, relativePath);

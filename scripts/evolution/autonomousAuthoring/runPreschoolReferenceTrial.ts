@@ -46,6 +46,7 @@ import {
   readAcceptedPreschoolReferenceResponsibilityBrief,
   type AcceptedPreschoolReferenceResponsibilityBrief,
   type PreschoolReferenceResponsibilityAttestationV1,
+  type PreschoolReferenceResponsibilityContextV1,
   type PreschoolReferenceResponsibilityBriefUnavailableReason,
 } from './preschoolReferenceResponsibilityBrief';
 
@@ -448,7 +449,7 @@ export async function writePreschoolReferenceTrialInputs(input: {
     feedbackRefs: ['overallImpression'],
     evidenceRefs: [CAPACITY_SUMMARY_PATH],
     unknowns: [
-      'The minimum sufficient shared-neutral responsibility set and concrete contract-conforming content instances needed to close the evidenced gaps remain to be derived and independently reviewed.',
+      'Whether the supplied Human-approved responsibilities admit independently authored contract-conforming content instances remains to be determined and independently reviewed.',
     ],
     productSignificance: 'Completing a minimum sufficient set of existing shared-neutral preschool experiences can close the four evidenced gaps without adding game mechanics.',
   } satisfies ImprovementHypothesis;
@@ -600,6 +601,13 @@ async function runVerifiedHistoricalTrial(input: {
       skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
       participant,
       autonomousAuthoringContractPacket: trialInputs.contractPacket,
+      referenceResponsibilityContext: {
+        validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+        responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+        briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+        attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+        brief: input.responsibilityBrief.brief,
+      } satisfies PreschoolReferenceResponsibilityContextV1,
     });
     if (!solution.ok) throw new Error(`Solution Participant failed: ${solution.message}`);
 

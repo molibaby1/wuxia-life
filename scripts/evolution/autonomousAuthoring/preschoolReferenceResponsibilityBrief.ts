@@ -31,6 +31,14 @@ export interface PreschoolReferenceResponsibilityAttestationV1 {
   referenceResponsibilityBriefSha256: string;
 }
 
+export interface PreschoolReferenceResponsibilityContextV1 {
+  validationLayer: typeof PRESCHOOL_REFERENCE_VALIDATION_LAYER;
+  responsibilityProvenance: typeof PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE;
+  briefRef: 'source/reference-trial/reference-responsibility-brief.json';
+  attestationRef: 'source/reference-trial/reference-responsibility-attestation.json';
+  brief: PreschoolReferenceResponsibilityBriefV1;
+}
+
 type RecordValue = Record<string, unknown>;
 
 function assertRecord(value: unknown, path: string): asserts value is RecordValue {

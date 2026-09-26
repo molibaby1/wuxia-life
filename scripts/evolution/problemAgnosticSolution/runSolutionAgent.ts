@@ -34,6 +34,7 @@ import {
   type DeliveredParticipantSkill,
 } from './solutionParticipantSkills';
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from '../autonomousAuthoring/buildPreschoolContractPacket';
+import type { PreschoolReferenceResponsibilityContextV1 } from '../autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 
 export interface RunSolutionAgentInput {
   problemPackage: ProblemPackage;
@@ -48,6 +49,7 @@ export interface RunSolutionAgentInput {
   skillAssignments: readonly ParticipantSkillAssignment[];
   participant: WorkspaceAgentParticipantOptions;
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
+  referenceResponsibilityContext?: PreschoolReferenceResponsibilityContextV1;
 }
 
 export interface RunSolutionRevisionInput extends RunSolutionAgentInput {
@@ -139,14 +141,17 @@ function renderSolutionWorkSchemaGuidance(): string {
 
 function renderAutonomousAuthoringPacket(
   packet: PreschoolAutonomousAuthoringContractPacketV1 | undefined,
+  referenceContext?: PreschoolReferenceResponsibilityContextV1,
 ): string[] {
   if (!packet) return [];
   return [
     'Decide applicability before authoring.',
     'Only APPLICABLE may contain responsibilities and Cards.',
-    'Derive the Minimum Sufficient Responsibility Set from permitted evidence and current catalog semantics.',
-    'Do not use a target count; max 8 is only an execution ceiling.',
-    'If the evidence-derived minimum exceeds 8 responsibilities, preserve the full set with contractPayload=null and do not author Cards; never truncate or split the case.',
+    ...(!referenceContext ? [
+      'Derive the Minimum Sufficient Responsibility Set from permitted evidence and current catalog semantics.',
+      'Do not use a target count; max 8 is only an execution ceiling.',
+      'If the evidence-derived minimum exceeds 8 responsibilities, preserve the full set with contractPayload=null and do not author Cards; never truncate or split the case.',
+    ] : []),
     'One primary responsibility maps to exactly one Card.',
     'Do not author new content before applicability is established.',
     'If evidence is insufficient, preserve INSUFFICIENT_EVIDENCE rather than guessing.',
@@ -158,6 +163,17 @@ function renderAutonomousAuthoringPacket(
     'For contamination-controlled historical trials, the full source authority may intentionally be absent from the Participant workspace. Do not require access to that intentionally withheld answer-bearing source document as a prerequisite for using the supplied Contract Packet.',
     'Participant-safe Autonomous Authoring Contract Packet:',
     canonicalJson(packet),
+    ...(referenceContext ? [
+      'Layer A exception to the generic Contract Packet §9 derivation instruction: this is Historical Controlled Downstream Mechanism validation. The supplied Reference Responsibility Brief is Human-approved semantic input.',
+      `Read the exact brief at ${referenceContext.briefRef} and provenance attestation at ${referenceContext.attestationRef}.`,
+      `Reference Responsibility Brief: ${canonicalJson(referenceContext.brief)}`,
+      'Do not derive, replace, add, omit, merge, or split the responsibility set. Do not claim these responsibilities were independently derived from observable payload or capacity evidence.',
+      'For APPLICABLE, preserve every brief responsibility one-to-one and independently author all Card and instance-level fields, including developmental age and justification, concrete scene, closest-entry distinction, shared-neutral portability, transient-role and durable-result compliance, production ID, title, and text.',
+      'For each Layer A responsibility, autonomousAuthoring.responsibilities[n].evidenceRefs must be [] because responsibility provenance is the Human-approved brief, not player-visible evidence.',
+      'sourceEvidenceRefs should still cite permitted case-level evidence for historical structural problem fit and instance-level applicability.',
+      'The Reference Responsibility Brief does not force APPLICABLE. If a supplied responsibility cannot fit Contract v1, use NOT_APPLICABLE, INSUFFICIENT_EVIDENCE, or CONTRACT_CHANGE_REQUIRED as appropriate.',
+      'Historical production IDs, titles, texts, age answers, scenes, closest-entry answers, and later implementation answers remain unavailable and must not be guessed.',
+    ] : []),
   ];
 }
 
@@ -165,6 +181,7 @@ export function buildSolutionAgentPrompt(
   problemPackage: ProblemPackage,
   assignedSkills: DeliveredParticipantSkill[],
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1,
+  referenceResponsibilityContext?: PreschoolReferenceResponsibilityContextV1,
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
     `Skill: ${skill.identity}`,
@@ -215,7 +232,7 @@ export function buildSolutionAgentPrompt(
     '- Use INSUFFICIENT_EVIDENCE only after grounded investigation and candidate verification leave a material unknown that the available evidence cannot resolve. Use NO_PROPOSAL only when the evidence supports that no change should be proposed. Neither is a time-budget escape hatch.',
     '- Produce a repository-grounded result that Reviewer can independently assess; do not perform an exhaustive second-pass review yourself.',
     '',
-    ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket),
+    ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket, referenceResponsibilityContext),
     ...(autonomousAuthoringContractPacket ? [''] : []),
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,
@@ -479,7 +496,7 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
     problemPackage,
     problemPackageSha256,
     assignedSkills,
-    buildSolutionAgentPrompt(problemPackage, assignedSkills, input.autonomousAuthoringContractPacket),
+    buildSolutionAgentPrompt(problemPackage, assignedSkills, input.autonomousAuthoringContractPacket, input.referenceResponsibilityContext),
   );
 }
 

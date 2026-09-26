@@ -18,6 +18,7 @@ import {
   type RunSolutionRevisionInput,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
+import type { PreschoolReferenceResponsibilityContextV1 } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
@@ -210,6 +211,30 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   }
   assert.ok(authoringPrompt.indexOf(packetJson) > previousInstructionIndex);
   assert.match(authoringPrompt, new RegExp(escapeRegex(packetJson)));
+  const referenceContext: PreschoolReferenceResponsibilityContextV1 = {
+    validationLayer: 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM',
+    responsibilityProvenance: 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES',
+    briefRef: 'source/reference-trial/reference-responsibility-brief.json',
+    attestationRef: 'source/reference-trial/reference-responsibility-attestation.json',
+    brief: {
+      schemaVersion: 'preschool-reference-responsibility-brief-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      responsibilities: [{
+        responsibilityRef: 'reference-responsibility-000001',
+        primaryLifeFunction: 'Shared play',
+        playerVisibleNeed: 'A child needs a shared play experience.',
+      }],
+    },
+  };
+  const referencePrompt = buildSolutionAgentPrompt(problemPackage, [], autonomousAuthoringContractPacket, referenceContext);
+  assert.ok(referencePrompt.indexOf('Do not derive, replace, add, omit, merge, or split the responsibility set')
+    > referencePrompt.indexOf('Derive the Minimum Sufficient Responsibility Set from permitted evidence'));
+  assert.match(referencePrompt, /Do not derive, replace, add, omit, merge, or split the responsibility set/);
+  assert.match(referencePrompt, /autonomousAuthoring\.responsibilities\[n\]\.evidenceRefs must be \[\]/);
+  assert.match(referencePrompt, /independently author.*Card.*instance-level/i);
+  assert.match(referencePrompt, /does not force APPLICABLE/);
+  assert.match(referencePrompt, /A child needs a shared play experience/);
+  assert.doesNotMatch(referencePrompt, /preschool_neutral_fair_play/);
 
   const root = await mkdtemp(join(tmpdir(), 'solution-agent-loop-'));
   const workspaceRoot = join(root, 'workspace');

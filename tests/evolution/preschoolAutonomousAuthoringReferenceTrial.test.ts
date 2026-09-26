@@ -4,7 +4,11 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
-import { validatePreschoolReferenceResponsibilityBrief } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
+import {
+  readAcceptedPreschoolReferenceResponsibilityBrief,
+  validatePreschoolReferenceResponsibilityBrief,
+} from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
+import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
@@ -108,6 +112,55 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
 
   const root = await mkdtemp(join(tmpdir(), 'preschool-reference-trial-test-'));
   try {
+    const syntheticBrief = validatePreschoolReferenceResponsibilityBrief({
+      schemaVersion: 'preschool-reference-responsibility-brief-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      responsibilities: [{
+        responsibilityRef: 'reference-responsibility-000001',
+        primaryLifeFunction: 'Shared play',
+        playerVisibleNeed: 'A child needs a shared play experience.',
+      }],
+    });
+    const syntheticBriefBytes = Buffer.from(canonicalJson(syntheticBrief));
+    const syntheticBriefPath = join(root, 'synthetic-brief.json');
+    await writeFile(syntheticBriefPath, syntheticBriefBytes);
+    assert.deepEqual(await readAcceptedPreschoolReferenceResponsibilityBrief(null), {
+      ok: false,
+      reason: 'Reference Responsibility Brief path was not supplied.',
+    });
+    assert.deepEqual(await readAcceptedPreschoolReferenceResponsibilityBrief(join(root, 'absent-brief.json')), {
+      ok: false,
+      reason: 'Reference Responsibility Brief file could not be read.',
+    });
+    assert.deepEqual(await readAcceptedPreschoolReferenceResponsibilityBrief(syntheticBriefPath), {
+      ok: false,
+      reason: 'Reference Responsibility Brief digest did not match the accepted digest.',
+    });
+    const malformedBriefPath = join(root, 'malformed-brief.json');
+    await writeFile(malformedBriefPath, '{invalid json');
+    assert.deepEqual(await readAcceptedPreschoolReferenceResponsibilityBrief(malformedBriefPath), {
+      ok: false,
+      reason: 'Reference Responsibility Brief is malformed JSON.',
+    });
+    const invalidBriefPath = join(root, 'invalid-brief.json');
+    await writeFile(invalidBriefPath, '{}');
+    assert.deepEqual(await readAcceptedPreschoolReferenceResponsibilityBrief(invalidBriefPath), {
+      ok: false,
+      reason: 'Reference Responsibility Brief schema or runRef is invalid.',
+    });
+    const acceptedBriefTestPath = process.env.PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_BRIEF_TEST_PATH;
+    if (acceptedBriefTestPath) {
+      const accepted = await readAcceptedPreschoolReferenceResponsibilityBrief(acceptedBriefTestPath);
+      if (!accepted.ok) throw new Error(accepted.reason);
+      assert.deepEqual(accepted.value.bytes, await readFile(acceptedBriefTestPath));
+      assert.equal(accepted.value.sha256, '864f99ffa26d41631e329c229a7289bef2e9998fe04eb4c25ef51dcf5b99980a');
+      assert.equal(accepted.value.brief.responsibilities.length, 5);
+    }
+    const syntheticAcceptedBrief = {
+      brief: syntheticBrief,
+      bytes: syntheticBriefBytes,
+      sha256: sha256Hex(syntheticBriefBytes),
+    };
     const currentRoot = join(root, 'current');
     const historicalRoot = join(root, 'historical');
     const packetPath = 'source/reference-trial/autonomous-authoring-contract-packet.json';
@@ -245,6 +298,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       const cliStopCode = await runPreschoolReferenceTrialCli([
         '--evidence', join(root, 'missing-cli-evidence.json'),
         '--observable-payload', syntheticPayloadPath,
+        '--responsibility-brief', syntheticBriefPath,
         '--attempt-ref', 'attempt-000002',
       ]);
       assert.equal(cliStopCode, 1);
@@ -260,8 +314,35 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       candidateBaselineRoot: historicalRoot,
       runRef: 'preschool-pver-20260922231805-71297571',
       observablePayloadBytes: syntheticPayloadBytes,
+      responsibilityBrief: syntheticAcceptedBrief,
     });
     assert.equal(trialInputs.problemPackage.source.observablePayloadRef, 'source/reference-trial/observable-payload.json');
+    assert.deepEqual(
+      await readFile(join(hostInputRoot, 'source/reference-trial/reference-responsibility-brief.json')),
+      syntheticBriefBytes,
+    );
+    assert.equal(
+      trialInputs.artifactRelativePaths.includes('source/reference-trial/reference-responsibility-brief.json'),
+      true,
+    );
+    if (acceptedBriefTestPath) {
+      const accepted = await readAcceptedPreschoolReferenceResponsibilityBrief(acceptedBriefTestPath);
+      if (!accepted.ok) throw new Error(accepted.reason);
+      const acceptedInputRoot = join(root, 'accepted-brief-inputs');
+      await writePreschoolReferenceTrialInputs({
+        outputRoot: acceptedInputRoot,
+        authorityRepositoryRoot: currentRoot,
+        candidateBaselineRoot: historicalRoot,
+        runRef: 'preschool-pver-20260922231805-71297571',
+        observablePayloadBytes: syntheticPayloadBytes,
+        responsibilityBrief: accepted.value,
+      });
+      const materializedBriefBytes = await readFile(
+        join(acceptedInputRoot, 'source/reference-trial/reference-responsibility-brief.json'),
+      );
+      assert.deepEqual(materializedBriefBytes, await readFile(acceptedBriefTestPath));
+      assert.equal(sha256Hex(materializedBriefBytes), accepted.value.sha256);
+    }
     const materializedPayload = await readFile(join(hostInputRoot, 'source/reference-trial/observable-payload.json'));
     assert.deepEqual(materializedPayload, syntheticPayloadBytes);
     assert.equal(createHash('sha256').update(materializedPayload).digest('hex'), syntheticPayloadSha);
@@ -431,6 +512,37 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
         });
         assert.equal(resolvedBinding, false);
         await assert.rejects(readdir(join(currentRoot, REFERENCE_TRIAL_ATTEMPTS_PATH)), { code: 'ENOENT' });
+      }
+    }
+
+    const acceptedObservableTestPath = process.env.PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_OBSERVABLE_TEST_PATH;
+    if (acceptedEvidenceTestPath && acceptedObservableTestPath) {
+      for (const [responsibilityBriefPath, reason] of [
+        [null, 'Reference Responsibility Brief path was not supplied.'],
+        [syntheticBriefPath, 'Reference Responsibility Brief digest did not match the accepted digest.'],
+        [malformedBriefPath, 'Reference Responsibility Brief is malformed JSON.'],
+        [invalidBriefPath, 'Reference Responsibility Brief schema or runRef is invalid.'],
+      ] as const) {
+        let resolvedBinding = false;
+        const briefStop = await runPreschoolReferenceTrial({
+          liveRepositoryRoot: currentRoot,
+          evidencePath: acceptedEvidenceTestPath,
+          observablePayloadPath: acceptedObservableTestPath,
+          responsibilityBriefPath,
+        }, {
+          resolveParticipantBinding: async () => {
+            resolvedBinding = true;
+            throw new Error('must not bind a Participant without the exact accepted brief');
+          },
+        });
+        assert.deepEqual(briefStop, {
+          schemaVersion: 'preschool-reference-trial-stop-v1',
+          status: 'REFERENCE_RESPONSIBILITY_BRIEF_UNAVAILABLE',
+          runRef: 'preschool-pver-20260922231805-71297571',
+          reason,
+        });
+        assert.equal(resolvedBinding, false);
+        await assert.rejects(readdir(join(currentRoot, REFERENCE_TRIAL_ROOT_PATH)), { code: 'ENOENT' });
       }
     }
 

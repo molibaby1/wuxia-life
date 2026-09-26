@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import { sha256Hex } from '../phase0/provenance';
+
 export const PRESCHOOL_REFERENCE_VALIDATION_LAYER =
   'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM' as const;
 
@@ -80,4 +83,52 @@ export function validatePreschoolReferenceResponsibilityBrief(
     runRef: 'preschool-pver-20260922231805-71297571',
     responsibilities,
   };
+}
+
+export interface AcceptedPreschoolReferenceResponsibilityBrief {
+  brief: PreschoolReferenceResponsibilityBriefV1;
+  bytes: Buffer;
+  sha256: string;
+}
+
+export type PreschoolReferenceResponsibilityBriefUnavailableReason =
+  | 'Reference Responsibility Brief path was not supplied.'
+  | 'Reference Responsibility Brief file could not be read.'
+  | 'Reference Responsibility Brief digest did not match the accepted digest.'
+  | 'Reference Responsibility Brief is malformed JSON.'
+  | 'Reference Responsibility Brief schema or runRef is invalid.';
+
+export async function readAcceptedPreschoolReferenceResponsibilityBrief(
+  path: string | null | undefined,
+): Promise<
+  | { ok: true; value: AcceptedPreschoolReferenceResponsibilityBrief }
+  | { ok: false; reason: PreschoolReferenceResponsibilityBriefUnavailableReason }
+> {
+  if (typeof path !== 'string' || path.length === 0) {
+    return { ok: false, reason: 'Reference Responsibility Brief path was not supplied.' };
+  }
+  let bytes: Buffer;
+  try {
+    bytes = await readFile(path);
+  } catch {
+    return { ok: false, reason: 'Reference Responsibility Brief file could not be read.' };
+  }
+  const sha256 = sha256Hex(bytes);
+  const digestMatches = sha256 === PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(bytes.toString('utf8')) as unknown;
+  } catch {
+    return { ok: false, reason: 'Reference Responsibility Brief is malformed JSON.' };
+  }
+  let brief: PreschoolReferenceResponsibilityBriefV1;
+  try {
+    brief = validatePreschoolReferenceResponsibilityBrief(parsed);
+  } catch {
+    return { ok: false, reason: 'Reference Responsibility Brief schema or runRef is invalid.' };
+  }
+  if (!digestMatches) {
+    return { ok: false, reason: 'Reference Responsibility Brief digest did not match the accepted digest.' };
+  }
+  return { ok: true, value: { brief, bytes, sha256 } };
 }

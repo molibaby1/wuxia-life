@@ -419,6 +419,8 @@ A Human-approved Autonomous Authoring Contract is a separate delegated shadow-ex
 It does not convert content authoring into ordinary configuration execution.
 该 authority 仅覆盖 PD-121 明确批准且 Host 判定适用的 shadow workspace；不授权修改 authoritative repository。
 
+2026-09-26 Reference Validation Proof Split 将 historical controlled validation 与 ordinary natural flow 的 durable proof provenance 分开：前者只在 reference-validation-local Layer A 使用 Human-approved Reference Responsibility Brief，并记录 validationLayer = HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM、responsibilityProvenance = HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES；它不验证 Contract §9 derivation 或 full Contract v1 flow。普通 natural flow 继续按 §9 自主推导，记录 responsibilityProvenance = EVIDENCE_DERIVED_MINIMUM_RESPONSIBILITY_SET，不接收该 Brief。两者不得在 durable evidence / report 中混淆；现有 READY_FOR_CONFIG_EXECUTION 与 READY_FOR_SHADOW_AUTHORING routes、同一 authoritative Source Epoch 的 shadow 语义及 RUN / OBSERVE 阶段均不变。
+
 ## 9. Orchestrator 应该强在哪里
 
 优先增强：

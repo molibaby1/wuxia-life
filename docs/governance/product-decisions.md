@@ -2301,3 +2301,23 @@ PD-111、PD-118、PD-119、repository fingerprint / baseline integrity、Human a
 **重新讨论条件**
 
 只按 accepted design §28 的 re-discussion triggers 重新讨论。
+
+#### 2026-09-26 Reference Validation Proof Split Reconciliation
+
+**Human accepted：2026-09-26**
+
+本次调和同时以 2026-09-24 Contract-Constrained Autonomous Authoring v1 design 和 2026-09-26 Reference Validation Proof Split 为 authority basis；后者只替换前者的 historical reference-validation proof obligation，不修改 Contract v1 identity、rules 或 authority SHA。原 PD-121 的 shadow-only delegated authority、唯一启用的 preschool-shared-neutral-passive-capacity-v1@1、Human exact-patch promotion、PD-111 evidence boundary 和 PD-118 source-change boundary 均保持不变。
+
+- **Layer A — Historical Controlled Downstream Mechanism Proof：**仅是受控历史验证。可使用 Human-approved Reference Responsibility Brief，责任 provenance 为 HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES。Layer A does NOT validate Contract §9 responsibility derivation and does NOT validate the full Contract v1 flow。即使达到 SHADOW_AUTHORING_VERIFIED，durable result 也必须同时标记：
+
+~~~text
+validationLayer = HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM
+responsibilityProvenance = HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES
+~~~
+
+其能力结论只能是 Historical controlled downstream mechanism: PASS，不能宣称 Contract v1 fully validated、autonomous semantic derivation verified 或 natural activation verified。Brief 只属于 reference-validation-local input，不是普通 natural AE input；不建立 generic HUMAN_RESPONSIBILITY_MODE。
+
+- **Layer B — Natural Autonomous Semantic-Derivation Proof：**普通 natural case 仍按完整 Contract §9，从 problem evidence、catalog semantic inventory 和获准的 player-visible evidence 独立推导 Minimum Sufficient Responsibility Set，记录 responsibilityProvenance = EVIDENCE_DERIVED_MINIMUM_RESPONSIBILITY_SET。不得提供 Reference Responsibility Brief、Human-selected missing life functions、target responsibility count 或 historical answer mapping。只有 genuine natural candidate 完成该路径，才能报告 Natural autonomous semantic derivation: PASS。
+- **Layer C — Natural Effectiveness：**SHADOW_AUTHORING_VERIFIED 不等于 Natural Effectiveness。只有 Human exact-patch promotion 后的 subsequent Natural PVER 才能判断效果；shadow result 本身也不改变 authoritative Source Epoch，不触发 PD-118 source-change barrier 或 supersede PENDING candidates。
+
+当前产品阶段仍为 RUN / OBSERVE；不得为 Layer B 制造样本、强迫 READY、预选必成功 candidate 或 retry until success。Layer A real historical trial 仍需独立 Human authorization；本次治理调和不代表 runtime implementation 或任何 proof layer 已完成。

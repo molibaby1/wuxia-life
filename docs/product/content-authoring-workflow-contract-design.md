@@ -111,6 +111,8 @@ Gap Diagnosis
 Shadow authoring never equals authoritative implementation.
 A Natural Player-visible Experience Review still occurs only after a Human-authorized authoritative promotion.
 
+**2026-09-26 Reference Validation Proof Split reconciliation（Human accepted）：**[accepted design](../superpowers/specs/2026-09-26-autonomous-authoring-reference-validation-proof-split-design.md) 将 historical Layer A 限定为可接收 Human-approved Reference Responsibility Brief 的下游机制验证，provenance 为 HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES；它不验证 Contract §9 responsibility derivation 或 full Contract v1 flow。普通 natural Autonomous Authoring 仍须自行从获准 evidence 推导责任集，provenance 为 EVIDENCE_DERIVED_MINIMUM_RESPONSIBILITY_SET；Human responsibility brief 不是普通生产输入。两种 proof 不改变上述 shadow workflow 或 Human exact-patch promotion boundary。
+
 Player-visible Experience Review 失败后必须回到 Gap Diagnosis，而不是直接继续加内容。
 
 ---

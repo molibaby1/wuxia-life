@@ -657,6 +657,11 @@ async function runVerifiedHistoricalTrial(input: {
       proposalSha256: sha256Hex(canonicalJson(selectedOption.autonomousAuthoring)),
       reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
       fixedCapacityEvidence: input.evidence,
+      referenceResponsibilityContext: {
+        brief: input.responsibilityBrief.brief,
+        briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+        attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+      },
     });
     if (admission.status !== 'ELIGIBLE') {
       throw new Error(`Host admission did not establish eligibility: ${admission.status} (${admission.reasons.join('; ')})`);

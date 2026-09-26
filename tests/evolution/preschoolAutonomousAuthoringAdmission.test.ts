@@ -6,6 +6,7 @@ import {
   evaluatePreschoolAutonomousAuthoringAdmission,
 } from '../../scripts/evolution/autonomousAuthoring/evaluatePreschoolAuthoringAdmission';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
+import { validatePreschoolReferenceResponsibilityBrief } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { runCandidateLane } from '../../scripts/evolution/runCandidateLane';
 import { infantPassiveNarrativeCatalog } from '../../src/data/infantPassiveNarrativeCatalog';
 import { getPreschoolPassiveEntries, isPreschoolPassiveEligible } from '../../src/data/preschoolPassiveSpine';
@@ -478,6 +479,52 @@ export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<v
       input(repositoryRoot, sourceRoot, option(unreferenced)),
     );
     assert.equal(missingParticipantRefs.status, 'INSUFFICIENT_EVIDENCE');
+    const noResponsibilityEvidence = proposal();
+    noResponsibilityEvidence.responsibilities[0]!.evidenceRefs = [];
+    const naturalMissingResponsibilityEvidence = await evaluatePreschoolAutonomousAuthoringAdmission({
+      ...input(repositoryRoot, sourceRoot, option(noResponsibilityEvidence)),
+      fixedCapacityEvidence: structuralEvidence(),
+    });
+    assert.equal(naturalMissingResponsibilityEvidence.status, 'INSUFFICIENT_EVIDENCE');
+    const referenceBrief = validatePreschoolReferenceResponsibilityBrief({
+      schemaVersion: 'preschool-reference-responsibility-brief-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      responsibilities: [{
+        responsibilityRef: 'reference-responsibility-000001',
+        primaryLifeFunction: noResponsibilityEvidence.responsibilities[0]!.primaryLifeFunction,
+        playerVisibleNeed: noResponsibilityEvidence.responsibilities[0]!.playerVisibleNeed,
+      }],
+    });
+    const referenceContext = {
+      brief: referenceBrief,
+      briefRef: 'source/reference-trial/reference-responsibility-brief.json' as const,
+      attestationRef: 'source/reference-trial/reference-responsibility-attestation.json' as const,
+    };
+    const referenceReview = { ...review(), artifactRefs: [
+      'source/reference-trial/reference-responsibility-brief.json',
+      'source/reference-trial/reference-responsibility-attestation.json',
+      'source/observable-payload.json',
+    ] };
+    const referenceInput = {
+      ...input(repositoryRoot, sourceRoot, option(noResponsibilityEvidence), referenceReview),
+      sourceRunRef: referenceBrief.runRef,
+      fixedCapacityEvidence: { ...structuralEvidence(), runRef: referenceBrief.runRef },
+      referenceResponsibilityContext: referenceContext,
+    };
+    assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission(referenceInput)).status, 'ELIGIBLE');
+    assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission({
+      ...referenceInput,
+      referenceResponsibilityContext: {
+        ...referenceContext,
+        brief: { ...referenceBrief, responsibilities: [{
+          ...referenceBrief.responsibilities[0]!, primaryLifeFunction: 'Changed',
+        }] },
+      },
+    })).status, 'INSUFFICIENT_EVIDENCE');
+    assert.equal((await evaluatePreschoolAutonomousAuthoringAdmission({
+      ...referenceInput,
+      review: { ...referenceReview, artifactRefs: ['source/observable-payload.json'] },
+    })).status, 'INSUFFICIENT_EVIDENCE');
 
     const wrongScope = await evaluatePreschoolAutonomousAuthoringAdmission(
       input(repositoryRoot, sourceRoot, { ...option(), changeScope: 'configuration' }),

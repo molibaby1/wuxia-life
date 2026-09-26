@@ -23,6 +23,10 @@ import {
   type PreschoolCapacityEvidenceV1,
 } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
 import { canonicalJson, sha256Hex, validatePhase0RunRef } from '../phase0/provenance';
+import {
+  assertPreschoolReferenceResponsibilitiesPreserved,
+  type PreschoolReferenceResponsibilityBriefV1,
+} from './preschoolReferenceResponsibilityBrief';
 
 const AUTHORITY_REFS = [
   'docs/governance/product-decisions.md',
@@ -42,6 +46,11 @@ export interface EvaluatePreschoolAutonomousAuthoringAdmissionInput {
   proposalSha256: string;
   reviewSha256: string;
   fixedCapacityEvidence?: PreschoolCapacityEvidenceV1;
+  referenceResponsibilityContext?: {
+    brief: PreschoolReferenceResponsibilityBriefV1;
+    briefRef: 'source/reference-trial/reference-responsibility-brief.json';
+    attestationRef: 'source/reference-trial/reference-responsibility-attestation.json';
+  };
 }
 
 interface CatalogEntry {
@@ -473,7 +482,24 @@ export async function evaluatePreschoolAutonomousAuthoringAdmission(
     || reviewAssessment.blockers.length > 0) {
     return makeAdmission(input, 'INSUFFICIENT_EVIDENCE', null, ['The independent Reviewer did not establish accepted, conforming, within-envelope authority.']);
   }
-  if (!participantEvidenceRefsArePresent(proposal, input.review)) {
+  if (input.referenceResponsibilityContext) {
+    const { brief, briefRef, attestationRef } = input.referenceResponsibilityContext;
+    try {
+      assertPreschoolReferenceResponsibilitiesPreserved({ brief, proposal });
+    } catch {
+      return makeAdmission(input, 'INSUFFICIENT_EVIDENCE', null, ['The reference responsibility set was not preserved one-to-one.']);
+    }
+    const caseEvidenceRef = (ref: string) => participantVisibleEvidenceRef(ref)
+      && ref.endsWith('/observable-payload.json');
+    if (brief.runRef !== input.sourceRunRef
+      || input.fixedCapacityEvidence === undefined
+      || !proposal.sourceEvidenceRefs.some(caseEvidenceRef)
+      || !input.review.artifactRefs.includes(briefRef)
+      || !input.review.artifactRefs.includes(attestationRef)
+      || !input.review.artifactRefs.some(caseEvidenceRef)) {
+      return makeAdmission(input, 'INSUFFICIENT_EVIDENCE', null, ['The reference brief or permitted case evidence was not independently reviewed.']);
+    }
+  } else if (!participantEvidenceRefsArePresent(proposal, input.review)) {
     return makeAdmission(input, 'INSUFFICIENT_EVIDENCE', null, ['The proposal or Reviewer lacks references to permitted player-visible evidence.']);
   }
 

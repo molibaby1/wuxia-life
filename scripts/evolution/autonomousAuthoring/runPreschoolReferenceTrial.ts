@@ -42,8 +42,9 @@ import { buildPromotionPackage } from './buildPromotionPackage';
 
 export const PRESCHOOL_REFERENCE_TRIAL_RUN_REF = 'preschool-pver-20260922231805-71297571' as const;
 export const PRESCHOOL_REFERENCE_TRIAL_BASELINE_SHA = 'e80eecc868a6ca99f4a53ff5d2493a13b4c0a8bf' as const;
-// Keep the Participant path closed until the accepted evidence provenance supplies a trusted digest.
-export const PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256: string | null = null;
+// This digest is the Human-accepted reference evidence trust anchor.
+export const PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256 =
+  'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3' as const;
 export const PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS = [
   'docs/governance/product-decisions.md',
   'docs/product/content-authoring-workflow-contract-design.md',

@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import {
+  PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
   overlayReferenceTrialAuthority,
   prepareReferenceTrialParticipantWorkspace,
   runPreschoolReferenceTrial,
@@ -45,6 +46,11 @@ async function listFiles(root: string, relativePath = ''): Promise<string[]> {
 }
 
 export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Promise<void> {
+  assert.equal(
+    PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
+    'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3',
+  );
+
   const root = await mkdtemp(join(tmpdir(), 'preschool-reference-trial-test-'));
   try {
     const currentRoot = join(root, 'current');

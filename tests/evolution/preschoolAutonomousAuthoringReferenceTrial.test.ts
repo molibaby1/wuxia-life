@@ -7,9 +7,12 @@ import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/e
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
+  createPreschoolReferenceTrialOutputRoot,
   overlayReferenceTrialAuthority,
   prepareReferenceTrialParticipantWorkspace,
+  referenceTrialInvocationRef,
   runPreschoolReferenceTrial,
+  runPreschoolReferenceTrialCli,
   writePreschoolReferenceTrialInputs,
   withParticipantContaminationGuard,
 } from '../../scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial';
@@ -30,6 +33,8 @@ const AUTHORITY_PATHS = [
 
 const RESIDUAL_DESIGN_PATH = 'docs/superpowers/specs/2026-09-23-preschool-residual-content-capacity-authoring-design.md';
 const ACCEPTED_DESIGN_PATH = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
+const REFERENCE_TRIAL_ROOT_PATH = 'artifacts/evolution/autonomous-authoring/reference-trials/preschool-pver-20260922231805-71297571';
+const REFERENCE_TRIAL_ATTEMPTS_PATH = join(REFERENCE_TRIAL_ROOT_PATH, 'attempts');
 const REFERENCE_HYPOTHESIS_UNKNOWN = 'The minimum sufficient shared-neutral responsibility set and concrete contract-conforming content instances needed to close the evidenced gaps remain to be derived and independently reviewed.';
 
 async function put(root: string, relativePath: string, content: string): Promise<void> {
@@ -86,6 +91,92 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     await put(historicalRoot, 'artifacts/evolution/later-pver/observations.json', `later PVER ${ANSWER_IDS.join(' ')}`);
 
     await overlayReferenceTrialAuthority(currentRoot, historicalRoot);
+
+    const legacyOutputFixtureRoot = join(root, 'legacy-output-fixture');
+    assert.equal(
+      await createPreschoolReferenceTrialOutputRoot(legacyOutputFixtureRoot),
+      join(legacyOutputFixtureRoot, REFERENCE_TRIAL_ROOT_PATH),
+    );
+
+    const identityRoot = join(root, 'attempt-identity-fixture');
+    const legacyAttemptRoot = join(identityRoot, REFERENCE_TRIAL_ROOT_PATH);
+    const legacyHypothesis = Buffer.from('legacy attempt one hypothesis bytes\n');
+    const legacyLog = Buffer.from('legacy attempt one log bytes\n');
+    await put(
+      identityRoot,
+      join(REFERENCE_TRIAL_ROOT_PATH, 'source/reference-trial/improvement-hypothesis.json'),
+      legacyHypothesis.toString('utf8'),
+    );
+    await put(
+      identityRoot,
+      join(REFERENCE_TRIAL_ROOT_PATH, 'trial-cli-output.log'),
+      legacyLog.toString('utf8'),
+    );
+
+    const attemptTwoRoot = await createPreschoolReferenceTrialOutputRoot(identityRoot, 'attempt-000002');
+    assert.equal(attemptTwoRoot, join(legacyAttemptRoot, 'attempts', 'attempt-000002'));
+    await put(attemptTwoRoot, 'source/reference-trial/improvement-hypothesis.json', 'attempt two hypothesis bytes\n');
+    await put(attemptTwoRoot, 'trial-cli-output.log', 'attempt two log bytes\n');
+    assert.deepEqual((await listFiles(attemptTwoRoot)).sort(), [
+      'source/reference-trial/improvement-hypothesis.json',
+      'trial-cli-output.log',
+    ]);
+    await assert.rejects(
+      createPreschoolReferenceTrialOutputRoot(identityRoot, 'attempt-000002'),
+      /EEXIST/,
+    );
+    const attemptThreeRoot = await createPreschoolReferenceTrialOutputRoot(identityRoot, 'attempt-000003');
+    assert.equal(attemptThreeRoot, join(legacyAttemptRoot, 'attempts', 'attempt-000003'));
+    assert.deepEqual((await readdir(join(legacyAttemptRoot, 'attempts'))).sort(), ['attempt-000002', 'attempt-000003']);
+    assert.deepEqual(await readFile(join(legacyAttemptRoot, 'source/reference-trial/improvement-hypothesis.json')), legacyHypothesis);
+    assert.deepEqual(await readFile(join(legacyAttemptRoot, 'trial-cli-output.log')), legacyLog);
+
+    const unsafeAttemptRefs = ['../attempt-000002', '/absolute/path', 'attempt-2', 'attempt-000002/foo', ''];
+    for (const unsafeAttemptRef of unsafeAttemptRefs) {
+      await assert.rejects(
+        createPreschoolReferenceTrialOutputRoot(identityRoot, unsafeAttemptRef),
+        /Invalid reference trial attemptRef/,
+      );
+    }
+    assert.equal(
+      referenceTrialInvocationRef('attempt-000002', 'solution'),
+      'preschool-pver-20260922231805-71297571/attempt-000002/solution-000001',
+    );
+    assert.equal(
+      referenceTrialInvocationRef('attempt-000002', 'reviewer'),
+      'preschool-pver-20260922231805-71297571/attempt-000002/reviewer-000001',
+    );
+    assert.equal(
+      referenceTrialInvocationRef('attempt-000002', 'shadow-authoring'),
+      'preschool-pver-20260922231805-71297571/attempt-000002/shadow-authoring',
+    );
+    assert.equal(
+      referenceTrialInvocationRef(null, 'solution'),
+      'preschool-pver-20260922231805-71297571-solution-000001',
+    );
+
+    const cliRoot = join(root, 'attempt-ref-cli');
+    await mkdir(cliRoot, { recursive: true });
+    const originalWorkingDirectory = process.cwd();
+    process.chdir(cliRoot);
+    try {
+      await assert.rejects(
+        runPreschoolReferenceTrialCli([
+          '--evidence', join(root, 'missing-cli-evidence.json'),
+          '--attempt-ref', '../attempt-000002',
+        ]),
+        /Invalid reference trial attemptRef/,
+      );
+      const cliStopCode = await runPreschoolReferenceTrialCli([
+        '--evidence', join(root, 'missing-cli-evidence.json'),
+        '--attempt-ref', 'attempt-000002',
+      ]);
+      assert.equal(cliStopCode, 1);
+      await assert.rejects(readdir(join(cliRoot, REFERENCE_TRIAL_ATTEMPTS_PATH)), { code: 'ENOENT' });
+    } finally {
+      process.chdir(originalWorkingDirectory);
+    }
+
     const hostInputRoot = join(root, 'synthetic-host-inputs');
     const trialInputs = await writePreschoolReferenceTrialInputs({
       outputRoot: hostInputRoot,
@@ -160,6 +251,17 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     });
     assert.equal(participantBindingResolved, false);
 
+    for (const unsafeAttemptRef of unsafeAttemptRefs) {
+      await assert.rejects(
+        runPreschoolReferenceTrial({
+          liveRepositoryRoot: currentRoot,
+          evidencePath: join(root, 'missing-accepted-evidence.json'),
+          attemptRef: unsafeAttemptRef,
+        }),
+        /Invalid reference trial attemptRef/,
+      );
+    }
+
     const fabricatedEvidencePath = join(root, 'fabricated-but-well-formed-evidence.json');
     await writeFile(fabricatedEvidencePath, JSON.stringify({
       schemaVersion: 'preschool-capacity-evidence-v1',
@@ -184,6 +286,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     const fabricatedEvidenceStop = await runPreschoolReferenceTrial({
       liveRepositoryRoot: currentRoot,
       evidencePath: fabricatedEvidencePath,
+      attemptRef: 'attempt-000002',
     }, {
       resolveParticipantBinding: async () => {
         fabricatedEvidenceResolvedBinding = true;
@@ -192,6 +295,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     }).catch(() => null);
     assert.deepEqual(fabricatedEvidenceStop, stop);
     assert.equal(fabricatedEvidenceResolvedBinding, false);
+    await assert.rejects(readdir(join(currentRoot, REFERENCE_TRIAL_ATTEMPTS_PATH)), { code: 'ENOENT' });
 
     const safeParticipant: WorkspaceAgentParticipantOptions = {
       executable: 'fake-participant',

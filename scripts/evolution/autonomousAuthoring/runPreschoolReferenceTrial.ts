@@ -92,10 +92,50 @@ export type PreschoolReferenceTrialResultV1 = PreschoolReferenceTrialStopV1 | Pr
 export interface RunPreschoolReferenceTrialInput {
   liveRepositoryRoot: string;
   evidencePath?: string | null;
+  attemptRef?: string | null;
 }
 
 export interface PreschoolReferenceTrialDependencies {
   resolveParticipantBinding?: typeof resolveOperatorParticipantBinding;
+}
+
+function validateReferenceTrialAttemptRef(value: string): string {
+  if (!/^attempt-[0-9]{6}$/.test(value)) {
+    throw new Error(`Invalid reference trial attemptRef: ${JSON.stringify(value)}`);
+  }
+  return value;
+}
+
+export async function createPreschoolReferenceTrialOutputRoot(
+  liveRepositoryRoot: string,
+  attemptRef?: string | null,
+): Promise<string> {
+  const referenceTrialRoot = join(
+    resolve(liveRepositoryRoot),
+    'artifacts/evolution/autonomous-authoring/reference-trials',
+    PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
+  );
+  const outputRoot = attemptRef === undefined || attemptRef === null
+    ? referenceTrialRoot
+    : join(referenceTrialRoot, 'attempts', validateReferenceTrialAttemptRef(attemptRef));
+  await mkdir(dirname(outputRoot), { recursive: true });
+  await mkdir(outputRoot, { recursive: false });
+  return outputRoot;
+}
+
+export function referenceTrialInvocationRef(
+  attemptRef: string | null | undefined,
+  stage: 'solution' | 'reviewer' | 'shadow-authoring',
+): string {
+  if (attemptRef === undefined || attemptRef === null) {
+    return stage === 'shadow-authoring'
+      ? `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}/shadow-authoring`
+      : `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}-${stage}-000001`;
+  }
+  const attemptBase = `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}/${validateReferenceTrialAttemptRef(attemptRef)}`;
+  return stage === 'shadow-authoring'
+    ? `${attemptBase}/shadow-authoring`
+    : `${attemptBase}/${stage}-000001`;
 }
 
 const EVIDENCE_UNAVAILABLE: PreschoolReferenceTrialStopV1 = {
@@ -432,17 +472,12 @@ function acceptedAuthoringOption(solution: SolutionAgentRunResult, reviewer: Sol
 async function runVerifiedHistoricalTrial(input: {
   liveRepositoryRoot: string;
   evidence: PreschoolCapacityEvidenceV1;
+  attemptRef: string | null;
   resolveParticipantBinding: typeof resolveOperatorParticipantBinding;
 }): Promise<PreschoolReferenceTrialVerifiedV1> {
   const liveRoot = resolve(input.liveRepositoryRoot);
   const liveRepositoryFingerprintBefore = await captureAuthoritativeFingerprint(liveRoot);
-  const outputRoot = join(
-    liveRoot,
-    'artifacts/evolution/autonomous-authoring/reference-trials',
-    PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
-  );
-  await mkdir(dirname(outputRoot), { recursive: true });
-  await mkdir(outputRoot, { recursive: false });
+  const outputRoot = await createPreschoolReferenceTrialOutputRoot(liveRoot, input.attemptRef);
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-reference-trial-'));
 
   try {
@@ -474,7 +509,7 @@ async function runVerifiedHistoricalTrial(input: {
       repositoryRoot: trialBaselineRoot,
       artifactRoot: outputRoot,
       workspaceBaselineFingerprintSha256: solutionWorkspace.workspaceBaselineFingerprintSha256,
-      invocationRef: `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}-solution-000001`,
+      invocationRef: referenceTrialInvocationRef(input.attemptRef, 'solution'),
       jobNumber: 1,
       destinationRoot: join(outputRoot, 'solution-agent'),
       skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
@@ -498,7 +533,7 @@ async function runVerifiedHistoricalTrial(input: {
       repositoryRoot: trialBaselineRoot,
       artifactRoot: outputRoot,
       workspaceBaselineFingerprintSha256: reviewerWorkspace.workspaceBaselineFingerprintSha256,
-      invocationRef: `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}-reviewer-000001`,
+      invocationRef: referenceTrialInvocationRef(input.attemptRef, 'reviewer'),
       jobNumber: 2,
       destinationRoot: join(outputRoot, 'reviewer-agent'),
       skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
@@ -543,7 +578,7 @@ async function runVerifiedHistoricalTrial(input: {
       repositoryRoot: trialBaselineRoot,
       workspaceDestinationRoot: join(temporaryRoot, 'shadow-workspace'),
       artifactRoot: join(outputRoot, 'shadow-authoring'),
-      invocationRef: `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}/shadow-authoring`,
+      invocationRef: referenceTrialInvocationRef(input.attemptRef, 'shadow-authoring'),
       solution: solution.result,
       review: reviewer.review,
       admission,
@@ -615,6 +650,9 @@ export async function runPreschoolReferenceTrial(
   input: RunPreschoolReferenceTrialInput,
   dependencies: PreschoolReferenceTrialDependencies = {},
 ): Promise<PreschoolReferenceTrialResultV1> {
+  const attemptRef = input.attemptRef === undefined || input.attemptRef === null
+    ? null
+    : validateReferenceTrialAttemptRef(input.attemptRef);
   const evidencePath = typeof input.evidencePath === 'string'
     ? (isAbsolute(input.evidencePath) ? input.evidencePath : resolve(input.liveRepositoryRoot, input.evidencePath))
     : null;
@@ -623,6 +661,7 @@ export async function runPreschoolReferenceTrial(
   return runVerifiedHistoricalTrial({
     liveRepositoryRoot: input.liveRepositoryRoot,
     evidence,
+    attemptRef,
     resolveParticipantBinding: dependencies.resolveParticipantBinding ?? resolveOperatorParticipantBinding,
   });
 }
@@ -650,17 +689,28 @@ async function persistEvidenceUnavailableStop(
 
 export async function runPreschoolReferenceTrialCli(argv: string[]): Promise<number> {
   let evidencePath: string | null = null;
+  let attemptRef: string | null = null;
   for (let index = 0; index < argv.length; index += 1) {
-    if (argv[index] !== '--evidence') continue;
-    if (evidencePath !== null || !argv[index + 1] || argv[index + 1]!.startsWith('--')) {
-      throw new Error('Usage: --evidence <path-to-existing-accepted-preschool-capacity-evidence.json>');
+    if (argv[index] === '--evidence') {
+      if (evidencePath !== null || !argv[index + 1] || argv[index + 1]!.startsWith('--')) {
+        throw new Error('Usage: --evidence <path-to-existing-accepted-preschool-capacity-evidence.json> [--attempt-ref <attempt-NNNNNN>]');
+      }
+      evidencePath = argv[index + 1]!;
+      index += 1;
+      continue;
     }
-    evidencePath = argv[index + 1]!;
-    index += 1;
+    if (argv[index] === '--attempt-ref') {
+      if (attemptRef !== null || !argv[index + 1] || argv[index + 1]!.startsWith('--')) {
+        throw new Error('Usage: --evidence <path-to-existing-accepted-preschool-capacity-evidence.json> [--attempt-ref <attempt-NNNNNN>]');
+      }
+      attemptRef = validateReferenceTrialAttemptRef(argv[index + 1]!);
+      index += 1;
+    }
   }
   const result = await runPreschoolReferenceTrial({
     liveRepositoryRoot: process.cwd(),
     evidencePath,
+    attemptRef,
   });
   if (result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE') {
     await persistEvidenceUnavailableStop(process.cwd(), result);

@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import { validatePreschoolReferenceResponsibilityBrief } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
@@ -55,7 +56,47 @@ async function listFiles(root: string, relativePath = ''): Promise<string[]> {
   return files;
 }
 
+function testReferenceResponsibilityBriefContract(): void {
+  const brief = {
+    schemaVersion: 'preschool-reference-responsibility-brief-v1',
+    runRef: 'preschool-pver-20260922231805-71297571',
+    responsibilities: [{
+      responsibilityRef: 'reference-responsibility-000001',
+      primaryLifeFunction: 'Shared play',
+      playerVisibleNeed: 'A child needs a shared play experience.',
+    }],
+  };
+  assert.deepEqual(validatePreschoolReferenceResponsibilityBrief(brief), brief);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({ ...brief, extra: true }), /unknown field/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({
+    ...brief,
+    responsibilities: [{ ...brief.responsibilities[0], extra: true }],
+  }), /unknown field/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({ ...brief, responsibilities: [] }), /1 through 8/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({
+    ...brief,
+    responsibilities: Array.from({ length: 9 }, (_, index) => ({
+      ...brief.responsibilities[0],
+      responsibilityRef: 'reference-responsibility-' + String(index + 1).padStart(6, '0'),
+    })),
+  }), /1 through 8/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({
+    ...brief,
+    responsibilities: [{ ...brief.responsibilities[0], responsibilityRef: 'reference-responsibility-000002' }],
+  }), /participant order/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({
+    ...brief,
+    responsibilities: [{ ...brief.responsibilities[0], primaryLifeFunction: '' }],
+  }), /non-empty string/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({
+    ...brief,
+    responsibilities: [{ ...brief.responsibilities[0], playerVisibleNeed: '' }],
+  }), /non-empty string/);
+  assert.throws(() => validatePreschoolReferenceResponsibilityBrief({ ...brief, runRef: 'wrong-run' }), /runRef/);
+}
+
 export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Promise<void> {
+  testReferenceResponsibilityBriefContract();
   assert.equal(
     PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
     'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3',

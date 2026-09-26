@@ -200,6 +200,22 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     contentSha256: canonicalSkillSha256,
   };
   const prompt = buildSolutionReviewerPrompt(problemPackage, autonomousSolutionWork, [assignedSkill], autonomousAuthoringContractPacket);
+  assert.match(prompt, /Host-validated.*provenance-bound safe projection/i);
+  assert.match(prompt, /authoritySourceRef and authoritySourceSha256 are provenance metadata/i);
+  assert.match(prompt, /Host has already verified.*source authority bytes.*immutable Contract identity/i);
+  assert.match(prompt, /full source authority may intentionally be absent/i);
+  assert.match(prompt, /Do not require access to.*withheld.*source document.*prerequisite/i);
+  const insufficientSolutionWork: SolutionWorkV1 = {
+    ...solutionWork,
+    status: 'INSUFFICIENT_EVIDENCE',
+    options: [],
+    recommendedOptionId: null,
+  };
+  const insufficientPrompt = buildSolutionReviewerPrompt(problemPackage, insufficientSolutionWork, [assignedSkill], autonomousAuthoringContractPacket);
+  assert.match(insufficientPrompt, /Host-validated.*provenance-bound safe projection/i);
+  assert.match(insufficientPrompt, /authoritySourceRef and authoritySourceSha256 are provenance metadata/i);
+  assert.match(insufficientPrompt, /full source authority may intentionally be absent/i);
+  assert.doesNotMatch(insufficientPrompt, /ACCEPT_OPTION \+ autonomous authoring requires:/i);
   assert.match(prompt, /independently inspect|independent source inspection/i);
   assert.match(prompt, /reject all options/i);
   assert.match(prompt, /REQUEST_MORE_WORK: concrete, decision-relevant, bounded work achievable in the current execution context\./i);

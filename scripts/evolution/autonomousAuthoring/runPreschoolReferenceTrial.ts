@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validatePreschoolCapacityEvidence, type PreschoolCapacityEvidenceV1 } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
+import { serializeObservablePayload, type ObservablePayload } from '../../../src/evolution/playerObservableTranscript';
 import type { ImprovementHypothesis } from '../../../src/evolution/improvementHypothesisContract';
 import { buildProblemPackage } from '../problemAgnosticSolution/buildProblemPackage';
 import {
@@ -45,6 +46,9 @@ export const PRESCHOOL_REFERENCE_TRIAL_BASELINE_SHA = 'e80eecc868a6ca99f4a53ff5d
 // This digest is the Human-accepted reference evidence trust anchor.
 export const PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256 =
   'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3' as const;
+// This digest anchors the Human-accepted exact sealed player-visible historical reference payload.
+export const PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256 =
+  'd91231e2967e75bf508d276c3163fc6ca5fcd2cbeba21db71132b3374b676ab4' as const;
 export const PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS = [
   'docs/governance/product-decisions.md',
   'docs/product/content-authoring-workflow-contract-design.md',
@@ -55,6 +59,8 @@ const ACCEPTED_DESIGN_PATH = 'docs/superpowers/specs/2026-09-24-contract-constra
 const INFANT_CATALOG_PATH = 'src/data/infantPassiveNarrativeCatalog.ts';
 const CAPACITY_SUMMARY_PATH = 'source/reference-trial/capacity-summary.json';
 const OBSERVABLE_SUMMARY_PATH = 'source/reference-trial/observable-summary.json';
+const OBSERVABLE_PAYLOAD_PATH = 'source/reference-trial/observable-payload.json';
+const REFERENCE_SOURCE_ATTESTATION_PATH = 'source/reference-trial/reference-source-attestation.json';
 const FEEDBACK_SUMMARY_PATH = 'source/reference-trial/external-feedback.json';
 const HYPOTHESIS_SUMMARY_PATH = 'source/reference-trial/improvement-hypothesis.json';
 const CONTRACT_PACKET_PATH = 'source/reference-trial/autonomous-authoring-contract-packet.json';
@@ -75,6 +81,13 @@ export interface PreschoolReferenceTrialStopV1 {
   reason: 'Exact accepted chronology was not supplied; replay or evidence reconstruction is forbidden for this trial.';
 }
 
+export interface PreschoolReferenceTrialObservablePayloadStopV1 {
+  schemaVersion: 'preschool-reference-trial-stop-v1';
+  status: 'REFERENCE_OBSERVABLE_PAYLOAD_UNAVAILABLE';
+  runRef: typeof PRESCHOOL_REFERENCE_TRIAL_RUN_REF;
+  reason: 'Exact sealed player-visible reference payload was not supplied or did not match the accepted digest.';
+}
+
 export interface PreschoolReferenceTrialVerifiedV1 {
   schemaVersion: 'preschool-reference-trial-result-v1';
   status: 'SHADOW_AUTHORING_VERIFIED';
@@ -87,11 +100,12 @@ export interface PreschoolReferenceTrialVerifiedV1 {
   liveRepositoryFingerprintAfter: string;
 }
 
-export type PreschoolReferenceTrialResultV1 = PreschoolReferenceTrialStopV1 | PreschoolReferenceTrialVerifiedV1;
+export type PreschoolReferenceTrialResultV1 = PreschoolReferenceTrialStopV1 | PreschoolReferenceTrialObservablePayloadStopV1 | PreschoolReferenceTrialVerifiedV1;
 
 export interface RunPreschoolReferenceTrialInput {
   liveRepositoryRoot: string;
   evidencePath?: string | null;
+  observablePayloadPath?: string | null;
   attemptRef?: string | null;
 }
 
@@ -144,6 +158,12 @@ const EVIDENCE_UNAVAILABLE: PreschoolReferenceTrialStopV1 = {
   runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
   reason: 'Exact accepted chronology was not supplied; replay or evidence reconstruction is forbidden for this trial.',
 };
+const OBSERVABLE_PAYLOAD_UNAVAILABLE: PreschoolReferenceTrialObservablePayloadStopV1 = {
+  schemaVersion: 'preschool-reference-trial-stop-v1',
+  status: 'REFERENCE_OBSERVABLE_PAYLOAD_UNAVAILABLE',
+  runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
+  reason: 'Exact sealed player-visible reference payload was not supplied or did not match the accepted digest.',
+};
 
 async function writeCreateOnlyJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
@@ -173,6 +193,21 @@ async function readExactAcceptedEvidence(path: string | null | undefined): Promi
       return null;
     }
     return evidence;
+  } catch {
+    return null;
+  }
+}
+
+export async function readExactReferenceObservablePayload(
+  path: string | null | undefined,
+  expectedSha256: string,
+): Promise<Buffer | null> {
+  if (typeof path !== 'string' || path.length === 0 || !/^[a-f0-9]{64}$/.test(expectedSha256)) return null;
+  try {
+    const bytes = await readFile(path);
+    if (sha256Hex(bytes) !== expectedSha256) return null;
+    serializeObservablePayload(JSON.parse(bytes.toString('utf8')) as ObservablePayload);
+    return bytes;
   } catch {
     return null;
   }
@@ -376,6 +411,7 @@ export async function writePreschoolReferenceTrialInputs(input: {
   authorityRepositoryRoot: string;
   candidateBaselineRoot: string;
   runRef: string;
+  observablePayloadBytes: Buffer;
 }): Promise<{
   problemPackagePath: string;
   problemPackage: Awaited<ReturnType<typeof buildProblemPackage>>;
@@ -398,6 +434,15 @@ export async function writePreschoolReferenceTrialInputs(input: {
     repositoryRoot: input.authorityRepositoryRoot,
   });
   await writeCreateOnlyJson(join(input.outputRoot, CONTRACT_PACKET_PATH), contractPacket);
+  await mkdir(dirname(join(input.outputRoot, OBSERVABLE_PAYLOAD_PATH)), { recursive: true });
+  await writeFile(join(input.outputRoot, OBSERVABLE_PAYLOAD_PATH), input.observablePayloadBytes, { flag: 'wx' });
+  await writeCreateOnlyJson(join(input.outputRoot, REFERENCE_SOURCE_ATTESTATION_PATH), {
+    schemaVersion: 'preschool-reference-source-attestation-v1',
+    runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
+    historicalBaselineGitSha: PRESCHOOL_REFERENCE_TRIAL_BASELINE_SHA,
+    observablePayloadSha256: sha256Hex(input.observablePayloadBytes),
+    verification: 'HOST_VERIFIED_FIXED_REFERENCE_CASE',
+  });
   await writeCreateOnlyJson(join(input.outputRoot, CAPACITY_SUMMARY_PATH), {
     schemaVersion: 'preschool-reference-capacity-summary-v1',
     runRef: input.runRef,
@@ -434,10 +479,10 @@ export async function writePreschoolReferenceTrialInputs(input: {
     activeCandidateRef: `reference-trial/${candidate.hypothesisId}`,
     activeCandidateSourceIndex: 0,
     runRef: input.runRef,
-    observablePayloadRef: OBSERVABLE_SUMMARY_PATH,
+    observablePayloadRef: OBSERVABLE_PAYLOAD_PATH,
     externalFeedbackRef: FEEDBACK_SUMMARY_PATH,
     improvementHypothesisRef: HYPOTHESIS_SUMMARY_PATH,
-    diagnosticEvidenceRefs: [CAPACITY_SUMMARY_PATH],
+    diagnosticEvidenceRefs: [CAPACITY_SUMMARY_PATH, REFERENCE_SOURCE_ATTESTATION_PATH],
     authorityRefs: [...PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS],
     productSourceFingerprintSha256: await captureAuthoritativeFingerprint(input.candidateBaselineRoot),
     destinationPath: problemPackagePath,
@@ -448,6 +493,8 @@ export async function writePreschoolReferenceTrialInputs(input: {
     contractPacket,
     artifactRelativePaths: [
       OBSERVABLE_SUMMARY_PATH,
+      OBSERVABLE_PAYLOAD_PATH,
+      REFERENCE_SOURCE_ATTESTATION_PATH,
       FEEDBACK_SUMMARY_PATH,
       HYPOTHESIS_SUMMARY_PATH,
       CAPACITY_SUMMARY_PATH,
@@ -472,6 +519,7 @@ function acceptedAuthoringOption(solution: SolutionAgentRunResult, reviewer: Sol
 async function runVerifiedHistoricalTrial(input: {
   liveRepositoryRoot: string;
   evidence: PreschoolCapacityEvidenceV1;
+  observablePayloadBytes: Buffer;
   attemptRef: string | null;
   resolveParticipantBinding: typeof resolveOperatorParticipantBinding;
 }): Promise<PreschoolReferenceTrialVerifiedV1> {
@@ -490,6 +538,7 @@ async function runVerifiedHistoricalTrial(input: {
       authorityRepositoryRoot: liveRoot,
       candidateBaselineRoot: trialBaselineRoot,
       runRef: input.evidence.runRef,
+      observablePayloadBytes: input.observablePayloadBytes,
     });
     const binding = await input.resolveParticipantBinding(OPERATOR_BINDING_CODEX_CURRENT);
     const participant = withParticipantContaminationGuard(binding.participant);
@@ -658,22 +707,35 @@ export async function runPreschoolReferenceTrial(
     : null;
   const evidence = await readExactAcceptedEvidence(evidencePath);
   if (!evidence) return EVIDENCE_UNAVAILABLE;
+  const observablePayloadPath = typeof input.observablePayloadPath === 'string'
+    ? (isAbsolute(input.observablePayloadPath)
+      ? input.observablePayloadPath
+      : resolve(input.liveRepositoryRoot, input.observablePayloadPath))
+    : null;
+  const observablePayloadBytes = await readExactReferenceObservablePayload(
+    observablePayloadPath,
+    PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
+  );
+  if (!observablePayloadBytes) return OBSERVABLE_PAYLOAD_UNAVAILABLE;
   return runVerifiedHistoricalTrial({
     liveRepositoryRoot: input.liveRepositoryRoot,
     evidence,
+    observablePayloadBytes,
     attemptRef,
     resolveParticipantBinding: dependencies.resolveParticipantBinding ?? resolveOperatorParticipantBinding,
   });
 }
 
-async function persistEvidenceUnavailableStop(
+async function persistReferenceTrialStop(
   repositoryRoot: string,
-  result: PreschoolReferenceTrialStopV1,
+  result: PreschoolReferenceTrialStopV1 | PreschoolReferenceTrialObservablePayloadStopV1,
 ): Promise<void> {
   const path = join(
     repositoryRoot,
     'artifacts/evolution/autonomous-authoring/reference-trial-stops',
-    `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}.json`,
+    result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE'
+      ? `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}.json`
+      : `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}-observable-payload.json`,
   );
   const bytes = `${JSON.stringify(result, null, 2)}\n`;
   await mkdir(dirname(path), { recursive: true });
@@ -689,19 +751,28 @@ async function persistEvidenceUnavailableStop(
 
 export async function runPreschoolReferenceTrialCli(argv: string[]): Promise<number> {
   let evidencePath: string | null = null;
+  let observablePayloadPath: string | null = null;
   let attemptRef: string | null = null;
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === '--evidence') {
       if (evidencePath !== null || !argv[index + 1] || argv[index + 1]!.startsWith('--')) {
-        throw new Error('Usage: --evidence <path-to-existing-accepted-preschool-capacity-evidence.json> [--attempt-ref <attempt-NNNNNN>]');
+        throw new Error('Usage: --evidence <accepted-capacity-evidence-path> --observable-payload <exact-sealed-observable-payload-path> [--attempt-ref <attempt-NNNNNN>]');
       }
       evidencePath = argv[index + 1]!;
       index += 1;
       continue;
     }
+    if (argv[index] === '--observable-payload') {
+      if (observablePayloadPath !== null || !argv[index + 1] || argv[index + 1]!.startsWith('--')) {
+        throw new Error('Usage: --evidence <accepted-capacity-evidence-path> --observable-payload <exact-sealed-observable-payload-path> [--attempt-ref <attempt-NNNNNN>]');
+      }
+      observablePayloadPath = argv[index + 1]!;
+      index += 1;
+      continue;
+    }
     if (argv[index] === '--attempt-ref') {
       if (attemptRef !== null || !argv[index + 1] || argv[index + 1]!.startsWith('--')) {
-        throw new Error('Usage: --evidence <path-to-existing-accepted-preschool-capacity-evidence.json> [--attempt-ref <attempt-NNNNNN>]');
+        throw new Error('Usage: --evidence <accepted-capacity-evidence-path> --observable-payload <exact-sealed-observable-payload-path> [--attempt-ref <attempt-NNNNNN>]');
       }
       attemptRef = validateReferenceTrialAttemptRef(argv[index + 1]!);
       index += 1;
@@ -710,13 +781,14 @@ export async function runPreschoolReferenceTrialCli(argv: string[]): Promise<num
   const result = await runPreschoolReferenceTrial({
     liveRepositoryRoot: process.cwd(),
     evidencePath,
+    observablePayloadPath,
     attemptRef,
   });
-  if (result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE') {
-    await persistEvidenceUnavailableStop(process.cwd(), result);
+  if (result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE' || result.status === 'REFERENCE_OBSERVABLE_PAYLOAD_UNAVAILABLE') {
+    await persistReferenceTrialStop(process.cwd(), result);
   }
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-  return result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE' ? 1 : 0;
+  return result.status === 'SHADOW_AUTHORING_VERIFIED' ? 0 : 1;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

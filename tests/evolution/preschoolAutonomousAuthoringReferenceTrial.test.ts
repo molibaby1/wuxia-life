@@ -1,18 +1,20 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
-import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
+  PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
   createPreschoolReferenceTrialOutputRoot,
   overlayReferenceTrialAuthority,
   prepareReferenceTrialParticipantWorkspace,
   referenceTrialInvocationRef,
   runPreschoolReferenceTrial,
   runPreschoolReferenceTrialCli,
+  readExactReferenceObservablePayload,
   writePreschoolReferenceTrialInputs,
   withParticipantContaminationGuard,
 } from '../../scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial';
@@ -58,13 +60,45 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
     'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3',
   );
+  assert.equal(
+    PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
+    'd91231e2967e75bf508d276c3163fc6ca5fcd2cbeba21db71132b3374b676ab4',
+  );
 
   const root = await mkdtemp(join(tmpdir(), 'preschool-reference-trial-test-'));
   try {
     const currentRoot = join(root, 'current');
     const historicalRoot = join(root, 'historical');
-    const artifactRoot = join(root, 'host-artifacts');
-    const packetPath = 'autonomous-authoring-contract-packet.json';
+    const packetPath = 'source/reference-trial/autonomous-authoring-contract-packet.json';
+    const syntheticPayloadBytes = Buffer.from(`${JSON.stringify({
+      transcriptVersion: 'player-observable-v1',
+      surfaceId: 'headless-api-player-v1',
+      transcriptId: 'synthetic-preschool-visible',
+      entries: [{
+        entryId: 'entry-000001',
+        kind: 'story_event',
+        age: 5,
+        title: '一起搭小桥',
+        body: '你和同伴一起搭起小桥。',
+        experienceContext: {
+          schemaVersion: 'experience-semantic-context-v1',
+          experienceCategory: 'passive',
+          expectedExperienceSignals: ['shared_play'],
+        },
+      }],
+    }, null, 2)}\n`);
+    const syntheticPayloadSha = createHash('sha256').update(syntheticPayloadBytes).digest('hex');
+    const syntheticPayloadPath = join(root, 'synthetic-observable-payload.json');
+    await writeFile(syntheticPayloadPath, syntheticPayloadBytes);
+    assert.equal(await readExactReferenceObservablePayload(syntheticPayloadPath, syntheticPayloadSha) instanceof Buffer, true);
+    assert.equal(await readExactReferenceObservablePayload(join(root, 'missing-observable.json'), syntheticPayloadSha), null);
+    assert.equal(await readExactReferenceObservablePayload(syntheticPayloadPath, PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256), null);
+    const malformedPayloadPath = join(root, 'malformed-observable.json');
+    await writeFile(malformedPayloadPath, '{invalid json');
+    assert.equal(await readExactReferenceObservablePayload(malformedPayloadPath, createHash('sha256').update('{invalid json').digest('hex')), null);
+    const invalidPayloadPath = join(root, 'invalid-observable.json');
+    await writeFile(invalidPayloadPath, '{}');
+    assert.equal(await readExactReferenceObservablePayload(invalidPayloadPath, createHash('sha256').update('{}').digest('hex')), null);
 
     const currentAuthorityText = [
       '### PD-121：Contract-Constrained Autonomous Authoring v1\n',
@@ -169,6 +203,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       );
       const cliStopCode = await runPreschoolReferenceTrialCli([
         '--evidence', join(root, 'missing-cli-evidence.json'),
+        '--observable-payload', syntheticPayloadPath,
         '--attempt-ref', 'attempt-000002',
       ]);
       assert.equal(cliStopCode, 1);
@@ -183,7 +218,28 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       authorityRepositoryRoot: currentRoot,
       candidateBaselineRoot: historicalRoot,
       runRef: 'preschool-pver-20260922231805-71297571',
+      observablePayloadBytes: syntheticPayloadBytes,
     });
+    assert.equal(trialInputs.problemPackage.source.observablePayloadRef, 'source/reference-trial/observable-payload.json');
+    const materializedPayload = await readFile(join(hostInputRoot, 'source/reference-trial/observable-payload.json'));
+    assert.deepEqual(materializedPayload, syntheticPayloadBytes);
+    assert.equal(createHash('sha256').update(materializedPayload).digest('hex'), syntheticPayloadSha);
+    assert.deepEqual(trialInputs.problemPackage.source.diagnosticEvidenceRefs, [
+      'source/reference-trial/capacity-summary.json',
+      'source/reference-trial/reference-source-attestation.json',
+    ]);
+    const attestation = JSON.parse(await readFile(join(hostInputRoot, 'source/reference-trial/reference-source-attestation.json'), 'utf8'));
+    assert.deepEqual(attestation, {
+      schemaVersion: 'preschool-reference-source-attestation-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      historicalBaselineGitSha: 'e80eecc868a6ca99f4a53ff5d2493a13b4c0a8bf',
+      observablePayloadSha256: syntheticPayloadSha,
+      verification: 'HOST_VERIFIED_FIXED_REFERENCE_CASE',
+    });
+    const attestationText = JSON.stringify(attestation);
+    for (const forbidden of ['passiveEntryIds', 'eventHistoryAdded', 'source-fingerprint', 'internal/player-surface-source', 'seed', 'persona', ...ANSWER_IDS]) {
+      assert.equal(attestationText.includes(forbidden), false, forbidden);
+    }
     assert.deepEqual(trialInputs.problemPackage.problem.unknowns, [REFERENCE_HYPOTHESIS_UNKNOWN]);
     const storedHypotheses = parseStoredImprovementHypothesisSet(
       await readFile(join(hostInputRoot, 'source/reference-trial/improvement-hypothesis.json'), 'utf8'),
@@ -196,22 +252,19 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     }
     for (const answerId of ANSWER_IDS) assert.equal(JSON.stringify(trialInputs.problemPackage).includes(answerId), false);
 
-    const packet = await buildPreschoolAutonomousAuthoringContractPacket({ repositoryRoot: currentRoot });
-    await put(artifactRoot, packetPath, `${JSON.stringify(packet)}\n`);
-
     const solutionWorkspace = await prepareReferenceTrialParticipantWorkspace({
       baselineRoot: historicalRoot,
       destinationRoot: join(root, 'solution-workspace'),
       jobKind: 'solution',
-      artifactSourceRoot: artifactRoot,
-      artifactRelativePaths: [packetPath],
+      artifactSourceRoot: hostInputRoot,
+      artifactRelativePaths: trialInputs.artifactRelativePaths,
     });
     const reviewerWorkspace = await prepareReferenceTrialParticipantWorkspace({
       baselineRoot: historicalRoot,
       destinationRoot: join(root, 'reviewer-workspace'),
       jobKind: 'reviewer',
-      artifactSourceRoot: artifactRoot,
-      artifactRelativePaths: [packetPath],
+      artifactSourceRoot: hostInputRoot,
+      artifactRelativePaths: trialInputs.artifactRelativePaths,
     });
 
     for (const workspace of [solutionWorkspace.workspaceRoot, reviewerWorkspace.workspaceRoot]) {
@@ -224,6 +277,18 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       assert.equal(await readFile(join(workspace, 'tests/preschoolPassiveSpineTests.ts'), 'utf8'), 'historical preschool tests');
       assert.equal(await readFile(join(workspace, 'tests/annualPassiveMemoryTests.ts'), 'utf8'), 'historical annual tests');
       assert.equal(visibleFiles.includes(packetPath), true);
+      assert.deepEqual(await readFile(join(workspace, 'source/reference-trial/observable-payload.json')), syntheticPayloadBytes);
+      const visiblePayload = JSON.parse(await readFile(join(workspace, 'source/reference-trial/observable-payload.json'), 'utf8'));
+      assert.equal(visiblePayload.entries[0].age, 5);
+      assert.equal(visiblePayload.entries[0].body, '你和同伴一起搭起小桥。');
+      assert.equal(visiblePayload.entries[0].experienceContext.experienceCategory, 'passive');
+      assert.equal(visibleFiles.includes('source/reference-trial/reference-source-attestation.json'), true);
+      for (const forbiddenPath of [
+        'internal/player-surface-source.json',
+        'provenance/source-fingerprint.json',
+        'inputs/run-input.json',
+        'inputs/persona.json',
+      ]) assert.equal(visibleFiles.includes(forbiddenPath), false, forbiddenPath);
       for (const authorityPath of AUTHORITY_PATHS) {
         assert.equal(await readFile(join(workspace, authorityPath), 'utf8'), await readFile(join(currentRoot, authorityPath), 'utf8'));
       }
@@ -296,6 +361,37 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     assert.deepEqual(fabricatedEvidenceStop, stop);
     assert.equal(fabricatedEvidenceResolvedBinding, false);
     await assert.rejects(readdir(join(currentRoot, REFERENCE_TRIAL_ATTEMPTS_PATH)), { code: 'ENOENT' });
+
+    const acceptedEvidenceTestPath = process.env.PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_TEST_PATH;
+    if (acceptedEvidenceTestPath) {
+      assert.equal(
+        createHash('sha256').update(await readFile(acceptedEvidenceTestPath)).digest('hex'),
+        PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
+      );
+      await put(currentRoot, 'source/reference-trial/observable-summary.json', '{"diagnosticOnly":true}\n');
+      for (const observablePayloadPath of [join(root, 'missing-observable.json'), syntheticPayloadPath]) {
+        let resolvedBinding = false;
+        const payloadStop = await runPreschoolReferenceTrial({
+          liveRepositoryRoot: currentRoot,
+          evidencePath: acceptedEvidenceTestPath,
+          observablePayloadPath,
+          attemptRef: 'attempt-000004',
+        }, {
+          resolveParticipantBinding: async () => {
+            resolvedBinding = true;
+            throw new Error('must not bind a Participant without the exact sealed observable payload');
+          },
+        });
+        assert.deepEqual(payloadStop, {
+          schemaVersion: 'preschool-reference-trial-stop-v1',
+          status: 'REFERENCE_OBSERVABLE_PAYLOAD_UNAVAILABLE',
+          runRef: 'preschool-pver-20260922231805-71297571',
+          reason: 'Exact sealed player-visible reference payload was not supplied or did not match the accepted digest.',
+        });
+        assert.equal(resolvedBinding, false);
+        await assert.rejects(readdir(join(currentRoot, REFERENCE_TRIAL_ATTEMPTS_PATH)), { code: 'ENOENT' });
+      }
+    }
 
     const safeParticipant: WorkspaceAgentParticipantOptions = {
       executable: 'fake-participant',

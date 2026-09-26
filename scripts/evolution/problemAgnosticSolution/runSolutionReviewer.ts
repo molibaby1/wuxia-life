@@ -97,22 +97,27 @@ function renderAutonomousAuthoringReviewGuidance(
   solutionWork: SolutionWorkV1,
   packet: PreschoolAutonomousAuthoringContractPacketV1 | undefined,
 ): string[] {
-  if (!packet || !solutionWork.options.some(option => option.autonomousAuthoring !== undefined)) return [];
+  if (!packet) return [];
   return [
-    'For an option carrying autonomousAuthoring, independently inspect the current catalog and allowed evidence.',
-    'Assess Contract applicability, every responsibility, developmental age reasoning, shared-neutral portability, closest-entry distinction, transient-role boundary, non-filler semantics, and no new durable state.',
-    'Use executionAuthorityAssessment=WITHIN_CURRENT_AUTHORITY only when the reusable Contract itself covers shadow execution.',
-    'Authoritative repository promotion remains Human-controlled and is not authorized by this review.',
-    'If the proposed minimum responsibility set exceeds maxNewEntries, set executionEnvelope=EXECUTION_ENVELOPE_EXCEEDED and do not ACCEPT_OPTION; retain the full set for Host admission.',
-    'ACCEPT_OPTION + autonomous authoring requires:',
-    '- applicabilityAssessment = APPLICABLE',
-    '- conformance = CONFORMING',
-    '- executionEnvelope = WITHIN_ENVELOPE',
-    '- blockers = []',
-    'If any required assessment value cannot be established, choose the existing REQUEST_MORE_WORK, DEFER, REJECT, or ESCALATE decision instead of encoding a contradiction.',
-    'Emit autonomousAuthoringAssessment with the same contractId and contractVersion as the selected option.',
+    'The Contract Packet is a Host-validated, provenance-bound safe projection of the accepted Contract authority.',
+    'authoritySourceRef and authoritySourceSha256 are provenance metadata. The Host has already verified the source authority bytes against the immutable Contract identity before constructing this packet.',
+    'For contamination-controlled historical trials, the full source authority may intentionally be absent from the Participant workspace. Do not require access to that intentionally withheld answer-bearing source document as a prerequisite for using the supplied Contract Packet.',
     'Participant-safe Autonomous Authoring Contract Packet:',
     canonicalJson(packet),
+    ...(solutionWork.options.some(option => option.autonomousAuthoring !== undefined) ? [
+      'For an option carrying autonomousAuthoring, independently inspect the current catalog and allowed evidence.',
+      'Assess Contract applicability, every responsibility, developmental age reasoning, shared-neutral portability, closest-entry distinction, transient-role boundary, non-filler semantics, and no new durable state.',
+      'Use executionAuthorityAssessment=WITHIN_CURRENT_AUTHORITY only when the reusable Contract itself covers shadow execution.',
+      'Authoritative repository promotion remains Human-controlled and is not authorized by this review.',
+      'If the proposed minimum responsibility set exceeds maxNewEntries, set executionEnvelope=EXECUTION_ENVELOPE_EXCEEDED and do not ACCEPT_OPTION; retain the full set for Host admission.',
+      'ACCEPT_OPTION + autonomous authoring requires:',
+      '- applicabilityAssessment = APPLICABLE',
+      '- conformance = CONFORMING',
+      '- executionEnvelope = WITHIN_ENVELOPE',
+      '- blockers = []',
+      'If any required assessment value cannot be established, choose the existing REQUEST_MORE_WORK, DEFER, REJECT, or ESCALATE decision instead of encoding a contradiction.',
+      'Emit autonomousAuthoringAssessment with the same contractId and contractVersion as the selected option.',
+    ] : []),
   ];
 }
 
@@ -152,9 +157,7 @@ export function buildSolutionReviewerPrompt(
     }),
     '',
     ...renderAutonomousAuthoringReviewGuidance(solutionWork, autonomousAuthoringContractPacket),
-    ...(solutionWork.options.some(option => option.autonomousAuthoring !== undefined) && autonomousAuthoringContractPacket
-      ? ['']
-      : []),
+    ...(autonomousAuthoringContractPacket ? [''] : []),
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,
     'Reference format requirements:',

@@ -185,6 +185,11 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   });
   const packetJson = canonicalJson(autonomousAuthoringContractPacket);
   const authoringPrompt = buildSolutionAgentPrompt(problemPackage, [], autonomousAuthoringContractPacket);
+  assert.match(authoringPrompt, /Host-validated.*provenance-bound safe projection/i);
+  assert.match(authoringPrompt, /authoritySourceRef and authoritySourceSha256 are provenance metadata/i);
+  assert.match(authoringPrompt, /Host has already verified.*source authority bytes.*immutable Contract identity/i);
+  assert.match(authoringPrompt, /full source authority may intentionally be absent/i);
+  assert.match(authoringPrompt, /Do not require access to.*withheld.*source document.*prerequisite/i);
   const authoringInstructions = [
     'Decide applicability before authoring.',
     'Only APPLICABLE may contain responsibilities and Cards.',

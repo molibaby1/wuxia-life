@@ -153,6 +153,9 @@ function renderAutonomousAuthoringPacket(
     'If a reasonable solution requires new semantics/mechanics, use CONTRACT_CHANGE_REQUIRED.',
     "Attach autonomousAuthoring only to an option with changeScope='program'; this lane is not ordinary config execution.",
     '',
+    'The Contract Packet is a Host-validated, provenance-bound safe projection of the accepted Contract authority.',
+    'authoritySourceRef and authoritySourceSha256 are provenance metadata. The Host has already verified the source authority bytes against the immutable Contract identity before constructing this packet.',
+    'For contamination-controlled historical trials, the full source authority may intentionally be absent from the Participant workspace. Do not require access to that intentionally withheld answer-bearing source document as a prerequisite for using the supplied Contract Packet.',
     'Participant-safe Autonomous Authoring Contract Packet:',
     canonicalJson(packet),
   ];

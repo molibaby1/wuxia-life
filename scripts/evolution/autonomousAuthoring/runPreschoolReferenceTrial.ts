@@ -331,7 +331,7 @@ async function materializeHistoricalTrialRoots(input: {
   return { trialBaselineRoot, hostAuthorityRoot, baselineFingerprint };
 }
 
-async function writeTrialInputs(input: {
+export async function writePreschoolReferenceTrialInputs(input: {
   outputRoot: string;
   authorityRepositoryRoot: string;
   candidateBaselineRoot: string;
@@ -348,7 +348,9 @@ async function writeTrialInputs(input: {
     observedBasis: 'The fixed accepted reference facts record 30 demand beats, 26 authored beats, and four generic content-capacity gaps after the whole legal pool is exhausted at each gap.',
     feedbackRefs: ['overallImpression'],
     evidenceRefs: [CAPACITY_SUMMARY_PATH],
-    unknowns: [],
+    unknowns: [
+      'The minimum sufficient shared-neutral responsibility set and concrete contract-conforming content instances needed to close the evidenced gaps remain to be derived and independently reviewed.',
+    ],
     productSignificance: 'Completing a minimum sufficient set of existing shared-neutral preschool experiences can close the four evidenced gaps without adding game mechanics.',
   } satisfies ImprovementHypothesis;
 
@@ -448,7 +450,7 @@ async function runVerifiedHistoricalTrial(input: {
       liveRepositoryRoot: liveRoot,
       temporaryRoot,
     });
-    const trialInputs = await writeTrialInputs({
+    const trialInputs = await writePreschoolReferenceTrialInputs({
       outputRoot,
       authorityRepositoryRoot: liveRoot,
       candidateBaselineRoot: trialBaselineRoot,

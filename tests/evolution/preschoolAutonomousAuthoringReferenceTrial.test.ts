@@ -4,11 +4,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
+import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
   overlayReferenceTrialAuthority,
   prepareReferenceTrialParticipantWorkspace,
   runPreschoolReferenceTrial,
+  writePreschoolReferenceTrialInputs,
   withParticipantContaminationGuard,
 } from '../../scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial';
 
@@ -28,6 +30,7 @@ const AUTHORITY_PATHS = [
 
 const RESIDUAL_DESIGN_PATH = 'docs/superpowers/specs/2026-09-23-preschool-residual-content-capacity-authoring-design.md';
 const ACCEPTED_DESIGN_PATH = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
+const REFERENCE_HYPOTHESIS_UNKNOWN = 'The minimum sufficient shared-neutral responsibility set and concrete contract-conforming content instances needed to close the evidenced gaps remain to be derived and independently reviewed.';
 
 async function put(root: string, relativePath: string, content: string): Promise<void> {
   const path = join(root, relativePath);
@@ -83,6 +86,25 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     await put(historicalRoot, 'artifacts/evolution/later-pver/observations.json', `later PVER ${ANSWER_IDS.join(' ')}`);
 
     await overlayReferenceTrialAuthority(currentRoot, historicalRoot);
+    const hostInputRoot = join(root, 'synthetic-host-inputs');
+    const trialInputs = await writePreschoolReferenceTrialInputs({
+      outputRoot: hostInputRoot,
+      authorityRepositoryRoot: currentRoot,
+      candidateBaselineRoot: historicalRoot,
+      runRef: 'preschool-pver-20260922231805-71297571',
+    });
+    assert.deepEqual(trialInputs.problemPackage.problem.unknowns, [REFERENCE_HYPOTHESIS_UNKNOWN]);
+    const storedHypotheses = parseStoredImprovementHypothesisSet(
+      await readFile(join(hostInputRoot, 'source/reference-trial/improvement-hypothesis.json'), 'utf8'),
+    );
+    assert.equal(storedHypotheses.hypotheses.length, 1);
+    assert.equal(storedHypotheses.hypotheses[0]?.unknowns.length, 1);
+    for (const relativePath of trialInputs.artifactRelativePaths) {
+      const participantInput = await readFile(join(hostInputRoot, relativePath), 'utf8');
+      for (const answerId of ANSWER_IDS) assert.equal(participantInput.includes(answerId), false, relativePath);
+    }
+    for (const answerId of ANSWER_IDS) assert.equal(JSON.stringify(trialInputs.problemPackage).includes(answerId), false);
+
     const packet = await buildPreschoolAutonomousAuthoringContractPacket({ repositoryRoot: currentRoot });
     await put(artifactRoot, packetPath, `${JSON.stringify(packet)}\n`);
 

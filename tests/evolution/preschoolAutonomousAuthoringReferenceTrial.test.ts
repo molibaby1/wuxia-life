@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -13,6 +14,7 @@ import {
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import type { AutonomousAuthoringProposalV1 } from '../../src/evolution/autonomousAuthoringContract';
+import { captureAuthoritativeFingerprint } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
@@ -172,6 +174,149 @@ function testQualifiedLayerAResult(): void {
     liveRepositoryFingerprintBefore: 'b'.repeat(64),
     liveRepositoryFingerprintAfter: 'b'.repeat(64),
   });
+}
+
+async function testSyntheticLayerAEndToEnd(root: string, paths: {
+  evidence: string;
+  observable: string;
+  brief: string;
+}): Promise<void> {
+  const liveRepositoryRoot = join(root, 'synthetic-layer-a-git-clone');
+  const cloned = spawnSync('git', ['clone', '--quiet', '--shared', process.cwd(), liveRepositoryRoot], { encoding: 'utf8' });
+  assert.equal(cloned.status, 0, cloned.stderr);
+  const nodeModules = join(process.cwd(), 'node_modules');
+  const linked = spawnSync('ln', ['-s', nodeModules, join(liveRepositoryRoot, 'node_modules')], { encoding: 'utf8' });
+  assert.equal(linked.status, 0, linked.stderr);
+  const accepted = await readAcceptedPreschoolReferenceResponsibilityBrief(paths.brief);
+  if (!accepted.ok) throw new Error(accepted.reason);
+  const brief = accepted.value.brief;
+  const ids = brief.responsibilities.map((_, index) => `preschool_neutral_synthetic_reference_${String(index + 1).padStart(2, '0')}`);
+  const entries = ids.map((id, index) => ({
+    id,
+    title: `Synthetic reference ${index + 1}`,
+    text: `Synthetic scene for supplied responsibility ${index + 1}; no historical instance answer is used.`,
+    originTags: ['neutral'],
+    ageMin: 4,
+    ageMax: 7,
+  }));
+  const responsibilities = brief.responsibilities.map((item, index) => ({
+    responsibilityId: `responsibility-${String(index + 1).padStart(6, '0')}`,
+    primaryLifeFunction: item.primaryLifeFunction,
+    playerVisibleNeed: item.playerVisibleNeed,
+    evidenceRefs: [],
+  }));
+  const cards = responsibilities.map((item, index) => ({
+    responsibilityId: item.responsibilityId,
+    primaryLifeFunction: item.primaryLifeFunction,
+    playerVisibleNeed: item.playerVisibleNeed,
+    developmentalAgeJustification: {
+      ageMin: 4,
+      whyNotEarlier: 'The synthetic scenario assumes a basic shared-social understanding.',
+      whyFromThisAge: 'The synthetic scenario is legible to a preschool child.',
+      whyThroughAgeSeven: 'The synthetic scenario stays small and age-appropriate.',
+    },
+    concreteSceneConcept: `Synthetic scene ${index + 1} addressing ${item.primaryLifeFunction}.`,
+    existingContentDistinction: {
+      closestEntryIds: ['preschool_neutral_peer_cooperation'],
+      sharedSemanticArea: 'A child interacts with familiar people.',
+      specificDistinction: `The synthetic scene addresses supplied responsibility ${index + 1}.`,
+    },
+    actorClass: 'TRANSIENT_ROLE_ONLY',
+    pastEvidenceConsumed: 'NONE',
+    meaningfulPlayerDecision: 'NONE',
+    durableResult: 'EVENT_HISTORY_ID_ONLY',
+    futureHook: 'NONE',
+    originPortability: 'No origin-specific people or setting are required.',
+    scopeCheck: 'CONTRACT_PRESERVING',
+    proposedEntry: entries[index],
+  }));
+  const observableRef = 'source/reference-trial/observable-payload.json';
+  const briefRef = 'source/reference-trial/reference-responsibility-brief.json';
+  const attestationRef = 'source/reference-trial/reference-responsibility-attestation.json';
+  const catalogRef = 'src/data/lines/preschool-passive-spine.json';
+  const problemId = 'problem-hypothesis-000001';
+  const solution = {
+    schemaVersion: 'solution-work-v1', status: 'OPTIONS', problemId,
+    options: [{
+      optionId: 'option-000001', proposedChange: 'Append synthetic contract-bound preschool entries.',
+      rationale: 'This synthetic fixture exercises supplied responsibilities and the structural capacity gate.',
+      repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef], changeScope: 'program',
+      expectedPlayerObservableDifference: 'Additional distinct synthetic preschool entries can be selected.',
+      risks: [], unknowns: [],
+      autonomousAuthoring: {
+        schemaVersion: 'autonomous-authoring-proposal-v1',
+        contractId: 'preschool-shared-neutral-passive-capacity-v1', contractVersion: 1,
+        gapClassification: 'CONTENT_GAP', gapSubtype: 'CONTENT_CAPACITY_GAP',
+        applicabilityClaim: 'APPLICABLE', authorityRefs: ['docs/governance/product-decisions.md'],
+        sourceEvidenceRefs: [observableRef], responsibilities,
+        contractPayload: { schemaVersion: 'preschool-shared-neutral-passive-authoring-payload-v1', cards },
+      },
+    }],
+    recommendedOptionId: 'option-000001', summary: 'Synthetic contract-bound proposal.',
+    repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef],
+  };
+  const review = {
+    schemaVersion: 'solution-review-v1', problemId, decision: 'ACCEPT_OPTION', acceptedOptionId: 'option-000001',
+    scopeAssessment: 'code_required', executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
+    autonomousAuthoringAssessment: {
+      schemaVersion: 'autonomous-authoring-review-assessment-v1',
+      contractId: 'preschool-shared-neutral-passive-capacity-v1', contractVersion: 1,
+      applicabilityAssessment: 'APPLICABLE', conformance: 'CONFORMING', executionEnvelope: 'WITHIN_ENVELOPE',
+      assessment: 'Synthetic one-to-one responsibility preservation and contract conformance.', blockers: [],
+    },
+    assessment: 'Synthetic Layer A review.', repoRefs: [catalogRef],
+    artifactRefs: [observableRef, briefRef, attestationRef], concerns: [],
+  };
+  const executorResult = {
+    schemaVersion: 'shadow-authoring-execution-participant-result-v1', status: 'completed',
+    changedFiles: [catalogRef, 'tests/preschoolPassiveSpineTests.ts', 'tests/annualPassiveMemoryTests.ts'],
+    verificationCommandsRun: [], deviations: [],
+  };
+  const executorScript = [
+    "const fs = require('node:fs');",
+    "const path = 'src/data/lines/preschool-passive-spine.json';",
+    'const catalog = JSON.parse(fs.readFileSync(path, "utf8"));',
+    'catalog.entries.push(...JSON.parse(process.argv[1]));',
+    'fs.writeFileSync(path, JSON.stringify(catalog, null, 2) + "\\n");',
+    'const ids = JSON.parse(process.argv[2]);',
+    'for (const name of ["preschoolPassiveSpineTests.ts", "annualPassiveMemoryTests.ts"]) {',
+    '  const block = `\\nimport { readFileSync as readSyntheticCatalog } from "node:fs";\\nif (process.argv[1]?.endsWith(\'${name}\')) {\\n  const rows = JSON.parse(readSyntheticCatalog("src/data/lines/preschool-passive-spine.json", "utf8")).entries;\\n  for (const id of ${JSON.stringify(ids)}) if (!rows.some((row) => row.id === id)) throw new Error("AUTONOMOUS_AUTHORING_MISSING_ENTRY: " + id);\\n}\\n`;',
+    '  fs.appendFileSync(`tests/${name}`, block);',
+    '}',
+    'process.stdout.write(process.argv[3]);',
+  ].join('\n');
+  const jobs: string[] = [];
+  const participant: WorkspaceAgentParticipantOptions = {
+    executable: process.execPath,
+    buildArgs: job => {
+      jobs.push(job.role);
+      if (job.role === 'solution') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(solution)];
+      if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(review)];
+      return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult)];
+    },
+  };
+  const before = await captureAuthoritativeFingerprint(liveRepositoryRoot);
+  const result = await runPreschoolReferenceTrial({
+    liveRepositoryRoot,
+    evidencePath: paths.evidence,
+    observablePayloadPath: paths.observable,
+    responsibilityBriefPath: paths.brief,
+    attemptRef: 'attempt-000900',
+  }, { resolveParticipantBinding: async () => ({ participant }) as never });
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFIED');
+  if (result.status !== 'SHADOW_AUTHORING_VERIFIED') throw new Error('synthetic Layer A did not verify');
+  assert.equal(result.validationLayer, 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM');
+  assert.equal(result.responsibilityProvenance, 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES');
+  assert.equal(result.referenceResponsibilityBriefSha256, accepted.value.sha256);
+  assert.equal(result.responsibilityMappings.length, brief.responsibilities.length);
+  assert.equal(result.newEntryCount, brief.responsibilities.length);
+  assert.deepEqual(jobs, ['solution', 'reviewer', 'configuration-execution']);
+  assert.equal(await captureAuthoritativeFingerprint(liveRepositoryRoot), before);
+  const packageJson = JSON.parse(await readFile(result.promotionPackagePath, 'utf8')) as { schemaVersion: string; authoritativeRepositoryUnchanged: boolean; naturalPverPerformed: boolean };
+  assert.equal(packageJson.schemaVersion, 'shadow-authoring-promotion-package-v1');
+  assert.equal(packageJson.authoritativeRepositoryUnchanged, true);
+  assert.equal(packageJson.naturalPverPerformed, false);
+  assert.ok((await readFile(result.promotionPatchPath)).length > 0);
 }
 
 export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Promise<void> {
@@ -608,6 +753,13 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     }
 
     const acceptedObservableTestPath = process.env.PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_OBSERVABLE_TEST_PATH;
+    if (acceptedEvidenceTestPath && acceptedObservableTestPath && acceptedBriefTestPath) {
+      await testSyntheticLayerAEndToEnd(root, {
+        evidence: acceptedEvidenceTestPath,
+        observable: acceptedObservableTestPath,
+        brief: acceptedBriefTestPath,
+      });
+    }
     if (acceptedEvidenceTestPath && acceptedObservableTestPath) {
       for (const [responsibilityBriefPath, reason] of [
         [null, 'Reference Responsibility Brief path was not supplied.'],

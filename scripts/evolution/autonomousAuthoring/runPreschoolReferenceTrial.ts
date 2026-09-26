@@ -632,6 +632,13 @@ async function runVerifiedHistoricalTrial(input: {
       skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
       participant,
       autonomousAuthoringContractPacket: trialInputs.contractPacket,
+      referenceResponsibilityContext: {
+        validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+        responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+        briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+        attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+        brief: input.responsibilityBrief.brief,
+      },
     });
     if (!reviewer.ok) throw new Error(`Reviewer Participant failed: ${reviewer.message}`);
 

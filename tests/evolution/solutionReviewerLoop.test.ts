@@ -13,6 +13,7 @@ import {
   type RunSolutionReviewerInput,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionReviewer';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
+import type { PreschoolReferenceResponsibilityContextV1 } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
@@ -212,6 +213,34 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     recommendedOptionId: null,
   };
   const insufficientPrompt = buildSolutionReviewerPrompt(problemPackage, insufficientSolutionWork, [assignedSkill], autonomousAuthoringContractPacket);
+  const referenceContext: PreschoolReferenceResponsibilityContextV1 = {
+    validationLayer: 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM',
+    responsibilityProvenance: 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES',
+    briefRef: 'source/reference-trial/reference-responsibility-brief.json',
+    attestationRef: 'source/reference-trial/reference-responsibility-attestation.json',
+    brief: {
+      schemaVersion: 'preschool-reference-responsibility-brief-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      responsibilities: [{
+        responsibilityRef: 'reference-responsibility-000001',
+        primaryLifeFunction: 'Shared play',
+        playerVisibleNeed: 'A child needs a shared play experience.',
+      }],
+    },
+  };
+  const referencePrompt = buildSolutionReviewerPrompt(problemPackage, autonomousSolutionWork, [assignedSkill], autonomousAuthoringContractPacket, referenceContext);
+  const referenceInsufficientPrompt = buildSolutionReviewerPrompt(problemPackage, insufficientSolutionWork, [assignedSkill], autonomousAuthoringContractPacket, referenceContext);
+  for (const text of [referencePrompt, referenceInsufficientPrompt]) {
+    assert.match(text, /Human-approved input for Layer A/);
+    assert.match(text, /Do not evaluate whether Solution independently discovered/);
+    assert.match(text, /Independently verify one-to-one preservation/);
+    assert.match(text, /A child needs a shared play experience/);
+    assert.match(text, /does not force ACCEPT_OPTION or APPLICABLE/);
+  }
+  assert.match(referencePrompt, /responsibility evidenceRefs are empty/);
+  assert.match(referencePrompt, /developmental age reasoning is independently authored/);
+  assert.doesNotMatch(prompt, /Human-approved input for Layer A/);
+  assert.doesNotMatch(insufficientPrompt, /Human-approved input for Layer A/);
   assert.match(insufficientPrompt, /Host-validated.*provenance-bound safe projection/i);
   assert.match(insufficientPrompt, /authoritySourceRef and authoritySourceSha256 are provenance metadata/i);
   assert.match(insufficientPrompt, /full source authority may intentionally be absent/i);

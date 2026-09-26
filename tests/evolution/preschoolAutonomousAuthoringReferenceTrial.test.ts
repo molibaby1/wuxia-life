@@ -7,6 +7,7 @@ import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '.
 import {
   assertPreschoolReferenceResponsibilitiesPreserved,
   readAcceptedPreschoolReferenceResponsibilityBrief,
+  PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
   validatePreschoolReferenceResponsibilityBrief,
 } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
@@ -15,6 +16,7 @@ import type { AutonomousAuthoringProposalV1 } from '../../src/evolution/autonomo
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
+  buildPreschoolReferenceTrialVerifiedResult,
   createPreschoolReferenceTrialOutputRoot,
   overlayReferenceTrialAuthority,
   prepareReferenceTrialParticipantWorkspace,
@@ -135,9 +137,47 @@ function testReferenceResponsibilityPreservation(): void {
   rejects([{ ...proposal.responsibilities[0]!, evidenceRefs: ['source/observable-payload.json'] }, proposal.responsibilities[1]!]);
 }
 
+function testQualifiedLayerAResult(): void {
+  const result = buildPreschoolReferenceTrialVerifiedResult({
+    briefSha256: PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
+    responsibilityMappings: [{
+      referenceResponsibilityRef: 'reference-responsibility-000001',
+      proposalResponsibilityId: 'responsibility-000001',
+    }],
+    downstream: {
+      status: 'SHADOW_AUTHORING_VERIFIED',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      newEntryCount: 1,
+      changedFiles: ['src/data/lines/preschool-passive-spine.json'],
+      promotionPackagePath: '/tmp/synthetic-promotion-package.json',
+      promotionPatchPath: '/tmp/synthetic-promotion.patch',
+      liveRepositoryFingerprintBefore: 'b'.repeat(64),
+      liveRepositoryFingerprintAfter: 'b'.repeat(64),
+    },
+  });
+  assert.deepEqual(result, {
+    schemaVersion: 'preschool-reference-trial-result-v2',
+    status: 'SHADOW_AUTHORING_VERIFIED',
+    validationLayer: 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM',
+    responsibilityProvenance: 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES',
+    referenceResponsibilityBriefRef: 'source/reference-trial/reference-responsibility-brief.json',
+    referenceResponsibilityBriefSha256: PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
+    referenceResponsibilityAttestationRef: 'source/reference-trial/reference-responsibility-attestation.json',
+    responsibilityMappings: [{ referenceResponsibilityRef: 'reference-responsibility-000001', proposalResponsibilityId: 'responsibility-000001' }],
+    runRef: 'preschool-pver-20260922231805-71297571',
+    newEntryCount: 1,
+    changedFiles: ['src/data/lines/preschool-passive-spine.json'],
+    promotionPackagePath: '/tmp/synthetic-promotion-package.json',
+    promotionPatchPath: '/tmp/synthetic-promotion.patch',
+    liveRepositoryFingerprintBefore: 'b'.repeat(64),
+    liveRepositoryFingerprintAfter: 'b'.repeat(64),
+  });
+}
+
 export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Promise<void> {
   testReferenceResponsibilityBriefContract();
   testReferenceResponsibilityPreservation();
+  testQualifiedLayerAResult();
   assert.equal(
     PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
     'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3',

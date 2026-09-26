@@ -43,11 +43,13 @@ import { buildPromotionPackage } from './buildPromotionPackage';
 import {
   PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
   PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+  PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256,
   assertPreschoolReferenceResponsibilitiesPreserved,
   readAcceptedPreschoolReferenceResponsibilityBrief,
   type AcceptedPreschoolReferenceResponsibilityBrief,
   type PreschoolReferenceResponsibilityAttestationV1,
   type PreschoolReferenceResponsibilityContextV1,
+  type PreschoolReferenceResponsibilityMappingV1,
   type PreschoolReferenceResponsibilityBriefUnavailableReason,
 } from './preschoolReferenceResponsibilityBrief';
 
@@ -107,9 +109,15 @@ export interface PreschoolReferenceTrialResponsibilityBriefStopV1 {
   reason: PreschoolReferenceResponsibilityBriefUnavailableReason;
 }
 
-export interface PreschoolReferenceTrialVerifiedV1 {
-  schemaVersion: 'preschool-reference-trial-result-v1';
+export interface PreschoolReferenceTrialVerifiedV2 {
+  schemaVersion: 'preschool-reference-trial-result-v2';
   status: 'SHADOW_AUTHORING_VERIFIED';
+  validationLayer: typeof PRESCHOOL_REFERENCE_VALIDATION_LAYER;
+  responsibilityProvenance: typeof PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE;
+  referenceResponsibilityBriefRef: typeof REFERENCE_RESPONSIBILITY_BRIEF_PATH;
+  referenceResponsibilityBriefSha256: string;
+  referenceResponsibilityAttestationRef: typeof REFERENCE_RESPONSIBILITY_ATTESTATION_PATH;
+  responsibilityMappings: PreschoolReferenceResponsibilityMappingV1[];
   runRef: typeof PRESCHOOL_REFERENCE_TRIAL_RUN_REF;
   newEntryCount: number;
   changedFiles: string[];
@@ -119,11 +127,33 @@ export interface PreschoolReferenceTrialVerifiedV1 {
   liveRepositoryFingerprintAfter: string;
 }
 
-export type PreschoolReferenceTrialResultV1 =
+export type PreschoolReferenceTrialResult =
   | PreschoolReferenceTrialStopV1
   | PreschoolReferenceTrialObservablePayloadStopV1
   | PreschoolReferenceTrialResponsibilityBriefStopV1
-  | PreschoolReferenceTrialVerifiedV1;
+  | PreschoolReferenceTrialVerifiedV2;
+
+export function buildPreschoolReferenceTrialVerifiedResult(input: {
+  briefSha256: string;
+  responsibilityMappings: PreschoolReferenceResponsibilityMappingV1[];
+  downstream: Pick<PreschoolReferenceTrialVerifiedV2,
+    'status' | 'runRef' | 'newEntryCount' | 'changedFiles' | 'promotionPackagePath'
+    | 'promotionPatchPath' | 'liveRepositoryFingerprintBefore' | 'liveRepositoryFingerprintAfter'>;
+}): PreschoolReferenceTrialVerifiedV2 {
+  if (input.briefSha256 !== PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256) {
+    throw new Error('Reference Responsibility Brief digest is not the accepted trust anchor.');
+  }
+  return {
+    schemaVersion: 'preschool-reference-trial-result-v2',
+    validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+    responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+    referenceResponsibilityBriefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+    referenceResponsibilityBriefSha256: input.briefSha256,
+    referenceResponsibilityAttestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+    responsibilityMappings: input.responsibilityMappings,
+    ...input.downstream,
+  };
+}
 
 export interface RunPreschoolReferenceTrialInput {
   liveRepositoryRoot: string;
@@ -559,7 +589,7 @@ async function runVerifiedHistoricalTrial(input: {
   responsibilityBrief: AcceptedPreschoolReferenceResponsibilityBrief;
   attemptRef: string | null;
   resolveParticipantBinding: typeof resolveOperatorParticipantBinding;
-}): Promise<PreschoolReferenceTrialVerifiedV1> {
+}): Promise<PreschoolReferenceTrialVerifiedV2> {
   const liveRoot = resolve(input.liveRepositoryRoot);
   const liveRepositoryFingerprintBefore = await captureAuthoritativeFingerprint(liveRoot);
   const outputRoot = await createPreschoolReferenceTrialOutputRoot(liveRoot, input.attemptRef);
@@ -644,7 +674,7 @@ async function runVerifiedHistoricalTrial(input: {
     if (!reviewer.ok) throw new Error(`Reviewer Participant failed: ${reviewer.message}`);
 
     const selectedOption = acceptedAuthoringOption(solution, reviewer);
-    assertPreschoolReferenceResponsibilitiesPreserved({
+    const responsibilityMappings = assertPreschoolReferenceResponsibilitiesPreserved({
       brief: input.responsibilityBrief.brief,
       proposal: selectedOption.autonomousAuthoring!,
     });
@@ -738,8 +768,10 @@ async function runVerifiedHistoricalTrial(input: {
     if (liveRepositoryFingerprintAfter !== liveRepositoryFingerprintBefore) {
       throw new Error('The live authoritative repository changed during the historical reference trial.');
     }
-    const result: PreschoolReferenceTrialVerifiedV1 = {
-      schemaVersion: 'preschool-reference-trial-result-v1',
+    const result = buildPreschoolReferenceTrialVerifiedResult({
+      briefSha256: input.responsibilityBrief.sha256,
+      responsibilityMappings,
+      downstream: {
       status: 'SHADOW_AUTHORING_VERIFIED',
       runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
       newEntryCount,
@@ -748,7 +780,8 @@ async function runVerifiedHistoricalTrial(input: {
       promotionPatchPath,
       liveRepositoryFingerprintBefore,
       liveRepositoryFingerprintAfter,
-    };
+      },
+    });
     await writeCreateOnlyJson(join(outputRoot, 'trial-result.json'), result);
     return result;
   } finally {
@@ -759,7 +792,7 @@ async function runVerifiedHistoricalTrial(input: {
 export async function runPreschoolReferenceTrial(
   input: RunPreschoolReferenceTrialInput,
   dependencies: PreschoolReferenceTrialDependencies = {},
-): Promise<PreschoolReferenceTrialResultV1> {
+): Promise<PreschoolReferenceTrialResult> {
   const attemptRef = input.attemptRef === undefined || input.attemptRef === null
     ? null
     : validateReferenceTrialAttemptRef(input.attemptRef);

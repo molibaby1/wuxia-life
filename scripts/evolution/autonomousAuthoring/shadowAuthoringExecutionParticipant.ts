@@ -25,6 +25,15 @@ import {
 } from '../../../src/evolution/shadowAuthoringResultContract';
 import { buildDeterministicPromotionPatch, compareWorkspaceSnapshots, type CanonicalWorkspaceChange } from './workspaceChangeSet';
 
+export class ShadowAuthoringExecutionError extends Error {
+  readonly participantJobs = 1 as const;
+
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'ShadowAuthoringExecutionError';
+  }
+}
+
 export interface ShadowAuthoringExecutionRun {
   status: 'completed' | 'failed';
   invocationRef: string;
@@ -171,62 +180,70 @@ export async function runShadowAuthoringExecution(input: {
     authoritativeFingerprintSha256: before.fingerprintSha256,
   });
 
-  const structured = await runStructuredParticipantExecution({
-    invocationRef: input.invocationRef,
-    role: 'configuration-execution',
-    workspaceRoot: preparedWorkspace.workspaceRoot,
-    destinationRoot: artifactRoot,
-    initialPrompt: buildShadowAuthoringPrompt(accepted.cards),
-    expectedRoleSchemaName: 'ShadowAuthoringExecutionParticipantResultV1',
-    participant: input.participant,
-    retransmissionEnabled: false,
-    validateSchema: validateShadowAuthoringExecutionParticipantResult,
-    validateAcceptedResult: async () => undefined,
-  });
-  const after = await captureWorkspaceSnapshot(repositoryRoot);
-  const finalWorkspace = await captureWorkspaceSnapshot(preparedWorkspace.workspaceRoot);
-  const canonicalChanges = compareWorkspaceSnapshots(before, finalWorkspace);
-  const promotion = await buildDeterministicPromotionPatch({
-    beforeRoot: repositoryRoot,
-    afterRoot: preparedWorkspace.workspaceRoot,
-    changes: canonicalChanges,
-  });
-  const authoritativeChanged = after.fingerprintSha256 !== before.fingerprintSha256;
-  const participantResult = structured.ok ? structured.value : null;
-  const failure = authoritativeChanged
-    ? 'authoritative repository fingerprint changed during shadow execution'
-    : !structured.ok
-      ? structured.message
-      : structured.value.status === 'failed'
-        ? 'Shadow Executor reported failed status'
-        : null;
-  const rawOutput = structured.rawOutput ?? '';
-  const stderr = structured.ok ? structured.stderr : '';
-  await writeCreateOnly(join(artifactRoot, 'raw-output.txt'), rawOutput);
-  await writeCreateOnlyJson(join(artifactRoot, 'execution-trace.json'), structured.executionTrace);
-  if (participantResult) {
-    await writeCreateOnlyJson(join(artifactRoot, 'executor-result.json'), participantResult);
-  }
-  if (stderr.length > 0) await writeCreateOnly(join(artifactRoot, 'stderr.txt'), stderr);
+  try {
+    const structured = await runStructuredParticipantExecution({
+      invocationRef: input.invocationRef,
+      role: 'configuration-execution',
+      workspaceRoot: preparedWorkspace.workspaceRoot,
+      destinationRoot: artifactRoot,
+      initialPrompt: buildShadowAuthoringPrompt(accepted.cards),
+      expectedRoleSchemaName: 'ShadowAuthoringExecutionParticipantResultV1',
+      participant: input.participant,
+      retransmissionEnabled: false,
+      validateSchema: validateShadowAuthoringExecutionParticipantResult,
+      validateAcceptedResult: async () => undefined,
+    });
+    const after = await captureWorkspaceSnapshot(repositoryRoot);
+    const finalWorkspace = await captureWorkspaceSnapshot(preparedWorkspace.workspaceRoot);
+    const canonicalChanges = compareWorkspaceSnapshots(before, finalWorkspace);
+    const promotion = await buildDeterministicPromotionPatch({
+      beforeRoot: repositoryRoot,
+      afterRoot: preparedWorkspace.workspaceRoot,
+      changes: canonicalChanges,
+    });
+    const authoritativeChanged = after.fingerprintSha256 !== before.fingerprintSha256;
+    const participantResult = structured.ok ? structured.value : null;
+    const failure = authoritativeChanged
+      ? 'authoritative repository fingerprint changed during shadow execution'
+      : !structured.ok
+        ? structured.message
+        : structured.value.status === 'failed'
+          ? 'Shadow Executor reported failed status'
+          : null;
+    const rawOutput = structured.rawOutput ?? '';
+    const stderr = structured.ok ? structured.stderr : '';
+    await writeCreateOnly(join(artifactRoot, 'raw-output.txt'), rawOutput);
+    await writeCreateOnlyJson(join(artifactRoot, 'execution-trace.json'), structured.executionTrace);
+    if (participantResult) {
+      await writeCreateOnlyJson(join(artifactRoot, 'executor-result.json'), participantResult);
+    }
+    if (stderr.length > 0) await writeCreateOnly(join(artifactRoot, 'stderr.txt'), stderr);
 
-  return {
-    status: failure === null ? 'completed' : 'failed',
-    invocationRef: input.invocationRef,
-    artifactRoot,
-    preparedWorkspace,
-    participantResult,
-    failure,
-    rawOutput,
-    stderr,
-    executionTrace: structured.executionTrace,
-    canonicalChanges,
-    promotionPatch: promotion.patch,
-    promotionPatchSha256: promotion.patchSha256,
-    authoritativeFingerprintBefore: before.fingerprintSha256,
-    authoritativeFingerprintAfter: after.fingerprintSha256,
-    proposalSha256: accepted.proposalSha256,
-    reviewSha256: accepted.reviewSha256,
-    admissionSha256: accepted.admissionSha256,
-    participantJobs: 1,
-  };
+    return {
+      status: failure === null ? 'completed' : 'failed',
+      invocationRef: input.invocationRef,
+      artifactRoot,
+      preparedWorkspace,
+      participantResult,
+      failure,
+      rawOutput,
+      stderr,
+      executionTrace: structured.executionTrace,
+      canonicalChanges,
+      promotionPatch: promotion.patch,
+      promotionPatchSha256: promotion.patchSha256,
+      authoritativeFingerprintBefore: before.fingerprintSha256,
+      authoritativeFingerprintAfter: after.fingerprintSha256,
+      proposalSha256: accepted.proposalSha256,
+      reviewSha256: accepted.reviewSha256,
+      admissionSha256: accepted.admissionSha256,
+      participantJobs: 1,
+    };
+  } catch (error) {
+    if (error instanceof ShadowAuthoringExecutionError) throw error;
+    throw new ShadowAuthoringExecutionError(
+      'Shadow authoring execution failed after Participant execution began.',
+      { cause: error },
+    );
+  }
 }

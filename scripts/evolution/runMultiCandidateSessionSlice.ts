@@ -77,6 +77,7 @@ import type {
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from './autonomousAuthoring/buildPreschoolContractPacket';
 import {
   runShadowAuthoringExecution,
+  ShadowAuthoringExecutionError,
   type ShadowAuthoringExecutionRun,
 } from './autonomousAuthoring/shadowAuthoringExecutionParticipant';
 import {
@@ -818,6 +819,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
       let proposalSha256: string | null = null;
       let reviewSha256: string | null = null;
       let admissionSha256: string | null = null;
+      let shadowParticipantJobs: 0 | 1 = 0;
 
       try {
         if (typeof effectiveSolutionPath !== 'string' || typeof effectiveReviewPath !== 'string' || typeof autonomousAuthoringAdmissionPath !== 'string') {
@@ -841,7 +843,6 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
           throw new Error('Host admission exceeded the execution envelope');
         }
         const executor = input.dependencies?.runShadowAuthoringExecution ?? runShadowAuthoringExecution;
-        shadowTerminalStatus = 'SHADOW_AUTHORING_EXECUTION_FAILED';
         execution = await executor({
           repositoryRoot: input.repositoryRoot,
           workspaceDestinationRoot: join(input.repositoryRoot, '.tmp/evolution', input.logicalSessionId, input.hostSliceId, 'shadow-authoring', pending.hypothesisId, 'workspace'),
@@ -852,7 +853,9 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
           admission,
           participant: input.participant,
         });
-        budget = consumeHostSliceJobs(budget, execution.participantJobs);
+        shadowParticipantJobs = execution.participantJobs;
+        shadowTerminalStatus = 'SHADOW_AUTHORING_EXECUTION_FAILED';
+        budget = consumeHostSliceJobs(budget, shadowParticipantJobs);
         slice = { ...slice, participantJobs: budget.usedParticipantJobs };
         await writeAtomicJson(join(shadowRoot, 'change-set.json'), {
           schemaVersion: 'shadow-authoring-change-set-v1',
@@ -906,6 +909,12 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         await writeCreateOnlyBytes(join(shadowRoot, 'promotion-package.md'), promotionPackage.markdown);
         shadowTerminalStatus = 'SHADOW_AUTHORING_VERIFIED';
       } catch (error) {
+        if (error instanceof ShadowAuthoringExecutionError) {
+          shadowParticipantJobs = error.participantJobs;
+          shadowTerminalStatus = 'SHADOW_AUTHORING_EXECUTION_FAILED';
+          budget = consumeHostSliceJobs(budget, shadowParticipantJobs);
+          slice = { ...slice, participantJobs: budget.usedParticipantJobs };
+        }
         shadowFailure = String(error);
       }
 
@@ -936,7 +945,7 @@ export async function runMultiCandidateSessionSlice(input: RunMultiCandidateSess
         promotionPackageRef: promotionPackage ? 'shadow-authoring/promotion-package.json' : null,
         authoritativeFingerprintBefore: execution?.authoritativeFingerprintBefore ?? input.repositoryBaseline.workingTreeFingerprint,
         authoritativeFingerprintAfter: execution?.authoritativeFingerprintAfter ?? input.repositoryBaseline.workingTreeFingerprint,
-        participantJobs: execution?.participantJobs ?? 0,
+        participantJobs: shadowParticipantJobs,
       };
       await writeAtomicJson(join(shadowRoot, 'result.json'), shadowResult);
       await retainLaneArtifacts();

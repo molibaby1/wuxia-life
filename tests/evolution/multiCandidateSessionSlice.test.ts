@@ -21,6 +21,7 @@ import { buildCandidateLaneFailureV2 } from '../../scripts/evolution/candidateLa
 import { validateSolutionDecision } from '../../src/evolution/solutionDecisionContract';
 import type { ShadowAuthoringResultV1 } from '../../src/evolution/shadowAuthoringResultContract';
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
+import { acceptedInputs } from './shadowAuthoringExecution.test';
 
 const participant: WorkspaceAgentParticipantOptions = { executable: 'test-participant', buildArgs: () => [] };
 const hypotheses = [1, 2, 3].map(index => ({ hypothesisId: `hypothesis-${String(index).padStart(6, '0')}`, hypothesis: `H${index}`, observedBasis: 'Observed.', feedbackRefs: ['overallImpression'], evidenceRefs: [], unknowns: ['Unknown.'], productSignificance: 'Significant.' }));
@@ -1356,6 +1357,9 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   assert.equal(shadowSuccessSourceTransitionCalls, 0);
   assert.equal(shadowSuccessHumanFollowupCalls, 0);
   const shadowSuccessPool = parseCandidatePoolV1(JSON.parse(await readFile(join(shadowSuccessRoot, 'artifacts/evolution/sessions/logical-session-shadow-success/source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
+  const shadowSuccessManifest = await readDurableMultiCandidateSessionManifest(shadowSuccessRoot, 'logical-session-shadow-success');
+  assert.equal(shadowSuccessManifest.hostSlices.at(-1)!.participantJobs, 6);
+  assert.equal(shadowSuccessManifest.budgetAccounting.participantJobs, 6);
   assert.equal(shadowSuccessPool.status, 'EXHAUSTED');
   assert.deepEqual(shadowSuccessPool.candidates.map(candidate => candidate.processingState), ['COMPLETED', 'COMPLETED']);
   assert.equal(shadowSuccessPool.candidates[0]!.sourceTransitionRef, null);
@@ -1416,6 +1420,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
       },
     });
     assert.equal(shadowFailureResult.sessionState, 'FAILED', failureCase.name);
+    assert.equal(shadowFailureResult.participantJobs, 5, failureCase.name);
     assert.equal(shadowFailureResult.sourceTransitionCount, 0, failureCase.name);
     assert.deepEqual(failureLaneCalls, ['hypothesis-000001'], failureCase.name);
     assert.equal(failureSourceTransitionCalls, 0, failureCase.name);
@@ -1425,6 +1430,8 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     assert.equal(failurePool.candidates[0]!.processingState, 'INTERRUPTED', failureCase.name);
     assert.equal(failurePool.candidates[1]!.processingState, 'PENDING', failureCase.name);
     const failureManifest = await readDurableMultiCandidateSessionManifest(failureRoot, logicalSessionId);
+    assert.equal(failureManifest.hostSlices.at(-1)!.participantJobs, 5, failureCase.name);
+    assert.equal(failureManifest.budgetAccounting.participantJobs, 5, failureCase.name);
     assert.ok(failureManifest.failureRef, failureCase.name);
     const retainedFailureResultPath = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, failureManifest.failureRef!);
     const retainedFailureShadowRoot = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring');
@@ -1440,7 +1447,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
   for (const failureCase of [
     {
       name: 'executor-runner-throws',
-      terminalStatus: 'SHADOW_AUTHORING_EXECUTION_FAILED',
+      terminalStatus: 'SHADOW_AUTHORING_PRE_EXECUTION_FAILED',
       options: { executorThrows: true },
     },
     {
@@ -1476,6 +1483,7 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
       },
     });
     assert.equal(shadowFailureResult.sessionState, 'FAILED', failureCase.name);
+    assert.equal(shadowFailureResult.participantJobs, 4, failureCase.name);
     assert.equal(shadowFailureResult.sourceTransitionCount, 0, failureCase.name);
     assert.deepEqual(failureLaneCalls, ['hypothesis-000001'], failureCase.name);
     assert.equal(failureSourceTransitionCalls, 0, failureCase.name);
@@ -1483,6 +1491,8 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
 
     const logicalSessionId = `logical-session-shadow-pre-execution-${failureCase.name}`;
     const failureManifest = await readDurableMultiCandidateSessionManifest(failureRoot, logicalSessionId);
+    assert.equal(failureManifest.hostSlices.at(-1)!.participantJobs, 4, failureCase.name);
+    assert.equal(failureManifest.budgetAccounting.participantJobs, 4, failureCase.name);
     assert.ok(failureManifest.failureRef, failureCase.name);
     const retainedFailureShadowRoot = join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring');
     const retainedFailureResult = JSON.parse(await readFile(join(retainedFailureShadowRoot, 'result.json'), 'utf8')) as Partial<ShadowAuthoringResultV1>;
@@ -1500,6 +1510,77 @@ export async function runMultiCandidateSessionSliceTests(): Promise<void> {
     const failurePool = parseCandidatePoolV1(JSON.parse(await readFile(join(failureRoot, 'artifacts/evolution/sessions', logicalSessionId, 'source-epochs/source-epoch-000001/candidate-pool.json'), 'utf8')));
     assert.equal(failurePool.candidates[0]!.processingState, 'INTERRUPTED', failureCase.name);
     assert.equal(failurePool.candidates[1]!.processingState, 'PENDING', failureCase.name);
+  }
+
+  const shadowPostProcessingFailureRoot = await mkdtemp(join(tmpdir(), 'candidate-session-shadow-post-processing-failure-'));
+  const acceptedShadowInputs = acceptedInputs();
+  const shadowPostProcessingLaneCalls: string[] = [];
+  let shadowPostProcessingParticipantCalls = 0;
+  let shadowPostProcessingSourceTransitionCalls = 0;
+  const participantResult = {
+    schemaVersion: 'shadow-authoring-execution-participant-result-v1',
+    status: 'completed',
+    changedFiles: [],
+    verificationCommandsRun: [],
+    deviations: [],
+  };
+  const participantOutput = JSON.stringify(participantResult);
+  const shadowPostProcessingFailure = await runMultiCandidateSessionSlice({
+    ...base,
+    repositoryRoot: shadowPostProcessingFailureRoot,
+    logicalSessionId: 'logical-session-shadow-post-processing-failure',
+    initialSourceRoot: sourceRoot,
+    hostSliceId: 'host-slice-000001',
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => {
+        shadowPostProcessingParticipantCalls += 1;
+        return ['-e', `process.stdout.write(${JSON.stringify(participantOutput)});`];
+      },
+    },
+    dependencies: {
+      ...base.dependencies,
+      runSourceAnalysis: async () => scopedAnalysis(shadowPostProcessingFailureRoot, { hypotheses: hypotheses.slice(0, 2) }),
+      runCandidateLane: async input => {
+        shadowPostProcessingLaneCalls.push(input.candidate.hypothesisId);
+        if (input.candidate.sourceIndex !== 0) return base.dependencies.runCandidateLane!(input);
+        const result = await shadowLaneResult(input.candidate, input.laneRoot);
+        await writeFile(join(input.laneRoot, result.effectiveSolutionPath!), JSON.stringify(acceptedShadowInputs.solution));
+        await writeFile(join(input.laneRoot, result.effectiveReviewPath!), JSON.stringify(acceptedShadowInputs.review));
+        await writeFile(join(input.laneRoot, result.autonomousAuthoringAdmissionPath!), JSON.stringify(acceptedShadowInputs.admission));
+        const shadowRoot = join(input.laneRoot, 'shadow-authoring');
+        await mkdir(shadowRoot, { recursive: true });
+        await writeFile(join(shadowRoot, 'raw-output.txt'), 'pre-existing Host artifact collision\n');
+        return result;
+      },
+      runSourceTransition: async () => {
+        shadowPostProcessingSourceTransitionCalls += 1;
+        throw new Error('post-Participant shadow failure must not run a source transition');
+      },
+    },
+  });
+  assert.equal(shadowPostProcessingFailure.sessionState, 'FAILED');
+  assert.equal(shadowPostProcessingFailure.sourceTransitionCount, 0);
+  assert.deepEqual(shadowPostProcessingLaneCalls, ['hypothesis-000001']);
+  assert.equal(shadowPostProcessingParticipantCalls, 1);
+  assert.equal(shadowPostProcessingSourceTransitionCalls, 0);
+  const shadowPostProcessingArtifactsRoot = join(
+    shadowPostProcessingFailureRoot,
+    'artifacts/evolution/sessions/logical-session-shadow-post-processing-failure/source-epochs/source-epoch-000001/candidates/hypothesis-000001/shadow-authoring',
+  );
+  assert.equal(await readFile(join(shadowPostProcessingArtifactsRoot, 'terminal-attempt-0.txt'), 'utf8'), participantOutput);
+  const shadowPostProcessingManifest = await readDurableMultiCandidateSessionManifest(
+    shadowPostProcessingFailureRoot,
+    'logical-session-shadow-post-processing-failure',
+  );
+  assert.equal(shadowPostProcessingManifest.hostSlices.at(-1)!.participantJobs, 5);
+  assert.equal(shadowPostProcessingManifest.budgetAccounting.participantJobs, 5);
+  assert.ok(shadowPostProcessingManifest.failureRef);
+  const shadowPostProcessingResult = JSON.parse(await readFile(join(shadowPostProcessingArtifactsRoot, 'result.json'), 'utf8')) as Partial<ShadowAuthoringResultV1>;
+  assert.equal(shadowPostProcessingResult.terminalStatus, 'SHADOW_AUTHORING_EXECUTION_FAILED');
+  assert.equal(shadowPostProcessingResult.participantJobs, 1);
+  for (const digest of [shadowPostProcessingResult.proposalSha256, shadowPostProcessingResult.reviewSha256, shadowPostProcessingResult.admissionSha256]) {
+    assert.ok(digest === null || /^[a-f0-9]{64}$/.test(digest));
   }
 }
 

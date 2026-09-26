@@ -22,7 +22,7 @@ import {
 import { validateSolutionReview } from '../../src/evolution/solutionReviewContract';
 import { validateSolutionWork } from '../../src/evolution/solutionWorkContract';
 
-function acceptedInputs() {
+export function acceptedInputs() {
   const responsibility = {
     responsibilityId: 'responsibility-000001',
     primaryLifeFunction: 'shared cooperation',

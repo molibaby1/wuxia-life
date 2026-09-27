@@ -177,7 +177,8 @@ function assertSolutionWorkSchemaGuidance(prompt: string): void {
   assert.match(prompt, /optionId.*option-000001.*option-000002.*option-000003.*participant order/i);
   assert.match(prompt, /changeScope.*configuration.*program.*mixed.*uncertain/i);
   assert.match(prompt, /recommendedOptionId.*only.*OPTIONS.*actual option/i);
-  assert.match(prompt, /root.*option.*no extra fields|no extra fields.*root.*option/i);
+  assert.match(prompt, /root object.*only.*required fields.*optional recommendedOptionId/i);
+  assert.match(prompt, /option object.*only.*required fields.*optional autonomousAuthoring/i);
 }
 
 export async function runSolutionAgentLoopTests(): Promise<void> {
@@ -227,6 +228,22 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     },
   };
   const referencePrompt = buildSolutionAgentPrompt(problemPackage, [], autonomousAuthoringContractPacket, referenceContext);
+  assertSolutionWorkSchemaGuidance(referencePrompt);
+  assert.match(referencePrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES/);
+  assert.match(referencePrompt, /If the Layer A case is APPLICABLE and supports an executable authoring option.*changeScope='program'.*autonomousAuthoring/s);
+  assert.match(referencePrompt, /A configuration option with content only in proposedChange is not an autonomous authoring proposal/);
+  assert.match(referencePrompt, /^autonomousAuthoring fields exactly: schemaVersion="autonomous-authoring-proposal-v1",[^\n]*applicabilityClaim="APPLICABLE",[^\n]*responsibilities, contractPayload\.$/m);
+  assert.match(referencePrompt, /^autonomousAuthoring\.responsibilities\[n\] fields exactly: responsibilityId[^\n]*primaryLifeFunction, playerVisibleNeed, evidenceRefs\.$/m);
+  assert.match(referencePrompt, /^For APPLICABLE within[^\n]*contractPayload fields exactly: schemaVersion="preschool-shared-neutral-passive-authoring-payload-v1", cards\./m);
+  const cardShape = referencePrompt.match(/^contractPayload\.cards\[n\] fields exactly: [^\n]+$/m)?.[0];
+  assert.ok(cardShape);
+  for (const field of [
+    'developmentalAgeJustification', 'playerVisibleNeed', 'concreteSceneConcept',
+    'existingContentDistinction', 'originPortability', 'proposedEntry',
+  ]) {
+    assert.ok(cardShape.includes(field), `missing Card field: ${field}`);
+  }
+  assert.match(referencePrompt, /If Layer A applicability is not established or evidence is insufficient.*INSUFFICIENT_EVIDENCE.*do not fabricate Cards/s);
   assert.ok(referencePrompt.indexOf('Do not derive, replace, add, omit, merge, or split the responsibility set')
     > referencePrompt.indexOf('Derive the Minimum Sufficient Responsibility Set from permitted evidence'));
   assert.match(referencePrompt, /Do not derive, replace, add, omit, merge, or split the responsibility set/);
@@ -235,6 +252,10 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(referencePrompt, /does not force APPLICABLE/);
   assert.match(referencePrompt, /A child needs a shared play experience/);
   assert.doesNotMatch(referencePrompt, /preschool_neutral_fair_play/);
+  const ordinaryPrompt = buildSolutionAgentPrompt(problemPackage, []);
+  assertSolutionWorkSchemaGuidance(ordinaryPrompt);
+  assert.doesNotMatch(ordinaryPrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES|If the Layer A case is APPLICABLE/);
+  assert.match(ordinaryPrompt, /Return zero to three options or an explicit no-proposal\/insufficient-evidence\/escalate result/);
 
   const root = await mkdtemp(join(tmpdir(), 'solution-agent-loop-'));
   const workspaceRoot = join(root, 'workspace');

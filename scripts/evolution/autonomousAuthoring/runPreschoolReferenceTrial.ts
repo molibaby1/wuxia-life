@@ -674,10 +674,6 @@ async function runVerifiedHistoricalTrial(input: {
     if (!reviewer.ok) throw new Error(`Reviewer Participant failed: ${reviewer.message}`);
 
     const selectedOption = acceptedAuthoringOption(solution, reviewer);
-    const responsibilityMappings = assertPreschoolReferenceResponsibilitiesPreserved({
-      brief: input.responsibilityBrief.brief,
-      proposal: selectedOption.autonomousAuthoring!,
-    });
     const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
       repositoryRoot: hostAuthorityRoot,
       sourceRoot: trialBaselineRoot,
@@ -696,6 +692,15 @@ async function runVerifiedHistoricalTrial(input: {
     });
     if (admission.status !== 'ELIGIBLE') {
       throw new Error(`Host admission did not establish eligibility: ${admission.status} (${admission.reasons.join('; ')})`);
+    }
+    let responsibilityMappings: PreschoolReferenceResponsibilityMappingV1[];
+    try {
+      responsibilityMappings = assertPreschoolReferenceResponsibilitiesPreserved({
+        brief: input.responsibilityBrief.brief,
+        proposal: selectedOption.autonomousAuthoring!,
+      });
+    } catch (error) {
+      throw new Error('Internal invariant failure: eligible Host admission did not preserve reference responsibilities.', { cause: error });
     }
 
     const decision = routeSolutionDecision({

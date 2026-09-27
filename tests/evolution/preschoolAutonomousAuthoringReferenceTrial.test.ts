@@ -315,28 +315,39 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     attemptRef: 'attempt-000900',
   }, { resolveParticipantBinding: async () => ({ participant }) as never });
   if (scenario !== 'success') {
-    const expectedFailure = scenario === 'omitted-responsibility'
-      ? /reference responsibility count or applicability does not match the accepted brief/
-      : scenario === 'unauthorized-shadow-path'
+    if (scenario === 'omitted-responsibility') {
+      await assert.rejects(trial, {
+        message: 'Host admission did not establish eligibility: INSUFFICIENT_EVIDENCE (The reference responsibility set was not preserved one-to-one.)',
+      });
+    } else {
+      await assert.rejects(trial, scenario === 'unauthorized-shadow-path'
         ? /Shadow workspace changed paths outside the Contract/
-        : /Structural capacity deficit must decrease from a positive value to zero/;
-    await assert.rejects(trial, expectedFailure);
+        : /Structural capacity deficit must decrease from a positive value to zero/);
+    }
     const outputRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ATTEMPTS_PATH, 'attempt-000900');
     assert.deepEqual(jobs, scenario === 'omitted-responsibility'
       ? ['solution', 'reviewer']
       : ['solution', 'reviewer', 'configuration-execution']);
     await assert.rejects(readFile(join(outputRoot, 'trial-result.json')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.json')), { code: 'ENOENT' });
+    await assert.rejects(readFile(join(outputRoot, 'promotion-package.md')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion.patch')), { code: 'ENOENT' });
     if (scenario === 'omitted-responsibility') {
+      const submittedSolution = JSON.parse(await readFile(join(outputRoot, 'solution-agent/result.json'), 'utf8')) as typeof solution;
+      const submittedBrief = JSON.parse(await readFile(join(outputRoot, 'source/reference-trial/reference-responsibility-brief.json'), 'utf8')) as typeof brief;
+      assert.equal(submittedSolution.options[0]!.autonomousAuthoring.responsibilities.length, 4);
+      assert.equal(submittedBrief.responsibilities.length, 5);
       await assert.rejects(readFile(join(outputRoot, 'decision.json')), { code: 'ENOENT' });
       await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
     } else {
       const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
       assert.equal(decision.route, 'READY_FOR_SHADOW_AUTHORING');
     }
-    assert.equal(await captureAuthoritativeFingerprint(liveRepositoryRoot), before);
-    process.stdout.write(`historical integration negative ${scenario}: PASS\n`);
+    const after = await captureAuthoritativeFingerprint(liveRepositoryRoot);
+    assert.equal(after, before);
+    process.stdout.write(scenario === 'omitted-responsibility'
+      ? `historical integration negative omitted-responsibility: PASS — rejected by Host Admission: INSUFFICIENT_EVIDENCE (The reference responsibility set was not preserved one-to-one.); proposal=4, brief=5; authoritative fingerprint before=${before} after=${after}\n`
+      : `historical integration negative ${scenario}: PASS\n`);
     return;
   }
   const result = await trial;

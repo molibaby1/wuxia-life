@@ -28,6 +28,9 @@ import {
 } from './participantFailureClassification';
 import { persistParticipantPromptAndBinding } from '../participantObservability';
 
+export const PARTICIPANT_ENVELOPE_RETRANSMISSION_PROMPT_1_ARTIFACT =
+  'participant-envelope-retransmission-prompt-1.txt' as const;
+
 export type StructuredParticipantExecutionResult<T> =
   | {
       ok: true;
@@ -412,6 +415,10 @@ export async function runStructuredParticipantExecution<T>(input: {
   const continuationPrompt = renderEnvelopeRetransmissionRequestV1({
     expectedRoleSchemaName: input.expectedRoleSchemaName,
   });
+  await writeCreateOnlyText(
+    join(input.destinationRoot, PARTICIPANT_ENVELOPE_RETRANSMISSION_PROMPT_1_ARTIFACT),
+    continuationPrompt,
+  );
   const continuationStartedMonotonic = performance.now();
   const attempt1ElapsedOffsetMs = Math.round(continuationStartedMonotonic - aggregateStartedMonotonic);
   const attempt1Job = await runWorkspaceAgentContinuation(

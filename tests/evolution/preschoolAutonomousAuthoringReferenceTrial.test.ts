@@ -279,6 +279,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
   const reviewerPath = 'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts';
   const structuredPath = 'scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution.ts';
+  const retransmissionPath = 'scripts/evolution/problemAgnosticSolution/envelopeRetransmission.ts';
   let runnerSource = await readFile(join(process.cwd(), runnerPath), 'utf8');
   for (const [acceptedSha, fixtureSha] of [
     [PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256, inputSha256.evidence],
@@ -307,6 +308,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
     inputSha256.brief,
   ));
   await writeFile(join(sourceRoot, structuredPath), await readFile(join(process.cwd(), structuredPath)));
+  await writeFile(join(sourceRoot, retransmissionPath), await readFile(join(process.cwd(), retransmissionPath)));
   const module = await import(pathToFileURL(join(sourceRoot, runnerPath)).href);
   return module.runPreschoolReferenceTrial as typeof runPreschoolReferenceTrial;
 }
@@ -452,6 +454,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   };
   if (scenario === 'solution-exact-answer-id') solution.summary = 'preschool_neutral_fair_play';
   if (scenario === 'reviewer-static-answer-marker') solution.summary = 'preschool_neutral_fair_play';
+  const schemaInvalidSolution = structuredClone(solution);
+  schemaInvalidSolution.options[0]!.autonomousAuthoring.contractPayload.cards[0]!.scopeCheck =
+    'The scoped changes preserve the authorized Contract.';
   const review = {
     schemaVersion: 'solution-review-v1', problemId, decision: 'ACCEPT_OPTION', acceptedOptionId: 'option-000001',
     scopeAssessment: 'code_required', executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
@@ -495,7 +500,10 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       if (job.role === 'solution' && scenario === 'participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Participant failure"); process.exitCode = 23'];
       }
-      if (job.role === 'solution' && retransmissionScenario) {
+      if (job.role === 'solution' && scenario === 'retransmission-success') {
+        return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(schemaInvalidSolution)];
+      }
+      if (job.role === 'solution' && scenario === 'retransmission-failure') {
         return ['-e', 'process.stdout.write("invalid structured terminal envelope")'];
       }
       if (job.role === 'solution') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(solution)];
@@ -633,10 +641,26 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     assert.equal(continuationCount, 1);
     const bytes = await readFile(join(outputRoot, 'solution-agent', RETRANSMISSION_PROMPT_ARTIFACT));
     assert.deepEqual(bytes, Buffer.from(deliveredRetransmissionPrompt!));
+    assert.match(deliveredRetransmissionPrompt!, /Failure class: SCHEMA_FAILURE/);
+    assert.match(deliveredRetransmissionPrompt!, /scopeCheck must be CONTRACT_PRESERVING/);
     const recorded = succeededManifest.participantPromptProvenance.solution.retransmissionPrompts[0];
     assert.equal(recorded.artifactRef, `solution-agent/${RETRANSMISSION_PROMPT_ARTIFACT}`);
     assert.equal(recorded.sha256, sha256Hex(bytes));
     assert.equal(recorded.byteLength, bytes.byteLength);
+    assert.equal(await readFile(join(outputRoot, 'solution-agent/terminal-attempt-0.txt'), 'utf8'), JSON.stringify(schemaInvalidSolution));
+    assert.equal(await readFile(join(outputRoot, 'solution-agent/terminal-attempt-1.txt'), 'utf8'), JSON.stringify(solution));
+    const solutionTrace = JSON.parse(await readFile(join(outputRoot, 'solution-agent/execution-trace.json'), 'utf8')) as {
+      events: Array<Record<string, unknown>>;
+    };
+    const firstValidation = solutionTrace.events.find(event => event.type === 'participant_terminal_validation' && event.attempt === 0);
+    assert.equal(firstValidation?.envelopeValid, true);
+    assert.equal(firstValidation?.schemaValid, false);
+    const retransmissionRequest = solutionTrace.events.find(event => event.type === 'participant_envelope_retransmission_requested');
+    assert.equal(retransmissionRequest?.failureClass, 'SCHEMA_FAILURE');
+    assert.equal(retransmissionRequest?.sameThread, true);
+    const secondValidation = solutionTrace.events.find(event => event.type === 'participant_terminal_validation' && event.attempt === 1);
+    assert.equal(secondValidation?.schemaValid, true);
+    assert.equal(secondValidation?.accepted, true);
   }
   assert.deepEqual(jobs, ['solution', 'reviewer', 'configuration-execution']);
   assert.equal(await captureAuthoritativeFingerprint(liveRepositoryRoot), before);

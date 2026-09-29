@@ -16,6 +16,7 @@ import {
 } from './agentParticipant';
 import {
   ENVELOPE_RETRANSMISSION_TIMEOUT_MS,
+  isEnvelopeRetransmissionEnabledForRole,
   type EnvelopeRetransmissionObservation,
   type EnvelopeRetransmissionOutcome,
   renderEnvelopeRetransmissionRequestV1,
@@ -67,10 +68,9 @@ function notAttemptedRecovery(): EnvelopeRetransmissionObservation {
 
 function retransmissionNotAttemptedReason(
   retransmissionEnabled: boolean,
-  participant: WorkspaceAgentParticipantOptions,
-  threadRef: ParticipantThreadRef | undefined,
+  role: WorkspaceAgentJobInput['role'],
 ): 'CAPABILITY_UNAVAILABLE' | 'POLICY_DISABLED' {
-  if (!retransmissionEnabled) return 'POLICY_DISABLED';
+  if (!retransmissionEnabled || !isEnvelopeRetransmissionEnabledForRole(role)) return 'POLICY_DISABLED';
   return 'CAPABILITY_UNAVAILABLE';
 }
 
@@ -214,10 +214,11 @@ function mapContinuationRuntimeOutcome(
 
 function canRetransmit(
   retransmissionEnabled: boolean,
+  role: WorkspaceAgentJobInput['role'],
   participant: WorkspaceAgentParticipantOptions,
   threadRef: ParticipantThreadRef | undefined,
 ): boolean {
-  if (!retransmissionEnabled) return false;
+  if (!retransmissionEnabled || !isEnvelopeRetransmissionEnabledForRole(role)) return false;
   if (participant.sameThreadContinuation === undefined) return false;
   return threadRef !== undefined;
 }
@@ -293,47 +294,77 @@ export async function runStructuredParticipantExecution<T>(input: {
     ...(attempt0Envelope.ok ? {} : { envelopeFailureReason: attempt0Envelope.reason }),
   };
 
-  if (attempt0Envelope.ok) {
-    let schemaValid = false;
-    let parsedValue: T | undefined;
+  let attempt0Failure:
+    | {
+        failureClass: 'ENVELOPE_FAILURE';
+        failure: ParticipantFailureFacts;
+        message: string;
+      }
+    | {
+        failureClass: 'SCHEMA_FAILURE';
+        failure: ParticipantFailureFacts;
+        message: string;
+        validationError: string;
+      }
+    | undefined;
+
+  if (!attempt0Envelope.ok) {
+    const message = 'structured terminal envelope validation failed';
+    attempt0Failure = {
+      failureClass: 'ENVELOPE_FAILURE',
+      failure: envelopeFailure(attempt0Envelope.reason, message),
+      message,
+    };
+  } else {
+    let parsedValue!: T;
     try {
       parsedValue = input.validateSchema(attempt0Envelope.parsedObject);
-      schemaValid = true;
     } catch (error) {
-      lifecycleEvents.push({
-        ...attempt0Validation,
-        schemaValid: false,
-      });
-      return {
-        ok: false,
-        errorKind: 'invalid_output',
-        message: String(error),
+      const message = String(error);
+      attempt0Failure = {
+        failureClass: 'SCHEMA_FAILURE',
         failure: schemaFailure(error),
-        rawOutput: attempt0Raw,
-        recovery: notAttemptedRecovery(),
-        executionTrace: composeExecutionTrace({
-          ...traceContext,
-          attempt0Trace: attempt0Job.executionTrace,
-          lifecycleEvents,
-          terminalOutcome: 'completed',
-        }),
+        message,
+        validationError: message,
       };
     }
 
-    try {
-      await input.validateAcceptedResult(parsedValue);
-    } catch (error) {
+    if (attempt0Failure === undefined) {
+      try {
+        await input.validateAcceptedResult(parsedValue);
+      } catch (error) {
+        lifecycleEvents.push({
+          ...attempt0Validation,
+          schemaValid: true,
+          accepted: false,
+        });
+        return {
+          ok: false,
+          errorKind: 'invalid_output',
+          message: String(error),
+          failure: acceptedResultFailure(error),
+          rawOutput: attempt0Raw,
+          recovery: notAttemptedRecovery(),
+          executionTrace: composeExecutionTrace({
+            ...traceContext,
+            attempt0Trace: attempt0Job.executionTrace,
+            lifecycleEvents,
+            terminalOutcome: 'completed',
+          }),
+        };
+      }
+
       lifecycleEvents.push({
         ...attempt0Validation,
         schemaValid: true,
-        accepted: false,
+        accepted: true,
       });
       return {
-        ok: false,
-        errorKind: 'invalid_output',
-        message: String(error),
-        failure: acceptedResultFailure(error),
+        ok: true,
+        value: parsedValue,
         rawOutput: attempt0Raw,
+        stderr: attempt0Job.stderr,
+        acceptedAttempt: 0,
         recovery: notAttemptedRecovery(),
         executionTrace: composeExecutionTrace({
           ...traceContext,
@@ -343,52 +374,29 @@ export async function runStructuredParticipantExecution<T>(input: {
         }),
       };
     }
-
-    lifecycleEvents.push({
-      ...attempt0Validation,
-      schemaValid: true,
-      accepted: true,
-    });
-    return {
-      ok: true,
-      value: parsedValue,
-      rawOutput: attempt0Raw,
-      stderr: attempt0Job.stderr,
-      acceptedAttempt: 0,
-      recovery: notAttemptedRecovery(),
-      executionTrace: composeExecutionTrace({
-        ...traceContext,
-        attempt0Trace: attempt0Job.executionTrace,
-        lifecycleEvents,
-        terminalOutcome: 'completed',
-      }),
-    };
   }
 
+  const initialFailure = attempt0Failure!;
   const threadRef = attempt0Job.threadRef;
-  const eligible = canRetransmit(input.retransmissionEnabled, input.participant, threadRef);
+  const eligible = canRetransmit(input.retransmissionEnabled, input.role, input.participant, threadRef);
   lifecycleEvents.push({
     ...attempt0Validation,
+    ...(initialFailure.failureClass === 'SCHEMA_FAILURE' ? { schemaValid: false } : {}),
     ...(eligible ? {} : {
       retransmissionEligible: false,
       retransmissionNotAttemptedReason: retransmissionNotAttemptedReason(
         input.retransmissionEnabled,
-        input.participant,
-        threadRef,
+        input.role,
       ),
     }),
   });
 
   if (!eligible) {
-    const failure = envelopeFailure(
-      attempt0Envelope.reason,
-      'structured terminal envelope validation failed',
-    );
     return {
       ok: false,
       errorKind: 'invalid_output',
-      message: 'structured terminal envelope validation failed',
-      failure,
+      message: initialFailure.message,
+      failure: initialFailure.failure,
       rawOutput: attempt0Raw,
       recovery: notAttemptedRecovery(),
       executionTrace: composeExecutionTrace({
@@ -406,15 +414,22 @@ export async function runStructuredParticipantExecution<T>(input: {
     type: 'participant_envelope_retransmission_requested',
     elapsedMs: elapsedMs(),
     retransmissionAttempt: 1,
-    failureClass: 'ENVELOPE_FAILURE',
+    failureClass: initialFailure.failureClass,
     sameThread: true,
     timeoutMs: ENVELOPE_RETRANSMISSION_TIMEOUT_MS,
     participantCapability: 'SAME_THREAD_CONTINUATION',
   });
 
-  const continuationPrompt = renderEnvelopeRetransmissionRequestV1({
-    expectedRoleSchemaName: input.expectedRoleSchemaName,
-  });
+  const continuationPrompt = initialFailure.failureClass === 'SCHEMA_FAILURE'
+    ? renderEnvelopeRetransmissionRequestV1({
+        expectedRoleSchemaName: input.expectedRoleSchemaName,
+        failureClass: 'SCHEMA_FAILURE',
+        validationError: initialFailure.validationError,
+      })
+    : renderEnvelopeRetransmissionRequestV1({
+        expectedRoleSchemaName: input.expectedRoleSchemaName,
+        failureClass: 'ENVELOPE_FAILURE',
+      });
   await writeCreateOnlyText(
     join(input.destinationRoot, PARTICIPANT_ENVELOPE_RETRANSMISSION_PROMPT_1_ARTIFACT),
     continuationPrompt,

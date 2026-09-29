@@ -39,7 +39,7 @@ export interface ParticipantExecutionTraceEventV1 {
   schemaValid?: boolean;
   accepted?: boolean;
   retransmissionAttempt?: 1;
-  failureClass?: 'ENVELOPE_FAILURE';
+  failureClass?: 'ENVELOPE_FAILURE' | 'SCHEMA_FAILURE';
   sameThread?: boolean;
   timeoutMs?: number;
   participantCapability?: 'SAME_THREAD_CONTINUATION';

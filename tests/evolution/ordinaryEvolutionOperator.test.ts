@@ -234,13 +234,14 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
   for (const scenario of [
     { name: 'valid', first: '{"ok":true}', second: '', calls: 1, ok: true },
     { name: 'envelope-recovered', first: '{"ok":true', second: '{"ok":true}', calls: 2, ok: true },
-    { name: 'schema-rejected', first: '{"wrong":true}', second: '', calls: 1, ok: false },
+    { name: 'schema-recovered', first: '{"wrong":true}', second: '{"ok":true}', calls: 2, ok: true },
     { name: 'second-envelope-failed', first: '{', second: '{', calls: 2, ok: false },
     { name: 'resume-mismatch', first: '{', second: '{"ok":true}', calls: 2, ok: false },
     { name: 'broken-transport', first: '{}', second: '', calls: 1, ok: false },
   ]) {
     const destinationRoot = await mkdtemp(join(tmpdir(), `codex-binding-${scenario.name}-`));
     let calls = 0;
+    let continuationPrompt = '';
     const nodeArgs = (payload: string, id = threadId) => ['-e', `process.stdout.write(${JSON.stringify(wire(payload, id))})`];
     const execution = await runStructuredParticipantExecution({
       invocationRef: scenario.name, role: 'solution', workspaceRoot: process.cwd(), destinationRoot,
@@ -255,6 +256,7 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
         },
         sameThreadContinuation: { provider: 'codex-exec', buildArgs: (input, ref) => {
           binding.sameThreadContinuation!.buildArgs(input, ref);
+          continuationPrompt = input.prompt;
           assert.deepEqual(ref, threadRef);
           calls++;
           return nodeArgs(scenario.second, scenario.name === 'resume-mismatch' ? '01a08753-9e8e-7973-90ef-52893da1c562' : threadId);
@@ -269,6 +271,11 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     if (calls === 2) {
       const requested = execution.executionTrace.events.find(e => e.type === 'participant_envelope_retransmission_requested');
       assert.equal(requested?.timeoutMs, 60000);
+      if (scenario.name === 'schema-recovered') {
+        assert.equal(requested?.failureClass, 'SCHEMA_FAILURE');
+        assert.match(continuationPrompt, /Failure class: SCHEMA_FAILURE/);
+        assert.match(continuationPrompt, /Host schema validation error/);
+      }
     }
   }
   const unknownGuidance = formatOperatorFailureGuidance(new Error('unexpected phase0 failure'));

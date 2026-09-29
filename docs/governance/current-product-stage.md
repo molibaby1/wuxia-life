@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-09-15（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 engineering delivered；default ordinary path active；deterministic acceptance verified）。
+> 最后更新：2026-09-30（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 engineering delivered；default ordinary path active；deterministic acceptance verified；Solution structured-output schema retransmission robustness extension authorized）。
 
 ---
 
@@ -51,9 +51,10 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - shared contract 要求 bare JSON / no wrapper prose / no Markdown fence / strict validate-or-reject，并保持 Host 不做 semantic repair；
 - 独立 Contract Conformance Matrix（trivial contract-only；Codex current binding ×3 + Cursor Auto ×3）全部 `PASS`；证据在实验目录，不构成主流程 authority；不证明 fixed Cursor model A/B，也不证明真实 Solution reasoning quality；不宣称 full runtime communication verified。
 - **P3 Minimal Slice #2 — Envelope Failure Bounded Retransmission：HUMAN-AUTHORIZED / ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED；**
-- 已验证产品边界：Role = Solution only；Trigger = terminal `ENVELOPE_FAILURE` only；Recovery = exactly one same-thread retransmission；Retransmission ceiling = 60000ms；当时 Initial Participant timeout 为 production default `240000ms`（历史验证基线，不是当前 hard-timeout authority）；
-- `SCHEMA_FAILURE` fail closed；Host repair / extraction / normalization forbidden；semantic correction forbidden；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
-- runtime conformance 由 clean corrective 3-trial Cursor batch 确认：3/3 均 one retransmission、`sameThread=true`、`timeoutMs=60000`、final `SUCCEEDED`；second retransmissions = 0；schema-failure retries = 0；aggregate Trace causal ordering verified；protected production hashes 在 runtime observation 期间不变；
+- 原始 Slice #2 授权并验证的边界为：Role = Solution only；Trigger = terminal `ENVELOPE_FAILURE` only；Recovery = exactly one same-thread retransmission；Retransmission ceiling = 60000ms；当时 Initial Participant timeout 为 production default `240000ms`（历史验证基线，不是当前 hard-timeout authority）；
+- 2026-09-30 Human 授权增加有界的 `SCHEMA_FAILURE` trigger：仅当 Solution 返回合法 JSON object envelope、但 Host role-schema validation 失败时，允许 exactly one same-thread retransmission；继续使用 60000ms ceiling，并将 exact Host schema error 写入 retransmission prompt；accepted-result validation failure 不触发重传，非 Solution role 不适用，attempt 1 再失败即 fail closed；
+- 原始 Slice #2 的 runtime conformance 由 clean corrective 3-trial Cursor batch 确认：3/3 均 one retransmission、`sameThread=true`、`timeoutMs=60000`、final `SUCCEEDED`；second retransmissions = 0；当时 schema-failure retries = 0；aggregate Trace causal ordering verified；protected production hashes 在 runtime observation 期间不变。此次 schema-trigger 扩展仅作 deterministic verification，未执行真实 Participant run；
+- 两类 trigger 均禁止 Host repair / extraction / normalization 与 semantic correction；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
 - Sidecar Run Report 现已可从 `solution-agent/execution-trace.json` 观察 first-pass / retransmission / final structured-output 指标，但不影响 runtime outcome；
 - 不代表完整 P3 启动或 broader Participant Communication Contract 激活。
 - **Participant / model hard-timeout policy v1（PD-099）：默认 hard boundary = `1800000ms`；abnormal-safety only，不是 ordinary execution budget；正常 Participant execution 应在 boundary 内自然完成；retransmission / retry ceilings 保持独立（Slice #2 retransmission ceiling 仍为 `60000ms`）。**
@@ -176,22 +177,22 @@ ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED。**
 Minimal Slice #2 已验证边界：
 
 - Role：Solution only；
-- Trigger：terminal `ENVELOPE_FAILURE` only；
+- 原始已验证 Trigger：terminal `ENVELOPE_FAILURE`；2026-09-30 授权扩展后当前 Trigger：terminal `ENVELOPE_FAILURE` 或合法 JSON object envelope 上的 Host `SCHEMA_FAILURE`；
 - Recovery：exactly one same-thread retransmission；
 - Retransmission ceiling：60000ms；
 - Initial Participant timeout（Slice #2 验证时的 historical baseline）：`240000ms`；当前 Participant hard-timeout authority 见 PD-099 / `1800000ms`，与 retransmission ceiling 独立；
-- `SCHEMA_FAILURE`：fail closed；
+- `SCHEMA_FAILURE`：仅首次 Solution role-schema failure 可触发该一次重传；无 same-thread capability、accepted-result failure、非 Solution role 或重传后失败均 fail closed；
 - Host repair / extraction / normalization：forbidden；
 - semantic correction：forbidden；
 - Participant 必须支持 reliable same-thread continuation；
 - first-pass failure provenance 保持可观察；
-- runtime conformance 由 clean corrective 3-trial Cursor batch 确认；
+- 原始 envelope-trigger runtime conformance 由 clean corrective 3-trial Cursor batch 确认；2026-09-30 schema-trigger 扩展只有 deterministic test evidence，尚无真实 Participant runtime evidence；
 - 3/3 trials：one retransmission、`sameThread=true`、`timeoutMs=60000`、final `SUCCEEDED`；
-- second retransmissions = 0；schema-failure retries = 0；
+- second retransmissions = 0；原始 batch 中 schema-failure retries = 0；
 - aggregate Trace causal ordering verified；
 - protected production hashes 在 runtime observation 期间不变。
 
-Sidecar Run Report 现已可区分 first-pass success、envelope failure、retransmission outcome 与 final structured-output success，但不读取 `terminal-attempt-*.txt` payload，也不影响 workflow outcome。
+Sidecar Run Report 现已可区分 first-pass success、envelope/schema failure、retransmission outcome 与 final structured-output success，但不读取 `terminal-attempt-*.txt` payload，也不影响 workflow outcome。
 
 Minimal Slice #1 只固定：
 

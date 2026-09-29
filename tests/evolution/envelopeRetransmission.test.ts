@@ -100,6 +100,7 @@ async function runExecution(
   destinationRoot: string,
   participant: WorkspaceAgentParticipantOptions,
   options?: {
+    role?: WorkspaceAgentJobInput['role'];
     initialPrompt?: string;
     validateSchema?: (value: Record<string, unknown>) => Record<string, unknown>;
     validateAcceptedResult?: (value: Record<string, unknown>) => Promise<void>;
@@ -107,7 +108,7 @@ async function runExecution(
 ) {
   return runStructuredParticipantExecution({
     invocationRef: 'fixture-invocation',
-    role: 'solution',
+    role: options?.role ?? 'solution',
     workspaceRoot: destinationRoot,
     destinationRoot,
     initialPrompt: options?.initialPrompt ?? 'Return fixture output.',
@@ -265,6 +266,189 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
   assert.equal(
     schemaInvalid.executionTrace.events.some(event => event.type === 'participant_envelope_retransmission_requested'),
     false,
+  );
+
+  const scopeSchemaError = 'payload.cards[0].scopeCheck must be CONTRACT_PRESERVING';
+  const schemaValidPayload = {
+    schemaVersion: 'fixture-v1',
+    summary: 'One unchanged role result.',
+    cards: [{ id: 'card-1', title: 'Same authored card', scopeCheck: 'CONTRACT_PRESERVING' }],
+  };
+  const schemaInvalidPayload = {
+    ...schemaValidPayload,
+    cards: [{ ...schemaValidPayload.cards[0], scopeCheck: 'This card preserves the contract.' }],
+  };
+  const schemaValidRaw = JSON.stringify(schemaValidPayload);
+  const schemaInvalidRaw = JSON.stringify(schemaInvalidPayload);
+  const validateScopeSchema = (value: Record<string, unknown>) => {
+    const firstCard = Array.isArray(value.cards) ? value.cards[0] : undefined;
+    const scopeCheck = typeof firstCard === 'object' && firstCard !== null
+      ? (firstCard as Record<string, unknown>).scopeCheck
+      : undefined;
+    if (scopeCheck !== 'CONTRACT_PRESERVING') throw new Error(scopeSchemaError);
+    return value;
+  };
+
+  const schemaRecoveryRoot = await mkdtemp(join(tmpdir(), 'schema-retransmission-recovery-'));
+  const schemaRecoveryCounter = { count: 0 };
+  let schemaContinuationPrompt = '';
+  let continuationThreadRef: { provider: string; opaqueId: string } | undefined;
+  const schemaRecoveryParticipant = createContinuationCapableParticipant(
+    { initial: schemaInvalidRaw, continuation: schemaValidRaw },
+    { spawnProcess: countingSpawn(schemaRecoveryCounter) },
+  );
+  schemaRecoveryParticipant.sameThreadContinuation = {
+    provider: 'test-provider',
+    buildArgs: (job, threadRef) => {
+      schemaContinuationPrompt = job.prompt;
+      continuationThreadRef = threadRef;
+      return ['-e', 'process.stdout.write(process.argv[1]);', schemaValidRaw];
+    },
+  };
+  const schemaRecovery = await runExecution(schemaRecoveryRoot, schemaRecoveryParticipant, {
+    validateSchema: validateScopeSchema,
+  });
+  assert.equal(schemaRecovery.ok, true, JSON.stringify(schemaRecovery));
+  if (schemaRecovery.ok) {
+    assert.equal(schemaRecovery.acceptedAttempt, 1);
+    assert.equal(schemaRecovery.rawOutput, schemaValidRaw);
+    assert.equal(schemaRecovery.recovery.outcome, 'SUCCEEDED');
+    assert.equal(schemaRecovery.value.summary, schemaValidPayload.summary);
+    assert.deepEqual(schemaRecovery.value.cards, schemaValidPayload.cards);
+  }
+  assert.equal(schemaRecoveryCounter.count, 2);
+  assert.deepEqual(continuationThreadRef, { provider: 'test-provider', opaqueId: 'thread-000001' });
+  assert.equal(await readFile(join(schemaRecoveryRoot, 'terminal-attempt-0.txt'), 'utf8'), schemaInvalidRaw);
+  assert.equal(await readFile(join(schemaRecoveryRoot, 'terminal-attempt-1.txt'), 'utf8'), schemaValidRaw);
+  assert.equal(
+    await readFile(join(schemaRecoveryRoot, 'participant-envelope-retransmission-prompt-1.txt'), 'utf8'),
+    schemaContinuationPrompt,
+  );
+  assert.match(schemaContinuationPrompt, /previous terminal payload was valid JSON and a valid JSON object envelope/i);
+  assert.match(schemaContinuationPrompt, /Failure class: SCHEMA_FAILURE/);
+  assert.ok(schemaContinuationPrompt.includes(`Host schema validation error (exact JSON string): "Error: ${scopeSchemaError}"`));
+  assert.match(schemaContinuationPrompt, /Re-emit the same Role result only/i);
+  assert.match(schemaContinuationPrompt, /Do not perform new reasoning or investigation/i);
+  assert.match(schemaContinuationPrompt, /Do not change the semantic content/i);
+  assert.match(schemaContinuationPrompt, /Do not alter, weaken, or route around the Contract/i);
+  assert.match(schemaContinuationPrompt, /Structured Final Output Contract V1/);
+  const schemaAttempt0Validation = schemaRecovery.executionTrace.events.find(
+    event => event.type === 'participant_terminal_validation' && event.attempt === 0,
+  );
+  assert.ok(schemaAttempt0Validation);
+  assert.equal(schemaAttempt0Validation.envelopeValid, true);
+  assert.equal(schemaAttempt0Validation.schemaValid, false);
+  const schemaRetransmissionRequest = schemaRecovery.executionTrace.events.find(
+    event => event.type === 'participant_envelope_retransmission_requested',
+  );
+  assert.ok(schemaRetransmissionRequest);
+  assert.equal(schemaRetransmissionRequest.failureClass, 'SCHEMA_FAILURE');
+  assert.equal(
+    schemaRecovery.executionTrace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
+  );
+  assert.equal(
+    schemaRecovery.executionTrace.events.filter(event => event.type === 'participant_terminal_validation' && event.attempt === 1).length,
+    1,
+  );
+  const schemaAttempt0ValidationIndex = schemaRecovery.executionTrace.events.findIndex(
+    event => event.type === 'participant_terminal_validation' && event.attempt === 0,
+  );
+  const schemaRetransmissionRequestIndex = schemaRecovery.executionTrace.events.findIndex(
+    event => event.type === 'participant_envelope_retransmission_requested',
+  );
+  const schemaAttempt1StartIndex = schemaRecovery.executionTrace.events.findIndex(
+    event => event.type === 'process_start' && event.attempt === 1,
+  );
+  const schemaRetransmissionCompletionIndex = schemaRecovery.executionTrace.events.findIndex(
+    event => event.type === 'participant_envelope_retransmission_completed',
+  );
+  const schemaAttempt1ValidationIndex = schemaRecovery.executionTrace.events.findIndex(
+    event => event.type === 'participant_terminal_validation' && event.attempt === 1,
+  );
+  assert.ok(schemaAttempt0ValidationIndex < schemaRetransmissionRequestIndex);
+  assert.ok(schemaRetransmissionRequestIndex < schemaAttempt1StartIndex);
+  assert.ok(schemaAttempt1StartIndex < schemaRetransmissionCompletionIndex);
+  assert.ok(schemaRetransmissionCompletionIndex < schemaAttempt1ValidationIndex);
+  await assert.rejects(
+    () => readFile(join(schemaRecoveryRoot, 'terminal-attempt-2.txt'), 'utf8'),
+    /ENOENT/,
+  );
+
+  const schemaRetryFailureRoot = await mkdtemp(join(tmpdir(), 'schema-retransmission-invalid-attempt1-'));
+  const schemaRetryFailureCounter = { count: 0 };
+  const schemaRetryFailure = await runExecution(
+    schemaRetryFailureRoot,
+    createContinuationCapableParticipant(
+      { initial: schemaInvalidRaw, continuation: schemaInvalidRaw },
+      { spawnProcess: countingSpawn(schemaRetryFailureCounter) },
+    ),
+    { validateSchema: validateScopeSchema },
+  );
+  assert.equal(schemaRetryFailure.ok, false);
+  if (!schemaRetryFailure.ok) {
+    assert.equal(schemaRetryFailure.failure.origin, 'OUTPUT_SCHEMA');
+    assert.equal(schemaRetryFailure.failure.message, `Error: ${scopeSchemaError}`);
+    assert.equal(schemaRetryFailure.recovery.outcome, 'SCHEMA_FAILURE');
+  }
+  assert.equal(schemaRetryFailureCounter.count, 2);
+  assert.equal(
+    schemaRetryFailure.executionTrace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
+  );
+  await assert.rejects(
+    () => readFile(join(schemaRetryFailureRoot, 'terminal-attempt-2.txt'), 'utf8'),
+    /ENOENT/,
+  );
+
+  const reviewerSchemaFailureRoot = await mkdtemp(join(tmpdir(), 'schema-retransmission-reviewer-'));
+  const reviewerSchemaFailureCounter = { count: 0 };
+  const reviewerSchemaFailure = await runExecution(
+    reviewerSchemaFailureRoot,
+    createContinuationCapableParticipant(
+      { initial: schemaInvalidRaw, continuation: schemaValidRaw },
+      { spawnProcess: countingSpawn(reviewerSchemaFailureCounter) },
+    ),
+    { role: 'reviewer', validateSchema: validateScopeSchema },
+  );
+  assert.equal(reviewerSchemaFailure.ok, false);
+  assert.equal(reviewerSchemaFailureCounter.count, 1);
+  assert.equal(reviewerSchemaFailure.recovery.outcome, 'NOT_ATTEMPTED');
+  assert.equal(
+    reviewerSchemaFailure.executionTrace.events.some(event => event.type === 'participant_envelope_retransmission_requested'),
+    false,
+  );
+
+  const schemaTimeoutRoot = await mkdtemp(join(tmpdir(), 'schema-retransmission-timeout-'));
+  const schemaTimeoutCounter = { count: 0 };
+  const schemaTimeout = await withScaledContinuationTimeout(() => runExecution(
+    schemaTimeoutRoot,
+    createContinuationCapableParticipant(
+      { initial: schemaInvalidRaw, continuation: schemaValidRaw },
+      { spawnProcess: createHangingSpawn(schemaTimeoutCounter) },
+    ),
+    { validateSchema: validateScopeSchema },
+  ));
+  assert.equal(schemaTimeout.ok, false);
+  if (!schemaTimeout.ok) assert.equal(schemaTimeout.errorKind, 'timeout');
+  assert.equal(schemaTimeoutCounter.count, 2);
+  assert.equal(schemaTimeout.recovery.outcome, 'TIMEOUT');
+
+  const schemaContinuationFailureRoot = await mkdtemp(join(tmpdir(), 'schema-retransmission-continuation-failure-'));
+  const schemaContinuationFailure = await runExecution(
+    schemaContinuationFailureRoot,
+    createContinuationCapableParticipant(
+      { initial: schemaInvalidRaw, continuation: schemaValidRaw },
+      { continuationProvider: 'other-provider' },
+    ),
+    { validateSchema: validateScopeSchema },
+  );
+  assert.equal(schemaContinuationFailure.ok, false);
+  if (!schemaContinuationFailure.ok) assert.equal(schemaContinuationFailure.errorKind, 'continuation');
+  assert.equal(schemaContinuationFailure.recovery.outcome, 'CONTINUATION_FAILURE');
+  assert.equal(
+    schemaContinuationFailure.executionTrace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
   );
 
   const doubleEnvelopeRoot = await mkdtemp(join(tmpdir(), 'envelope-retransmission-double-envelope-'));
@@ -455,9 +639,12 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
   }
 
   const unknownAcceptedResultRoot = await mkdtemp(join(tmpdir(), 'envelope-unknown-accepted-result-'));
+  const unknownAcceptedResultCounter = { count: 0 };
   const unknownAcceptedResult = await runExecution(unknownAcceptedResultRoot, {
-    executable: process.execPath,
-    buildArgs: () => ['-e', 'process.stdout.write(JSON.stringify({ schemaVersion: "fixture-v1" }));'],
+    ...createContinuationCapableParticipant(
+      { initial: attempt1Raw, continuation: attempt1Raw },
+      { spawnProcess: countingSpawn(unknownAcceptedResultCounter) },
+    ),
   }, {
     validateAcceptedResult: async () => {
       throw new Error('unexpected acceptance failure');
@@ -472,6 +659,11 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
       message: 'Error: unexpected acceptance failure',
     });
   }
+  assert.equal(unknownAcceptedResultCounter.count, 1);
+  assert.equal(
+    unknownAcceptedResult.executionTrace.events.some(event => event.type === 'participant_envelope_retransmission_requested'),
+    false,
+  );
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

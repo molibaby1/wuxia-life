@@ -338,6 +338,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /source.*configuration.*existing tests/i);
   assert.match(deliveredPrompt, /unresolved remainder/i);
 
+  const wrongProblemIdCounter = { count: 0 };
   const wrongProblemId = await runSolutionAgent({
     problemPackage,
     problemPackagePath: packagePath,
@@ -348,11 +349,15 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     jobNumber: 3,
     destinationRoot: join(root, 'wrong-problem-id'),
     skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...solutionResult, problemId: 'problem-999999' }))})`],
-    },
+    participant: createContinuationCapableParticipant(
+      {
+        initial: JSON.stringify({ ...solutionResult, problemId: 'problem-999999' }),
+        continuation: JSON.stringify(solutionResult),
+      },
+      { spawnProcess: countingSpawn(wrongProblemIdCounter) },
+    ),
   });
+  assert.equal(wrongProblemIdCounter.count, 1);
   assert.equal(wrongProblemId.ok, false);
   if (!wrongProblemId.ok) {
     assert.deepEqual(wrongProblemId.failure, {
@@ -362,6 +367,15 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
       message: 'SolutionWork problemId does not match ProblemPackage',
     });
   }
+  await assert.rejects(
+    () => readFile(join(root, 'wrong-problem-id/terminal-attempt-1.txt'), 'utf8'),
+    /ENOENT/,
+  );
+  const wrongProblemIdTrace = JSON.parse(await readFile(join(root, 'wrong-problem-id/execution-trace.json'), 'utf8'));
+  assert.equal(
+    wrongProblemIdTrace.events.some((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested'),
+    false,
+  );
 
   const missingNestedRepoRef = await runSolutionAgent({
     problemPackage,
@@ -875,6 +889,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
 
   const schemaFailureRoot = join(root, 'schema-failure-agent');
   const schemaFailureCounter = { count: 0 };
+  let schemaContinuationPrompt = '';
   const schemaInvalidPayload = JSON.stringify({
     schemaVersion: 'solution-work-v1',
     status: 'OPTIONS',
@@ -893,20 +908,37 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant: createContinuationCapableParticipant(
       { initial: schemaInvalidPayload, continuation: attempt1Raw },
-      { spawnProcess: countingSpawn(schemaFailureCounter) },
+      {
+        spawnProcess: countingSpawn(schemaFailureCounter),
+        onContinuationBuildArgs: job => { schemaContinuationPrompt = job.prompt; },
+      },
     ),
   });
-  assert.equal(schemaFailureRun.ok, false);
-  assert.equal(schemaFailureRun.ok ? undefined : schemaFailureRun.errorKind, 'invalid_output');
-  assert.equal(schemaFailureCounter.count, 1);
-  await assert.rejects(
-    () => readFile(join(schemaFailureRoot, 'terminal-attempt-1.txt'), 'utf8'),
-    /ENOENT/,
-  );
+  assert.equal(schemaFailureRun.ok, true);
+  assert.equal(schemaFailureCounter.count, 2);
+  assert.equal(await readFile(join(schemaFailureRoot, 'terminal-attempt-0.txt'), 'utf8'), schemaInvalidPayload);
+  assert.equal(await readFile(join(schemaFailureRoot, 'terminal-attempt-1.txt'), 'utf8'), attempt1Raw);
+  assert.match(schemaContinuationPrompt, /Failure class: SCHEMA_FAILURE/);
+  assert.match(schemaContinuationPrompt, /unknownField/);
+  assert.match(schemaContinuationPrompt, /Structured Final Output Contract V1/);
   const schemaFailureTrace = JSON.parse(await readFile(join(schemaFailureRoot, 'execution-trace.json'), 'utf8'));
+  const schemaFailureValidations = schemaFailureTrace.events.filter(
+    (event: { type: string }) => event.type === 'participant_terminal_validation',
+  );
+  assert.equal(schemaFailureValidations.length, 2);
+  assert.equal(schemaFailureValidations[0].attempt, 0);
+  assert.equal(schemaFailureValidations[0].envelopeValid, true);
+  assert.equal(schemaFailureValidations[0].schemaValid, false);
+  assert.equal(schemaFailureValidations[1].attempt, 1);
+  assert.equal(schemaFailureValidations[1].schemaValid, true);
+  assert.equal(schemaFailureValidations[1].accepted, true);
+  const schemaFailureRetransmission = schemaFailureTrace.events.find(
+    (event: { type: string }) => event.type === 'participant_envelope_retransmission_requested',
+  );
+  assert.equal(schemaFailureRetransmission?.failureClass, 'SCHEMA_FAILURE');
   assert.equal(
-    schemaFailureTrace.events.some((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested'),
-    false,
+    schemaFailureTrace.events.filter((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
   );
 
   const doubleEnvelopeRoot = join(root, 'double-envelope-agent');

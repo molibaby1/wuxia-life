@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { access, cp, copyFile, mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, copyFile, mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import {
   lstatSync,
   readFileSync,
@@ -45,7 +45,10 @@ import { canonicalJson, captureWorktreeSourceFingerprint, sha256Hex } from '../p
 import { buildPreschoolAutonomousAuthoringContractPacket } from './buildPreschoolContractPacket';
 import { evaluatePreschoolAutonomousAuthoringAdmission } from './evaluatePreschoolAuthoringAdmission';
 import { assertAcceptedAuthoring, runShadowAuthoringExecution } from './shadowAuthoringExecutionParticipant';
-import { verifyPreschoolShadowAuthoring } from './verifyPreschoolShadowAuthoring';
+import {
+  resolveHostNodeModulesRoot,
+  verifyPreschoolShadowAuthoring,
+} from './verifyPreschoolShadowAuthoring';
 import { buildPromotionPackage } from './buildPromotionPackage';
 import {
   PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
@@ -1805,7 +1808,12 @@ async function assertHistoricalInfantCatalogMatches(liveRoot: string, baselineRo
 async function materializeHistoricalTrialRoots(input: {
   liveRepositoryRoot: string;
   temporaryRoot: string;
-}): Promise<{ trialBaselineRoot: string; hostAuthorityRoot: string; baselineFingerprint: string }> {
+}): Promise<{
+  trialBaselineRoot: string;
+  hostAuthorityRoot: string;
+  baselineFingerprint: string;
+  hostNodeModulesRoot: string | null;
+}> {
   const liveRoot = resolve(input.liveRepositoryRoot);
   const trialBaselineRoot = join(input.temporaryRoot, 'trial-baseline');
   await mkdir(trialBaselineRoot, { recursive: false });
@@ -1813,12 +1821,9 @@ async function materializeHistoricalTrialRoots(input: {
   await overlayReferenceTrialAuthority(liveRoot, trialBaselineRoot);
   await assertHistoricalInfantCatalogMatches(liveRoot, trialBaselineRoot);
 
-  const nodeModulesPath = join(liveRoot, 'node_modules');
-  try {
-    await access(join(nodeModulesPath, '.modules.yaml'));
-    await symlink(nodeModulesPath, join(trialBaselineRoot, 'node_modules'), 'dir');
-  } catch {
-    // Verification falls back to the normal npm exec cache when no pnpm runtime is present.
+  const hostNodeModulesRoot = await resolveHostNodeModulesRoot(liveRoot);
+  if (hostNodeModulesRoot) {
+    await symlink(hostNodeModulesRoot, join(trialBaselineRoot, 'node_modules'), 'dir');
   }
 
   const hostAuthorityRoot = join(input.temporaryRoot, 'host-authority');
@@ -1834,7 +1839,7 @@ async function materializeHistoricalTrialRoots(input: {
   if (baselineFingerprint !== hostAuthorityFingerprint) {
     throw new Error('Host-only authority material changed the historical candidate baseline fingerprint.');
   }
-  return { trialBaselineRoot, hostAuthorityRoot, baselineFingerprint };
+  return { trialBaselineRoot, hostAuthorityRoot, baselineFingerprint, hostNodeModulesRoot };
 }
 
 export async function writePreschoolReferenceTrialInputs(input: {
@@ -1977,7 +1982,7 @@ async function runVerifiedHistoricalTrial(input: {
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-reference-trial-'));
 
   try {
-    const { trialBaselineRoot, hostAuthorityRoot, baselineFingerprint } = await materializeHistoricalTrialRoots({
+    const { trialBaselineRoot, hostAuthorityRoot, baselineFingerprint, hostNodeModulesRoot } = await materializeHistoricalTrialRoots({
       liveRepositoryRoot: liveRoot,
       temporaryRoot,
     });
@@ -2214,6 +2219,7 @@ async function runVerifiedHistoricalTrial(input: {
     const verification = await verifyPreschoolShadowAuthoring({
       repositoryRoot: trialBaselineRoot,
       authoritativeRepositoryRoot: hostAuthorityRoot,
+      ...(hostNodeModulesRoot ? { hostNodeModulesRoot } : {}),
       beforeWorkspaceRoot: trialBaselineRoot,
       finalWorkspaceRoot: execution.preparedWorkspace.workspaceRoot,
       candidateBaselineGitSha: PRESCHOOL_REFERENCE_TRIAL_BASELINE_SHA,

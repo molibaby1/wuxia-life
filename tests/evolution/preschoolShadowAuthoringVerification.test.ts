@@ -335,7 +335,10 @@ async function createFixture(options: {
   };
 }
 
-function verificationInput(fixture: Awaited<ReturnType<typeof createFixture>>) {
+function verificationInput(
+  fixture: Awaited<ReturnType<typeof createFixture>>,
+  hostNodeModulesRoot = join(process.cwd(), 'node_modules'),
+) {
   return {
     repositoryRoot: fixture.repositoryRoot,
     authoritativeRepositoryRoot: fixture.authoritativeRepositoryRoot,
@@ -347,7 +350,43 @@ function verificationInput(fixture: Awaited<ReturnType<typeof createFixture>>) {
     solution: fixture.solution,
     review: fixture.review,
     admission: fixture.admission,
+    hostNodeModulesRoot,
   };
+}
+
+async function createNpmStyleDependencyRoot(tempRoot: string, omittedPackages: string[] = []): Promise<string> {
+  const dependencyRoot = join(tempRoot, 'npm', 'node_modules');
+  const hostNodeModulesRoot = join(process.cwd(), 'node_modules');
+  await mkdir(dependencyRoot, { recursive: true });
+  await symlink(join(hostNodeModulesRoot, '.bin'), join(dependencyRoot, '.bin'), 'dir');
+  for (const packageName of ['tsx', 'vue', 'vue-tsc', 'typescript']) {
+    if (omittedPackages.includes(packageName)) continue;
+    await symlink(join(hostNodeModulesRoot, packageName), join(dependencyRoot, packageName), 'dir');
+  }
+  await assert.rejects(readFile(join(dependencyRoot, '.modules.yaml')), { code: 'ENOENT' });
+  return dependencyRoot;
+}
+
+async function addV4DependencyAssertions(fixture: Awaited<ReturnType<typeof createFixture>>): Promise<void> {
+  for (const path of PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS) {
+    const filePath = join(fixture.finalWorkspaceRoot, path);
+    const contents = await readFile(filePath, 'utf8');
+    assert.ok(contents.startsWith(BASELINE_TEST));
+    const dependencyAssertion = path.endsWith('annualPassiveMemoryTests.ts')
+      ? [
+        "import { reactive } from 'vue';",
+        "import { realpathSync } from 'node:fs';",
+        "if (reactive({ available: true }).available !== true) throw new Error('Vue dependency unavailable');",
+        "console.log('V4_NODE_MODULES=' + realpathSync('node_modules'));",
+        '',
+      ].join('\n')
+      : [
+        "import { realpathSync } from 'node:fs';",
+        "console.log('V4_NODE_MODULES=' + realpathSync('node_modules'));",
+        '',
+      ].join('\n');
+    await writeFile(filePath, `${contents.slice(0, BASELINE_TEST.length)}${dependencyAssertion}${contents.slice(BASELINE_TEST.length)}`);
+  }
 }
 
 async function testV1RejectsCandidateBaselineShaAndFingerprintMismatch(): Promise<void> {
@@ -519,11 +558,86 @@ async function testV4RejectsSyntaxErrorAsRedAndGreenRegressionFailure(): Promise
   assert.match(greenResult.failures.join('\n'), /GREEN_PHASE_FAILURE/);
 }
 
+async function testV4RejectsUnrelatedFailureInOneRedCommand(): Promise<void> {
+  const fixture = await createFixture({
+    appendedTests: [
+      "import { readFileSync } from 'node:fs';",
+      `const catalog = JSON.parse(readFileSync('${PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH}', 'utf8'));`,
+      "const expectedId = 'preschool_neutral_shared_responsibility';",
+      "const isPresent = catalog.entries.some((item: { id: string }) => item.id === expectedId);",
+      "if (process.argv[1]?.endsWith('preschoolPassiveSpineTests.ts') && !isPresent) {",
+      "  throw new Error(`AUTONOMOUS_AUTHORING_MISSING_ENTRY: ${expectedId}`);",
+      '}',
+      "if (process.argv[1]?.endsWith('annualPassiveMemoryTests.ts') && !isPresent) {",
+      "  throw new Error('UNRELATED_RED_FAILURE');",
+      '}',
+      '',
+    ].join('\n'),
+  });
+  const dependencyRoot = await createNpmStyleDependencyRoot(fixture.tempRoot);
+
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture, dependencyRoot));
+
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
+  assert.equal(result.checks.redGreenRegression, 'FAIL');
+  assert.equal(result.commandResults.length, 2, 'RED failure must stop before GREEN commands run');
+  assert.match(result.commandResults[0]!.output, /AUTONOMOUS_AUTHORING_MISSING_ENTRY: preschool_neutral_shared_responsibility/);
+  assert.match(result.commandResults[1]!.output, /UNRELATED_RED_FAILURE/);
+  assert.match(result.failures.join('\n'), /RED phase.*AUTONOMOUS_AUTHORING_MISSING_ENTRY|RED phase.*unrelated/i);
+}
+
 async function testV4RejectsAdjacentRegressionFailure(): Promise<void> {
   const fixture = await createFixture({ adjacentFailure: true });
   const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture));
   assert.equal(result.checks.adjacentRegression, 'FAIL');
   assert.match(result.failures.join('\n'), /ADJACENT_REGRESSION_FAILURE/);
+}
+
+async function testV4UsesNpmStyleDependencyTreeForRedAndGreen(): Promise<void> {
+  const fixture = await createFixture();
+  const dependencyRoot = await createNpmStyleDependencyRoot(fixture.tempRoot);
+  await symlink(dependencyRoot, join(fixture.repositoryRoot, 'node_modules'), 'dir');
+  await symlink(dependencyRoot, join(fixture.finalWorkspaceRoot, 'node_modules'), 'dir');
+  assert.equal(await captureAuthoritativeFingerprint(fixture.repositoryRoot), fixture.candidateBaselineFingerprintSha256);
+  await addV4DependencyAssertions(fixture);
+
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture, dependencyRoot));
+
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFIED', JSON.stringify({ checks: result.checks, failures: result.failures, commands: result.commandResults }));
+  assert.equal(result.checks.redGreenRegression, 'PASS');
+  const redAndGreenResults = result.commandResults.slice(0, 4);
+  assert.equal(redAndGreenResults.length, 4);
+  const dependencyRoots = redAndGreenResults.map(command => command.output.match(/V4_NODE_MODULES=([^\r\n]+)/)?.[1]);
+  assert.ok(dependencyRoots[0]?.endsWith('/npm/node_modules'));
+  assert.deepEqual(
+    dependencyRoots,
+    Array.from({ length: 4 }, () => dependencyRoots[0]),
+  );
+  for (const redResult of redAndGreenResults.slice(0, 2)) {
+    assert.match(redResult.output, /AUTONOMOUS_AUTHORING_MISSING_ENTRY: preschool_neutral_shared_responsibility/);
+    assert.doesNotMatch(redResult.output, /ERR_MODULE_NOT_FOUND|Cannot find (?:module|package)/);
+  }
+  for (const greenResult of redAndGreenResults.slice(2)) {
+    assert.doesNotMatch(greenResult.output, /AUTONOMOUS_AUTHORING_MISSING_ENTRY|ERR_MODULE_NOT_FOUND/);
+  }
+  assert.equal(result.changedFiles.some(change => change.path === 'node_modules' || change.path.startsWith('node_modules/')), false);
+  assert.doesNotMatch(result.promotionPatch?.toString('utf8') ?? '', /diff --git a\/node_modules(?:\/| )/);
+  assert.equal(result.authoritativeFingerprintAfter, fixture.authoritativeFingerprintBefore);
+}
+
+async function testV4FailsClosedWhenHostDependencyIsMissing(): Promise<void> {
+  const fixture = await createFixture();
+  const dependencyRoot = await createNpmStyleDependencyRoot(fixture.tempRoot, ['vue']);
+  await symlink(dependencyRoot, join(fixture.repositoryRoot, 'node_modules'), 'dir');
+  await symlink(dependencyRoot, join(fixture.finalWorkspaceRoot, 'node_modules'), 'dir');
+  await addV4DependencyAssertions(fixture);
+
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture, dependencyRoot));
+
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
+  assert.equal(result.checks.redGreenRegression, 'FAIL');
+  assert.equal(result.promotionPatch, null);
+  assert.match(result.failures.join('\n'), /Host verification dependency tree is unavailable.*vue/i);
 }
 
 async function testV5UsesOneToOneMaximumMatchingForStructuralAndSemanticEvidence(): Promise<void> {
@@ -773,7 +887,10 @@ export async function runPreschoolShadowAuthoringVerificationTests(): Promise<vo
     await testV2RejectsSymlinkedWorkspaceRootBeforeRunningCommands();
     await testV3RequiresConformingReviewerAndCurrentExecutionAuthority();
     await testV4RejectsSyntaxErrorAsRedAndGreenRegressionFailure();
+    await testV4RejectsUnrelatedFailureInOneRedCommand();
     await testV4RejectsAdjacentRegressionFailure();
+    await testV4UsesNpmStyleDependencyTreeForRedAndGreen();
+    await testV4FailsClosedWhenHostDependencyIsMissing();
     await testV5UsesOneToOneMaximumMatchingForStructuralAndSemanticEvidence();
     await testV5UsesEffectiveLegacyAndConfiguredCatalogForBaseline();
     await testV5RejectsUnresolvedStructuralDeficitAndAllowsSemanticZeroToZero();

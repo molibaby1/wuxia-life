@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { cp, lstat, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, lstat, mkdtemp, readFile, realpath, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import type { PassiveNarrativeEntry } from '../../../src/data/passiveNarrativeTypes';
@@ -76,6 +76,7 @@ export interface PreschoolShadowAuthoringVerificationResultV1 {
 export interface VerifyPreschoolShadowAuthoringInput {
   repositoryRoot: string;
   authoritativeRepositoryRoot?: string;
+  hostNodeModulesRoot?: string;
   beforeWorkspaceRoot: string;
   finalWorkspaceRoot: string;
   candidateBaselineGitSha: string;
@@ -107,6 +108,8 @@ const RED_ERROR_MARKERS = [
   'TypeScript parse error',
   'Transform failed with',
 ];
+const REQUIRED_V4_DEPENDENCIES = ['tsx', 'vue', 'vue-tsc', 'typescript'] as const;
+const REQUIRED_V4_BINARIES = ['tsx', 'vue-tsc', 'tsc'] as const;
 const ADJACENT_COMMANDS = [
   'npm exec tsx tests/neutralPassiveDedupTests.ts',
   'npm exec tsx tests/evolution/playerSurfaceCapture.test.ts',
@@ -433,21 +436,37 @@ async function copyWorkspace(sourceRoot: string, destinationRoot: string): Promi
   });
 }
 
-async function linkNodeModules(repositoryRoot: string, workspaceRoot: string): Promise<void> {
+async function isUsableNodeModulesRoot(candidate: string): Promise<string | null> {
+  try {
+    const realRoot = await realpath(candidate);
+    if (!(await stat(realRoot)).isDirectory()) return null;
+    for (const packageName of REQUIRED_V4_DEPENDENCIES) {
+      if (!(await stat(join(realRoot, packageName, 'package.json'))).isFile()) return null;
+    }
+    for (const binaryName of REQUIRED_V4_BINARIES) {
+      if (!(await stat(join(realRoot, '.bin', binaryName))).isFile()) return null;
+    }
+    return realRoot;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return null;
+    throw error;
+  }
+}
+
+export async function resolveHostNodeModulesRoot(repositoryRoot: string): Promise<string | null> {
   let current = resolve(repositoryRoot);
   while (true) {
-    const candidate = join(current, 'node_modules');
-    try {
-      await readFile(join(candidate, '.modules.yaml'), 'utf8');
-      await symlink(candidate, join(workspaceRoot, 'node_modules'), 'dir');
-      return;
-    } catch {
-      // Continue walking toward the filesystem root; cache-only npm exec remains available.
-    }
+    const dependencyRoot = await isUsableNodeModulesRoot(join(current, 'node_modules'));
+    if (dependencyRoot) return dependencyRoot;
     const parent = dirname(current);
-    if (parent === current) return;
+    if (parent === current) return null;
     current = parent;
   }
+}
+
+async function linkNodeModules(dependencyRoot: string, workspaceRoot: string): Promise<void> {
+  await symlink(dependencyRoot, join(workspaceRoot, 'node_modules'), 'dir');
 }
 
 async function runV4(
@@ -455,13 +474,19 @@ async function runV4(
   result: PreschoolShadowAuthoringVerificationResultV1,
   proposedIds: string[],
 ): Promise<void> {
+  const dependencyRoot = input.hostNodeModulesRoot
+    ? await isUsableNodeModulesRoot(input.hostNodeModulesRoot)
+    : await resolveHostNodeModulesRoot(input.repositoryRoot);
+  if (!dependencyRoot) {
+    throw new Error(`Host verification dependency tree is unavailable; required packages: ${REQUIRED_V4_DEPENDENCIES.join(', ')} and binaries: ${REQUIRED_V4_BINARIES.join(', ')}.`);
+  }
   const redRoot = await mkdtemp(join(tmpdir(), 'preschool-shadow-red-'));
   const greenRoot = await mkdtemp(join(tmpdir(), 'preschool-shadow-green-'));
   try {
     await copyWorkspace(input.finalWorkspaceRoot, redRoot);
     await copyWorkspace(input.finalWorkspaceRoot, greenRoot);
-    await linkNodeModules(input.repositoryRoot, redRoot);
-    await linkNodeModules(input.repositoryRoot, greenRoot);
+    await linkNodeModules(dependencyRoot, redRoot);
+    await linkNodeModules(dependencyRoot, greenRoot);
     await writeFile(
       join(redRoot, PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH),
       await readFile(join(input.beforeWorkspaceRoot, PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH)),
@@ -470,13 +495,21 @@ async function runV4(
     const redResults = focusedCommands.map(command => runCommand(redRoot, command));
     result.commandResults.push(...redResults);
     const redOutput = redResults.map(commandResult => commandResult.output).join('\n');
-    const redFailed = redResults.some(commandResult => commandResult.exitCode !== 0);
-    if (!redFailed) throw new Error('RED phase passed with the baseline catalog; a missing authored entry was not demonstrated.');
     const invalidRed = RED_ERROR_MARKERS.find(marker => redOutput.includes(marker));
     if (invalidRed) throw new Error(`RED phase failed for an invalid syntax/import/path reason: ${invalidRed}.`);
-    if (!redOutput.includes('AUTONOMOUS_AUTHORING_MISSING_ENTRY')
-      || !proposedIds.some(id => redOutput.includes(id))) {
-      throw new Error('RED phase did not report AUTONOMOUS_AUTHORING_MISSING_ENTRY with a proposed ID.');
+    const invalidRedCommand = redResults.find(commandResult => {
+      if (commandResult.exitCode === 0) return true;
+      const errorLines = commandResult.output
+        .split(/\r?\n/)
+        .filter(line => /^[A-Za-z]*Error(?: \[[^\]\r\n]+\])?: /.test(line));
+      return errorLines.length !== 1
+        || !proposedIds.some(id => errorLines[0] === `Error: AUTONOMOUS_AUTHORING_MISSING_ENTRY: ${id}`);
+    });
+    if (invalidRedCommand) {
+      const reason = invalidRedCommand.exitCode === 0
+        ? 'the command passed with the baseline catalog'
+        : 'the command did not fail solely with AUTONOMOUS_AUTHORING_MISSING_ENTRY for a proposed ID';
+      throw new Error(`RED phase command ${invalidRedCommand.command} ${reason}.\n${invalidRedCommand.output}`);
     }
 
     const greenResults = focusedCommands.map(command => runCommand(greenRoot, command));

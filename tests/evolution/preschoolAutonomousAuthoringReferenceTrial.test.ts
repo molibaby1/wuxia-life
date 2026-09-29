@@ -275,6 +275,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   assert.equal(linked.status, 0, linked.stderr);
   const runnerPath = 'scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts';
   const shadowAuthoringPath = 'scripts/evolution/autonomousAuthoring/shadowAuthoringExecutionParticipant.ts';
+  const verifierPath = 'scripts/evolution/autonomousAuthoring/verifyPreschoolShadowAuthoring.ts';
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
   const reviewerPath = 'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts';
   const structuredPath = 'scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution.ts';
@@ -287,6 +288,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
     runnerSource = runnerSource.replace(acceptedSha, fixtureSha);
   }
   await writeFile(join(sourceRoot, runnerPath), runnerSource);
+  await writeFile(join(sourceRoot, verifierPath), await readFile(join(process.cwd(), verifierPath)));
   await writeFile(join(sourceRoot, shadowAuthoringPath), await readFile(join(process.cwd(), shadowAuthoringPath)));
   if (options.reviewerStaticPromptMarker) {
     const reviewerSourcePath = join(process.cwd(), reviewerPath);

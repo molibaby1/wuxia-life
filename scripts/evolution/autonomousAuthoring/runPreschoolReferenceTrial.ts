@@ -11,7 +11,11 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validatePreschoolCapacityEvidence, type PreschoolCapacityEvidenceV1 } from '../../../src/evolution/autonomousAuthoringAdmissionContract';
+import {
+  validatePreschoolCapacityEvidence,
+  type AutonomousAuthoringAdmissionV1,
+  type PreschoolCapacityEvidenceV1,
+} from '../../../src/evolution/autonomousAuthoringAdmissionContract';
 import { serializeObservablePayload, type ObservablePayload } from '../../../src/evolution/playerObservableTranscript';
 import type { ImprovementHypothesis } from '../../../src/evolution/improvementHypothesisContract';
 import { buildProblemPackage } from '../problemAgnosticSolution/buildProblemPackage';
@@ -29,6 +33,7 @@ import {
   runSolutionReviewer,
   type SolutionReviewerRunResult,
 } from '../problemAgnosticSolution/runSolutionReviewer';
+import { validateSolutionWork } from '../../../src/evolution/solutionWorkContract';
 import { routeSolutionDecision } from '../problemAgnosticSolution/routeSolutionDecision';
 import {
   REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
@@ -39,7 +44,7 @@ import { resolveOperatorParticipantBinding, OPERATOR_BINDING_CODEX_CURRENT } fro
 import { canonicalJson, captureWorktreeSourceFingerprint, sha256Hex } from '../phase0/provenance';
 import { buildPreschoolAutonomousAuthoringContractPacket } from './buildPreschoolContractPacket';
 import { evaluatePreschoolAutonomousAuthoringAdmission } from './evaluatePreschoolAuthoringAdmission';
-import { runShadowAuthoringExecution } from './shadowAuthoringExecutionParticipant';
+import { assertAcceptedAuthoring, runShadowAuthoringExecution } from './shadowAuthoringExecutionParticipant';
 import { verifyPreschoolShadowAuthoring } from './verifyPreschoolShadowAuthoring';
 import { buildPromotionPackage } from './buildPromotionPackage';
 import {
@@ -180,13 +185,14 @@ type ParticipantPromptProvenance =
   | { role: InvocationRole; status: 'NOT_INVOKED' }
   | { role: InvocationRole; status: 'AVAILABLE'; artifactRef: string; sha256: string; byteLength: number; retransmissionPrompts: RetransmissionPromptProvenance[] }
   | { role: InvocationRole; status: 'CORRUPTED'; artifactRef: string; diagnostic: string; sha256?: string; byteLength?: number; retransmissionPrompts: RetransmissionPromptProvenance[] };
-type InvocationProvenance = null | {
+interface AvailableInvocationProvenanceV1 {
   status: 'AVAILABLE';
   invocationRef: string;
   artifactRef: string;
   artifactSha256: string;
   completionEvidence: { artifactRef: string; sha256: string; outcome: InvocationOutcome };
-} | { status: 'CORRUPTED'; artifactRef: string; diagnostic: string };
+}
+type InvocationProvenance = null | AvailableInvocationProvenanceV1 | { status: 'CORRUPTED'; artifactRef: string; diagnostic: string };
 
 interface AttemptManifest {
   schemaVersion: 'preschool-reference-trial-attempt-manifest-v1';
@@ -1554,9 +1560,40 @@ function containsMarker(bytes: Buffer, marker: string): boolean {
   return bytes.includes(Buffer.from(marker, 'utf8'));
 }
 
-function assertNoParticipantContamination(workspaceRoot: string, prompt = ''): void {
-  for (const marker of [...FORBIDDEN_ANSWER_IDS, FORBIDDEN_RESIDUAL_DESIGN_PATH]) {
-    if (prompt.includes(marker)) throw new Error(`Participant-visible contamination detected in prompt: ${marker}`);
+interface TrustedCurrentRunPromptFragment {
+  role: WorkspaceAgentJobInput['role'];
+  before: string;
+  content: string;
+  after: string;
+}
+
+function removeTrustedCurrentRunPromptFragment(
+  prompt: string,
+  fragment: TrustedCurrentRunPromptFragment,
+): string {
+  const exactSegment = `${fragment.before}${fragment.content}${fragment.after}`;
+  const first = prompt.indexOf(exactSegment);
+  if (first < 0 || first !== prompt.lastIndexOf(exactSegment)) {
+    throw new Error('Verified current-run output is not present exactly once at its expected prompt boundary.');
+  }
+  return prompt.slice(0, first)
+    + `${fragment.before}${fragment.after}`
+    + prompt.slice(first + exactSegment.length);
+}
+
+function assertNoParticipantContamination(
+  workspaceRoot: string,
+  prompt = '',
+  trustedCurrentRunFragment?: TrustedCurrentRunPromptFragment,
+): void {
+  if (prompt.includes(FORBIDDEN_RESIDUAL_DESIGN_PATH)) {
+    throw new Error(`Participant-visible contamination detected in prompt: ${FORBIDDEN_RESIDUAL_DESIGN_PATH}`);
+  }
+  const promptForAnswerScan = trustedCurrentRunFragment
+    ? removeTrustedCurrentRunPromptFragment(prompt, trustedCurrentRunFragment)
+    : prompt;
+  for (const marker of FORBIDDEN_ANSWER_IDS) {
+    if (promptForAnswerScan.includes(marker)) throw new Error(`Participant-visible contamination detected in prompt: ${marker}`);
   }
 
   const root = resolve(workspaceRoot);
@@ -1625,12 +1662,25 @@ export async function prepareReferenceTrialParticipantWorkspace(input: {
 export function withParticipantContaminationGuard(
   participant: WorkspaceAgentParticipantOptions,
 ): WorkspaceAgentParticipantOptions {
+  return withPromptContaminationGuard(participant);
+}
+
+function withPromptContaminationGuard(
+  participant: WorkspaceAgentParticipantOptions,
+  trustedCurrentRunFragment?: TrustedCurrentRunPromptFragment,
+): WorkspaceAgentParticipantOptions {
   const buildArgs = participant.buildArgs;
   const sameThreadContinuation = participant.sameThreadContinuation;
+  const assertCleanJob = (input: WorkspaceAgentJobInput): void => {
+    if (trustedCurrentRunFragment && input.role !== trustedCurrentRunFragment.role) {
+      throw new Error('Verified current-run output cannot be applied to a different Participant role.');
+    }
+    assertNoParticipantContamination(input.workspaceRoot, input.prompt, trustedCurrentRunFragment);
+  };
   return {
     ...participant,
     buildArgs: (input: WorkspaceAgentJobInput) => {
-      assertNoParticipantContamination(input.workspaceRoot, input.prompt);
+      assertCleanJob(input);
       return buildArgs(input);
     },
     ...(sameThreadContinuation === undefined
@@ -1639,12 +1689,83 @@ export function withParticipantContaminationGuard(
         sameThreadContinuation: {
           ...sameThreadContinuation,
           buildArgs: (input: WorkspaceAgentJobInput, threadRef) => {
-            assertNoParticipantContamination(input.workspaceRoot, input.prompt);
+            assertCleanJob(input);
             return sameThreadContinuation.buildArgs(input, threadRef);
           },
         },
       }),
   };
+}
+
+function assertAvailableCurrentRunInvocation(input: {
+  provenance: AvailableInvocationProvenanceV1;
+  attemptRef: string;
+  role: 'solution' | 'reviewer';
+}): void {
+  const expectedArtifactRef = input.role === 'solution'
+    ? 'solution-agent/invocation.json'
+    : 'reviewer-agent/invocation.json';
+  const expectedCompletionArtifactRef = expectedArtifactRef.replace('invocation.json', 'execution-trace.json');
+  if (input.provenance.status !== 'AVAILABLE'
+    || input.provenance.invocationRef !== expectedInvocationRef(input.attemptRef, input.role)
+    || input.provenance.artifactRef !== expectedArtifactRef
+    || !/^[a-f0-9]{64}$/.test(input.provenance.artifactSha256)
+    || input.provenance.completionEvidence.artifactRef !== expectedCompletionArtifactRef
+    || !/^[a-f0-9]{64}$/.test(input.provenance.completionEvidence.sha256)
+    || input.provenance.completionEvidence.outcome !== 'completed') {
+    throw new Error(`Current-run ${input.role} output exemption requires completed, valid invocation provenance for ${input.attemptRef}.`);
+  }
+}
+
+function withVerifiedSolutionWorkContaminationGuard(
+  participant: WorkspaceAgentParticipantOptions,
+  input: {
+    attemptRef: string;
+    solution: SolutionAgentRunResult;
+    solutionProvenance: AvailableInvocationProvenanceV1;
+  },
+): WorkspaceAgentParticipantOptions {
+  if (!input.solution.ok) throw new Error('Current-run SolutionWork exemption requires a completed Solution result.');
+  assertAvailableCurrentRunInvocation({ provenance: input.solutionProvenance, attemptRef: input.attemptRef, role: 'solution' });
+  const solutionWork = validateSolutionWork(input.solution.result);
+  return withPromptContaminationGuard(participant, {
+    role: 'reviewer',
+    before: 'Structured Solution Result:\n',
+    content: canonicalJson(solutionWork),
+    after: '',
+  });
+}
+
+function withVerifiedAcceptedCardsContaminationGuard(
+  participant: WorkspaceAgentParticipantOptions,
+  input: {
+    attemptRef: string;
+    solution: SolutionAgentRunResult;
+    solutionProvenance: AvailableInvocationProvenanceV1;
+    reviewer: SolutionReviewerRunResult;
+    reviewerProvenance: AvailableInvocationProvenanceV1;
+    admission: AutonomousAuthoringAdmissionV1;
+  },
+): WorkspaceAgentParticipantOptions {
+  if (!input.solution.ok || !input.reviewer.ok) {
+    throw new Error('Current-run accepted Cards exemption requires completed Solution and Reviewer results.');
+  }
+  assertAvailableCurrentRunInvocation({ provenance: input.solutionProvenance, attemptRef: input.attemptRef, role: 'solution' });
+  assertAvailableCurrentRunInvocation({ provenance: input.reviewerProvenance, attemptRef: input.attemptRef, role: 'reviewer' });
+  if (input.admission.sourceRunRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF) {
+    throw new Error('Current-run accepted Cards exemption requires Host admission for the reference trial source.');
+  }
+  const accepted = assertAcceptedAuthoring({
+    solution: validateSolutionWork(input.solution.result),
+    review: input.reviewer.review,
+    admission: input.admission,
+  });
+  return withPromptContaminationGuard(participant, {
+    role: 'configuration-execution',
+    before: 'Accepted Cards:\n',
+    content: canonicalJson(accepted.cards),
+    after: '\n\nThe only allowed write paths are exactly these three paths:',
+  });
 }
 
 function runGitArchive(repositoryRoot: string): Buffer {
@@ -1877,7 +1998,7 @@ async function runVerifiedHistoricalTrial(input: {
     input.manifest.currentStage = 'BINDING';
     await writeAttemptManifest(input.manifestPath, input.manifest);
     const binding = await input.resolveParticipantBinding(OPERATOR_BINDING_CODEX_CURRENT);
-    const participant = withParticipantContaminationGuard(binding.participant);
+    const solutionParticipant = withParticipantContaminationGuard(binding.participant);
     const workspaceDestinationRoot = join(temporaryRoot, 'participant-workspaces');
 
     const solutionWorkspace = await prepareReferenceTrialParticipantWorkspace({
@@ -1905,7 +2026,7 @@ async function runVerifiedHistoricalTrial(input: {
         jobNumber: 1,
         destinationRoot: join(outputRoot, 'solution-agent'),
         skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
-        participant,
+        participant: solutionParticipant,
         autonomousAuthoringContractPacket: trialInputs.contractPacket,
         referenceResponsibilityContext: {
           validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
@@ -1929,6 +2050,15 @@ async function runVerifiedHistoricalTrial(input: {
       throw new TrialInvocationProvenanceFailure([`solution: ${input.manifest.invocationRefs.solution.diagnostic}`]);
     }
     if (!solution.ok) throw new TrialParticipantFailure(solution.errorKind, 'solution-agent/failure.json', `Solution Participant failed: ${solution.message}`);
+    const solutionProvenance = input.manifest.invocationRefs.solution;
+    if (!solutionProvenance || solutionProvenance.status !== 'AVAILABLE') {
+      throw new TrialInvocationProvenanceFailure(['solution: completed invocation provenance is unavailable.']);
+    }
+    const reviewerParticipant = withVerifiedSolutionWorkContaminationGuard(binding.participant, {
+      attemptRef: input.attemptRef,
+      solution,
+      solutionProvenance,
+    });
 
     const reviewerWorkspace = await prepareReferenceTrialParticipantWorkspace({
       baselineRoot: trialBaselineRoot,
@@ -1956,7 +2086,7 @@ async function runVerifiedHistoricalTrial(input: {
         jobNumber: 2,
         destinationRoot: join(outputRoot, 'reviewer-agent'),
         skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-        participant,
+        participant: reviewerParticipant,
         autonomousAuthoringContractPacket: trialInputs.contractPacket,
         referenceResponsibilityContext: {
           validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
@@ -1980,6 +2110,10 @@ async function runVerifiedHistoricalTrial(input: {
       throw new TrialInvocationProvenanceFailure([`reviewer: ${input.manifest.invocationRefs.reviewer.diagnostic}`]);
     }
     if (!reviewer.ok) throw new TrialParticipantFailure(reviewer.errorKind, 'reviewer-agent/failure.json', `Reviewer Participant failed: ${reviewer.message}`);
+    const reviewerProvenance = input.manifest.invocationRefs.reviewer;
+    if (!reviewerProvenance || reviewerProvenance.status !== 'AVAILABLE') {
+      throw new TrialInvocationProvenanceFailure(['reviewer: completed invocation provenance is unavailable.']);
+    }
 
     const selectedOption = acceptedAuthoringOption(solution, reviewer);
     input.manifest.currentStage = 'ADMISSION';
@@ -2029,6 +2163,14 @@ async function runVerifiedHistoricalTrial(input: {
     if (decision.route !== 'READY_FOR_SHADOW_AUTHORING') {
       throw new Error(`Reference trial did not route to READY_FOR_SHADOW_AUTHORING: ${decision.route}`);
     }
+    const shadowParticipant = withVerifiedAcceptedCardsContaminationGuard(binding.participant, {
+      attemptRef: input.attemptRef,
+      solution,
+      solutionProvenance,
+      reviewer,
+      reviewerProvenance,
+      admission,
+    });
 
     input.manifest.currentStage = 'SHADOW_AUTHORING';
     await writeAttemptManifest(input.manifestPath, input.manifest);
@@ -2045,7 +2187,7 @@ async function runVerifiedHistoricalTrial(input: {
         solution: solution.result,
         review: reviewer.review,
         admission,
-        participant,
+        participant: shadowParticipant,
       }),
     });
     input.manifest.invocationRefs.shadowAuthoring = await readInvocationProvenance(

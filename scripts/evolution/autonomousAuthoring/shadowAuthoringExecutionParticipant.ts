@@ -91,7 +91,7 @@ function buildShadowAuthoringPrompt(cards: unknown): string {
   ].join('\n');
 }
 
-function assertAcceptedAuthoring(input: {
+export function assertAcceptedAuthoring(input: {
   solution: SolutionWorkV1;
   review: SolutionReviewV1;
   admission: AutonomousAuthoringAdmissionV1;

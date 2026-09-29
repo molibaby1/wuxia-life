@@ -261,20 +261,22 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'retransmission-success' | 'retransmission-failure';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'retransmission-success' | 'retransmission-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
   observable: string;
   brief: string;
-}): Promise<typeof runPreschoolReferenceTrial> {
-  const sourceRoot = join(root, 'synthetic-public-runner-source');
+}, options: { suffix?: string; reviewerStaticPromptMarker?: string } = {}): Promise<typeof runPreschoolReferenceTrial> {
+  const sourceRoot = join(root, `synthetic-public-runner-source${options.suffix ? `-${options.suffix}` : ''}`);
   const cloned = spawnSync('git', ['clone', '--quiet', '--shared', process.cwd(), sourceRoot], { encoding: 'utf8' });
   assert.equal(cloned.status, 0, cloned.stderr);
   const linked = spawnSync('ln', ['-s', join(process.cwd(), 'node_modules'), join(sourceRoot, 'node_modules')], { encoding: 'utf8' });
   assert.equal(linked.status, 0, linked.stderr);
   const runnerPath = 'scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts';
+  const shadowAuthoringPath = 'scripts/evolution/autonomousAuthoring/shadowAuthoringExecutionParticipant.ts';
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
+  const reviewerPath = 'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts';
   const structuredPath = 'scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution.ts';
   let runnerSource = await readFile(join(process.cwd(), runnerPath), 'utf8');
   for (const [acceptedSha, fixtureSha] of [
@@ -285,6 +287,17 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
     runnerSource = runnerSource.replace(acceptedSha, fixtureSha);
   }
   await writeFile(join(sourceRoot, runnerPath), runnerSource);
+  await writeFile(join(sourceRoot, shadowAuthoringPath), await readFile(join(process.cwd(), shadowAuthoringPath)));
+  if (options.reviewerStaticPromptMarker) {
+    const reviewerSourcePath = join(process.cwd(), reviewerPath);
+    const promptAnchor = "    'Independently inspect the repository and referenced artifacts before reviewing this result.',";
+    const reviewerSource = await readFile(reviewerSourcePath, 'utf8');
+    assert.equal(reviewerSource.split(promptAnchor).length, 2);
+    await writeFile(join(sourceRoot, reviewerPath), reviewerSource.replace(
+      promptAnchor,
+      `${promptAnchor}\n    ${JSON.stringify(options.reviewerStaticPromptMarker)},`,
+    ));
+  }
   const briefSource = await readFile(join(process.cwd(), briefPath), 'utf8');
   assert.equal(briefSource.split(PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256).length, 2);
   await writeFile(join(sourceRoot, briefPath), briefSource.replace(
@@ -405,6 +418,11 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     for (const entry of entries) entry.ageMin = 7;
     for (const card of cards) card.developmentalAgeJustification.ageMin = 7;
   }
+  if (scenario === 'solution-id-prefix-collision') {
+    ids[0] = 'preschool_neutral_fair_play_result';
+    entries[0]!.id = 'preschool_neutral_fair_play_result';
+    cards[0]!.proposedEntry.id = 'preschool_neutral_fair_play_result';
+  }
   const observableRef = 'source/reference-trial/observable-payload.json';
   const briefRef = 'source/reference-trial/reference-responsibility-brief.json';
   const attestationRef = 'source/reference-trial/reference-responsibility-attestation.json';
@@ -430,6 +448,8 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     recommendedOptionId: 'option-000001', summary: 'Synthetic contract-bound proposal.',
     repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef],
   };
+  if (scenario === 'solution-exact-answer-id') solution.summary = 'preschool_neutral_fair_play';
+  if (scenario === 'reviewer-static-answer-marker') solution.summary = 'preschool_neutral_fair_play';
   const review = {
     schemaVersion: 'solution-review-v1', problemId, decision: 'ACCEPT_OPTION', acceptedOptionId: 'option-000001',
     scopeAssessment: 'code_required', executionAuthorityAssessment: 'WITHIN_CURRENT_AUTHORITY',
@@ -518,10 +538,16 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     executionAuthorizationPath,
     expectedExecutionAuthorizationSha256,
   }, { resolveParticipantBinding: async () => ({ participant }) as never });
-  if (scenario !== 'success' && scenario !== 'retransmission-success') {
+  const expectedSuccessfulScenario = scenario === 'success'
+    || scenario === 'retransmission-success'
+    || scenario === 'solution-id-prefix-collision'
+    || scenario === 'solution-exact-answer-id';
+  if (!expectedSuccessfulScenario) {
     const solutionOnlyFailure = scenario === 'participant-failure' || scenario === 'retransmission-failure';
     if (solutionOnlyFailure) {
       await assert.rejects(trial, /Solution Participant failed/);
+    } else if (scenario === 'reviewer-static-answer-marker') {
+      await assert.rejects(trial, /Participant-visible contamination detected in prompt: preschool_neutral_fair_play/);
     } else if (scenario === 'omitted-responsibility') {
       await assert.rejects(trial, {
         message: 'Host admission did not establish eligibility: INSUFFICIENT_EVIDENCE (The reference responsibility set was not preserved one-to-one.)',
@@ -531,7 +557,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         ? /Shadow workspace changed paths outside the Contract/
         : /Structural capacity deficit must decrease from a positive value to zero/);
     }
-    assert.deepEqual(jobs, solutionOnlyFailure
+    assert.deepEqual(jobs, solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
       ? ['solution']
       : scenario === 'omitted-responsibility'
         ? ['solution', 'reviewer']
@@ -540,6 +566,8 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     assert.equal(failedManifest.state, 'FAILED');
     const invokedPromptRoles = solutionOnlyFailure
       ? ['solution'] as const
+      : scenario === 'reviewer-static-answer-marker'
+        ? ['solution', 'reviewer'] as const
       : scenario === 'omitted-responsibility'
         ? ['solution', 'reviewer'] as const
         : ['solution', 'reviewer', 'shadowAuthoring'] as const;
@@ -567,7 +595,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       assert.equal(submittedBrief.responsibilities.length, 5);
       await assert.rejects(readFile(join(outputRoot, 'decision.json')), { code: 'ENOENT' });
       await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
-    } else if (scenario !== 'retransmission-failure' && scenario !== 'participant-failure') {
+    } else if (scenario !== 'retransmission-failure' && scenario !== 'participant-failure' && scenario !== 'reviewer-static-answer-marker') {
       const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
       assert.equal(decision.route, 'READY_FOR_SHADOW_AUTHORING');
     }
@@ -1767,6 +1795,41 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       bytes: fullBriefBytes,
       sha256: sha256Hex(fullBriefBytes),
     });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'solution-id-prefix-collision', syntheticRunner, {
+      brief: fullBrief,
+      bytes: fullBriefBytes,
+      sha256: sha256Hex(fullBriefBytes),
+    });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'solution-exact-answer-id', syntheticRunner, {
+      brief: fullBrief,
+      bytes: fullBriefBytes,
+      sha256: sha256Hex(fullBriefBytes),
+    });
+    const reviewerStaticMarkerRunner = await loadSyntheticPublicRunner(root, {
+      evidence: sha256Hex(capacityEvidenceBytes),
+      observable: sha256Hex(syntheticPayloadBytes),
+      brief: sha256Hex(fullBriefBytes),
+    }, {
+      suffix: 'reviewer-static-marker',
+      reviewerStaticPromptMarker: ANSWER_IDS[0],
+    });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'reviewer-static-answer-marker', reviewerStaticMarkerRunner, {
+      brief: fullBrief,
+      bytes: fullBriefBytes,
+      sha256: sha256Hex(fullBriefBytes),
+    });
     for (const scenario of ['retransmission-success', 'retransmission-failure'] as const) {
       await testSyntheticLayerAEndToEnd(root, {
         evidence: capacityEvidencePath,
@@ -1998,8 +2061,15 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       artifactSourceRoot: hostInputRoot,
       artifactRelativePaths: trialInputs.artifactRelativePaths,
     });
+    const shadowWorkspace = await prepareReferenceTrialParticipantWorkspace({
+      baselineRoot: historicalRoot,
+      destinationRoot: join(root, 'shadow-workspace'),
+      jobKind: 'shadow-authoring',
+      artifactSourceRoot: hostInputRoot,
+      artifactRelativePaths: trialInputs.artifactRelativePaths,
+    });
 
-    for (const workspace of [solutionWorkspace.workspaceRoot, reviewerWorkspace.workspaceRoot]) {
+    for (const workspace of [solutionWorkspace.workspaceRoot, reviewerWorkspace.workspaceRoot, shadowWorkspace.workspaceRoot]) {
       const visibleFiles = await listFiles(workspace);
       assert.equal(visibleFiles.includes(RESIDUAL_DESIGN_PATH), false);
       assert.equal(visibleFiles.includes(ACCEPTED_DESIGN_PATH), false);
@@ -2189,6 +2259,15 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     buildArgsCalled = false;
     assert.throws(() => guardedParticipant.buildArgs({ ...promptInput, prompt: `contaminated ${ANSWER_IDS[0]}` }), /contamination/i);
     assert.equal(buildArgsCalled, false);
+    const shadowPromptInput: WorkspaceAgentJobInput = {
+      ...promptInput,
+      role: 'configuration-execution',
+    };
+    assert.throws(() => guardedParticipant.buildArgs({
+      ...shadowPromptInput,
+      prompt: `non-accepted shadow material ${ANSWER_IDS[0]}`,
+    }), /contamination/i);
+    assert.equal(buildArgsCalled, false);
 
     const leakedName = `${ANSWER_IDS[2]}.txt`;
     await put(solutionWorkspace.workspaceRoot, leakedName, 'marker in participant-visible path');
@@ -2201,6 +2280,24 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     buildArgsCalled = false;
     assert.throws(() => guardedParticipant.buildArgs(promptInput), /contamination/i);
     assert.equal(buildArgsCalled, false);
+    await rm(join(solutionWorkspace.workspaceRoot, 'participant-visible-leak.txt'));
+
+    await put(solutionWorkspace.workspaceRoot, RESIDUAL_DESIGN_PATH, 'forbidden residual design path');
+    buildArgsCalled = false;
+    assert.throws(() => guardedParticipant.buildArgs(promptInput), /contamination/i);
+    assert.equal(buildArgsCalled, false);
+    await rm(join(solutionWorkspace.workspaceRoot, RESIDUAL_DESIGN_PATH));
+
+    const shadowSourceMarkerPath = `${ANSWER_IDS[0]}.txt`;
+    await put(historicalRoot, shadowSourceMarkerPath, 'forbidden shadow source marker');
+    await assert.rejects(prepareReferenceTrialParticipantWorkspace({
+      baselineRoot: historicalRoot,
+      destinationRoot: join(root, 'shadow-workspace-with-source-marker'),
+      jobKind: 'shadow-authoring',
+      artifactSourceRoot: hostInputRoot,
+      artifactRelativePaths: trialInputs.artifactRelativePaths,
+    }), /Participant-visible contamination detected in (?:path|file)/i);
+    await rm(join(historicalRoot, shadowSourceMarkerPath));
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -19,6 +19,12 @@ export function buildParticipantBindingReceipt(
     modelConfigured,
     modelResolution: modelConfigured === null ? 'HOST_CONFIGURED_UNOBSERVED' : 'EXPLICIT',
     reasoningEffort: participant.reasoningEffort ?? null,
+    ...(participant.bindingMetadata?.ambientCodexConfigSha256 === undefined
+      ? {}
+      : { ambientCodexConfigSha256: participant.bindingMetadata.ambientCodexConfigSha256 }),
+    ...(participant.bindingMetadata?.nativeEnvelopeSchemaSha256 === undefined
+      ? {}
+      : { nativeEnvelopeSchemaSha256: participant.bindingMetadata.nativeEnvelopeSchemaSha256 }),
     timeoutMs: participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
   };
 }

@@ -131,6 +131,8 @@ export interface WorkspaceAgentParticipantOptions {
   bindingMetadata?: {
     bindingId?: string;
     executableVersion?: string;
+    ambientCodexConfigSha256?: string | 'ABSENT';
+    nativeEnvelopeSchemaSha256?: string;
   };
   spawnProcess?: typeof spawn;
   timeoutMs?: number;

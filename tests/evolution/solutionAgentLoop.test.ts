@@ -229,6 +229,12 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   };
   const referencePrompt = buildSolutionAgentPrompt(problemPackage, [], autonomousAuthoringContractPacket, referenceContext);
   assertSolutionWorkSchemaGuidance(referencePrompt);
+  assert.match(referencePrompt, /Final JSON serialization check \(required\):/);
+  assert.match(referencePrompt, /every object and array is closed/);
+  assert.match(referencePrompt, /one compact JSON line/);
+  assert.match(referencePrompt, /never omit or summarize required fields or content/);
+  assert.ok(referencePrompt.lastIndexOf('Final JSON serialization check')
+    > referencePrompt.indexOf('Problem Package (the package references evidence; interpret it yourself):'));
   assert.match(referencePrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES/);
   assert.match(referencePrompt, /If the Layer A case is APPLICABLE and supports an executable authoring option.*changeScope='program'.*autonomousAuthoring/s);
   assert.match(referencePrompt, /A configuration option with content only in proposedChange is not an autonomous authoring proposal/);

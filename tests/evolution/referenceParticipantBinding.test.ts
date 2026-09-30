@@ -85,6 +85,33 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     assert.equal(resolved.participant.reasoningEffort, 'max');
     assert.equal(resolved.participant.bindingMetadata?.ambientCodexConfigSha256, lock.ambientCodexConfigSha256);
     assert.equal(resolved.participant.bindingMetadata?.nativeEnvelopeSchemaSha256, lock.nativeEnvelopeAssistance.schemaSha256);
+    const solutionJob = {
+      invocationRef: 'reference-solution-000001',
+      role: 'solution' as const,
+      workspaceRoot: repositoryRoot,
+      prompt: 'Return a JSON object.',
+    };
+    const initialArgs = resolved.participant.buildArgs(solutionJob);
+    assert.ok(initialArgs.includes('--json'));
+    assert.ok(initialArgs.includes('-m'));
+    assert.equal(initialArgs[initialArgs.indexOf('-m') + 1], lock.modelConfigured);
+    assert.ok(initialArgs.includes('-c'));
+    assert.ok(initialArgs.includes(`model_reasoning_effort=${JSON.stringify(lock.reasoningEffort)}`));
+    assert.ok(initialArgs.includes('--output-schema'));
+    assert.equal(initialArgs[initialArgs.indexOf('--output-schema') + 1], join(repositoryRoot, SCHEMA_REF));
+    const resumeArgs = resolved.participant.sameThreadContinuation?.buildArgs(
+      solutionJob,
+      { provider: 'codex-exec', opaqueId: '01234567-89ab-cdef-0123-456789abcdef' },
+    );
+    assert.ok(resumeArgs?.includes('resume'));
+    assert.ok(resumeArgs?.includes('--json'));
+    assert.ok(resumeArgs?.includes('-m'));
+    assert.equal(resumeArgs?.[resumeArgs.indexOf('-m') + 1], lock.modelConfigured);
+    assert.ok(resumeArgs?.includes(`model_reasoning_effort=${JSON.stringify(lock.reasoningEffort)}`));
+    assert.ok(resumeArgs?.includes('--output-schema'));
+    assert.equal(resumeArgs?.[resumeArgs.indexOf('--output-schema') + 1], join(repositoryRoot, SCHEMA_REF));
+    const reviewerArgs = resolved.participant.buildArgs({ ...solutionJob, role: 'reviewer' });
+    assert.equal(reviewerArgs.includes('--output-schema'), false);
     const receipt = buildParticipantBindingReceipt(resolved.participant);
     assert.equal(receipt.modelConfigured, 'gpt-6-luna');
     assert.equal(receipt.modelResolution, 'EXPLICIT');
@@ -154,6 +181,11 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
       bindingId: 'CODEX_CURRENT',
       executableVersion: 'codex 1.2.3',
     });
+    assert.deepEqual(ordinary.participant.buildArgs(solutionJob), [
+      '--sandbox', 'workspace-write',
+      '--ask-for-approval', 'never',
+      'exec', '--json', '--skip-git-repo-check', '--color', 'never', solutionJob.prompt,
+    ]);
     const ordinaryReceipt = buildParticipantBindingReceipt(ordinary.participant);
     assert.equal(Object.hasOwn(ordinaryReceipt, 'ambientCodexConfigSha256'), false);
     assert.equal(Object.hasOwn(ordinaryReceipt, 'nativeEnvelopeSchemaSha256'), false);

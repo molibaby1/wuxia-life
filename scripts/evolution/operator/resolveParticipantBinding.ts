@@ -123,6 +123,61 @@ export function createCodexCurrentParticipant(
   };
 }
 
+export function createCodexReferenceParticipant(input: {
+  executable: string;
+  executableVersion: string;
+  model: string;
+  reasoningEffort: string;
+  nativeEnvelopeSchemaPath: string;
+  ambientCodexConfigSha256: string | 'ABSENT';
+  nativeEnvelopeSchemaSha256: string;
+}): WorkspaceAgentParticipantOptions {
+  const ordinary = createCodexCurrentParticipant(input.executable, input.executableVersion);
+  const modelOptions = [
+    '-m', input.model,
+    '-c', `model_reasoning_effort=${JSON.stringify(input.reasoningEffort)}`,
+  ];
+  const schemaOptions = ['--output-schema', input.nativeEnvelopeSchemaPath];
+  const participant: WorkspaceAgentParticipantOptions = {
+    ...ordinary,
+    model: input.model,
+    reasoningEffort: input.reasoningEffort,
+    bindingMetadata: {
+      ...ordinary.bindingMetadata,
+      ambientCodexConfigSha256: input.ambientCodexConfigSha256,
+      nativeEnvelopeSchemaSha256: input.nativeEnvelopeSchemaSha256,
+    },
+    buildArgs: job => [
+      '--sandbox', 'workspace-write',
+      'exec',
+      ...(job.role === 'solution' ? ['--json'] : ['--ephemeral']),
+      ...modelOptions,
+      '--skip-git-repo-check',
+      '--color', 'never',
+      ...(job.role === 'solution' ? schemaOptions : []),
+      job.prompt,
+    ],
+    sameThreadContinuation: {
+      provider: 'codex-exec',
+      buildArgs: (job, threadRef) => {
+        if (job.role !== 'solution' || threadRef.provider !== 'codex-exec' || !CODEX_THREAD_ID.test(threadRef.opaqueId)) {
+          throw new Error('Codex continuation requires the current Solution thread UUID');
+        }
+        return [
+          '--sandbox', 'workspace-write',
+          'exec', 'resume', '--json',
+          ...modelOptions,
+          ...schemaOptions,
+          '--skip-git-repo-check',
+          threadRef.opaqueId,
+          job.prompt,
+        ];
+      },
+    },
+  };
+  return participant;
+}
+
 export function parseOperatorParticipantBindingId(
   value: string | undefined,
 ): OperatorParticipantBindingId {

@@ -7,6 +7,7 @@ import {
 import {
   OPERATOR_BINDING_CODEX_CURRENT,
   ParticipantBindingUnavailableError,
+  createCodexReferenceParticipant,
   resolveOperatorParticipantBinding,
   type OperatorParticipantBindingId,
   type ResolvedOperatorParticipantBinding,
@@ -144,16 +145,15 @@ export async function resolveReferenceParticipantBindingFromLock(input: {
     throw new ParticipantBindingUnavailableError('PARTICIPANT_BINDING_UNAVAILABLE: native envelope schema drift');
   }
 
-  const participant = {
-    ...current.participant,
+  const participant = createCodexReferenceParticipant({
+    executable: executableRealPath,
+    executableVersion: current.executableVersion,
     model: input.lock.modelConfigured,
     reasoningEffort: input.lock.reasoningEffort,
-    bindingMetadata: {
-      ...current.participant.bindingMetadata,
-      ambientCodexConfigSha256: input.lock.ambientCodexConfigSha256,
-      nativeEnvelopeSchemaSha256: input.lock.nativeEnvelopeAssistance.schemaSha256,
-    },
-  };
+    nativeEnvelopeSchemaPath: join(resolve(input.repositoryRoot), input.lock.nativeEnvelopeAssistance.schemaRef),
+    ambientCodexConfigSha256: input.lock.ambientCodexConfigSha256,
+    nativeEnvelopeSchemaSha256: input.lock.nativeEnvelopeAssistance.schemaSha256,
+  });
   return {
     ...current,
     executable: executableRealPath,

@@ -265,7 +265,6 @@ export function buildSolutionAgentPrompt(
     'Problem Package (the package references evidence; interpret it yourself):',
     canonicalJson(problemPackage),
     'Final JSON serialization check (required): before sending, verify that the complete result parses as one JSON object, every object and array is closed, and all strings are escaped.',
-    'Return it as one compact JSON line. Compact only whitespace; never omit or summarize required fields or content.',
   ].join('\n');
 }
 

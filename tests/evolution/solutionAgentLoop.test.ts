@@ -230,9 +230,10 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   const referencePrompt = buildSolutionAgentPrompt(problemPackage, [], autonomousAuthoringContractPacket, referenceContext);
   assertSolutionWorkSchemaGuidance(referencePrompt);
   assert.match(referencePrompt, /Final JSON serialization check \(required\):/);
-  assert.match(referencePrompt, /every object and array is closed/);
-  assert.match(referencePrompt, /one compact JSON line/);
-  assert.match(referencePrompt, /never omit or summarize required fields or content/);
+  assert.match(referencePrompt, /complete result parses as one JSON object/);
+  assert.doesNotMatch(referencePrompt, /Return it as one compact JSON line\./);
+  assert.doesNotMatch(referencePrompt, /canonical JSON|single-line JSON/i);
+  assert.match(referencePrompt, /Structured Final Output Contract V1/);
   assert.ok(referencePrompt.lastIndexOf('Final JSON serialization check')
     > referencePrompt.indexOf('Problem Package (the package references evidence; interpret it yourself):'));
   assert.match(referencePrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES/);

@@ -131,7 +131,7 @@ export async function readValidatedPreschoolReferenceProbeBindingLock(input: {
     throw new Error('Matrix D binding lock has an unsupported schema.');
   }
   if (!isRecord(matrixValue)
-    || matrixValue.schemaVersion !== 'reference-participant-communication-matrix-v1'
+    || matrixValue.schemaVersion !== 'reference-participant-communication-matrix-v2'
     || matrixValue.status !== 'PASS'
     || matrixValue.bindingLockRef !== 'binding-lock.json'
     || matrixValue.implementationSha !== input.currentImplementationSha
@@ -141,7 +141,9 @@ export async function readValidatedPreschoolReferenceProbeBindingLock(input: {
     || !isRecord(matrixValue.matrices.B)
     || matrixValue.matrices.B.gatePassed !== true
     || !isRecord(matrixValue.matrices.C)
-    || matrixValue.matrices.C.gatePassed !== true) {
+    || matrixValue.matrices.C.gatePassed !== true
+    || matrixValue.matrices.C.policyClassification !== 'SUPPORTED_60S'
+    || matrixValue.matrices.C.timeoutPolicyReviewRequired !== false) {
     throw new Error('Matrix D requires a passing A-C matrix for the current implementation SHA.');
   }
   const lock = lockValue as unknown as ReferenceParticipantBindingLockV1;

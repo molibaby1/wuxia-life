@@ -244,7 +244,7 @@ async function testCliRequiresPassingMatrixAndExactBindingLock(): Promise<void> 
   await mkdir(matrixRoot);
   await writeFile(lockPath, `${JSON.stringify(TEST_BINDING_LOCK, null, 2)}\n`);
   const matrix = {
-    schemaVersion: 'reference-participant-communication-matrix-v1',
+    schemaVersion: 'reference-participant-communication-matrix-v2',
     implementationSha,
     bindingLockRef: 'binding-lock.json',
     bindingLockSha256: lockSha256,
@@ -252,7 +252,11 @@ async function testCliRequiresPassingMatrixAndExactBindingLock(): Promise<void> 
     matrices: {
       A: { gatePassed: true },
       B: { gatePassed: true },
-      C: { gatePassed: true },
+      C: {
+        gatePassed: true,
+        timeoutPolicyReviewRequired: false,
+        policyClassification: 'SUPPORTED_60S',
+      },
     },
   };
   try {
@@ -262,6 +266,26 @@ async function testCliRequiresPassingMatrixAndExactBindingLock(): Promise<void> 
       participantBindingLockPath: lockPath,
       currentImplementationSha: implementationSha,
     }), TEST_BINDING_LOCK);
+
+    await writeFile(matrixPath, `${JSON.stringify({ ...matrix, schemaVersion: 'reference-participant-communication-matrix-v1' }, null, 2)}\n`);
+    await assert.rejects(readValidatedPreschoolReferenceProbeBindingLock({
+      repositoryRoot: temporaryRoot,
+      participantBindingLockPath: lockPath,
+      currentImplementationSha: implementationSha,
+    }), /passing A-C matrix/i);
+
+    await writeFile(matrixPath, `${JSON.stringify({
+      ...matrix,
+      matrices: {
+        ...matrix.matrices,
+        C: { gatePassed: true, timeoutPolicyReviewRequired: true, policyClassification: 'CONTINUATION_TIMEOUT_POLICY_REVIEW' },
+      },
+    }, null, 2)}\n`);
+    await assert.rejects(readValidatedPreschoolReferenceProbeBindingLock({
+      repositoryRoot: temporaryRoot,
+      participantBindingLockPath: lockPath,
+      currentImplementationSha: implementationSha,
+    }), /passing A-C matrix/i);
 
     await writeFile(matrixPath, `${JSON.stringify({ ...matrix, bindingLockSha256: '0'.repeat(64) }, null, 2)}\n`);
     await assert.rejects(readValidatedPreschoolReferenceProbeBindingLock({

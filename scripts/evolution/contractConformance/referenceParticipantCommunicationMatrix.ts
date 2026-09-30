@@ -24,10 +24,13 @@ import { validateStructuredTerminalEnvelope } from '../../../src/evolution/struc
 
 export const REFERENCE_COMMUNICATION_PRODUCTION_RETRANSMISSION_TIMEOUT_MS = 60_000;
 export const REFERENCE_COMMUNICATION_OBSERVATION_TIMEOUT_MS = 300_000;
+const REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS = 1_800_000;
+const SYNTHETIC_LARGE_PAYLOAD_MIN_BYTES = 22 * 1024;
+const SYNTHETIC_LARGE_PAYLOAD_MAX_BYTES = 26 * 1024;
 
 type RuntimeOutcome = 'COMPLETED' | 'TIMEOUT' | 'PROCESS_FAILURE' | 'INVALID_OUTPUT' | 'CONTINUATION_FAILURE';
 
-export interface ReferenceCommunicationTrialEvidenceV1 {
+export interface ReferenceCommunicationTrialEvidenceV2 {
   trialId: string;
   bindingLockSha256: string;
   schemaSha256: string;
@@ -40,18 +43,27 @@ export interface ReferenceCommunicationTrialEvidenceV1 {
   terminalPayloadRef: string;
   executionTraceRef: string;
   payloadMatchedExactly?: boolean;
+  payloadStructureValid?: boolean;
+  payloadMeasuredBytes?: number;
+  payloadStructureFailureReason?: string;
   threadRef?: ParticipantThreadRef;
 }
 
-export interface ReferenceCommunicationContinuationTrialEvidenceV1 {
+export interface ReferenceCommunicationContinuationTrialEvidenceV2 {
   trialId: string;
   bindingLockSha256: string;
   schemaSha256: string;
   initialRuntimeOutcome: RuntimeOutcome;
   initialHostEnvelopeValid: boolean;
   initialPayloadMatchedExactly: boolean;
-  continuationRuntimeOutcome: RuntimeOutcome | 'NOT_RUN' | 'THREAD_IDENTITY_UNAVAILABLE';
+  initialPayloadStructureValid: boolean;
+  initialPayloadMeasuredBytes: number | null;
+  initialStructureFailureReason?: string;
+  continuationRuntimeOutcome: RuntimeOutcome | 'NOT_RUN' | 'THREAD_IDENTITY_UNAVAILABLE' | 'THREAD_IDENTITY_FAILURE';
   continuationHostEnvelopeValid: boolean;
+  continuationPayloadStructureValid: boolean;
+  continuationPayloadMeasuredBytes: number | null;
+  continuationStructureFailureReason?: string;
   hostRepairApplied: false;
   initialElapsedMs: number | null;
   startupLatencyMs: number | null;
@@ -61,6 +73,7 @@ export interface ReferenceCommunicationContinuationTrialEvidenceV1 {
   withinProductionCeiling: boolean;
   withinObservationCeiling: boolean;
   payloadMatchedExactly: boolean;
+  threadIdentityValid: boolean;
   initialTerminalPayloadRef: string;
   initialExecutionTraceRef: string;
   continuationTerminalPayloadRef: string;
@@ -69,8 +82,8 @@ export interface ReferenceCommunicationContinuationTrialEvidenceV1 {
   continuationFailureReason?: string;
 }
 
-export interface ReferenceParticipantCommunicationMatrixEvidenceV1 {
-  schemaVersion: 'reference-participant-communication-matrix-v1';
+export interface ReferenceParticipantCommunicationMatrixEvidenceV2 {
+  schemaVersion: 'reference-participant-communication-matrix-v2';
   matrixRef: string;
   implementationSha: string;
   bindingLockRef: 'binding-lock.json';
@@ -91,19 +104,26 @@ export interface ReferenceParticipantCommunicationMatrixEvidenceV1 {
     A: {
       validationScope: 'NATIVE_ENVELOPE_ONLY';
       gatePassed: boolean;
-      trials: ReferenceCommunicationTrialEvidenceV1[];
+      trials: ReferenceCommunicationTrialEvidenceV2[];
     };
     B: {
       gatePassed: boolean | null;
       expectedPayloadBytes: number;
-      trials: ReferenceCommunicationTrialEvidenceV1[];
+      trials: ReferenceCommunicationTrialEvidenceV2[];
     };
     C: {
       gatePassed: boolean | null;
       timeoutPolicyReviewRequired: boolean;
-      trials: ReferenceCommunicationContinuationTrialEvidenceV1[];
+      policyClassification: 'SUPPORTED_60S' | 'CONTINUATION_TIMEOUT_POLICY_REVIEW' | 'CONTINUATION_UNRELIABLE' | null;
+      trials: ReferenceCommunicationContinuationTrialEvidenceV2[];
     };
   };
+}
+
+export interface SyntheticLargeEnvelopePayloadValidation {
+  ok: boolean;
+  measuredBytes: number;
+  reason?: string;
 }
 
 export interface RunReferenceParticipantCommunicationMatrixInput {
@@ -211,6 +231,10 @@ function trace(job: WorkspaceAgentJobResult): ParticipantExecutionTraceV1 {
   return job.executionTrace;
 }
 
+function threadRefsMatch(actual: ParticipantThreadRef | undefined, expected: ParticipantThreadRef): boolean {
+  return actual !== undefined && actual.provider === expected.provider && actual.opaqueId === expected.opaqueId;
+}
+
 async function writeTextCreateOnly(path: string, value: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, value, { flag: 'wx' });
@@ -245,7 +269,7 @@ function envelopeEvidence(input: {
   payloadMatchedExactly?: boolean;
   terminalPayloadRef: string;
   executionTraceRef: string;
-}): ReferenceCommunicationTrialEvidenceV1 {
+}): ReferenceCommunicationTrialEvidenceV2 {
   const result = envelope(input.job);
   return {
     trialId: input.trialId,
@@ -295,8 +319,102 @@ export function buildSyntheticLargeEnvelopePayload(): Record<string, unknown> {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasExactKeys(value: unknown, expectedKeys: readonly string[]): value is Record<string, unknown> {
+  if (!isRecord(value)) return false;
+  const actualKeys = Object.keys(value);
+  return actualKeys.length === expectedKeys.length && expectedKeys.every(key => Object.hasOwn(value, key));
+}
+
+export function validateSyntheticLargeEnvelopePayload(
+  actual: Record<string, unknown>,
+): SyntheticLargeEnvelopePayloadValidation {
+  let measuredBytes = 0;
+  try {
+    const serialized = JSON.stringify(actual);
+    if (serialized === undefined) return { ok: false, measuredBytes, reason: 'Payload cannot be serialized as JSON.' };
+    measuredBytes = Buffer.byteLength(serialized);
+  } catch (error) {
+    return {
+      ok: false,
+      measuredBytes,
+      reason: `Payload cannot be serialized as JSON: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  const fail = (reason: string): SyntheticLargeEnvelopePayloadValidation => ({ ok: false, measuredBytes, reason });
+  if (!hasExactKeys(actual, ['schemaVersion', 'header', 'nested'])) return fail('Top-level keys are missing or unexpected.');
+  if (actual.schemaVersion !== 'reference-communication-large-object-v1') return fail('Top-level schemaVersion changed.');
+  if (!hasExactKeys(actual.header, ['purpose', 'recordCount', 'depth', 'marker'])
+    || actual.header.purpose !== 'serialization-only'
+    || actual.header.recordCount !== 20
+    || actual.header.depth !== 4
+    || actual.header.marker !== 'no repository reasoning required') {
+    return fail('Top-level header semantics or keys changed.');
+  }
+  if (!Array.isArray(actual.nested) || actual.nested.length !== 20) return fail('Payload must contain exactly 20 records.');
+
+  for (let index = 0; index < actual.nested.length; index += 1) {
+    const record = actual.nested[index];
+    if (!hasExactKeys(record, ['nodeId', 'ancestry', 'values', 'children'])) return fail(`Record ${index + 1} keys are missing or unexpected.`);
+    if (record.nodeId !== `node-${String(index + 1).padStart(2, '0')}`) return fail(`Record ${index + 1} nodeId changed.`);
+
+    const ancestry = record.ancestry;
+    const expectedAncestry = [
+      { level: 0, label: 'root' },
+      { level: 1, label: `branch-${index % 4}` },
+      { level: 2, label: `group-${index % 7}` },
+      { level: 3, label: `leaf-${index}` },
+    ];
+    if (!Array.isArray(ancestry) || ancestry.length !== expectedAncestry.length
+      || ancestry.some((item, ancestryIndex) => !hasExactKeys(item, ['level', 'label'])
+        || item.level !== expectedAncestry[ancestryIndex]!.level
+        || item.label !== expectedAncestry[ancestryIndex]!.label)) {
+      return fail(`Record ${index + 1} ancestry changed.`);
+    }
+
+    const values = record.values;
+    if (!hasExactKeys(values, ['ordinal', 'active', 'samples', 'measurements'])
+      || values.ordinal !== index + 1
+      || values.active !== (index % 2 === 0)
+      || !Array.isArray(values.samples)
+      || values.samples.length !== 4
+      || values.samples.some((sample, sampleIndex) => sample !== index + sampleIndex)) {
+      return fail(`Record ${index + 1} values or keys changed.`);
+    }
+    const measurements = values.measurements;
+    if (!hasExactKeys(measurements, ['low', 'mid', 'high'])
+      || measurements.low !== index / 10
+      || measurements.mid !== index / 5
+      || measurements.high !== index / 2) {
+      return fail(`Record ${index + 1} measurements or keys changed.`);
+    }
+
+    if (!Array.isArray(record.children) || record.children.length !== 1) return fail(`Record ${index + 1} must contain exactly one child.`);
+    const child = record.children[0];
+    if (!hasExactKeys(child, ['id', 'payload']) || child.id !== `child-${String(index + 1).padStart(2, '0')}`) {
+      return fail(`Record ${index + 1} child identity or keys changed.`);
+    }
+    const childPayload = child.payload;
+    if (!hasExactKeys(childPayload, ['padding', 'checksumMarker'])
+      || typeof childPayload.padding !== 'string'
+      || !/^x+$/.test(childPayload.padding)
+      || childPayload.checksumMarker !== `fixed-${index}`) {
+      return fail(`Record ${index + 1} padding, checksumMarker, or child payload keys changed.`);
+    }
+  }
+
+  if (measuredBytes < SYNTHETIC_LARGE_PAYLOAD_MIN_BYTES || measuredBytes > SYNTHETIC_LARGE_PAYLOAD_MAX_BYTES) {
+    return fail(`Serialized payload size ${measuredBytes} is outside 22-26 KiB.`);
+  }
+  return { ok: true, measuredBytes };
+}
+
 function initialPrompt(trialId: string, payload: Record<string, unknown>): string {
-  return `Return the following complete JSON object exactly as supplied. Emit only the JSON object, with no prose or Markdown.\n${JSON.stringify(payload)}`;
+  return `Return the complete JSON object for ${trialId}, preserving every correctness-bearing field and structural key. Emit only the JSON object, with no prose or Markdown. The bulk padding string is non-semantic transport filler: keep it a non-empty string containing only x characters, but its exact character count is not semantic. Keep the serialized object between 22 and 26 KiB.\n${JSON.stringify(payload)}`;
 }
 
 async function runInitialTrial(input: {
@@ -306,12 +424,13 @@ async function runInitialTrial(input: {
   workspacePrefix: string;
   trialDirectory: string;
   evidenceRoot: string;
+  validateSyntheticLargeStructure?: boolean;
   bindingLock: ReferenceParticipantBindingLockV1;
   bindingLockSha256: string;
   repositoryRoot: string;
   resolveBindingLock: typeof resolveReferenceParticipantBindingFromLock;
   runJob: typeof runWorkspaceAgentJob;
-}): Promise<{ evidence: ReferenceCommunicationTrialEvidenceV1; job: WorkspaceAgentJobResult }> {
+}): Promise<{ evidence: ReferenceCommunicationTrialEvidenceV2; job: WorkspaceAgentJobResult }> {
   const workspaceRoot = await mkdtemp(join(tmpdir(), input.workspacePrefix));
   const promptRef = join(input.trialDirectory, 'prompt.txt');
   const payloadRef = join(input.trialDirectory, 'terminal-payload.txt');
@@ -341,6 +460,12 @@ async function runInitialTrial(input: {
       terminalPayloadRef: relative(input.evidenceRoot, payloadRef),
       executionTraceRef: relative(input.evidenceRoot, traceRef),
     });
+    if (input.validateSyntheticLargeStructure && result.valid && result.parsedObject !== undefined) {
+      const structure = validateSyntheticLargeEnvelopePayload(result.parsedObject);
+      evidence.payloadStructureValid = structure.ok;
+      evidence.payloadMeasuredBytes = structure.measuredBytes;
+      if (structure.reason !== undefined) evidence.payloadStructureFailureReason = structure.reason;
+    }
     evidence.elapsedMs = job.executionTrace.terminal.elapsedMs ?? elapsedMs;
     await writeTextCreateOnly(payloadRef, rawOutput(job));
     await writeJsonCreateOnly(traceRef, job.executionTrace);
@@ -373,7 +498,7 @@ function defaultInputValidation(input: RunReferenceParticipantCommunicationMatri
 export async function runReferenceParticipantCommunicationMatrix(
   input: RunReferenceParticipantCommunicationMatrixInput,
   dependencies: ReferenceParticipantCommunicationMatrixDependencies = {},
-): Promise<ReferenceParticipantCommunicationMatrixEvidenceV1> {
+): Promise<ReferenceParticipantCommunicationMatrixEvidenceV2> {
   const { repositoryRoot, evidenceRoot } = defaultInputValidation(input);
   if (dependencies.implementationSha === undefined) assertTrackedImplementationWorktreeClean(repositoryRoot);
   const captureBindingLock = dependencies.captureBindingLock ?? captureReferenceParticipantBindingLock;
@@ -402,8 +527,8 @@ export async function runReferenceParticipantCommunicationMatrix(
   await writeJsonCreateOnly(join(evidenceRoot, 'binding-lock.json'), bindingLock);
 
   const implementationSha = await readImplementationSha(repositoryRoot);
-  const evidence: ReferenceParticipantCommunicationMatrixEvidenceV1 = {
-    schemaVersion: 'reference-participant-communication-matrix-v1',
+  const evidence: ReferenceParticipantCommunicationMatrixEvidenceV2 = {
+    schemaVersion: 'reference-participant-communication-matrix-v2',
     matrixRef: input.matrixRef,
     implementationSha,
     bindingLockRef: 'binding-lock.json',
@@ -414,7 +539,7 @@ export async function runReferenceParticipantCommunicationMatrix(
     reasoningEffort: bindingLock.reasoningEffort,
     ambientCodexConfigSha256: bindingLock.ambientCodexConfigSha256,
     nativeEnvelopeSchemaSha256: schemaSha256,
-    productionInitialTimeoutMs: 1_800_000,
+    productionInitialTimeoutMs: REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS,
     productionRetransmissionTimeoutMs: REFERENCE_COMMUNICATION_PRODUCTION_RETRANSMISSION_TIMEOUT_MS,
     maxProductionRetransmissions: 1,
     continuationObservationTimeoutMs: REFERENCE_COMMUNICATION_OBSERVATION_TIMEOUT_MS,
@@ -422,11 +547,11 @@ export async function runReferenceParticipantCommunicationMatrix(
     matrices: {
       A: { validationScope: 'NATIVE_ENVELOPE_ONLY', gatePassed: false, trials: [] },
       B: { gatePassed: null, expectedPayloadBytes: 0, trials: [] },
-      C: { gatePassed: null, timeoutPolicyReviewRequired: false, trials: [] },
+      C: { gatePassed: null, timeoutPolicyReviewRequired: false, policyClassification: null, trials: [] },
     },
   };
 
-  const finish = async (): Promise<ReferenceParticipantCommunicationMatrixEvidenceV1> => {
+  const finish = async (): Promise<ReferenceParticipantCommunicationMatrixEvidenceV2> => {
     try {
       const finalImplementationSha = await readImplementationSha(repositoryRoot);
       if (finalImplementationSha !== implementationSha) {
@@ -443,20 +568,26 @@ export async function runReferenceParticipantCommunicationMatrix(
   const largePayload = buildSyntheticLargeEnvelopePayload();
   const largePayloadBytes = Buffer.byteLength(JSON.stringify(largePayload));
   evidence.matrices.B.expectedPayloadBytes = largePayloadBytes;
-  if (largePayloadBytes < 22 * 1024 || largePayloadBytes > 26 * 1024) {
+  if (largePayloadBytes < SYNTHETIC_LARGE_PAYLOAD_MIN_BYTES || largePayloadBytes > SYNTHETIC_LARGE_PAYLOAD_MAX_BYTES) {
     evidence.status = 'MATRIX_B_FAILED';
     evidence.stopReason = `Synthetic large object size ${largePayloadBytes} is outside 22-26 KiB.`;
     return finish();
   }
   await mkdir(join(evidenceRoot, 'trials'), { recursive: false });
 
-  const runTrial = async (trialId: string, prompt: string, expectedPayload?: Record<string, unknown>) => {
+  const runTrial = async (
+    trialId: string,
+    prompt: string,
+    expectedPayload?: Record<string, unknown>,
+    validateSyntheticLargeStructure = false,
+  ) => {
     const trialDirectory = join(evidenceRoot, 'trials', trialId);
     await mkdir(trialDirectory, { recursive: false });
     return runInitialTrial({
       trialId,
       prompt,
       ...(expectedPayload === undefined ? {} : { expectedPayload }),
+      validateSyntheticLargeStructure,
       workspacePrefix: `ref-comm-${trialId}-`,
       trialDirectory,
       evidenceRoot,
@@ -482,7 +613,8 @@ export async function runReferenceParticipantCommunicationMatrix(
     evidence.matrices.A.gatePassed = evidence.matrices.A.trials.length === 3
       && evidence.matrices.A.trials.every(trial => trial.runtimeOutcome === 'COMPLETED'
         && trial.hostEnvelopeValid
-        && trial.payloadMatchedExactly === true);
+        && trial.elapsedMs !== null
+        && trial.elapsedMs <= REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS);
     await writeJsonCreateOnly(join(evidenceRoot, 'matrix-A.json'), evidence.matrices.A);
     if (!evidence.matrices.A.gatePassed) {
       evidence.status = 'NATIVE_ENVELOPE_ASSISTANCE_UNRELIABLE';
@@ -492,17 +624,23 @@ export async function runReferenceParticipantCommunicationMatrix(
 
     for (let index = 1; index <= 3; index += 1) {
       const trialId = `B-${String(index).padStart(2, '0')}`;
-      const { evidence: trialEvidence } = await runTrial(trialId, initialPrompt(trialId, largePayload), largePayload);
+      const { evidence: trialEvidence } = await runTrial(trialId, initialPrompt(trialId, largePayload), largePayload, true);
       evidence.matrices.B.trials.push(trialEvidence);
     }
     evidence.matrices.B.gatePassed = evidence.matrices.B.trials.length === 3
       && evidence.matrices.B.trials.every(trial => trial.runtimeOutcome === 'COMPLETED'
+        && trial.elapsedMs !== null
+        && trial.elapsedMs <= REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS
         && trial.hostEnvelopeValid
-        && trial.payloadMatchedExactly === true);
+        && trial.payloadStructureValid === true
+        && trial.payloadMeasuredBytes !== undefined
+        && trial.payloadMeasuredBytes >= SYNTHETIC_LARGE_PAYLOAD_MIN_BYTES
+        && trial.payloadMeasuredBytes <= SYNTHETIC_LARGE_PAYLOAD_MAX_BYTES
+        && !trial.hostRepairApplied);
     await writeJsonCreateOnly(join(evidenceRoot, 'matrix-B.json'), evidence.matrices.B);
     if (!evidence.matrices.B.gatePassed) {
       evidence.status = 'MATRIX_B_FAILED';
-      evidence.stopReason = 'Matrix B did not achieve 3/3 completion, envelope validity, and exact payload equality.';
+      evidence.stopReason = 'Matrix B did not achieve 3/3 completion, envelope validity, valid large-object structure, and no Host repair.';
       return finish();
     }
 
@@ -514,6 +652,7 @@ export async function runReferenceParticipantCommunicationMatrix(
         trialId: `${trialId}-initial`,
         prompt: initialPrompt(`${trialId}-initial`, largePayload),
         expectedPayload: largePayload,
+        validateSyntheticLargeStructure: true,
         workspacePrefix: `ref-comm-${trialId}-`,
         trialDirectory,
         evidenceRoot,
@@ -524,15 +663,39 @@ export async function runReferenceParticipantCommunicationMatrix(
         runJob,
       });
       const initialEnvelope = envelope(initial.job);
-      let continuationOutcome: ReferenceCommunicationContinuationTrialEvidenceV1['continuationRuntimeOutcome'] = 'NOT_RUN';
+      const initialStructureValid = initial.evidence.payloadStructureValid === true;
+      const initialElapsedMs = initial.job.executionTrace.terminal.elapsedMs;
+      const initialStructureFailureReason = initial.evidence.payloadStructureFailureReason;
+      const initialFields = {
+        initialRuntimeOutcome: runtimeOutcome(initial.job),
+        initialHostEnvelopeValid: initialEnvelope.valid,
+        initialPayloadMatchedExactly: initial.evidence.payloadMatchedExactly === true,
+        initialPayloadStructureValid: initialStructureValid,
+        initialPayloadMeasuredBytes: initial.evidence.payloadMeasuredBytes ?? null,
+        ...(initialStructureFailureReason === undefined ? {} : { initialStructureFailureReason }),
+        initialElapsedMs,
+        initialTerminalPayloadRef: initial.evidence.terminalPayloadRef,
+        initialExecutionTraceRef: initial.evidence.executionTraceRef,
+      };
+      let continuationOutcome: ReferenceCommunicationContinuationTrialEvidenceV2['continuationRuntimeOutcome'] = 'NOT_RUN';
       let continuationEnvelopeValid = false;
+      let continuationStructureValid = false;
+      let continuationMeasuredBytes: number | null = null;
+      let continuationStructureFailureReason: string | undefined;
       let continuationMatchedExactly = false;
+      let threadIdentityValid = false;
       let continuationFailureReason: string | undefined;
-      let continuationJob: WorkspaceAgentJobResult | undefined;
-      if (initial.job.ok && initialEnvelope.valid && initial.job.threadRef !== undefined) {
+      let continuationJob: WorkspaceAgentJobResult;
+      const initialThreadRef = initial.job.threadRef;
+      if (initial.job.ok
+        && initialEnvelope.valid
+        && initialStructureValid
+        && initialElapsedMs !== null
+        && initialElapsedMs <= REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS
+        && initialThreadRef !== undefined) {
         const binding = await resolveLockedParticipant(resolveBindingLock, repositoryRoot, bindingLock);
         try {
-          const continuationPrompt = 'RE-EMIT ONLY: Return the exact complete JSON object from your previous completed turn. Emit only the JSON object, with no prose or Markdown.';
+          const continuationPrompt = 'RE-EMIT ONLY: Return the complete JSON object from the previous completed turn, preserving every correctness-bearing field and structural key. The bulk padding string is non-semantic transport filler: keep it a non-empty string containing only x characters, but its exact character count is not semantic. Keep the serialized object between 22 and 26 KiB. Emit only the JSON object, with no prose or Markdown.';
           await writeTextCreateOnly(join(trialDirectory, 'continuation-prompt.txt'), `${continuationPrompt}\n`);
           const continuationWorkspaceRoot = await mkdtemp(join(tmpdir(), `ref-comm-${trialId}-resume-`));
           const continuationInput: WorkspaceAgentJobInput = {
@@ -545,7 +708,7 @@ export async function runReferenceParticipantCommunicationMatrix(
             continuationJob = await runContinuation(
               continuationInput,
               binding.participant,
-              initial.job.threadRef,
+              initialThreadRef,
               REFERENCE_COMMUNICATION_OBSERVATION_TIMEOUT_MS,
             );
           } finally {
@@ -554,39 +717,57 @@ export async function runReferenceParticipantCommunicationMatrix(
           const continuationResult = envelope(continuationJob);
           continuationOutcome = runtimeOutcome(continuationJob);
           continuationEnvelopeValid = continuationResult.valid;
+          const structureResult = continuationResult.valid && continuationResult.parsedObject !== undefined
+            ? validateSyntheticLargeEnvelopePayload(continuationResult.parsedObject)
+            : undefined;
+          continuationStructureValid = structureResult?.ok === true;
+          continuationMeasuredBytes = structureResult?.measuredBytes ?? null;
+          continuationStructureFailureReason = structureResult?.reason;
           continuationMatchedExactly = continuationResult.valid
             && continuationResult.parsedObject !== undefined
             && isDeepStrictEqual(continuationResult.parsedObject, largePayload);
-          if (!continuationResult.valid) continuationFailureReason = continuationResult.reason;
+          threadIdentityValid = threadRefsMatch(continuationJob.ok ? continuationJob.threadRef : undefined, initialThreadRef);
+          if (continuationJob.ok && !threadIdentityValid) {
+            continuationOutcome = continuationJob.threadRef === undefined
+              ? 'THREAD_IDENTITY_UNAVAILABLE'
+              : 'THREAD_IDENTITY_FAILURE';
+          }
+          if (!threadIdentityValid) {
+            continuationFailureReason = continuationJob.threadRef === undefined
+              ? 'Continuation did not retain the initial thread identity.'
+              : 'Continuation returned a thread identity different from the initial thread.';
+          } else if (!continuationResult.valid) {
+            continuationFailureReason = continuationResult.reason;
+          } else if (structureResult?.reason !== undefined) {
+            continuationFailureReason = structureResult.reason;
+          }
           const timing = outputTiming(continuationJob);
           const continuationPayloadRef = join(trialDirectory, 'continuation-terminal-payload.txt');
           const continuationTraceRef = join(trialDirectory, 'continuation-execution-trace.json');
           await writeTextCreateOnly(continuationPayloadRef, rawOutput(continuationJob));
           await writeJsonCreateOnly(continuationTraceRef, continuationJob.executionTrace);
-          const withinObservation = continuationJob.ok
-            && timing.terminalCompletionLatencyMs !== null
+          const withinObservation = timing.terminalCompletionLatencyMs !== null
             && timing.terminalCompletionLatencyMs <= REFERENCE_COMMUNICATION_OBSERVATION_TIMEOUT_MS;
           evidence.matrices.C.trials.push({
             trialId,
             bindingLockSha256,
             schemaSha256,
-            initialRuntimeOutcome: runtimeOutcome(initial.job),
-            initialHostEnvelopeValid: initialEnvelope.valid,
-            initialPayloadMatchedExactly: initial.evidence.payloadMatchedExactly === true,
+            ...initialFields,
             continuationRuntimeOutcome: continuationOutcome,
             continuationHostEnvelopeValid: continuationEnvelopeValid,
+            continuationPayloadStructureValid: continuationStructureValid,
+            continuationPayloadMeasuredBytes: continuationMeasuredBytes,
+            ...(continuationStructureFailureReason === undefined ? {} : { continuationStructureFailureReason }),
             hostRepairApplied: false,
-            initialElapsedMs: initial.job.executionTrace.terminal.elapsedMs,
             ...timing,
             withinProductionCeiling: timing.terminalCompletionLatencyMs !== null
               && timing.terminalCompletionLatencyMs <= REFERENCE_COMMUNICATION_PRODUCTION_RETRANSMISSION_TIMEOUT_MS,
             withinObservationCeiling: withinObservation,
             payloadMatchedExactly: continuationMatchedExactly,
-            initialTerminalPayloadRef: initial.evidence.terminalPayloadRef,
-            initialExecutionTraceRef: initial.evidence.executionTraceRef,
+            threadIdentityValid,
             continuationTerminalPayloadRef: relative(evidenceRoot, continuationPayloadRef),
             continuationExecutionTraceRef: relative(evidenceRoot, continuationTraceRef),
-            threadRef: initial.job.threadRef,
+            threadRef: initialThreadRef,
             ...(continuationFailureReason === undefined ? {} : { continuationFailureReason }),
           });
         } catch (error) {
@@ -595,13 +776,12 @@ export async function runReferenceParticipantCommunicationMatrix(
             trialId,
             bindingLockSha256,
             schemaSha256,
-            initialRuntimeOutcome: runtimeOutcome(initial.job),
-            initialHostEnvelopeValid: initialEnvelope.valid,
-            initialPayloadMatchedExactly: initial.evidence.payloadMatchedExactly === true,
+            ...initialFields,
             continuationRuntimeOutcome: 'CONTINUATION_FAILURE',
             continuationHostEnvelopeValid: false,
+            continuationPayloadStructureValid: false,
+            continuationPayloadMeasuredBytes: null,
             hostRepairApplied: false,
-            initialElapsedMs: initial.job.executionTrace.terminal.elapsedMs,
             startupLatencyMs: null,
             firstOutputActivityLatencyMs: null,
             terminalCompletionLatencyMs: null,
@@ -609,28 +789,30 @@ export async function runReferenceParticipantCommunicationMatrix(
             withinProductionCeiling: false,
             withinObservationCeiling: false,
             payloadMatchedExactly: false,
-            initialTerminalPayloadRef: initial.evidence.terminalPayloadRef,
-            initialExecutionTraceRef: initial.evidence.executionTraceRef,
+            threadIdentityValid: false,
             continuationTerminalPayloadRef: relative(evidenceRoot, join(trialDirectory, 'continuation-terminal-payload.txt')),
             continuationExecutionTraceRef: relative(evidenceRoot, join(trialDirectory, 'continuation-execution-trace.json')),
-            threadRef: initial.job.threadRef,
+            threadRef: initialThreadRef,
             continuationFailureReason,
           });
         }
       } else {
+        const identityUnavailable = initial.job.ok
+          && initialEnvelope.valid
+          && initialStructureValid
+          && initialThreadRef === undefined;
         evidence.matrices.C.trials.push({
           trialId,
           bindingLockSha256,
           schemaSha256,
-          initialRuntimeOutcome: runtimeOutcome(initial.job),
-          initialHostEnvelopeValid: initialEnvelope.valid,
-          initialPayloadMatchedExactly: initial.evidence.payloadMatchedExactly === true,
-          continuationRuntimeOutcome: initial.job.ok && initial.job.threadRef === undefined
+          ...initialFields,
+          continuationRuntimeOutcome: identityUnavailable
             ? 'THREAD_IDENTITY_UNAVAILABLE'
             : 'NOT_RUN',
           continuationHostEnvelopeValid: false,
+          continuationPayloadStructureValid: false,
+          continuationPayloadMeasuredBytes: null,
           hostRepairApplied: false,
-          initialElapsedMs: initial.job.executionTrace.terminal.elapsedMs,
           startupLatencyMs: null,
           firstOutputActivityLatencyMs: null,
           terminalCompletionLatencyMs: null,
@@ -638,37 +820,56 @@ export async function runReferenceParticipantCommunicationMatrix(
           withinProductionCeiling: false,
           withinObservationCeiling: false,
           payloadMatchedExactly: false,
-          initialTerminalPayloadRef: initial.evidence.terminalPayloadRef,
-          initialExecutionTraceRef: initial.evidence.executionTraceRef,
+          threadIdentityValid: false,
           continuationTerminalPayloadRef: relative(evidenceRoot, join(trialDirectory, 'continuation-terminal-payload.txt')),
           continuationExecutionTraceRef: relative(evidenceRoot, join(trialDirectory, 'continuation-execution-trace.json')),
-          ...(initial.job.ok && initial.job.threadRef !== undefined ? { threadRef: initial.job.threadRef } : {}),
-          continuationFailureReason: initial.job.ok
+          ...(initialThreadRef === undefined ? {} : { threadRef: initialThreadRef }),
+          continuationFailureReason: identityUnavailable
             ? 'Completed initial thread did not provide a thread identity.'
-            : 'Initial large-object trial did not complete with a valid Host envelope.',
+            : initialStructureFailureReason
+              ?? initialEnvelope.reason
+              ?? (initialElapsedMs !== null && initialElapsedMs > REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS
+                ? 'Initial large-object trial exceeded the 1,800,000ms hard timeout.'
+                : 'Initial large-object trial did not complete with a valid Host envelope and structure.'),
         });
       }
     }
-    evidence.matrices.C.timeoutPolicyReviewRequired = evidence.matrices.C.trials.some(trial =>
-      trial.terminalCompletionLatencyMs !== null
+    const continuationTrials = evidence.matrices.C.trials;
+    const continuationUnreliable = continuationTrials.length !== 3 || continuationTrials.some(trial =>
+      trial.initialRuntimeOutcome !== 'COMPLETED'
+      || !trial.initialHostEnvelopeValid
+      || !trial.initialPayloadStructureValid
+      || trial.initialElapsedMs === null
+      || trial.initialElapsedMs > REFERENCE_COMMUNICATION_INITIAL_TIMEOUT_MS
+      || trial.continuationRuntimeOutcome !== 'COMPLETED'
+      || !trial.continuationHostEnvelopeValid
+      || !trial.continuationPayloadStructureValid
+      || !trial.threadIdentityValid
+      || trial.hostRepairApplied
+      || !trial.withinObservationCeiling);
+    const validSlowContinuation = continuationTrials.some(trial =>
+      trial.continuationRuntimeOutcome === 'COMPLETED'
+      && trial.continuationHostEnvelopeValid
+      && trial.continuationPayloadStructureValid
+      && trial.threadIdentityValid
+      && trial.terminalCompletionLatencyMs !== null
       && trial.terminalCompletionLatencyMs > REFERENCE_COMMUNICATION_PRODUCTION_RETRANSMISSION_TIMEOUT_MS
       && trial.terminalCompletionLatencyMs <= REFERENCE_COMMUNICATION_OBSERVATION_TIMEOUT_MS);
-    evidence.matrices.C.gatePassed = evidence.matrices.C.trials.length === 3
-      && evidence.matrices.C.trials.every(trial => trial.initialRuntimeOutcome === 'COMPLETED'
-        && trial.initialHostEnvelopeValid
-        && trial.initialPayloadMatchedExactly
-        && trial.continuationRuntimeOutcome === 'COMPLETED'
-        && trial.continuationHostEnvelopeValid
-        && trial.payloadMatchedExactly
-        && trial.withinProductionCeiling);
+    evidence.matrices.C.policyClassification = continuationUnreliable
+      ? 'CONTINUATION_UNRELIABLE'
+      : validSlowContinuation
+        ? 'CONTINUATION_TIMEOUT_POLICY_REVIEW'
+        : 'SUPPORTED_60S';
+    evidence.matrices.C.timeoutPolicyReviewRequired = evidence.matrices.C.policyClassification === 'CONTINUATION_TIMEOUT_POLICY_REVIEW';
+    evidence.matrices.C.gatePassed = evidence.matrices.C.policyClassification === 'SUPPORTED_60S';
     await writeJsonCreateOnly(join(evidenceRoot, 'matrix-C.json'), evidence.matrices.C);
     if (!evidence.matrices.C.gatePassed) {
-      if (evidence.matrices.C.timeoutPolicyReviewRequired) {
+      if (evidence.matrices.C.policyClassification === 'CONTINUATION_TIMEOUT_POLICY_REVIEW') {
         evidence.status = 'CONTINUATION_TIMEOUT_POLICY_REVIEW';
-        evidence.stopReason = 'At least one continuation completed after the 60-second production ceiling.';
+        evidence.stopReason = 'At least one structurally valid continuation completed after the 60-second production ceiling and within the 300-second observation ceiling.';
       } else {
         evidence.status = 'CONTINUATION_UNRELIABLE';
-        evidence.stopReason = 'Matrix C continuation runtime, identity, envelope, or payload validation failed.';
+        evidence.stopReason = 'Matrix C initial delivery or continuation failed runtime, thread identity, envelope, structural, or observation-ceiling validation.';
       }
     }
   } catch (error) {

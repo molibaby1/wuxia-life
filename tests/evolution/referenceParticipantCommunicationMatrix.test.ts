@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type {
@@ -148,6 +149,7 @@ async function testMatricesShareOneSealedBinding(root: string): Promise<void> {
         captureCount += 1;
         return TEST_BINDING_LOCK;
       },
+      implementationSha: async () => 'c'.repeat(40),
     }),
     { code: 'EEXIST' },
   );
@@ -170,6 +172,121 @@ async function testGovernedHistoryContainment(root: string): Promise<void> {
     },
   }), /outside.*reference-trial|governed.*history/i);
   assert.equal(captureCount, 0);
+}
+
+async function testSymlinkedGovernedHistoryContainment(root: string): Promise<void> {
+  const repositoryRoot = join(root, 'matrix-symlink-repository');
+  const governedRoot = join(repositoryRoot, 'artifacts/evolution/autonomous-authoring/reference-trials');
+  const evidenceAlias = join(root, 'matrix-evidence-alias');
+  await mkdir(governedRoot, { recursive: true });
+  await symlink(governedRoot, evidenceAlias, 'dir');
+  const evidenceRoot = join(evidenceAlias, 'forbidden-matrix');
+  let captureCount = 0;
+  let errorMessage = '';
+  try {
+    await runReferenceParticipantCommunicationMatrix({
+      repositoryRoot,
+      evidenceRoot,
+      matrixRef: 'forbidden-symlink-matrix',
+      model: 'gpt-6-luna',
+      reasoningEffort: 'max',
+      ambientCodexConfigPath: TEST_BINDING_LOCK.ambientCodexConfigPath,
+    }, {
+      captureBindingLock: async () => {
+        captureCount += 1;
+        return TEST_BINDING_LOCK;
+      },
+    });
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+  }
+  assert.match(errorMessage, /outside.*reference-trial|governed.*history/i);
+  assert.equal(captureCount, 0);
+  await assert.rejects(readFile(join(governedRoot, 'forbidden-matrix/binding-lock.json')), { code: 'ENOENT' });
+}
+
+async function testDirtyTrackedImplementationRejectedBeforeMatrix(root: string): Promise<void> {
+  const repositoryRoot = join(root, 'matrix-dirty-implementation-repository');
+  await mkdir(repositoryRoot, { recursive: true });
+  execFileSync('git', ['-C', repositoryRoot, 'init', '--quiet']);
+  execFileSync('git', ['-C', repositoryRoot, 'config', 'user.name', 'Matrix Test']);
+  execFileSync('git', ['-C', repositoryRoot, 'config', 'user.email', 'matrix-test@example.invalid']);
+  const sourcePath = join(repositoryRoot, 'implementation.ts');
+  await writeFile(sourcePath, 'export const version = 1;\n');
+  execFileSync('git', ['-C', repositoryRoot, 'add', 'implementation.ts']);
+  execFileSync('git', ['-C', repositoryRoot, 'commit', '--quiet', '-m', 'base']);
+  await writeFile(sourcePath, 'export const version = 2;\n');
+
+  const evidenceRoot = join(root, 'matrix-dirty-implementation-evidence');
+  let captureCount = 0;
+  await assert.rejects(runReferenceParticipantCommunicationMatrix({
+    repositoryRoot,
+    evidenceRoot,
+    matrixRef: 'dirty-implementation',
+    model: 'gpt-6-luna',
+    reasoningEffort: 'max',
+    ambientCodexConfigPath: TEST_BINDING_LOCK.ambientCodexConfigPath,
+  }, {
+    captureBindingLock: async () => {
+      captureCount += 1;
+      return TEST_BINDING_LOCK;
+    },
+  }), /tracked implementation worktree must be clean/i);
+  assert.equal(captureCount, 0);
+  await assert.rejects(readFile(join(evidenceRoot, 'binding-lock.json')), { code: 'ENOENT' });
+}
+
+async function testImplementationShaRecheckedAfterMatrix(root: string): Promise<void> {
+  const repositoryRoot = join(root, 'matrix-changed-implementation-repository');
+  await mkdir(repositoryRoot, { recursive: true });
+  execFileSync('git', ['-C', repositoryRoot, 'init', '--quiet']);
+  execFileSync('git', ['-C', repositoryRoot, 'config', 'user.name', 'Matrix Test']);
+  execFileSync('git', ['-C', repositoryRoot, 'config', 'user.email', 'matrix-test@example.invalid']);
+  const sourcePath = join(repositoryRoot, 'implementation.ts');
+  await writeFile(sourcePath, 'export const version = 1;\n');
+  execFileSync('git', ['-C', repositoryRoot, 'add', 'implementation.ts']);
+  execFileSync('git', ['-C', repositoryRoot, 'commit', '--quiet', '-m', 'base']);
+  const initialSha = execFileSync('git', ['-C', repositoryRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const largePayload = buildSyntheticLargeEnvelopePayload();
+  let initialCount = 0;
+  let continuationCount = 0;
+  const participant: WorkspaceAgentParticipantOptions = { executable: 'fake-codex', buildArgs: () => [] };
+
+  const result = await runReferenceParticipantCommunicationMatrix({
+    repositoryRoot,
+    evidenceRoot: join(root, 'matrix-changed-implementation-evidence'),
+    matrixRef: 'changed-implementation',
+    model: 'gpt-6-luna',
+    reasoningEffort: 'max',
+    ambientCodexConfigPath: TEST_BINDING_LOCK.ambientCodexConfigPath,
+  }, {
+    captureBindingLock: async () => TEST_BINDING_LOCK,
+    resolveBindingLock: async () => ({ participant }) as never,
+    runWorkspaceAgentJob: async job => {
+      initialCount += 1;
+      const payload = initialCount <= 3
+        ? { matrix: 'A', trialId: job.invocationRef, result: 'ok' }
+        : largePayload;
+      return completed(JSON.stringify(payload), `matrix-thread-${initialCount}`);
+    },
+    runWorkspaceAgentContinuation: async (_job, _participant, threadRef) => {
+      continuationCount += 1;
+      if (continuationCount === 3) {
+        await writeFile(sourcePath, 'export const version = 2;\n');
+        execFileSync('git', ['-C', repositoryRoot, 'add', 'implementation.ts']);
+        execFileSync('git', ['-C', repositoryRoot, 'commit', '--quiet', '-m', 'change during matrix']);
+      }
+      return completed(JSON.stringify(largePayload), threadRef.opaqueId);
+    },
+  });
+
+  assert.equal(result.implementationSha, initialSha);
+  assert.equal(result.status, 'RUNNER_FAILURE');
+  assert.match(result.stopReason ?? '', /implementation SHA changed during communication matrix/i);
+  const persisted = JSON.parse(await readFile(
+    join(root, 'matrix-changed-implementation-evidence', 'matrix.json'), 'utf8',
+  )) as typeof result;
+  assert.deepEqual(persisted, result);
 }
 
 async function testStopsAfterInvalidMatrixAEnvelope(root: string): Promise<void> {
@@ -287,6 +404,9 @@ export async function runReferenceParticipantCommunicationMatrixTests(): Promise
   try {
     await testMatricesShareOneSealedBinding(root);
     await testGovernedHistoryContainment(root);
+    await testSymlinkedGovernedHistoryContainment(root);
+    await testDirtyTrackedImplementationRejectedBeforeMatrix(root);
+    await testImplementationShaRecheckedAfterMatrix(root);
     await testStopsAfterInvalidMatrixAEnvelope(root);
     await testContinuationPastProductionCeilingRequiresReview(root);
     testCliRequiresExplicitBindingAndHasNoLayerAOption();

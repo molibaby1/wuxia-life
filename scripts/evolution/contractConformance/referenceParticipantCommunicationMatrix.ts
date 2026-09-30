@@ -1,7 +1,8 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { realpathSync } from 'node:fs';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { performance } from 'node:perf_hooks';
 import {
@@ -134,15 +135,39 @@ function validateMatrixRef(matrixRef: string): void {
   }
 }
 
+function realpathWithMissingSuffix(path: string): string {
+  let cursor = resolve(path);
+  const missingSuffix: string[] = [];
+  while (true) {
+    try {
+      return resolve(realpathSync(cursor), ...missingSuffix);
+    } catch (error) {
+      if (!error || typeof error !== 'object' || !('code' in error) || error.code !== 'ENOENT') throw error;
+      const parent = dirname(cursor);
+      if (parent === cursor) throw error;
+      missingSuffix.unshift(basename(cursor));
+      cursor = parent;
+    }
+  }
+}
+
 function assertEvidenceRootOutsideGovernedHistory(repositoryRoot: string, evidenceRoot: string): void {
-  const governedRoot = resolve(repositoryRoot, 'artifacts/evolution/autonomous-authoring/reference-trials');
-  const relativePath = relative(governedRoot, evidenceRoot);
+  const governedRoot = realpathWithMissingSuffix(resolve(repositoryRoot, 'artifacts/evolution/autonomous-authoring/reference-trials'));
+  const relativePath = relative(governedRoot, realpathWithMissingSuffix(evidenceRoot));
   if (relativePath === '' || (relativePath !== '..' && !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath))) {
     throw new Error('Communication matrix evidence root must be outside governed reference-trial history.');
   }
 }
 
+function assertTrackedImplementationWorktreeClean(repositoryRoot: string): void {
+  const result = spawnSync('git', ['-C', repositoryRoot, 'diff', '--quiet', 'HEAD', '--'], { encoding: 'utf8' });
+  if (result.error) throw new Error(`Could not verify tracked implementation worktree: ${result.error.message}`);
+  if (result.status === 1) throw new Error('Tracked implementation worktree must be clean before communication validation.');
+  if (result.status !== 0) throw new Error(`Could not verify tracked implementation worktree: ${result.stderr}`);
+}
+
 function createImplementationShaReader(repositoryRoot: string): string {
+  assertTrackedImplementationWorktreeClean(repositoryRoot);
   return execFileSync('git', ['-C', repositoryRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 }
 
@@ -350,6 +375,7 @@ export async function runReferenceParticipantCommunicationMatrix(
   dependencies: ReferenceParticipantCommunicationMatrixDependencies = {},
 ): Promise<ReferenceParticipantCommunicationMatrixEvidenceV1> {
   const { repositoryRoot, evidenceRoot } = defaultInputValidation(input);
+  if (dependencies.implementationSha === undefined) assertTrackedImplementationWorktreeClean(repositoryRoot);
   const captureBindingLock = dependencies.captureBindingLock ?? captureReferenceParticipantBindingLock;
   const resolveBindingLock = dependencies.resolveBindingLock ?? resolveReferenceParticipantBindingFromLock;
   const runJob = dependencies.runWorkspaceAgentJob ?? runWorkspaceAgentJob;
@@ -400,14 +426,27 @@ export async function runReferenceParticipantCommunicationMatrix(
     },
   };
 
+  const finish = async (): Promise<ReferenceParticipantCommunicationMatrixEvidenceV1> => {
+    try {
+      const finalImplementationSha = await readImplementationSha(repositoryRoot);
+      if (finalImplementationSha !== implementationSha) {
+        throw new Error('Implementation SHA changed during communication matrix.');
+      }
+    } catch (error) {
+      evidence.status = 'RUNNER_FAILURE';
+      evidence.stopReason = error instanceof Error ? error.message : String(error);
+    }
+    await writeJsonCreateOnly(join(evidenceRoot, 'matrix.json'), evidence);
+    return evidence;
+  };
+
   const largePayload = buildSyntheticLargeEnvelopePayload();
   const largePayloadBytes = Buffer.byteLength(JSON.stringify(largePayload));
   evidence.matrices.B.expectedPayloadBytes = largePayloadBytes;
   if (largePayloadBytes < 22 * 1024 || largePayloadBytes > 26 * 1024) {
     evidence.status = 'MATRIX_B_FAILED';
     evidence.stopReason = `Synthetic large object size ${largePayloadBytes} is outside 22-26 KiB.`;
-    await writeJsonCreateOnly(join(evidenceRoot, 'matrix.json'), evidence);
-    return evidence;
+    return finish();
   }
   await mkdir(join(evidenceRoot, 'trials'), { recursive: false });
 
@@ -448,8 +487,7 @@ export async function runReferenceParticipantCommunicationMatrix(
     if (!evidence.matrices.A.gatePassed) {
       evidence.status = 'NATIVE_ENVELOPE_ASSISTANCE_UNRELIABLE';
       evidence.stopReason = 'Matrix A did not achieve 3/3 process completion and Host envelope validity.';
-      await writeJsonCreateOnly(join(evidenceRoot, 'matrix.json'), evidence);
-      return evidence;
+      return finish();
     }
 
     for (let index = 1; index <= 3; index += 1) {
@@ -465,8 +503,7 @@ export async function runReferenceParticipantCommunicationMatrix(
     if (!evidence.matrices.B.gatePassed) {
       evidence.status = 'MATRIX_B_FAILED';
       evidence.stopReason = 'Matrix B did not achieve 3/3 completion, envelope validity, and exact payload equality.';
-      await writeJsonCreateOnly(join(evidenceRoot, 'matrix.json'), evidence);
-      return evidence;
+      return finish();
     }
 
     for (let index = 1; index <= 3; index += 1) {
@@ -639,6 +676,5 @@ export async function runReferenceParticipantCommunicationMatrix(
     evidence.stopReason = error instanceof Error ? error.message : String(error);
   }
 
-  await writeJsonCreateOnly(join(evidenceRoot, 'matrix.json'), evidence);
-  return evidence;
+  return finish();
 }

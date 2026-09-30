@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { access, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -10,6 +11,7 @@ import {
 } from '../../scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial';
 import {
   parsePreschoolReferenceSolutionCommunicationProbeArgs,
+  readCleanPreschoolReferenceProbeImplementationSha,
   readValidatedPreschoolReferenceProbeBindingLock,
 } from '../../scripts/evolution/autonomousAuthoring/runPreschoolReferenceSolutionCommunicationProbe';
 import { referenceParticipantBindingLockSha256 } from '../../scripts/evolution/operator/referenceParticipantBinding';
@@ -212,6 +214,26 @@ function testCliRequiresExactInputsAndBindingLock(): void {
   ], '/synthetic/repository'), /unknown option/i);
 }
 
+async function testCliRejectsDirtyTrackedImplementation(): Promise<void> {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-reference-probe-dirty-tree-test-'));
+  try {
+    execFileSync('git', ['-C', temporaryRoot, 'init', '--quiet']);
+    execFileSync('git', ['-C', temporaryRoot, 'config', 'user.name', 'Probe Test']);
+    execFileSync('git', ['-C', temporaryRoot, 'config', 'user.email', 'probe-test@example.invalid']);
+    const sourcePath = join(temporaryRoot, 'implementation.ts');
+    await writeFile(sourcePath, 'export const version = 1;\n');
+    execFileSync('git', ['-C', temporaryRoot, 'add', 'implementation.ts']);
+    execFileSync('git', ['-C', temporaryRoot, 'commit', '--quiet', '-m', 'base']);
+    await writeFile(sourcePath, 'export const version = 2;\n');
+    assert.throws(
+      () => readCleanPreschoolReferenceProbeImplementationSha(temporaryRoot),
+      /tracked implementation worktree must be clean/i,
+    );
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+}
+
 async function testCliRequiresPassingMatrixAndExactBindingLock(): Promise<void> {
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-reference-probe-cli-test-'));
   const matrixRoot = join(temporaryRoot, 'matrix');
@@ -299,6 +321,7 @@ export async function runPreschoolReferenceSolutionCommunicationProbeTests(): Pr
   await testGovernedDestinationRejectedBeforeBinding();
   await testSymlinkedGovernedDestinationRejectedBeforeBinding();
   testCliRequiresExactInputsAndBindingLock();
+  await testCliRejectsDirtyTrackedImplementation();
   await testCliRequiresPassingMatrixAndExactBindingLock();
 }
 

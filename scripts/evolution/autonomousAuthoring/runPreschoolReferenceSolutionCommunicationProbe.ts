@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
@@ -152,6 +152,14 @@ export async function readValidatedPreschoolReferenceProbeBindingLock(input: {
   return lock;
 }
 
+export function readCleanPreschoolReferenceProbeImplementationSha(repositoryRoot: string): string {
+  const diff = spawnSync('git', ['-C', repositoryRoot, 'diff', '--quiet', 'HEAD', '--'], { encoding: 'utf8' });
+  if (diff.error) throw new Error(`Could not verify tracked implementation worktree: ${diff.error.message}`);
+  if (diff.status === 1) throw new Error('Tracked implementation worktree must be clean before communication validation.');
+  if (diff.status !== 0) throw new Error(`Could not verify tracked implementation worktree: ${diff.stderr}`);
+  return execFileSync('git', ['-C', repositoryRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+}
+
 export function preschoolReferenceSolutionCommunicationProbeUsage(): string {
   return [
     'Usage: npm run evolution:reference-communication:solution-probe -- --evidence <accepted-evidence.json> --observable-payload <observable-payload.json> --responsibility-brief <reference-responsibility-brief.json> --probe-ref <id> --binding-lock <matrix-root>/binding-lock.json',
@@ -173,10 +181,9 @@ export async function runPreschoolReferenceSolutionCommunicationProbeCli(
     return 0;
   }
 
-  const currentImplementationSha = (dependencies.implementationSha
-    ?? (root => execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()))(
-      parsed.input.liveRepositoryRoot,
-    );
+  const currentImplementationSha = dependencies.implementationSha === undefined
+    ? readCleanPreschoolReferenceProbeImplementationSha(parsed.input.liveRepositoryRoot)
+    : await dependencies.implementationSha(parsed.input.liveRepositoryRoot);
   const participantBindingLock = await readValidatedPreschoolReferenceProbeBindingLock({
     repositoryRoot: parsed.input.liveRepositoryRoot,
     participantBindingLockPath: parsed.input.participantBindingLockPath,

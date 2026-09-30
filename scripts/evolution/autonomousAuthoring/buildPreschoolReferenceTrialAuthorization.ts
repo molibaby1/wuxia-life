@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, resolve } from 'node:path';
+import { realpathSync } from 'node:fs';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   canonicalAttemptManifestJson,
   captureReferenceTrialLegacyHistory,
@@ -15,6 +16,30 @@ import { sha256Hex } from '../phase0/provenance';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function realpathWithMissingSuffix(path: string): string {
+  let cursor = resolve(path);
+  const missingSuffix: string[] = [];
+  while (true) {
+    try {
+      return resolve(realpathSync(cursor), ...missingSuffix);
+    } catch (error) {
+      if (!error || typeof error !== 'object' || !('code' in error) || error.code !== 'ENOENT') throw error;
+      const parent = dirname(cursor);
+      if (parent === cursor) throw error;
+      missingSuffix.unshift(basename(cursor));
+      cursor = parent;
+    }
+  }
+}
+
+function assertAuthorizationDestinationOutsideReferenceHistory(root: string, destination: string): void {
+  const historyRoot = join(root, 'artifacts/evolution/autonomous-authoring/reference-trials');
+  const relativePath = relative(realpathWithMissingSuffix(historyRoot), realpathWithMissingSuffix(destination));
+  if (relativePath === '' || (relativePath !== '..' && !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath))) {
+    throw new Error('Authorization candidate destination must be outside governed reference-trial history.');
+  }
 }
 
 export async function buildPreschoolReferenceTrialAuthorizationCandidate(input: {
@@ -51,6 +76,7 @@ export async function buildPreschoolReferenceTrialAuthorizationCandidate(input: 
   const destinationPath = isAbsolute(input.destinationPath)
     ? input.destinationPath
     : resolve(liveRepositoryRoot, input.destinationPath);
+  assertAuthorizationDestinationOutsideReferenceHistory(liveRepositoryRoot, destinationPath);
   let parsedLock: unknown;
   try {
     parsedLock = JSON.parse(await readFile(bindingLockPath, 'utf8')) as unknown;

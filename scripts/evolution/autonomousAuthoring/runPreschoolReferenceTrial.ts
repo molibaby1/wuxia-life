@@ -2655,6 +2655,10 @@ function assertReferenceSolutionProbeDestination(liveRoot: string, destinationRo
 }
 
 function readGitHead(repositoryRoot: string): string {
+  const diff = spawnSync('git', ['-C', repositoryRoot, 'diff', '--quiet', 'HEAD', '--'], { encoding: 'utf8' });
+  if (diff.error) throw new Error(`Could not verify tracked implementation worktree: ${diff.error.message}`);
+  if (diff.status === 1) throw new Error('Tracked implementation worktree must be clean before communication validation.');
+  if (diff.status !== 0) throw new Error(`Could not verify tracked implementation worktree: ${diff.stderr}`);
   const head = spawnSync('git', ['-C', repositoryRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' });
   if (head.error || head.status !== 0) throw new Error(`Could not read implementation SHA: ${head.error ?? head.stderr}`);
   return head.stdout.trim();

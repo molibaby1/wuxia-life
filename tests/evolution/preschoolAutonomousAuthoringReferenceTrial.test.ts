@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -807,6 +807,23 @@ async function testAuthorizationCandidateBuilder(root: string): Promise<void> {
     throw new Error('executable version drift');
   }), /executable version drift/);
   await assert.rejects(readFile(join(liveRepositoryRoot, 'binding-drift.json')), { code: 'ENOENT' });
+
+  const forbiddenAttemptRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ROOT_PATH, 'attempts/attempt-000099');
+  await assert.rejects(buildPreschoolReferenceTrialAuthorizationCandidate({
+    ...input,
+    destinationPath: join(forbiddenAttemptRoot, 'authorization-candidate.json'),
+  }, testBindingLockResolver), /outside.*reference-trial history/i);
+  await assert.rejects(readdir(forbiddenAttemptRoot), { code: 'ENOENT' });
+
+  const protectedRoot = join(liveRepositoryRoot, 'artifacts/evolution/autonomous-authoring/reference-trials');
+  const protectedRootAlias = join(root, 'authorization-candidate-history-alias');
+  await symlink(protectedRoot, protectedRootAlias, 'dir');
+  const symlinkedAttemptRoot = join(protectedRootAlias, 'preschool-pver-20260922231805-71297571/attempts/attempt-000098');
+  await assert.rejects(buildPreschoolReferenceTrialAuthorizationCandidate({
+    ...input,
+    destinationPath: join(symlinkedAttemptRoot, 'authorization-candidate.json'),
+  }, testBindingLockResolver), /outside.*reference-trial history/i);
+  await assert.rejects(readdir(symlinkedAttemptRoot), { code: 'ENOENT' });
 }
 
 async function createLegacyAttemptHistory(root: string): Promise<string> {

@@ -9,7 +9,7 @@ import {
   realpathSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   validatePreschoolCapacityEvidence,
@@ -39,7 +39,11 @@ import {
   REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
   SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
 } from '../problemAgnosticSolution/solutionParticipantSkills';
-import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../problemAgnosticSolution/agentParticipant';
+import type {
+  ParticipantExecutionTraceV1,
+  WorkspaceAgentJobInput,
+  WorkspaceAgentParticipantOptions,
+} from '../problemAgnosticSolution/agentParticipant';
 import {
   referenceParticipantBindingLockSha256,
   resolveReferenceParticipantBindingFromLock,
@@ -2514,6 +2518,356 @@ async function persistReferenceTrialStop(
       throw error;
     }
   }
+}
+
+export interface PreschoolReferenceSolutionCommunicationOutcomeV1 {
+  status: 'SUCCEEDED' | 'INITIAL_TIMEOUT' | 'TIMEOUT_AFTER_ROLE_SCHEMA' | 'PROCESS_FAILURE' | 'ENVELOPE_FAILURE' | 'ROLE_SCHEMA_FAILURE' | 'ACCEPTED_RESULT_FAILURE' | 'PRE_VALIDATION_FAILURE' | 'PREPARATION_FAILURE';
+  envelopeValid: boolean | null;
+  schemaValidationAttempted: boolean;
+  schemaValid: boolean | null;
+  reachedRoleSchemaValidation: boolean;
+  elapsedMs: number | null;
+  lastObservableActivityElapsedMs: number | null;
+  failureOrigin?: string;
+  failureReason?: string;
+}
+
+export interface PreschoolReferenceSolutionCommunicationProbeResultV1 {
+  schemaVersion: 'preschool-reference-solution-communication-probe-v1';
+  probeRef: string;
+  status: PreschoolReferenceSolutionCommunicationOutcomeV1['status'] | 'CONTAINMENT_FAILURE';
+  implementationSha: string;
+  participantBindingLock: ReferenceParticipantBindingLockV1;
+  participantBindingLockSha256: string;
+  acceptedEvidenceSha256: string;
+  observablePayloadSha256: string;
+  responsibilityBriefSha256: string;
+  authoritativeFingerprintBefore: string;
+  authoritativeFingerprintAfter: string;
+  authoritativeFingerprintUnchanged: boolean;
+  governedHistorySha256Before: string;
+  governedHistorySha256After: string;
+  governedHistoryUnchanged: boolean;
+  attempt000012Absent: boolean;
+  admissionLockAbsent: boolean;
+  noReviewerShadowPromotion: boolean;
+  solutionOutcome: PreschoolReferenceSolutionCommunicationOutcomeV1;
+  evidenceArtifactRefs: {
+    bindingLock: 'participant-binding-lock.json';
+    probeInputs: 'probe-inputs.json';
+    solutionInvocation: string;
+    solutionRawOutput: string;
+    solutionExecutionTrace: string | null;
+    solutionResult: string | null;
+    solutionFailure: string | null;
+    probeResult: 'probe-result.json';
+  };
+  failure?: string;
+}
+
+export interface PreschoolReferenceSolutionCommunicationProbeDependencies {
+  resolveReferenceParticipantBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+  runSolutionAgent?: typeof runSolutionAgent;
+}
+
+export function classifyPreschoolReferenceSolutionCommunicationOutcome(input: {
+  solution: SolutionAgentRunResult;
+  executionTrace: ParticipantExecutionTraceV1 | null;
+}): PreschoolReferenceSolutionCommunicationOutcomeV1 {
+  const validationEvents = input.executionTrace?.events.filter(event => event.type === 'participant_terminal_validation') ?? [];
+  const lastValidation = validationEvents.at(-1);
+  const schemaValidationEvents = validationEvents.filter(event => event.schemaValidationAttempted === true);
+  const schemaValidationAttempted = schemaValidationEvents.length > 0;
+  const schemaValid = schemaValidationAttempted
+    ? schemaValidationEvents.at(-1)?.schemaValid ?? null
+    : null;
+  let status: PreschoolReferenceSolutionCommunicationOutcomeV1['status'];
+  if (!input.solution.ok && input.solution.errorKind === 'timeout') {
+    status = schemaValidationAttempted ? 'TIMEOUT_AFTER_ROLE_SCHEMA' : 'INITIAL_TIMEOUT';
+  } else if (lastValidation?.envelopeValid === false) {
+    status = 'ENVELOPE_FAILURE';
+  } else if (schemaValidationAttempted && schemaValid === false) {
+    status = 'ROLE_SCHEMA_FAILURE';
+  } else if (schemaValidationAttempted && schemaValid === true && !input.solution.ok) {
+    status = 'ACCEPTED_RESULT_FAILURE';
+  } else if (input.solution.ok && schemaValidationAttempted && schemaValid === true) {
+    status = 'SUCCEEDED';
+  } else if (!input.executionTrace && !input.solution.ok
+    && input.solution.failure.origin === 'HOST_INFRASTRUCTURE') {
+    status = 'PREPARATION_FAILURE';
+  } else if (!input.solution.ok && ['process', 'runtime_unavailable', 'continuation'].includes(input.solution.errorKind)) {
+    status = 'PROCESS_FAILURE';
+  } else {
+    status = 'PRE_VALIDATION_FAILURE';
+  }
+  return {
+    status,
+    envelopeValid: lastValidation?.envelopeValid ?? null,
+    schemaValidationAttempted,
+    schemaValid,
+    reachedRoleSchemaValidation: schemaValidationAttempted,
+    elapsedMs: input.executionTrace?.terminal.elapsedMs ?? null,
+    lastObservableActivityElapsedMs: input.executionTrace?.terminal.lastObservableActivityElapsedMs ?? null,
+    ...(!input.solution.ok ? {
+      failureOrigin: input.solution.failure.origin,
+      failureReason: input.solution.failure.reason,
+    } : {}),
+  };
+}
+
+function referenceProbePathExists(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
+function realpathWithMissingSuffix(path: string): string {
+  let cursor = resolve(path);
+  const missingSuffix: string[] = [];
+  while (true) {
+    try {
+      return resolve(realpathSync(cursor), ...missingSuffix);
+    } catch (error) {
+      if (!error || typeof error !== 'object' || !('code' in error) || error.code !== 'ENOENT') throw error;
+      const parent = dirname(cursor);
+      if (parent === cursor) throw error;
+      missingSuffix.unshift(basename(cursor));
+      cursor = parent;
+    }
+  }
+}
+
+function pathIsWithin(root: string, target: string): boolean {
+  const relativePath = relative(realpathWithMissingSuffix(root), realpathWithMissingSuffix(target));
+  return relativePath === '' || (relativePath !== '..'
+    && !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath));
+}
+
+function assertReferenceSolutionProbeDestination(liveRoot: string, destinationRoot: string): void {
+  const governedRoot = join(resolve(liveRoot), 'artifacts/evolution/autonomous-authoring/reference-trials');
+  if (pathIsWithin(governedRoot, destinationRoot)) {
+    throw new Error('Solution communication probe destination must be outside governed reference-trial history.');
+  }
+}
+
+function readGitHead(repositoryRoot: string): string {
+  const head = spawnSync('git', ['-C', repositoryRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' });
+  if (head.error || head.status !== 0) throw new Error(`Could not read implementation SHA: ${head.error ?? head.stderr}`);
+  return head.stdout.trim();
+}
+
+async function readSolutionExecutionTrace(path: string): Promise<ParticipantExecutionTraceV1 | null> {
+  try {
+    const parsed = JSON.parse(await readFile(path, 'utf8')) as unknown;
+    if (!isRecord(parsed) || parsed.schemaVersion !== 'participant-execution-trace-v1'
+      || !Array.isArray(parsed.events) || !isRecord(parsed.invocation) || !isRecord(parsed.terminal)) {
+      throw new Error('Solution execution trace artifact is malformed.');
+    }
+    return parsed as unknown as ParticipantExecutionTraceV1;
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+export async function runPreschoolReferenceSolutionCommunicationProbe(
+  input: {
+    liveRepositoryRoot: string;
+    evidencePath: string;
+    observablePayloadPath: string;
+    responsibilityBriefPath: string;
+    probeRef: string;
+    destinationRoot: string;
+    participantBindingLock: ReferenceParticipantBindingLockV1;
+  },
+  dependencies: PreschoolReferenceSolutionCommunicationProbeDependencies = {},
+): Promise<PreschoolReferenceSolutionCommunicationProbeResultV1> {
+  const liveRoot = resolve(input.liveRepositoryRoot);
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(input.probeRef) || /^attempt-[0-9]{6}$/.test(input.probeRef)) {
+    throw new Error('Solution communication probe reference is invalid.');
+  }
+  const destinationRoot = isAbsolute(input.destinationRoot)
+    ? resolve(input.destinationRoot)
+    : resolve(liveRoot, input.destinationRoot);
+  assertReferenceSolutionProbeDestination(liveRoot, destinationRoot);
+
+  const trialRoot = referenceTrialRoot(liveRoot);
+  const attemptTwelvePath = join(trialRoot, 'attempts/attempt-000012');
+  const admissionLockPath = `${trialRoot}.admission.lock`;
+  if (referenceProbePathExists(attemptTwelvePath)) throw new Error('attempt-000012 already exists; probe will not run.');
+  if (referenceProbePathExists(admissionLockPath)) throw new Error('Reference-trial admission lock exists; probe will not run.');
+
+  const evidencePath = isAbsolute(input.evidencePath) ? input.evidencePath : resolve(liveRoot, input.evidencePath);
+  const observablePayloadPath = isAbsolute(input.observablePayloadPath)
+    ? input.observablePayloadPath : resolve(liveRoot, input.observablePayloadPath);
+  const responsibilityBriefPath = isAbsolute(input.responsibilityBriefPath)
+    ? input.responsibilityBriefPath : resolve(liveRoot, input.responsibilityBriefPath);
+  const acceptedEvidence = await readExactAcceptedEvidence(evidencePath);
+  if (!acceptedEvidence.evidence || !acceptedEvidence.bytes) throw new Error('Exact accepted historical evidence is unavailable.');
+  const observablePayloadBytes = await readExactReferenceObservablePayload(
+    observablePayloadPath,
+    PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_SEALED_OBSERVABLE_PAYLOAD_SHA256,
+  );
+  if (!observablePayloadBytes) throw new Error('Exact accepted historical observable payload is unavailable.');
+  const responsibilityBrief = await readAcceptedPreschoolReferenceResponsibilityBrief(responsibilityBriefPath);
+  if (!responsibilityBrief.ok) throw new Error(responsibilityBrief.reason);
+  await assertCurrentAuthorityDocuments(liveRoot);
+
+  const historyBefore = await captureReferenceTrialLegacyHistory(trialRoot);
+  const governedHistorySha256Before = sha256Hex(canonicalJson(historyBefore));
+  const authoritativeFingerprintBefore = await captureAuthoritativeFingerprint(liveRoot);
+  const participantBindingLockSha256 = referenceParticipantBindingLockSha256(input.participantBindingLock);
+  const resolveBinding = dependencies.resolveReferenceParticipantBindingFromLock
+    ?? resolveReferenceParticipantBindingFromLock;
+  const binding = await resolveBinding({ repositoryRoot: liveRoot, lock: input.participantBindingLock });
+  const implementationSha = readGitHead(liveRoot);
+
+  await mkdir(dirname(destinationRoot), { recursive: true });
+  await mkdir(destinationRoot, { recursive: false });
+  await writeCreateOnlyJson(join(destinationRoot, 'participant-binding-lock.json'), input.participantBindingLock);
+  await writeCreateOnlyJson(join(destinationRoot, 'probe-inputs.json'), {
+    schemaVersion: 'preschool-reference-solution-communication-probe-inputs-v1',
+    probeRef: input.probeRef,
+    implementationSha,
+    participantBindingLockSha256,
+    acceptedEvidenceSha256: sha256Hex(acceptedEvidence.bytes),
+    observablePayloadSha256: sha256Hex(observablePayloadBytes),
+    responsibilityBriefSha256: responsibilityBrief.value.sha256,
+    runRef: acceptedEvidence.evidence.runRef,
+  });
+
+  const temporaryRoot = await mkdtemp(join(tmpdir(), `preschool-reference-solution-probe-${input.probeRef}-`));
+  let solution: SolutionAgentRunResult | null = null;
+  let executionTrace: ParticipantExecutionTraceV1 | null = null;
+  let failure: string | undefined;
+  const solutionDestinationRoot = join(destinationRoot, 'solution-agent');
+  try {
+    const { trialBaselineRoot } = await materializeHistoricalTrialRoots({
+      liveRepositoryRoot: liveRoot,
+      temporaryRoot,
+    });
+    const solutionInputsRoot = join(destinationRoot, 'solution-inputs');
+    const trialInputs = await writePreschoolReferenceTrialInputs({
+      outputRoot: solutionInputsRoot,
+      authorityRepositoryRoot: liveRoot,
+      candidateBaselineRoot: trialBaselineRoot,
+      runRef: acceptedEvidence.evidence.runRef,
+      observablePayloadBytes,
+      responsibilityBrief: responsibilityBrief.value,
+    });
+    const solutionWorkspace = await prepareReferenceTrialParticipantWorkspace({
+      baselineRoot: trialBaselineRoot,
+      destinationRoot: join(temporaryRoot, 'participant-workspaces'),
+      jobKind: 'solution',
+      artifactSourceRoot: solutionInputsRoot,
+      artifactRelativePaths: trialInputs.artifactRelativePaths,
+    });
+    const runSolution = dependencies.runSolutionAgent ?? runSolutionAgent;
+    solution = await runSolution({
+      problemPackage: trialInputs.problemPackage,
+      problemPackagePath: trialInputs.problemPackagePath,
+      workspaceRoot: solutionWorkspace.workspaceRoot,
+      repositoryRoot: trialBaselineRoot,
+      artifactRoot: solutionInputsRoot,
+      workspaceBaselineFingerprintSha256: solutionWorkspace.workspaceBaselineFingerprintSha256,
+      invocationRef: `preschool-reference-solution-communication-${input.probeRef}`,
+      jobNumber: 1,
+      destinationRoot: solutionDestinationRoot,
+      skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+      participant: withParticipantContaminationGuard(binding.participant),
+      autonomousAuthoringContractPacket: trialInputs.contractPacket,
+      referenceResponsibilityContext: {
+        validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+        responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+        briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+        attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+        brief: responsibilityBrief.value.brief,
+      } satisfies PreschoolReferenceResponsibilityContextV1,
+    });
+    executionTrace = await readSolutionExecutionTrace(join(solutionDestinationRoot, 'execution-trace.json'));
+  } catch (error) {
+    failure = error instanceof Error ? error.message : String(error);
+    try {
+      executionTrace = await readSolutionExecutionTrace(join(solutionDestinationRoot, 'execution-trace.json'));
+    } catch {
+      executionTrace = null;
+    }
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+
+  const solutionOutcome = solution
+    ? classifyPreschoolReferenceSolutionCommunicationOutcome({ solution, executionTrace })
+    : {
+      status: 'PREPARATION_FAILURE' as const,
+      envelopeValid: null,
+      schemaValidationAttempted: false,
+      schemaValid: null,
+      reachedRoleSchemaValidation: false,
+      elapsedMs: null,
+      lastObservableActivityElapsedMs: null,
+    };
+  const [authoritativeFingerprintAfter, historyAfter] = await Promise.all([
+    captureAuthoritativeFingerprint(liveRoot),
+    captureReferenceTrialLegacyHistory(trialRoot),
+  ]);
+  const governedHistorySha256After = sha256Hex(canonicalJson(historyAfter));
+  const authoritativeFingerprintUnchanged = authoritativeFingerprintAfter === authoritativeFingerprintBefore;
+  const governedHistoryUnchanged = governedHistorySha256After === governedHistorySha256Before;
+  const attempt000012Absent = !referenceProbePathExists(attemptTwelvePath);
+  const admissionLockAbsent = !referenceProbePathExists(admissionLockPath);
+  const forbiddenArtifacts = [
+    'reviewer-agent', 'shadow-authoring', 'promotion-package.json', 'promotion.patch',
+  ].filter(path => referenceProbePathExists(join(destinationRoot, path)));
+  const noReviewerShadowPromotion = forbiddenArtifacts.length === 0;
+  const status = authoritativeFingerprintUnchanged
+    && governedHistoryUnchanged
+    && attempt000012Absent
+    && admissionLockAbsent
+    && noReviewerShadowPromotion
+    ? solutionOutcome.status
+    : 'CONTAINMENT_FAILURE';
+  const result: PreschoolReferenceSolutionCommunicationProbeResultV1 = {
+    schemaVersion: 'preschool-reference-solution-communication-probe-v1',
+    probeRef: input.probeRef,
+    status,
+    implementationSha,
+    participantBindingLock: input.participantBindingLock,
+    participantBindingLockSha256,
+    acceptedEvidenceSha256: sha256Hex(acceptedEvidence.bytes),
+    observablePayloadSha256: sha256Hex(observablePayloadBytes),
+    responsibilityBriefSha256: responsibilityBrief.value.sha256,
+    authoritativeFingerprintBefore: authoritativeFingerprintBefore,
+    authoritativeFingerprintAfter,
+    authoritativeFingerprintUnchanged,
+    governedHistorySha256Before,
+    governedHistorySha256After,
+    governedHistoryUnchanged,
+    attempt000012Absent,
+    admissionLockAbsent,
+    noReviewerShadowPromotion,
+    solutionOutcome,
+    evidenceArtifactRefs: {
+      bindingLock: 'participant-binding-lock.json',
+      probeInputs: 'probe-inputs.json',
+      solutionInvocation: relative(destinationRoot, join(solutionDestinationRoot, 'invocation.json')),
+      solutionRawOutput: relative(destinationRoot, join(solutionDestinationRoot, 'raw-output.txt')),
+      solutionExecutionTrace: referenceProbePathExists(join(solutionDestinationRoot, 'execution-trace.json'))
+        ? relative(destinationRoot, join(solutionDestinationRoot, 'execution-trace.json')) : null,
+      solutionResult: referenceProbePathExists(join(solutionDestinationRoot, 'result.json'))
+        ? relative(destinationRoot, join(solutionDestinationRoot, 'result.json')) : null,
+      solutionFailure: referenceProbePathExists(join(solutionDestinationRoot, 'failure.json'))
+        ? relative(destinationRoot, join(solutionDestinationRoot, 'failure.json')) : null,
+      probeResult: 'probe-result.json',
+    },
+    ...(failure === undefined ? {} : { failure }),
+  };
+  await writeCreateOnlyJson(join(destinationRoot, 'probe-result.json'), result);
+  return result;
 }
 
 export async function runPreschoolReferenceTrialCli(

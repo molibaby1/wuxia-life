@@ -13,6 +13,7 @@
     "test:evolution:autonomous-authoring": "tsx tests/evolution/autonomousAuthoringContracts.test.ts && tsx tests/evolution/preschoolAutonomousAuthoringAdmission.test.ts && tsx tests/evolution/shadowAuthoringExecution.test.ts && tsx tests/evolution/preschoolShadowAuthoringVerification.test.ts && tsx tests/evolution/preschoolAutonomousAuthoringReferenceTrial.test.ts",
     "evolution:autonomous-authoring:reference-trial": "tsx scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts",
     "evolution:reference-communication:matrix": "tsx scripts/evolution/contractConformance/runReferenceParticipantCommunicationMatrix.ts",
+    "evolution:reference-communication:solution-probe": "tsx scripts/evolution/autonomousAuthoring/runPreschoolReferenceSolutionCommunicationProbe.ts",
     "test:evolution:solution-replay": "tsx tests/evolution/solutionDecisionReplay.test.ts && tsx tests/evolution/solutionReviewerReplay.test.ts && tsx tests/evolution/solutionAgentReplay.test.ts",
     "test:evolution:review-continuation": "tsx tests/evolution/reviewContinuationContract.test.ts && tsx tests/evolution/reviewContinuation.test.ts && tsx tests/evolution/reviewContinuationReplay.test.ts",
     "evolution:review-continuation:replay": "tsx scripts/evolution/replay/runReviewContinuationReplay.ts",

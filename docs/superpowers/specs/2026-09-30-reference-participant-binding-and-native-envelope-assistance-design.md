@@ -1,8 +1,9 @@
 # Reference Participant Binding Stability and Codex Native Envelope Assistance — Design
 
 **Date:** 2026-09-30
-**Status:** APPROVED DESIGN
+**Status:** REVISION DRAFT FOR HUMAN REVIEW
 **Human approval:** 2026-09-30 — approved the five core boundaries in chat
+**Revision basis:** 2026-10-01 Matrix B/C runtime evidence; revision narrows measurement semantics and timeout-policy evidence only
 **Project:** wuxia-life / Auto Evolution
 **Scope:** Participant communication reliability for controlled reference validation
 **Real Layer A:** FROZEN until this design's communication gates are satisfied
@@ -37,6 +38,14 @@ Preserved reference-trial evidence for run `preschool-pver-20260922231805-712975
 The current binding artifact records `modelConfigured=null` and `reasoningEffort=null`, even though Codex may receive those settings from ambient user configuration.
 
 The evidence therefore does **not** establish that Structured Final Output Contract V1 itself regressed. It establishes that the controlled campaign crossed an unsealed Participant-binding boundary while terminal reliability also degraded.
+
+### 2.1 2026-10-01 communication-matrix evidence
+
+Implementation of the original design produced a sealed Codex reference binding and live Matrix A/B/C evidence. Matrix A passed 3/3. Matrix B produced one 1,800-second initial timeout and two completed, Host-envelope-valid outputs at approximately 24.6 KiB. The two completed Matrix B payloads differed from the deterministic source only in the lengths of synthetic repeated-character padding fields; record identity, hierarchy, scalar fields, and checksum markers remained intact. The implementation plan had added exact deep equality for Matrix B even though the approved design required completion, envelope validity, no truncation, no wrapper prose, and no Host repair rather than byte-for-byte reproduction of non-semantic filler.
+
+The Matrix C supplement measured two successful same-thread continuations at approximately 118.9s and 119.9s, both beyond the current 60s production retransmission ceiling. Their payload differences were likewise concentrated in non-semantic synthetic padding. A third C setup could not obtain a thread because its initial large-object execution hit the 1,800s hard timeout.
+
+The revision therefore treats the current Matrix B exact-equality gate as an over-constrained harness criterion, while treating the observed >60s continuation latency as valid evidence that the current 60s ceiling is not supported for this sealed Codex binding. Neither observation authorizes a timeout change by itself.
 
 Current `dev` also contains a Solution-only prompt instruction added in `7d0ee9b9b4eed953d5b9c862f6342f33fb549f05`: `Return it as one compact JSON line.` That is an implementation deviation from the already accepted communication authority. Structured Final Output Contract V1 requires one bare JSON object but permits legal whitespace, and Envelope Failure Bounded Retransmission explicitly says the slice MUST NOT introduce canonical or single-line serialization requirements. This design does not treat that stricter prompt wording as authority.
 
@@ -242,36 +251,61 @@ This proves basic provider capability wiring only.
 
 ### 8.2 Matrix B — synthetic large nested object
 
-Run three independent executions that return a deterministic nested object with size and nesting comparable to the historical Solution terminal payload. The task MUST NOT require repository reasoning.
+Run three independent executions that return a synthetic nested object with size and nesting comparable to the historical Solution terminal payload. The task MUST NOT require repository reasoning.
 
-Required result:
+Matrix B measures **large structured terminal delivery**, not whether a language model can count and reproduce hundreds of identical filler characters exactly.
 
-- 3/3 completion;
+The synthetic object MUST therefore distinguish:
+
+- **semantic/structural fields**, which are correctness-bearing and MUST match exactly;
+- **bulk transport filler**, which exists only to keep the payload in the target size range and MUST NOT be compared byte-for-byte.
+
+The Host-side Matrix B validator MUST require all of the following:
+
+- 3/3 process completion;
 - 3/3 Host envelope-valid;
-- no truncation;
+- all expected records are present;
+- record identities, hierarchy, required keys, fixed scalar values, and checksum markers match exactly;
+- every bulk filler field has the expected JSON type;
+- the completed parsed object remains within the declared large-payload size band (22–26 KiB when serialized for measurement);
 - no wrapper prose;
-- no semantic repair.
+- no Host extraction, normalization, repair, or semantic completion.
 
-This separates serialization reliability from reasoning workload.
+The Matrix B gate MUST NOT use whole-object `isDeepStrictEqual` or equivalent equality when the only differences are within designated non-semantic bulk filler.
+
+A missing record, missing checksum marker, altered correctness-bearing field, malformed/incomplete envelope, payload outside the declared size band, or runtime timeout remains a Matrix B failure.
+
+If any of the three trials times out, Matrix B fails and Matrix C/D do not proceed. Do not infer a replacement for the 1,800-second initial hard timeout from Matrix B alone.
+
+This separates serialization/runtime reliability from exact-copy behavior and reasoning workload.
 
 ### 8.3 Matrix C — same-thread re-emission latency
 
-Create a completed thread containing a large structured result, then request same-thread re-emission under the same envelope-only schema. Repeat three times.
+Matrix C runs only after the corrected Matrix B passes 3/3 under one sealed binding.
+
+Create a completed thread containing a representative large structured result, then request same-thread `RE-EMIT ONLY` under the same envelope-only schema. Repeat three times.
+
+The continuation result is evaluated with the same semantic/structural preservation rule as Matrix B: correctness-bearing fields must remain exact, while designated bulk transport filler is not a byte-equality requirement.
 
 Record:
 
 - resume startup latency;
 - time to first output activity;
 - time to completed terminal result;
-- final envelope validity.
+- final envelope validity;
+- semantic/structural preservation outcome;
+- whether completion falls within the current 60-second production ceiling and the observation-only ceiling.
 
-The 60-second ceiling remains unchanged during measurement.
+The production 60-second ceiling remains unchanged during measurement. The observation-only ceiling may remain 300 seconds.
 
 Verdict:
 
-- if all three complete within 60 seconds, the existing ceiling remains supported;
-- if one or more exceed 60 seconds but later complete under an observation-only extended ceiling, return to Human design review with measured latency before changing production policy;
-- if continuation is unreliable independently of the ceiling, do not solve it by merely increasing the timeout.
+- if all three complete within 60 seconds and preserve the required structure/semantics, the existing ceiling remains supported;
+- if one or more valid continuations complete after 60 seconds but within the observation-only ceiling, the current 60-second ceiling is **not supported for that sealed binding** and Matrix D remains blocked pending explicit Human timeout-policy approval;
+- if continuation fails envelope validity or semantic/structural preservation independently of timeout, return to communication design review rather than merely increasing the timeout;
+- a replacement production ceiling MUST NOT be selected automatically from the maximum observed latency. Human review must consider the fresh three-trial measurements and explicit operational headroom.
+
+Existing 2026-10-01 supplementary measurements of approximately 118.9s and 119.9s already establish that 60 seconds is not supported by those two observed continuations. They do not, by themselves, select the replacement ceiling.
 
 ### 8.4 Matrix D — historical Solution-only communication probe
 
@@ -317,7 +351,7 @@ A new historical Layer A campaign may be proposed only after:
 2. implementation passes deterministic tests;
 3. Matrix A succeeds;
 4. Matrix B succeeds;
-5. Matrix C produces a supported retransmission-policy conclusion;
+5. Matrix C either supports the existing 60-second ceiling or, if it does not, a replacement retransmission policy has been separately Human-approved from fresh corrected-Matrix evidence;
 6. both Matrix D historical Solution-only probes reach Host Role-schema validation;
 7. current authoritative repository fingerprint is unchanged by the probes.
 
@@ -339,11 +373,11 @@ The dominant problem is no longer JSON serialization.
 
 Return to design review for Solution workload/convergence/runtime behavior. Do not increase the hard timeout automatically.
 
-### Case C — initial historical probe reaches Host Role-schema validation but retransmission exceeds 60 seconds
+### Case C — corrected Matrix C exceeds 60 seconds
 
-Transport is improved, but recovery policy is not yet supported.
+The current production retransmission ceiling is not supported for that sealed binding.
 
-Return with measured continuation latency and decide the retransmission ceiling separately.
+Do not run Matrix D and do not modify the production timeout automatically. Return with the three fresh continuation measurements and semantic/structural preservation evidence for explicit Human timeout-policy review.
 
 ### Case D — historical probes consistently reach Host Role-schema validation
 
@@ -373,7 +407,7 @@ The implementation is accepted only if:
 6. initial and resume paths use the same envelope assistance when enabled;
 7. Host strict envelope and Role-schema validation remain authoritative;
 8. no extraction, normalization, or semantic repair is introduced;
-9. existing 60-second and 1,800-second production timeouts are unchanged unless separately Human-approved after measurement;
+9. existing 60-second and 1,800-second production timeouts remain unchanged during corrected Matrix B/C measurement; any retransmission-timeout change requires separate Human approval from fresh corrected-Matrix evidence;
 10. deterministic tests cover binding drift rejection and native-envelope wiring;
 11. communication-only matrices are clearly separated from governed Layer A history;
 12. no communication probe can create promotion artifacts or authoritative content writes;
@@ -400,7 +434,7 @@ Return to Human design review if any of the following is required:
 - duplicating the complete Role/domain schema into provider-native JSON Schema;
 - Host-side semantic repair;
 - more than one retransmission;
-- changing the 60-second retransmission ceiling without measured continuation evidence;
+- changing the 60-second retransmission ceiling without fresh corrected-Matrix continuation evidence and explicit Human timeout-policy approval;
 - changing the 1,800-second initial hard timeout without historical-probe evidence;
 - changing Solution reasoning authority;
 - changing Reviewer or Shadow authority;

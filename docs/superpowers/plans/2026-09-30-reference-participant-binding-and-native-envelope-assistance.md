@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-30-reference-participant-binding-and-native-envelope-assistance-design.md`
 
+**Revision execution scope (2026-10-01):** Tasks 1–3 and Task 5 are already delivered on `dev`; do not redo them. The approved correction changes only Task 4's Matrix B/C measurement semantics and Task 6's live rerun/evidence gate. Matrix D remains conditional and must not run if corrected Matrix B fails or if Matrix C requires Human timeout-policy review.
+
 ## Global Constraints
 
 - Use only `/Users/zhouyun/code/wuxia-life`; do not create Git worktrees.
@@ -27,15 +29,15 @@
 
 ## Review Focus
 
-1. **Binding changes after Human authorization:** executable target/version, explicit model/reasoning, ambient config SHA, or envelope-schema SHA changes must reject admission before a new attempt directory is created.
-2. **Executable symlink drift:** resolving the same `which codex` path to a different real path/version must count as binding drift, not as the same binding.
-3. **Provider schema drift:** changing the committed/native envelope schema bytes after candidate approval must reject the governed run.
-4. **Pretty-printed terminal JSON:** multi-line legal JSON objects must continue to pass Host envelope validation and must not be converted into a single-line protocol requirement.
-5. **Probe containment:** Matrix A–D evidence may use `.tmp/evolution/**` or dedicated probe roots but must never create governed attempt directories, promotion artifacts, or authoritative content changes.
+1. **Matrix B filler-only variance:** changed lengths of designated non-semantic `padding` must not fail the gate when structure is exact, padding remains non-empty `x+`, and total parsed size stays 22–26 KiB.
+2. **Matrix B real corruption:** missing records/keys, changed correctness-bearing fields/checksum markers, invalid filler type/content, out-of-band total size, malformed envelope, or timeout must still fail.
+3. **Matrix C policy separation:** a structurally valid continuation that completes after 60,000ms but within 300,000ms must stop at `CONTINUATION_TIMEOUT_POLICY_REVIEW`; it must never auto-change the production timeout.
+4. **Fresh sealed evidence:** corrected A/B/C must share one fresh binding lock and new evidence root; prior v1/v2 evidence is immutable and must not be mixed into the corrected verdict.
+5. **Probe containment:** Matrix D remains blocked unless corrected B passes and C has a supported/approved retransmission policy; no communication evidence may create governed attempts, Reviewer/Shadow invocations, promotion artifacts, or authoritative content writes.
 
 ---
 
-### Task 1: Add the sealed reference Participant binding contract
+### Task 1: Add the sealed reference Participant binding contract — DELIVERED / DO NOT REDO
 
 **Files:**
 - Create: `scripts/evolution/operator/referenceParticipantBinding.ts`
@@ -181,7 +183,7 @@ git add scripts/evolution/operator/referenceParticipantBinding.ts \
 git commit -m "feat: seal reference participant binding"
 ```
 
-### Task 2: Wire native JSON-object assistance into the locked Codex Solution path and restore accepted sender wording
+### Task 2: Wire native JSON-object assistance into the locked Codex Solution path and restore accepted sender wording — DELIVERED / DO NOT REDO
 
 **Files:**
 - Modify: `scripts/evolution/operator/resolveParticipantBinding.ts`
@@ -258,7 +260,7 @@ git add scripts/evolution/operator/resolveParticipantBinding.ts \
 git commit -m "feat: add codex native envelope assistance"
 ```
 
-### Task 3: Bind governed execution authorization to the sealed Participant
+### Task 3: Bind governed execution authorization to the sealed Participant — DELIVERED / DO NOT REDO
 
 **Files:**
 - Modify: `scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts`
@@ -388,88 +390,126 @@ git add scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts \
 git commit -m "feat: bind reference authorization to participant"
 ```
 
-### Task 4: Implement communication Matrix A–C outside governed Layer A
+### Task 4: Correct Matrix B/C measurement semantics
 
 **Files:**
-- Create: `scripts/evolution/contractConformance/referenceParticipantCommunicationMatrix.ts`
-- Create: `scripts/evolution/contractConformance/runReferenceParticipantCommunicationMatrix.ts`
-- Modify: `package.json`
-- Test: `tests/evolution/referenceParticipantCommunicationMatrix.test.ts`
+- Modify: `scripts/evolution/contractConformance/referenceParticipantCommunicationMatrix.ts`
+- Modify: `tests/evolution/referenceParticipantCommunicationMatrix.test.ts`
 
 **Interfaces:**
-- Consumes: sealed reference binding APIs from Task 1 and existing `runWorkspaceAgentJob()`, `runWorkspaceAgentContinuation()`, `validateStructuredTerminalEnvelope()`.
-- Produces: create-only matrix evidence under `.tmp/evolution/reference-participant-communication/<matrix-ref>/`.
+- Consumes: existing sealed binding APIs, `runWorkspaceAgentJob()`, `runWorkspaceAgentContinuation()`, and `validateStructuredTerminalEnvelope()`.
+- Produces:
+  - `validateSyntheticLargeEnvelopePayload(actual)` — strict semantic/structural validation for the synthetic large-object workload;
+  - Matrix evidence schema v2 fields that distinguish exact byte equality from semantic/structural validity;
+  - corrected Matrix B/C gates that never treat non-semantic filler byte equality as a requirement.
 
-- [ ] **Step 1: Write failing Matrix A tests**
+- [ ] **Step 1: Write failing Matrix B validator tests**
 
-Define evidence types that record:
-- matrix/trial identity;
-- binding-lock digest;
-- schema digest;
-- elapsed time;
-- last observable activity;
-- runtime outcome;
-- Host envelope validity.
+Add table-driven tests for a new exported helper:
 
-Use a fake Participant to assert three independent trivial-object trials are required and no Role/domain validation is inferred from this matrix.
+```ts
+export function validateSyntheticLargeEnvelopePayload(
+  actual: Record<string, unknown>,
+): {
+  ok: boolean;
+  measuredBytes: number;
+  reason?: string;
+}
+```
 
-- [ ] **Step 2: Write failing Matrix B tests**
+Pin these cases:
 
-Define a deterministic `buildSyntheticLargeEnvelopePayload()` whose serialized size is in the 22–26 KiB range and whose nesting is non-trivial.
+- exact generated payload → `ok: true`;
+- one or more `padding` strings change length but remain non-empty `x+`, and total serialized object remains 22–26 KiB → `ok: true`;
+- missing record → `ok: false`;
+- changed `nodeId`, ancestry, `values`, child id, or `checksumMarker` → `ok: false`;
+- missing/extra required structural key → `ok: false`;
+- non-string padding or padding containing characters other than `x` → `ok: false`;
+- total serialized object outside 22–26 KiB → `ok: false`.
 
-Host validation must compare the returned parsed object against the deterministic expected payload after envelope parsing. No repair or substring extraction is allowed.
+Do not use whole-object `isDeepStrictEqual` inside this helper.
 
-- [ ] **Step 3: Write failing Matrix C tests**
+- [ ] **Step 2: Write failing Matrix B gate tests**
 
-Matrix C must:
-- create a fresh completed thread for each measurement;
-- issue one `RE-EMIT ONLY` same-thread request;
-- use the same envelope-only schema;
-- record startup, first-output-activity, and terminal-completion latency;
-- classify whether completion is within the production 60,000ms boundary.
+Update fake-Participant tests so Matrix B passes only when all three trials:
 
-Use an experiment-only observation ceiling of `300_000ms`; this does not change production timeout policy.
+- return `COMPLETED`;
+- are Host envelope-valid;
+- pass `validateSyntheticLargeEnvelopePayload()`;
+- apply no Host repair.
 
-If a continuation completes after 60,000ms but before 300,000ms, report measured evidence and require Human design review before production timeout changes.
+Keep `payloadMatchedExactly` only as optional diagnostic evidence if useful; it MUST NOT control the Matrix B gate.
 
-- [ ] **Step 4: Run the matrix test and verify RED**
+Add evidence fields:
+
+```ts
+payloadStructureValid?: boolean;
+payloadMeasuredBytes?: number;
+```
+
+Bump new matrix evidence to `reference-participant-communication-matrix-v2`; do not rewrite existing v1 evidence.
+
+- [ ] **Step 3: Write failing Matrix C semantic-preservation tests**
+
+Matrix C initial and continuation results must use the same structural validator as Matrix B.
+
+Add/rename evidence fields so the gate can state independently:
+
+- initial envelope valid;
+- initial structure valid;
+- continuation envelope valid;
+- continuation structure valid;
+- continuation completion latency;
+- within production 60,000ms;
+- within observation 300,000ms.
+
+A continuation that changes only valid non-semantic padding length remains structurally valid.
+
+A continuation that changes a correctness-bearing field fails even if the JSON envelope is valid.
+
+- [ ] **Step 4: Write failing Matrix C timeout-policy tests**
+
+Pin these outcomes:
+
+- 3/3 structurally valid continuations complete within 60,000ms → Matrix C gate passes;
+- any structurally valid continuation completes after 60,000ms but at or before 300,000ms → status `CONTINUATION_TIMEOUT_POLICY_REVIEW`, Matrix D blocked;
+- continuation exceeds 300,000ms, fails envelope validity, loses thread identity, or fails structural preservation → `CONTINUATION_UNRELIABLE`;
+- no code path changes the production 60,000ms constant.
+
+- [ ] **Step 5: Run the focused test and verify RED**
 
 Run:
 
 `npm exec -- tsx tests/evolution/referenceParticipantCommunicationMatrix.test.ts`
 
-Expected: FAIL because the matrix runner does not exist.
+Expected: FAIL on the new structural-validation/gate assertions.
 
-- [ ] **Step 5: Implement Matrix A/B/C runners and evidence**
+- [ ] **Step 6: Implement the structural validator**
 
-Keep all evidence outside governed reference-trial history.
+Validate the exact synthetic shape produced by `buildSyntheticLargeEnvelopePayload()`:
 
-The runner must accept explicit:
-- model;
-- reasoning effort;
-- ambient Codex config path;
-- evidence root/matrix ref.
+- exact top-level schema/header semantics;
+- exactly 20 expected records;
+- exact `nodeId`, ancestry, `values`, child id, and `checksumMarker`;
+- `padding` is a non-empty string matching `/^x+$/`;
+- serialized parsed payload size is within 22–26 KiB;
+- no missing or unknown structural keys.
 
-It captures one binding lock at matrix start, persists it create-only as `<matrix-root>/binding-lock.json`, records its SHA in matrix evidence, and uses that exact lock for every trial.
+This helper is matrix-only measurement logic. It must not be reused as a production Role schema or Host repair mechanism.
 
-- [ ] **Step 6: Add the CLI and package script**
+- [ ] **Step 7: Correct Matrix B and C prompts/gates**
 
-Add a package script such as:
+Matrix B prompt must ask for the complete supplied structure while explicitly stating that bulk `padding` is transport filler: preserve all correctness-bearing fields; padding must remain non-empty `x` filler and exact character count is not semantic.
 
-`evolution:reference-communication:matrix`
+Matrix C continuation prompt must request same-thread `RE-EMIT ONLY` with the same rule: preserve all correctness-bearing fields; filler length is non-semantic.
 
-The CLI must not expose any option that can invoke governed Layer A.
+Replace gate dependence on exact deep equality with the new structural-validation result.
 
-- [ ] **Step 7: Add containment tests**
-
-Assert the matrix runner refuses an evidence root inside:
-
-`artifacts/evolution/autonomous-authoring/reference-trials/`
-
-and never creates:
-- `attempt-*`;
-- `promotion-package.json`;
-- `promotion.patch`.
+Keep:
+- production initial timeout `1_800_000ms`;
+- production retransmission timeout `60_000ms`;
+- observation ceiling `300_000ms`;
+- maximum production retransmissions = one.
 
 - [ ] **Step 8: Run focused tests**
 
@@ -479,17 +519,27 @@ Run:
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 9: Run adjacent regression tests**
+
+Run:
+
+`npm exec -- tsx tests/evolution/referenceParticipantBinding.test.ts`
+
+`npm exec -- tsx tests/evolution/solutionAgentLoop.test.ts`
+
+`git diff --check`
+
+Expected: PASS.
+
+- [ ] **Step 10: Commit the correction**
 
 ```bash
 git add scripts/evolution/contractConformance/referenceParticipantCommunicationMatrix.ts \
-  scripts/evolution/contractConformance/runReferenceParticipantCommunicationMatrix.ts \
-  tests/evolution/referenceParticipantCommunicationMatrix.test.ts \
-  package.json
-git commit -m "feat: add reference communication matrix"
+  tests/evolution/referenceParticipantCommunicationMatrix.test.ts
+git commit -m "fix: correct reference communication matrix semantics"
 ```
 
-### Task 5: Add the historical Solution-only communication probe
+### Task 5: Add the historical Solution-only communication probe — DELIVERED / DO NOT REDO
 
 **Files:**
 - Modify: `scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts` to export one `runPreschoolReferenceSolutionCommunicationProbe()` function that reuses the module's existing private historical preparation helpers without duplicating their semantics.
@@ -605,30 +655,28 @@ git add scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts \
 git commit -m "feat: add reference solution communication probe"
 ```
 
-### Task 6: Verify the implementation, run communication evidence, and stop at the reopening gate
+### Task 6: Verify the correction, rerun communication evidence, and stop at the timeout/reopening gate
 
 **Files:**
-- Modify only after evidence exists: `docs/governance/current-product-stage.md`
+- Modify only after fresh evidence exists: `docs/governance/current-product-stage.md`
 - Evidence: `.tmp/evolution/reference-participant-communication/**`
-- Evidence: `.tmp/evolution/preschool-reference-solution-communication-probes/**`
+- Evidence only if allowed by Matrix C: `.tmp/evolution/preschool-reference-solution-communication-probes/**`
 
 **Interfaces:**
-- Consumes: Tasks 1–5.
-- Produces: deterministic verification results plus Matrix A–D evidence; it does **not** produce a governed Layer A authorization.
+- Consumes: delivered Tasks 1–5 plus corrected Task 4.
+- Produces: fresh corrected Matrix A/B/C evidence and, only when permitted, Matrix D evidence. It does **not** produce a governed Layer A authorization.
 
-- [ ] **Step 1: Run all focused deterministic tests**
+- [ ] **Step 1: Run focused deterministic verification**
 
 Run:
 
-`npm exec -- tsx tests/evolution/referenceParticipantBinding.test.ts`
-
 `npm exec -- tsx tests/evolution/referenceParticipantCommunicationMatrix.test.ts`
+
+`npm exec -- tsx tests/evolution/referenceParticipantBinding.test.ts`
 
 `npm exec -- tsx tests/evolution/preschoolReferenceSolutionCommunicationProbe.test.ts`
 
 `npm exec -- tsx tests/evolution/solutionAgentLoop.test.ts`
-
-`npm exec -- tsx tests/evolution/preschoolAutonomousAuthoringReferenceTrial.test.ts`
 
 Expected: PASS.
 
@@ -646,103 +694,138 @@ Run:
 
 Expected: all gating commands exit 0.
 
-The known stale `ordinaryEvolutionOperator.test.ts` report-format assertion remains non-gating unless this implementation changes that code path.
+The known unrelated `ordinaryEvolutionOperator.test.ts` report-format assertion remains non-gating unless this correction changes that code path.
 
-- [ ] **Step 3: Commit and push the implementation before live communication experiments**
+- [ ] **Step 3: Push the harness correction before live experiments**
 
 Confirm:
-- only intended tracked changes are present;
-- the user's untracked governance file is untouched;
-- `dev` is pushed.
+- the correction commit is on `dev`;
+- `origin/dev` equals local `dev`;
+- only the user's existing untracked governance file remains;
+- production timeout constants are still `1_800_000ms` initial and `60_000ms` retransmission.
 
-Record the exact implementation SHA. All live Matrix A–D evidence must identify this SHA.
+Record the exact corrected implementation SHA. Fresh Matrix evidence must identify this SHA.
 
-- [ ] **Step 4: Capture one sealed live binding for Matrix A–C**
+- [ ] **Step 4: Start one fresh corrected matrix root**
 
-Use the current intended explicit model/reasoning values. At plan-authoring time the ambient values are `gpt-6-luna` and `max`; if the Human intentionally changes them before execution, use the new explicit values and record them rather than silently inheriting config.
+Use a new create-only matrix ref; do not reuse or mutate `reference-binding-2026-09-30-v2`.
 
-A normal CLI upgrade is not an error. Whatever CLI version is current at matrix start becomes part of that matrix's sealed binding and must remain unchanged for A–C.
+Capture a fresh sealed binding using explicit current model/reasoning/config values. A normal Codex CLI upgrade is allowed; if the version/config differs from previous evidence, record the new binding and do not mix evidence across bindings.
+
+Matrix A/B/C in this corrected run must share the exact new `binding-lock.json`.
 
 - [ ] **Step 5: Run Matrix A**
 
-Run three trivial-object trials.
+Run three trivial-object trials under the corrected implementation.
 
-Gate: 3/3 process completion, 3/3 Host envelope-valid.
+Gate: 3/3 process completion and 3/3 Host envelope-valid.
 
-If this gate fails, STOP communication validation and report `NATIVE_ENVELOPE_ASSISTANCE_UNRELIABLE` or the actual runtime failure; do not run Layer A.
+If A fails, STOP with the actual runtime/provider failure. Do not run B/C/D.
 
-- [ ] **Step 6: Run Matrix B**
+- [ ] **Step 6: Run corrected Matrix B**
 
 Run three synthetic 22–26 KiB nested-object trials.
 
-Gate: 3/3 completion and exact Host-parsed payload match, with no envelope repair.
+Gate: all three trials must:
+- complete before `1_800_000ms`;
+- be Host envelope-valid;
+- pass `validateSyntheticLargeEnvelopePayload()`;
+- show no Host repair.
 
-If this gate fails, STOP before Matrix D.
+Non-semantic `padding` length differences are allowed only when the structural validator passes and total parsed size remains 22–26 KiB.
 
-- [ ] **Step 7: Run Matrix C**
+If any trial times out or fails structural validation, STOP. Do not run Matrix C or D. Do not change the 1,800-second hard timeout.
 
-Run three same-thread re-emission latency observations.
+- [ ] **Step 7: Run corrected Matrix C**
 
-Do not modify the production 60-second constant.
+Only if corrected Matrix B passes 3/3, run three fresh same-thread continuation measurements.
+
+Each C trial must begin from a fresh completed, structurally valid large-object thread and then issue one `RE-EMIT ONLY` continuation under the same sealed binding and envelope schema.
+
+Record for each:
+- startup latency;
+- first output activity latency;
+- terminal completion latency;
+- envelope validity;
+- structural validity;
+- within-60s;
+- within-300s.
 
 Classify:
-- all three complete within 60s → current production ceiling remains supported;
-- any complete only after 60s but within the 300s observation ceiling → STOP for Human timeout-policy review;
-- continuation runtime/identity is unreliable → STOP for communication design review.
 
-Do not proceed to Matrix D unless Matrix C supports the current production policy.
+- 3/3 structurally valid continuations complete within `60_000ms` → existing production ceiling remains supported and Matrix D may proceed;
+- any structurally valid continuation completes after `60_000ms` but within `300_000ms` → status `CONTINUATION_TIMEOUT_POLICY_REVIEW`; STOP before Matrix D and return all three fresh measurements for Human timeout-policy approval;
+- any continuation exceeds `300_000ms`, loses thread identity, fails envelope validity, or fails structural preservation → `CONTINUATION_UNRELIABLE`; STOP for communication design review.
 
-- [ ] **Step 8: Run two historical Solution-only Matrix D probes**
+Do not modify the production `60_000ms` constant in this task.
 
-Use the exact accepted historical evidence, observable payload, and responsibility brief from preserved reference artifacts.
+- [ ] **Step 8: Conditionally run Matrix D**
+
+Run Matrix D **only** if corrected Matrix B passes and corrected Matrix C supports the current 60-second production policy, or if a replacement policy has already received a separate Human approval after Step 7.
+
+If permitted, run two historical Solution-only probes using:
+- the exact accepted historical evidence;
+- observable payload;
+- responsibility brief;
+- the exact corrected-matrix `binding-lock.json`.
 
 Both probes must:
-- load the exact `<matrix-root>/binding-lock.json` created by Matrix A–C and verify its recorded SHA before execution;
-- finish before 1,800,000ms;
+- finish before `1_800_000ms`;
 - produce a Host envelope-valid object;
 - reach Role-schema validation;
 - leave authoritative fingerprint unchanged.
 
-A Role-schema failure is allowed for the communication gate if `schemaValidationAttempted=true`; an envelope failure or timeout is not.
+Do not create `attempt-000012`, Reviewer, Shadow, promotion package, or promotion patch.
 
-- [ ] **Step 9: Verify probe containment**
+- [ ] **Step 9: Verify containment and immutable governed history**
 
-After both probes, independently confirm:
+After the fresh evidence run, confirm:
 - `attempt-000012` is absent;
-- no admission lock exists;
-- governed history is unchanged from its pre-probe SHA;
-- no Reviewer/Shadow invocation was created;
-- no promotion package/patch exists in probe output;
-- authoritative fingerprint is unchanged.
+- admission lock is absent;
+- governed history SHA is unchanged from before the corrected matrix/probes;
+- previous v1/v2 matrix evidence remains unchanged;
+- no Reviewer/Shadow invocation exists in communication evidence;
+- no promotion package/patch was created;
+- authoritative fingerprint is unchanged during runtime evidence collection.
 
-- [ ] **Step 10: Update stage documentation from actual evidence only**
+- [ ] **Step 10: Update stage documentation from fresh evidence only**
 
-If A–D meet the spec's reopening gates, update `docs/governance/current-product-stage.md` to state:
-- binding/envelope communication gate verified for the exact sealed binding;
-- governed Layer A may be proposed again;
-- no new Layer A attempt has yet been authorized.
+Update `docs/governance/current-product-stage.md` with the corrected result.
 
-If a matrix fails, document the actual failure boundary instead and leave Layer A frozen.
+If corrected B fails, record its actual earliest failure.
 
-Do not describe deterministic tests as real Participant runtime evidence.
+If corrected B passes but C triggers timeout-policy review, explicitly state:
+- Matrix B corrected harness passed;
+- the exact three Matrix C latencies;
+- 60 seconds is unsupported for that sealed binding;
+- production timeout remains unchanged;
+- Matrix D remains blocked pending Human timeout-policy decision.
 
-- [ ] **Step 11: Final verification and commit**
+If A–D eventually meet the reopening gates, state only that governed Layer A may be proposed again; no attempt is authorized by this plan.
+
+- [ ] **Step 11: Final verification and stage-doc commit**
 
 Run:
 
 `git diff --check`
 
-Then commit only the evidence-derived stage documentation change, if any, and push `dev`.
+Commit and push only the evidence-derived stage documentation change after confirming all evidence artifacts are preserved outside governed attempt history.
 
 - [ ] **Step 12: Stop**
 
 Return one consolidated report containing:
-- implementation SHA;
+- corrected implementation SHA;
 - exact sealed binding facts and binding-lock SHA;
-- A/B/C results and timings;
-- D probe results;
-- authoritative fingerprint check;
+- Matrix A results;
+- corrected Matrix B results and structural-validation outcomes;
+- corrected Matrix C three-trial latencies and policy classification;
+- Matrix D results only if it was legitimately run;
+- authoritative fingerprint before/after;
 - governed history SHA before/after;
+- production timeout constants unchanged confirmation;
+- `attempt-000012` absent confirmation;
 - whether the Layer A reopening gate is satisfied.
 
-Do **not** create an `attempt-000012` authorization candidate in this plan. Reopening Layer A is a separate Human decision after reviewing this report.
+If Matrix C requires timeout-policy review, the report must stop there. Do not propose or implement a replacement timeout inside this execution.
+
+Do **not** create an `attempt-000012` authorization candidate in this plan. Reopening Layer A remains a separate Human decision.

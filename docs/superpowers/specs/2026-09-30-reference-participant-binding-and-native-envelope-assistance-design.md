@@ -1,8 +1,9 @@
 # Reference Participant Binding Stability and Codex Native Envelope Assistance — Design
 
 **Date:** 2026-09-30
-**Status:** REVISION DRAFT FOR HUMAN REVIEW
+**Status:** APPROVED DESIGN — REVISION 1
 **Human approval:** 2026-09-30 — approved the five core boundaries in chat
+**Revision approval:** 2026-10-01 — approved corrected Matrix B semantics and separate timeout-policy gate
 **Revision basis:** 2026-10-01 Matrix B/C runtime evidence; revision narrows measurement semantics and timeout-policy evidence only
 **Project:** wuxia-life / Auto Evolution
 **Scope:** Participant communication reliability for controlled reference validation

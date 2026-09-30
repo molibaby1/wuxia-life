@@ -1,7 +1,8 @@
 # Reference Participant Binding Stability and Codex Native Envelope Assistance — Design
 
 **Date:** 2026-09-30
-**Status:** DRAFT FOR HUMAN REVIEW
+**Status:** APPROVED DESIGN
+**Human approval:** 2026-09-30 — approved the five core boundaries in chat
 **Project:** wuxia-life / Auto Evolution
 **Scope:** Participant communication reliability for controlled reference validation
 **Real Layer A:** FROZEN until this design's communication gates are satisfied
@@ -38,6 +39,8 @@ The current binding artifact records `modelConfigured=null` and `reasoningEffort
 The evidence therefore does **not** establish that Structured Final Output Contract V1 itself regressed. It establishes that the controlled campaign crossed an unsealed Participant-binding boundary while terminal reliability also degraded.
 
 Current `dev` also contains a Solution-only prompt instruction added in `7d0ee9b9b4eed953d5b9c862f6342f33fb549f05`: `Return it as one compact JSON line.` That is an implementation deviation from the already accepted communication authority. Structured Final Output Contract V1 requires one bare JSON object but permits legal whitespace, and Envelope Failure Bounded Retransmission explicitly says the slice MUST NOT introduce canonical or single-line serialization requirements. This design does not treat that stricter prompt wording as authority.
+
+A Codex CLI upgrade is normal operational maintenance and is not treated as an error. The issue for a controlled proof is only that a version/configuration change creates a different experimental binding and therefore requires new sealed communication evidence.
 
 This design therefore removes two uncontrolled variables before another governed proof: floating Participant binding and sender wording that exceeds the accepted terminal-output contract.
 

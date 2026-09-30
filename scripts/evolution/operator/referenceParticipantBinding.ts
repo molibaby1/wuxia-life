@@ -14,6 +14,72 @@ import {
 } from './resolveParticipantBinding';
 
 const CODEX_JSON_OBJECT_SCHEMA_REF = 'scripts/evolution/operator/codexJsonObjectEnvelope.schema.json';
+const JSON_VALUE_SCHEMA_REF = '#/$defs/jsonValue';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function hasExactKeys(value: Record<string, unknown>, keys: string[]): boolean {
+  return Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
+}
+
+function isJsonValueReference(value: unknown): boolean {
+  return isRecord(value) && hasExactKeys(value, ['$ref']) && value.$ref === JSON_VALUE_SCHEMA_REF;
+}
+
+function isUniversalJsonProperties(value: unknown): boolean {
+  return isRecord(value)
+    && hasExactKeys(value, ['.*'])
+    && isJsonValueReference(value['.*']);
+}
+
+function isClosedJsonObject(value: unknown): boolean {
+  return isRecord(value)
+    && hasExactKeys(value, ['type', 'properties', 'patternProperties', 'required', 'additionalProperties'])
+    && value.type === 'object'
+    && isRecord(value.properties)
+    && Object.keys(value.properties).length === 0
+    && isUniversalJsonProperties(value.patternProperties)
+    && Array.isArray(value.required)
+    && value.required.length === 0
+    && value.additionalProperties === false;
+}
+
+function isJsonValueSchema(value: unknown): boolean {
+  if (!isRecord(value) || !hasExactKeys(value, ['anyOf']) || !Array.isArray(value.anyOf) || value.anyOf.length !== 6) {
+    return false;
+  }
+  const [stringValue, numberValue, booleanValue, nullValue, arrayValue, objectValue] = value.anyOf;
+  return [
+    ['string', stringValue],
+    ['number', numberValue],
+    ['boolean', booleanValue],
+    ['null', nullValue],
+  ].every(([type, schema]) => isRecord(schema)
+    && hasExactKeys(schema, ['type'])
+    && schema.type === type)
+    && isRecord(arrayValue)
+    && hasExactKeys(arrayValue, ['type', 'items'])
+    && arrayValue.type === 'array'
+    && isJsonValueReference(arrayValue.items)
+    && isClosedJsonObject(objectValue);
+}
+
+function isJsonObjectEnvelopeSchema(value: unknown): boolean {
+  return isRecord(value)
+    && hasExactKeys(value, ['$defs', 'type', 'properties', 'patternProperties', 'required', 'additionalProperties'])
+    && value.type === 'object'
+    && isRecord(value.properties)
+    && Object.keys(value.properties).length === 0
+    && isUniversalJsonProperties(value.patternProperties)
+    && Array.isArray(value.required)
+    && value.required.length === 0
+    && value.additionalProperties === false
+    && isRecord(value.$defs)
+    && hasExactKeys(value.$defs, ['jsonValue'])
+    && isJsonValueSchema(value.$defs.jsonValue);
+}
 
 export interface ReferenceParticipantBindingLockV1 {
   readonly schemaVersion: 'reference-participant-binding-lock-v1';
@@ -52,13 +118,7 @@ async function readEnvelopeSchemaSha256(repositoryRoot: string): Promise<string>
       `PARTICIPANT_BINDING_UNAVAILABLE: native envelope schema is invalid JSON: ${String(error)}`,
     );
   }
-  if (
-    !schema ||
-    typeof schema !== 'object' ||
-    Array.isArray(schema) ||
-    Object.keys(schema).length !== 1 ||
-    (schema as { type?: unknown }).type !== 'object'
-  ) {
+  if (!isJsonObjectEnvelopeSchema(schema)) {
     throw new ParticipantBindingUnavailableError(
       'PARTICIPANT_BINDING_UNAVAILABLE: native envelope schema must contain only the JSON object constraint',
     );

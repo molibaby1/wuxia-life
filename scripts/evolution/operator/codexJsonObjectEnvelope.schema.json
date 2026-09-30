@@ -1,3 +1,46 @@
 {
-  "type": "object"
+  "$defs": {
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "properties": {},
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/$defs/jsonValue"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {},
+  "patternProperties": {
+    ".*": {
+      "$ref": "#/$defs/jsonValue"
+    }
+  },
+  "required": [],
+  "additionalProperties": false
 }

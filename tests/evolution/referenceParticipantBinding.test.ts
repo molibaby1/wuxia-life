@@ -12,7 +12,31 @@ import { buildParticipantBindingReceipt } from '../../scripts/evolution/particip
 import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 const SCHEMA_REF = 'scripts/evolution/operator/codexJsonObjectEnvelope.schema.json';
-const SCHEMA = '{\n  "type": "object"\n}\n';
+const JSON_VALUE_SCHEMA = {
+  anyOf: [
+    { type: 'string' },
+    { type: 'number' },
+    { type: 'boolean' },
+    { type: 'null' },
+    { type: 'array', items: { $ref: '#/$defs/jsonValue' } },
+    {
+      type: 'object',
+      properties: {},
+      patternProperties: { '.*': { $ref: '#/$defs/jsonValue' } },
+      required: [],
+      additionalProperties: false,
+    },
+  ],
+};
+const SCHEMA_OBJECT = {
+  $defs: { jsonValue: JSON_VALUE_SCHEMA },
+  type: 'object',
+  properties: {},
+  patternProperties: { '.*': { $ref: '#/$defs/jsonValue' } },
+  required: [],
+  additionalProperties: false,
+};
+const SCHEMA = `${JSON.stringify(SCHEMA_OBJECT, null, 2)}\n`;
 
 async function createCodexFixture(root: string, version: string): Promise<{
   binRoot: string;
@@ -39,6 +63,8 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     const configPath = join(root, 'config.toml');
     await mkdir(join(repositoryRoot, 'scripts/evolution/operator'), { recursive: true });
     await writeFile(join(repositoryRoot, SCHEMA_REF), SCHEMA);
+    const repositorySchema = JSON.parse(await readFile(join(process.cwd(), SCHEMA_REF), 'utf8')) as unknown;
+    assert.deepEqual(repositorySchema, SCHEMA_OBJECT);
     await writeFile(configPath, 'model = "ambient-secret-is-not-copied"\n');
     const executable = await createCodexFixture(root, 'codex 1.2.3');
     process.env.PATH = `${executable.binRoot}:/usr/bin:/bin`;
@@ -145,7 +171,7 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     await writeFile(executable.targetPath, `#!/bin/sh\nprintf '%s\\n' ${JSON.stringify('codex 1.2.3')}\n`);
     await chmod(executable.targetPath, 0o755);
 
-    await writeFile(join(repositoryRoot, SCHEMA_REF), '{\n "type": "object"\n}\n');
+    await writeFile(join(repositoryRoot, SCHEMA_REF), `${SCHEMA}\n`);
     await assert.rejects(
       resolveReferenceParticipantBindingFromLock({ repositoryRoot, lock }),
       /native envelope schema drift/,

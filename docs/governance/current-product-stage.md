@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-01（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 engineering delivered；default ordinary path active；deterministic acceptance verified；Solution structured-output schema retransmission robustness extension authorized；Reference Participant Binding / Native Envelope Assistance communication gates 未通过，60 秒 continuation ceiling 需 Human review）。
+> 最后更新：2026-10-01（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 engineering delivered；default ordinary path active；deterministic acceptance verified；Solution structured-output schema retransmission robustness extension authorized；Reference Participant Binding / Native Envelope Assistance corrected Matrix A 3/3、Matrix B 0/3 timeout；Matrix C/D 未运行，Layer A reopening gate 未满足）。
 
 ---
 
@@ -77,7 +77,7 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - 每个真实 run 都能或都应该进入下一轮；
 - Participant Communication Contract 的最终形态；
 - Structured Final Output Contract V1 的 first harness matrix 仅为 `CONTRACT_CONFORMANCE_PROMISING`（小样本、contract-only）；fixed Cursor model matrix 与真实 Solution workload matrix 尚未证明；
-- **Reference Participant Binding / Native Envelope Assistance：**实现已交付（`aa02ef65fad27f78c48cb6b2c30300ee8b17c197`）；在 `reference-binding-2026-09-30-v2` sealed binding 下，Matrix A 为 3/3 envelope-valid；Matrix B 未通过（B-01 在 1,800,014ms 超时，B-02 / B-03 envelope-valid 但 payload 不完全匹配）。Matrix C latency supplement 的两次 continuation 分别在 118,862ms / 119,935ms 完成（超过 60,000ms，且 payload 均不完全匹配）；第三次 initial 在 1,800,011ms 超时且无 thread identity。60 秒 continuation ceiling 不获支持，生产 timeout 未修改，需 Human timeout-policy review；Matrix D 未运行；Layer A 继续冻结，未创建 `attempt-000012`。
+- **Reference Participant Binding / Native Envelope Assistance：**Task 4 corrected implementation 已交付（`aab6d25c12a904e900ba24460cf29586f812cb23`）；fresh matrix `reference-binding-2026-10-01-corrected-v1` 在单一 sealed binding 下，Matrix A 为 3/3 completed 且 Host envelope-valid。Corrected Matrix B 为 0/3：B-01 / B-02 / B-03 均在 `1_800_000ms` initial hard timeout 到期，实际耗时分别为 `1_800_010ms` / `1_800_009ms` / `1_800_019ms`；没有完成的 JSON terminal payload，故 Host envelope 无效、结构校验及 parsed payload size 未评估。按 gate 未运行 Matrix C/D；这组 corrected evidence 不判定 60 秒 continuation ceiling。旧 v1/v2 matrix evidence 保持原样且未与本次 binding 混合；生产 timeout 未修改，Layer A reopening gate 未满足，未创建 `attempt-000012`。
 - Envelope Failure Bounded Retransmission 超出已验证边界的扩展（第二重传、`SCHEMA_FAILURE` recovery、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；
 - report analysis / automatic intervention；
 - Game 与 Auto Evolution 已经物理解耦；

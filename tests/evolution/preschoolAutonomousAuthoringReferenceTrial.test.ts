@@ -18,6 +18,13 @@ import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provena
 import { parseStoredImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 import type { AutonomousAuthoringProposalV1 } from '../../src/evolution/autonomousAuthoringContract';
 import { captureAuthoritativeFingerprint } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
+import {
+  buildPreschoolReferenceTrialAuthorizationCandidate,
+} from '../../scripts/evolution/autonomousAuthoring/buildPreschoolReferenceTrialAuthorization';
+import {
+  referenceParticipantBindingLockSha256,
+  type ReferenceParticipantBindingLockV1,
+} from '../../scripts/evolution/operator/referenceParticipantBinding';
 import { runStructuredParticipantExecution } from '../../scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution';
 import {
   PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
@@ -62,6 +69,33 @@ const REFERENCE_TRIAL_ROOT_PATH = 'artifacts/evolution/autonomous-authoring/refe
 const REFERENCE_TRIAL_ATTEMPTS_PATH = join(REFERENCE_TRIAL_ROOT_PATH, 'attempts');
 const REFERENCE_HYPOTHESIS_UNKNOWN = 'Whether the supplied Human-approved responsibilities admit independently authored contract-conforming content instances remains to be determined and independently reviewed.';
 const RETRANSMISSION_PROMPT_ARTIFACT = 'participant-envelope-retransmission-prompt-1.txt';
+const TEST_PARTICIPANT_BINDING_LOCK: ReferenceParticipantBindingLockV1 = {
+  schemaVersion: 'reference-participant-binding-lock-v1',
+  bindingId: 'CODEX_CURRENT',
+  provider: 'codex-local-subagent',
+  executableRealPath: '/synthetic/codex/bin/codex',
+  executableVersion: 'codex synthetic-1.0.0',
+  modelConfigured: 'gpt-6-luna',
+  reasoningEffort: 'max',
+  ambientCodexConfigPath: '/synthetic/codex/config.toml',
+  ambientCodexConfigSha256: 'a'.repeat(64),
+  nativeEnvelopeAssistance: {
+    enabled: true,
+    schemaRef: 'scripts/evolution/operator/codexJsonObjectEnvelope.schema.json',
+    schemaSha256: sha256Hex('{"type":"object"}'),
+  },
+};
+const TEST_PARTICIPANT_BINDING_LOCK_SHA256 = referenceParticipantBindingLockSha256(TEST_PARTICIPANT_BINDING_LOCK);
+
+async function testBindingLockResolver(input: { repositoryRoot: string; lock: ReferenceParticipantBindingLockV1 }): Promise<never> {
+  assert.equal(input.repositoryRoot.length > 0, true);
+  assert.equal(referenceParticipantBindingLockSha256(input.lock), TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  return {} as never;
+}
+
+async function admitForTest(input: Parameters<typeof admitReferenceTrialAttempt>[0]) {
+  return admitReferenceTrialAttempt(input, testBindingLockResolver);
+}
 
 async function testRetransmissionPromptPersistedBeforeSend(root: string): Promise<void> {
   const threadRef = { provider: 'synthetic-provider', opaqueId: 'thread-000001' };
@@ -261,7 +295,7 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'retransmission-success' | 'retransmission-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'retransmission-success' | 'retransmission-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
@@ -529,6 +563,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       },
     } : {}),
   };
+  let participantBindingResolutionCount = 0;
   const before = await captureAuthoritativeFingerprint(liveRepositoryRoot);
   const trialRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ROOT_PATH);
   await mkdir(join(trialRoot, 'attempts'), { recursive: true });
@@ -547,14 +582,26 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     attemptRef: 'attempt-000900',
     executionAuthorizationPath,
     expectedExecutionAuthorizationSha256,
-  }, { resolveParticipantBinding: async () => ({ participant }) as never });
+  }, {
+    resolveReferenceParticipantBindingFromLock: async ({ lock }) => {
+      assert.equal(referenceParticipantBindingLockSha256(lock), TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+      participantBindingResolutionCount += 1;
+      if (scenario === 'binding-drift-at-invocation' && participantBindingResolutionCount === 2) {
+        throw new Error('synthetic Participant binding drift at BINDING');
+      }
+      return { participant } as never;
+    },
+  });
   const expectedSuccessfulScenario = scenario === 'success'
     || scenario === 'retransmission-success'
     || scenario === 'solution-id-prefix-collision'
     || scenario === 'solution-exact-answer-id';
   if (!expectedSuccessfulScenario) {
     const solutionOnlyFailure = scenario === 'participant-failure' || scenario === 'retransmission-failure';
-    if (solutionOnlyFailure) {
+    if (scenario === 'binding-drift-at-invocation') {
+      await assert.rejects(trial, /synthetic Participant binding drift at BINDING/);
+      assert.equal(participantBindingResolutionCount, 2);
+    } else if (solutionOnlyFailure) {
       await assert.rejects(trial, /Solution Participant failed/);
     } else if (scenario === 'reviewer-static-answer-marker') {
       await assert.rejects(trial, /Participant-visible contamination detected in prompt: preschool_neutral_fair_play/);
@@ -567,14 +614,19 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         ? /Shadow workspace changed paths outside the Contract/
         : /Structural capacity deficit must decrease from a positive value to zero/);
     }
-    assert.deepEqual(jobs, solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
+    assert.deepEqual(jobs, scenario === 'binding-drift-at-invocation'
+      ? []
+      : solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
       ? ['solution']
       : scenario === 'omitted-responsibility'
         ? ['solution', 'reviewer']
         : ['solution', 'reviewer', 'configuration-execution']);
     const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
     assert.equal(failedManifest.state, 'FAILED');
-    const invokedPromptRoles = solutionOnlyFailure
+    if (scenario === 'binding-drift-at-invocation') assert.equal(failedManifest.currentStage, 'BINDING');
+    const invokedPromptRoles = scenario === 'binding-drift-at-invocation'
+      ? [] as const
+      : solutionOnlyFailure
       ? ['solution'] as const
       : scenario === 'reviewer-static-answer-marker'
         ? ['solution', 'reviewer'] as const
@@ -605,7 +657,10 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       assert.equal(submittedBrief.responsibilities.length, 5);
       await assert.rejects(readFile(join(outputRoot, 'decision.json')), { code: 'ENOENT' });
       await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
-    } else if (scenario !== 'retransmission-failure' && scenario !== 'participant-failure' && scenario !== 'reviewer-static-answer-marker') {
+    } else if (scenario !== 'retransmission-failure'
+      && scenario !== 'participant-failure'
+      && scenario !== 'reviewer-static-answer-marker'
+      && scenario !== 'binding-drift-at-invocation') {
       const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
       assert.equal(decision.route, 'READY_FOR_SHADOW_AUTHORING');
     }
@@ -676,14 +731,18 @@ function authorizationBody(input: {
   attemptRef: string;
   authorizationRef?: string;
   runRef?: string;
+  participantBindingLock?: ReferenceParticipantBindingLockV1;
 }): Record<string, unknown> {
+  const participantBindingLock = input.participantBindingLock ?? TEST_PARTICIPANT_BINDING_LOCK;
   return {
-    schemaVersion: 'preschool-reference-trial-execution-authorization-v1',
+    schemaVersion: 'preschool-reference-trial-execution-authorization-v2',
     authorizationRef: input.authorizationRef ?? 'human-authorization-000001',
     runRef: input.runRef ?? 'preschool-pver-20260922231805-71297571',
     attemptRef: input.attemptRef,
     authorizedAt: '2026-09-29T00:00:00.000Z',
     acknowledgedLegacyHistory: input.acknowledgedLegacyHistory,
+    participantBindingLock,
+    participantBindingLockSha256: referenceParticipantBindingLockSha256(participantBindingLock),
   };
 }
 
@@ -695,6 +754,59 @@ async function writeAuthorization(path: string, body: Record<string, unknown>, d
     canonicalSha256: digestOverride ?? canonicalSha256,
   })}\n`);
   return canonicalSha256;
+}
+
+async function testAuthorizationCandidateBuilder(root: string): Promise<void> {
+  const liveRepositoryRoot = join(root, 'authorization-candidate-builder-fixture');
+  await mkdir(liveRepositoryRoot, { recursive: true });
+  const trialRoot = await createLegacyAttemptHistory(liveRepositoryRoot);
+  const acknowledgedLegacyHistory = await captureReferenceTrialLegacyHistory(trialRoot);
+  const participantBindingLockPath = join(root, 'matrix-binding-lock.json');
+  await writeFile(participantBindingLockPath, `${canonicalJson(TEST_PARTICIPANT_BINDING_LOCK)}\n`, { flag: 'wx' });
+  const destinationPath = join(liveRepositoryRoot, 'authorization-candidate.json');
+  const input = {
+    liveRepositoryRoot,
+    attemptRef: 'attempt-000006',
+    authorizationRef: 'synthetic-human-authorization-builder',
+    authorizedAt: '2026-09-30T00:00:00.000Z',
+    participantBindingLockPath,
+    expectedParticipantBindingLockSha256: TEST_PARTICIPANT_BINDING_LOCK_SHA256,
+    destinationPath,
+  };
+  const candidate = await buildPreschoolReferenceTrialAuthorizationCandidate(input, testBindingLockResolver);
+  const bytes = await readFile(destinationPath);
+  const authorization = JSON.parse(bytes.toString('utf8')) as Record<string, any>;
+  assert.equal(candidate.participantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.equal(authorization.schemaVersion, 'preschool-reference-trial-execution-authorization-v2');
+  assert.deepEqual(authorization.acknowledgedLegacyHistory, acknowledgedLegacyHistory);
+  assert.deepEqual(authorization.participantBindingLock, TEST_PARTICIPANT_BINDING_LOCK);
+  assert.equal(authorization.participantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.equal(candidate.canonicalSha256, authorization.canonicalSha256);
+  const { canonicalSha256, ...body } = authorization;
+  assert.equal(candidate.canonicalSha256, sha256Hex(canonicalJson(body)));
+  assert.equal(candidate.rawSha256, sha256Hex(bytes));
+  await assert.rejects(
+    readFile(join(trialRoot, 'attempts/attempt-000006/attempt-manifest.json')),
+    { code: 'ENOENT' },
+  );
+  await assert.rejects(
+    buildPreschoolReferenceTrialAuthorizationCandidate(input, testBindingLockResolver),
+    { code: 'EEXIST' },
+  );
+
+  await assert.rejects(buildPreschoolReferenceTrialAuthorizationCandidate({
+    ...input,
+    destinationPath: join(liveRepositoryRoot, 'wrong-lock-digest.json'),
+    expectedParticipantBindingLockSha256: '0'.repeat(64),
+  }, testBindingLockResolver), /binding lock.*SHA-256/i);
+  await assert.rejects(readFile(join(liveRepositoryRoot, 'wrong-lock-digest.json')), { code: 'ENOENT' });
+  await assert.rejects(buildPreschoolReferenceTrialAuthorizationCandidate({
+    ...input,
+    destinationPath: join(liveRepositoryRoot, 'binding-drift.json'),
+  }, async () => {
+    throw new Error('executable version drift');
+  }), /executable version drift/);
+  await assert.rejects(readFile(join(liveRepositoryRoot, 'binding-drift.json')), { code: 'ENOENT' });
 }
 
 async function createLegacyAttemptHistory(root: string): Promise<string> {
@@ -721,7 +833,7 @@ async function createLifecycleAttempt(root: string, attemptRef: string): Promise
     authorizationPath,
     authorizationBody({ acknowledgedLegacyHistory: history, attemptRef }),
   );
-  const admitted = await admitReferenceTrialAttempt({
+  const admitted = await admitForTest({
     liveRepositoryRoot: root,
     attemptRef,
     executionAuthorizationPath: authorizationPath,
@@ -1357,7 +1469,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     attemptRef: 'attempt-000006',
     evidencePath: join(fixtureRoot, 'missing-evidence.json'),
   }, {
-    resolveParticipantBinding: async () => {
+    resolveReferenceParticipantBindingFromLock: async () => {
       throw new Error('Participant binding must not occur without execution authorization');
     },
   });
@@ -1379,7 +1491,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     executionAuthorizationPath: validAuthorizationPath,
     evidencePath: join(fixtureRoot, 'missing-evidence.json'),
   }, {
-    resolveParticipantBinding: async () => {
+    resolveReferenceParticipantBindingFromLock: async () => {
       boundWithoutExpectedDigest = true;
       throw new Error('Participant binding must not occur without an external expected digest');
     },
@@ -1404,7 +1516,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     expectedExecutionAuthorizationSha256: '0'.repeat(64),
     evidencePath: join(fixtureRoot, 'missing-evidence.json'),
   }, {
-    resolveParticipantBinding: async () => {
+    resolveReferenceParticipantBindingFromLock: async () => {
       boundWithWrongExpectedDigest = true;
       throw new Error('Participant binding must not occur with a mismatched external digest');
     },
@@ -1422,14 +1534,17 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   const cliTrialRoot = await createLegacyAttemptHistory(cliFixtureRoot);
   const originalWorkingDirectory = process.cwd();
   const originalStdoutWrite = process.stdout.write;
-  const runCli = async (argv: string[]): Promise<{ code: number; output: string }> => {
+  const runCli = async (
+    argv: string[],
+    dependencies: Parameters<typeof runPreschoolReferenceTrialCli>[1] = {},
+  ): Promise<{ code: number; output: string }> => {
     let output = '';
     process.stdout.write = ((chunk: unknown) => {
       output += String(chunk);
       return true;
     }) as typeof process.stdout.write;
     try {
-      return { code: await runPreschoolReferenceTrialCli(argv), output };
+      return { code: await runPreschoolReferenceTrialCli(argv, dependencies), output };
     } finally {
       process.stdout.write = originalStdoutWrite;
     }
@@ -1468,7 +1583,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
       '--attempt-ref', 'attempt-000009',
       '--execution-authorization', cliExactAuthorizationPath,
       '--execution-authorization-sha256', cliExactDigest,
-    ]);
+    ], { resolveReferenceParticipantBindingFromLock: testBindingLockResolver });
     assert.equal(exactExternalDigest.code, 1);
     assert.equal(JSON.parse(exactExternalDigest.output).status, 'REFERENCE_EVIDENCE_UNAVAILABLE', exactExternalDigest.output);
     const cliAdmittedManifest = JSON.parse(await readFile(join(cliTrialRoot, 'attempts/attempt-000009/attempt-manifest.json'), 'utf8')) as Record<string, any>;
@@ -1486,7 +1601,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   const correctBody = authorizationBody({ acknowledgedLegacyHistory: history, attemptRef: 'attempt-000006' });
   const admitted = await (async () => {
     const expectedExecutionAuthorizationSha256 = await writeAuthorization(authorizationPath, correctBody);
-    return admitReferenceTrialAttempt({
+    return admitForTest({
       liveRepositoryRoot: fixtureRoot,
       attemptRef: 'attempt-000006',
       executionAuthorizationPath: authorizationPath,
@@ -1500,6 +1615,11 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   assert.match(admitted.manifest.authorizationDigest, /^[a-f0-9]{64}$/);
   assert.equal(admitted.manifest.authorizationDigest, admitted.manifest.expectedAuthorizationDigest);
   assert.equal(admitted.manifest.authorizationArtifactPath, authorizationPath);
+  assert.equal(admitted.manifest.participantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.deepEqual(
+    JSON.parse(await readFile(join(admitted.outputRoot, 'participant-binding-lock.json'), 'utf8')),
+    TEST_PARTICIPANT_BINDING_LOCK,
+  );
   const admittedManifestPath = join(admitted.outputRoot, 'attempt-manifest.json');
 
   // A valid admission can advance into the lifecycle without binding or invoking a Participant.
@@ -1530,7 +1650,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     attemptRef: 'attempt-000007',
     authorizationRef: 'human-authorization-000001',
   }));
-  await assert.rejects(admitReferenceTrialAttempt({
+  await assert.rejects(admitForTest({
     liveRepositoryRoot: fixtureRoot,
     attemptRef: 'attempt-000007',
     executionAuthorizationPath: reusedPath,
@@ -1543,7 +1663,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     attemptRef: 'attempt-000007',
     authorizationRef: 'human-authorization-000002',
   }));
-  const nextAdmission = await admitReferenceTrialAttempt({
+  const nextAdmission = await admitForTest({
     liveRepositoryRoot: fixtureRoot,
     attemptRef: 'attempt-000007',
     executionAuthorizationPath: nextPath,
@@ -1557,7 +1677,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     attemptRef: 'attempt-000008',
     authorizationRef: 'human-authorization-000003',
   }));
-  await assert.rejects(admitReferenceTrialAttempt({
+  await assert.rejects(admitForTest({
     liveRepositoryRoot: fixtureRoot,
     attemptRef: 'attempt-000008',
     executionAuthorizationPath: activePath,
@@ -1575,7 +1695,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   };
   const assertDenied = async (name: string, body: Record<string, unknown>, digest?: string, expectedDigestOverride?: string): Promise<void> => {
     const written = await writeInvalid(name, body, digest);
-    await assert.rejects(admitReferenceTrialAttempt({
+    await assert.rejects(admitForTest({
       liveRepositoryRoot: invalidFixture,
       attemptRef: 'attempt-000006',
       executionAuthorizationPath: written.path,
@@ -1600,8 +1720,20 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     acknowledgedLegacyHistory: invalidHistory,
     attemptRef: 'attempt-000006',
   }), undefined, '0'.repeat(64));
+  await assertDenied('wrong-binding-lock-digest', {
+    ...authorizationBody({ acknowledgedLegacyHistory: invalidHistory, attemptRef: 'attempt-000006' }),
+    participantBindingLockSha256: '0'.repeat(64),
+  });
+  await assertDenied('legacy-v1-authorization', {
+    schemaVersion: 'preschool-reference-trial-execution-authorization-v1',
+    authorizationRef: 'historical-v1-authorization',
+    runRef: 'preschool-pver-20260922231805-71297571',
+    attemptRef: 'attempt-000006',
+    authorizedAt: '2026-09-29T00:00:00.000Z',
+    acknowledgedLegacyHistory: invalidHistory,
+  });
   await writeFile(join(invalidFixture, 'malformed.json'), '{not json');
-  await assert.rejects(admitReferenceTrialAttempt({
+  await assert.rejects(admitForTest({
     liveRepositoryRoot: invalidFixture,
     attemptRef: 'attempt-000006',
     executionAuthorizationPath: join(invalidFixture, 'malformed.json'),
@@ -1612,7 +1744,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     acknowledgedLegacyHistory: { ...invalidHistory, attempts: [] },
     attemptRef: 'attempt-000006',
   }));
-  await assert.rejects(admitReferenceTrialAttempt({
+  await assert.rejects(admitForTest({
     liveRepositoryRoot: invalidFixture,
     attemptRef: 'attempt-000006',
     executionAuthorizationPath: mismatchedHistory.path,
@@ -1623,12 +1755,64 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     acknowledgedLegacyHistory: invalidHistory,
     attemptRef: 'attempt-000006',
   }));
-  await assert.rejects(admitReferenceTrialAttempt({
+  await assert.rejects(admitForTest({
     liveRepositoryRoot: invalidFixture,
     attemptRef: 'attempt-000006',
     executionAuthorizationPath: newHistory.path,
     expectedExecutionAuthorizationSha256: newHistory.expectedDigest,
   }), /legacy history|history acknowledgement/i);
+
+  const driftFixture = join(root, 'binding-drift-admission-fixture');
+  await mkdir(driftFixture, { recursive: true });
+  const driftTrialRoot = await createLegacyAttemptHistory(driftFixture);
+  const driftHistory = await captureReferenceTrialLegacyHistory(driftTrialRoot);
+  const driftCases: Array<{ name: string; lock: ReferenceParticipantBindingLockV1; message: string }> = [
+    {
+      name: 'config',
+      lock: { ...TEST_PARTICIPANT_BINDING_LOCK, ambientCodexConfigSha256: 'b'.repeat(64) },
+      message: 'ambient Codex config drift',
+    },
+    {
+      name: 'executable-path',
+      lock: { ...TEST_PARTICIPANT_BINDING_LOCK, executableRealPath: '/synthetic/codex/other-codex' },
+      message: 'executable real path drift',
+    },
+    {
+      name: 'executable-version',
+      lock: { ...TEST_PARTICIPANT_BINDING_LOCK, executableVersion: 'codex synthetic-1.0.1' },
+      message: 'executable version drift',
+    },
+    {
+      name: 'schema',
+      lock: {
+        ...TEST_PARTICIPANT_BINDING_LOCK,
+        nativeEnvelopeAssistance: { ...TEST_PARTICIPANT_BINDING_LOCK.nativeEnvelopeAssistance, schemaSha256: 'c'.repeat(64) },
+      },
+      message: 'native envelope schema drift',
+    },
+  ];
+  for (const [index, drift] of driftCases.entries()) {
+    const attemptRef = `attempt-${String(20 + index).padStart(6, '0')}`;
+    const authorizationPath = join(driftFixture, `${drift.name}-authorization.json`);
+    const digest = await writeAuthorization(authorizationPath, authorizationBody({
+      acknowledgedLegacyHistory: driftHistory,
+      attemptRef,
+      participantBindingLock: drift.lock,
+    }));
+    await assert.rejects(admitReferenceTrialAttempt({
+      liveRepositoryRoot: driftFixture,
+      attemptRef,
+      executionAuthorizationPath: authorizationPath,
+      expectedExecutionAuthorizationSha256: digest,
+    }, async ({ lock }) => {
+      assert.equal(referenceParticipantBindingLockSha256(lock), referenceParticipantBindingLockSha256(drift.lock));
+      throw new Error(drift.message);
+    }), new RegExp(drift.message));
+    await assert.rejects(
+      readFile(join(driftTrialRoot, 'attempts', attemptRef, 'attempt-manifest.json')),
+      { code: 'ENOENT' },
+    );
+  }
 }
 
 async function testConcurrentProductionAttemptAdmission(root: string): Promise<void> {
@@ -1657,15 +1841,15 @@ async function testConcurrentProductionAttemptAdmission(root: string): Promise<v
     expectedExecutionAuthorizationSha256: authorization.expectedExecutionAuthorizationSha256,
     evidencePath: join(fixtureRoot, 'missing-accepted-evidence.json'),
   }, {
-    resolveParticipantBinding: async () => {
+    resolveReferenceParticipantBindingFromLock: async input => {
       participantBindingCalls += 1;
-      throw new Error('concurrent synthetic admission must stop before Participant binding');
+      return testBindingLockResolver(input);
     },
   })));
 
   assert.equal(results.filter(result => result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE').length, 1);
   assert.equal(results.filter(result => result.status === 'REFERENCE_EXECUTION_AUTHORIZATION_UNAVAILABLE').length, 1);
-  assert.equal(participantBindingCalls, 0);
+  assert.equal(participantBindingCalls, 1);
   const afterHistory = await captureReferenceTrialLegacyHistory(trialRoot);
   assert.deepEqual(afterHistory.attempts.slice(0, initialHistory.attempts.length), initialHistory.attempts);
   assert.deepEqual(afterHistory.runLevelMaterial, initialHistory.runLevelMaterial);
@@ -1707,6 +1891,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
   const root = await mkdtemp(join(tmpdir(), 'preschool-reference-trial-test-'));
   try {
     await testRetransmissionPromptPersistedBeforeSend(root);
+    await testAuthorizationCandidateBuilder(root);
     await testExecutionAuthorizationAdmission(root);
     await testConcurrentProductionAttemptAdmission(root);
     await testAttemptManifestLifecycle(root);
@@ -1817,6 +2002,15 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
     }, 'success', syntheticRunner, {
+      brief: fullBrief,
+      bytes: fullBriefBytes,
+      sha256: sha256Hex(fullBriefBytes),
+    });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'binding-drift-at-invocation', syntheticRunner, {
       brief: fullBrief,
       bytes: fullBriefBytes,
       sha256: sha256Hex(fullBriefBytes),
@@ -2132,7 +2326,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       liveRepositoryRoot: currentRoot,
       evidencePath: join(root, 'missing-accepted-evidence.json'),
     }, {
-      resolveParticipantBinding: async () => {
+      resolveReferenceParticipantBindingFromLock: async () => {
         participantBindingResolved = true;
         throw new Error('must not resolve a Participant binding without fixed evidence');
       },
@@ -2180,7 +2374,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       evidencePath: fabricatedEvidencePath,
       attemptRef: 'attempt-000002',
     }, {
-      resolveParticipantBinding: async () => {
+      resolveReferenceParticipantBindingFromLock: async () => {
         fabricatedEvidenceResolvedBinding = true;
         throw new Error('must not resolve a Participant binding for unanchored evidence');
       },
@@ -2203,7 +2397,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
           observablePayloadPath,
           attemptRef: 'attempt-000004',
         }, {
-          resolveParticipantBinding: async () => {
+          resolveReferenceParticipantBindingFromLock: async () => {
             resolvedBinding = true;
             throw new Error('must not bind a Participant without the exact sealed observable payload');
           },
@@ -2231,6 +2425,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       await testSyntheticLayerAEndToEnd(root, paths, 'unauthorized-shadow-path');
       await testSyntheticLayerAEndToEnd(root, paths, 'residual-v5-deficit');
       await testSyntheticLayerAEndToEnd(root, paths, 'participant-failure');
+      await testSyntheticLayerAEndToEnd(root, paths, 'binding-drift-at-invocation');
     }
     if (acceptedEvidenceTestPath && acceptedObservableTestPath) {
       for (const [responsibilityBriefPath, reason] of [
@@ -2246,7 +2441,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
           observablePayloadPath: acceptedObservableTestPath,
           responsibilityBriefPath,
         }, {
-          resolveParticipantBinding: async () => {
+          resolveReferenceParticipantBindingFromLock: async () => {
             resolvedBinding = true;
             throw new Error('must not bind a Participant without the exact accepted brief');
           },

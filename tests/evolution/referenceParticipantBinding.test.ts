@@ -3,8 +3,11 @@ import { chmod, mkdir, mkdtemp, readFile, realpath, rm, symlink, unlink, writeFi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  artifactBackedReferenceParticipantBindingLockSha256,
+  captureArtifactBackedReferenceParticipantBindingLock,
   captureReferenceParticipantBindingLock,
   referenceParticipantBindingLockSha256,
+  resolveArtifactBackedReferenceParticipantBindingFromLock,
   resolveReferenceParticipantBindingFromLock,
 } from '../../scripts/evolution/operator/referenceParticipantBinding';
 import { resolveOperatorParticipantBinding } from '../../scripts/evolution/operator/resolveParticipantBinding';
@@ -12,6 +15,8 @@ import { buildParticipantBindingReceipt } from '../../scripts/evolution/particip
 import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 const SCHEMA_REF = 'scripts/evolution/operator/codexJsonObjectEnvelope.schema.json';
+const ARTIFACT_RECEIPT_SCHEMA_REF = 'scripts/evolution/operator/codexArtifactBackedReceipt.schema.json';
+const ARTIFACT_RESULT_PATH = '.evolution-participant/final-result.json';
 const JSON_VALUE_SCHEMA = {
   anyOf: [
     { type: 'string' },
@@ -198,6 +203,154 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     await assert.rejects(
       resolveReferenceParticipantBindingFromLock({ repositoryRoot, lock: absentLock }),
       /ambient Codex config drift/,
+    );
+
+    await writeFile(configPath, 'model = "ambient-secret-is-not-copied"\n');
+    const artifactSchemaPath = join(repositoryRoot, ARTIFACT_RECEIPT_SCHEMA_REF);
+    const artifactSchemaBytes = await readFile(join(process.cwd(), ARTIFACT_RECEIPT_SCHEMA_REF));
+    await writeFile(artifactSchemaPath, artifactSchemaBytes);
+    const artifactSchema = JSON.parse(artifactSchemaBytes.toString('utf8')) as {
+      type?: unknown;
+      properties?: Record<string, { type?: unknown }>;
+      required?: unknown;
+      additionalProperties?: unknown;
+    };
+    assert.equal(artifactSchema.type, 'object');
+    assert.deepEqual(Object.keys(artifactSchema.properties ?? {}).sort(), ['bytes', 'schemaVersion', 'sha256']);
+    assert.deepEqual(artifactSchema.required, ['schemaVersion', 'bytes', 'sha256']);
+    assert.equal(artifactSchema.additionalProperties, false);
+    assert.deepEqual(artifactSchema.properties?.schemaVersion?.type, 'string');
+    assert.deepEqual(artifactSchema.properties?.bytes?.type, 'integer');
+    assert.deepEqual(artifactSchema.properties?.sha256?.type, 'string');
+    assert.doesNotMatch(artifactSchemaBytes.toString('utf8'), /SolutionWorkV1|AutonomousAuthoring|Card/);
+
+    const artifactLock = await captureArtifactBackedReferenceParticipantBindingLock({
+      repositoryRoot,
+      bindingId: 'CODEX_CURRENT',
+      model: 'gpt-6-luna',
+      reasoningEffort: 'max',
+      ambientCodexConfigPath: configPath,
+    });
+    assert.equal(artifactLock.schemaVersion, 'reference-participant-binding-lock-v2');
+    assert.equal(artifactLock.bindingId, 'CODEX_CURRENT');
+    assert.equal(artifactLock.provider, 'codex-local-subagent');
+    assert.equal(artifactLock.executableRealPath, await realpath(executable.targetPath));
+    assert.equal(artifactLock.executableVersion, 'codex 1.2.3');
+    assert.equal(artifactLock.modelConfigured, 'gpt-6-luna');
+    assert.equal(artifactLock.reasoningEffort, 'max');
+    assert.equal(artifactLock.ambientCodexConfigPath, configPath);
+    assert.equal(artifactLock.ambientCodexConfigSha256, sha256Hex(await readFile(configPath)));
+    assert.deepEqual(artifactLock.structuredResultDelivery, {
+      kind: 'WORKSPACE_ARTIFACT_RECEIPT_V1',
+      resultRelativePath: ARTIFACT_RESULT_PATH,
+      receiptSchemaRef: ARTIFACT_RECEIPT_SCHEMA_REF,
+      receiptSchemaSha256: sha256Hex(artifactSchemaBytes),
+    });
+    assert.equal(
+      artifactBackedReferenceParticipantBindingLockSha256(artifactLock),
+      artifactBackedReferenceParticipantBindingLockSha256({
+        ...Object.fromEntries(Object.entries(artifactLock).reverse()),
+        structuredResultDelivery: {
+          receiptSchemaSha256: artifactLock.structuredResultDelivery.receiptSchemaSha256,
+          receiptSchemaRef: artifactLock.structuredResultDelivery.receiptSchemaRef,
+          resultRelativePath: artifactLock.structuredResultDelivery.resultRelativePath,
+          kind: artifactLock.structuredResultDelivery.kind,
+        },
+      } as typeof artifactLock),
+    );
+
+    const artifactResolved = await resolveArtifactBackedReferenceParticipantBindingFromLock({
+      repositoryRoot,
+      lock: artifactLock,
+    });
+    assert.equal(artifactResolved.executable, await realpath(executable.targetPath));
+    assert.equal(artifactResolved.participant.model, 'gpt-6-luna');
+    assert.equal(artifactResolved.participant.reasoningEffort, 'max');
+    assert.equal(artifactResolved.participant.bindingMetadata?.ambientCodexConfigSha256, artifactLock.ambientCodexConfigSha256);
+    assert.equal(artifactResolved.participant.bindingMetadata?.structuredResultDeliveryMode, 'WORKSPACE_ARTIFACT_RECEIPT_V1');
+    assert.equal(artifactResolved.participant.bindingMetadata?.nativeReceiptSchemaSha256, artifactLock.structuredResultDelivery.receiptSchemaSha256);
+    const artifactReceipt = buildParticipantBindingReceipt(artifactResolved.participant);
+    assert.equal(artifactReceipt.structuredResultDeliveryMode, 'WORKSPACE_ARTIFACT_RECEIPT_V1');
+    assert.equal(artifactReceipt.nativeReceiptSchemaSha256, artifactLock.structuredResultDelivery.receiptSchemaSha256);
+    assert.equal(Object.hasOwn(artifactReceipt, 'nativeEnvelopeSchemaSha256'), false);
+    const artifactSolutionArgs = artifactResolved.participant.buildArgs(solutionJob);
+    assert.ok(artifactSolutionArgs.includes('--output-schema'));
+    assert.equal(artifactSolutionArgs[artifactSolutionArgs.indexOf('--output-schema') + 1], artifactSchemaPath);
+    const artifactReviewerArgs = artifactResolved.participant.buildArgs({ ...solutionJob, role: 'reviewer' });
+    assert.equal(artifactReviewerArgs.includes('--output-schema'), false);
+    assert.equal(Object.hasOwn(artifactResolved.participant, 'sameThreadContinuation'), false);
+
+    await writeFile(configPath, 'model = "changed"\n');
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({ repositoryRoot, lock: artifactLock }),
+      /ambient Codex config drift/,
+    );
+    await writeFile(configPath, 'model = "ambient-secret-is-not-copied"\n');
+
+    await writeFile(artifactSchemaPath, `${artifactSchemaBytes.toString('utf8')}\n`);
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({ repositoryRoot, lock: artifactLock }),
+      /receipt schema drift/,
+    );
+    await writeFile(artifactSchemaPath, artifactSchemaBytes);
+
+    const alternateArtifactExecutable = await createCodexFixture(join(root, 'alternate-artifact'), 'codex 1.2.3');
+    await unlink(executable.symlinkPath);
+    await symlink(alternateArtifactExecutable.targetPath, executable.symlinkPath);
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({ repositoryRoot, lock: artifactLock }),
+      /executable real path drift/,
+    );
+    await unlink(executable.symlinkPath);
+    await symlink(executable.targetPath, executable.symlinkPath);
+
+    await writeFile(executable.targetPath, '#!/bin/sh\nprintf "%s\\n" "codex 1.2.4"\n');
+    await chmod(executable.targetPath, 0o755);
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({ repositoryRoot, lock: artifactLock }),
+      /executable version drift/,
+    );
+    await writeFile(executable.targetPath, `#!/bin/sh\nprintf '%s\\n' ${JSON.stringify('codex 1.2.3')}\n`);
+    await chmod(executable.targetPath, 0o755);
+
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({
+        repositoryRoot,
+        lock: {
+          ...artifactLock,
+          structuredResultDelivery: {
+            ...artifactLock.structuredResultDelivery,
+            resultRelativePath: 'other.json',
+          },
+        },
+      }),
+      /invalid reference Participant binding lock/,
+    );
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({
+        repositoryRoot,
+        lock: {
+          ...artifactLock,
+          structuredResultDelivery: {
+            ...artifactLock.structuredResultDelivery,
+            receiptSchemaRef: SCHEMA_REF,
+          },
+        } as unknown as typeof artifactLock,
+      }),
+      /invalid reference Participant binding lock/,
+    );
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({
+        repositoryRoot,
+        lock: {
+          ...artifactLock,
+          structuredResultDelivery: {
+            ...artifactLock.structuredResultDelivery,
+            kind: 'TERMINAL_JSON',
+          },
+        } as unknown as typeof artifactLock,
+      }),
+      /invalid reference Participant binding lock/,
     );
 
     const ordinary = await resolveOperatorParticipantBinding();

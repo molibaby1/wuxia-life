@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "bytes": {
+      "type": "integer"
+    },
+    "sha256": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "bytes",
+    "sha256"
+  ],
+  "additionalProperties": false
+}

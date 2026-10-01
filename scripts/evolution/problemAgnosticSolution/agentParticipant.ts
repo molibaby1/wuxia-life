@@ -133,6 +133,8 @@ export interface WorkspaceAgentParticipantOptions {
     executableVersion?: string;
     ambientCodexConfigSha256?: string | 'ABSENT';
     nativeEnvelopeSchemaSha256?: string;
+    structuredResultDeliveryMode?: 'WORKSPACE_ARTIFACT_RECEIPT_V1';
+    nativeReceiptSchemaSha256?: string;
   };
   spawnProcess?: typeof spawn;
   timeoutMs?: number;

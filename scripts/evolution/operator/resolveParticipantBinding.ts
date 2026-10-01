@@ -128,16 +128,35 @@ export function createCodexReferenceParticipant(input: {
   executableVersion: string;
   model: string;
   reasoningEffort: string;
-  nativeEnvelopeSchemaPath: string;
+  nativeOutputSchemaPath: string;
+  nativeOutputSchemaSha256: string;
   ambientCodexConfigSha256: string | 'ABSENT';
-  nativeEnvelopeSchemaSha256: string;
+  structuredResultDeliveryMode?: 'WORKSPACE_ARTIFACT_RECEIPT_V1';
 }): WorkspaceAgentParticipantOptions {
   const ordinary = createCodexCurrentParticipant(input.executable, input.executableVersion);
   const modelOptions = [
     '-m', input.model,
     '-c', `model_reasoning_effort=${JSON.stringify(input.reasoningEffort)}`,
   ];
-  const schemaOptions = ['--output-schema', input.nativeEnvelopeSchemaPath];
+  const schemaOptions = ['--output-schema', input.nativeOutputSchemaPath];
+  const sameThreadContinuation: NonNullable<WorkspaceAgentParticipantOptions['sameThreadContinuation']> = {
+    provider: 'codex-exec',
+    buildArgs: (job, threadRef) => {
+      if (job.role !== 'solution' || threadRef.provider !== 'codex-exec' || !CODEX_THREAD_ID.test(threadRef.opaqueId)) {
+        throw new Error('Codex continuation requires the current Solution thread UUID');
+      }
+      return [
+        '--sandbox', 'workspace-write',
+        'exec', 'resume', '--json',
+        ...modelOptions,
+        ...schemaOptions,
+        '--skip-git-repo-check',
+        threadRef.opaqueId,
+        job.prompt,
+      ];
+    },
+  };
+  const artifactBacked = input.structuredResultDeliveryMode === 'WORKSPACE_ARTIFACT_RECEIPT_V1';
   const participant: WorkspaceAgentParticipantOptions = {
     ...ordinary,
     model: input.model,
@@ -145,7 +164,12 @@ export function createCodexReferenceParticipant(input: {
     bindingMetadata: {
       ...ordinary.bindingMetadata,
       ambientCodexConfigSha256: input.ambientCodexConfigSha256,
-      nativeEnvelopeSchemaSha256: input.nativeEnvelopeSchemaSha256,
+      ...(artifactBacked
+        ? {
+            structuredResultDeliveryMode: input.structuredResultDeliveryMode,
+            nativeReceiptSchemaSha256: input.nativeOutputSchemaSha256,
+          }
+        : { nativeEnvelopeSchemaSha256: input.nativeOutputSchemaSha256 }),
     },
     buildArgs: job => [
       '--sandbox', 'workspace-write',
@@ -157,24 +181,9 @@ export function createCodexReferenceParticipant(input: {
       ...(job.role === 'solution' ? schemaOptions : []),
       job.prompt,
     ],
-    sameThreadContinuation: {
-      provider: 'codex-exec',
-      buildArgs: (job, threadRef) => {
-        if (job.role !== 'solution' || threadRef.provider !== 'codex-exec' || !CODEX_THREAD_ID.test(threadRef.opaqueId)) {
-          throw new Error('Codex continuation requires the current Solution thread UUID');
-        }
-        return [
-          '--sandbox', 'workspace-write',
-          'exec', 'resume', '--json',
-          ...modelOptions,
-          ...schemaOptions,
-          '--skip-git-repo-check',
-          threadRef.opaqueId,
-          job.prompt,
-        ];
-      },
-    },
   };
+  if (artifactBacked) delete participant.sameThreadContinuation;
+  else participant.sameThreadContinuation = sameThreadContinuation;
   return participant;
 }
 

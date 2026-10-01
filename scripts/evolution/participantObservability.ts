@@ -25,6 +25,12 @@ export function buildParticipantBindingReceipt(
     ...(participant.bindingMetadata?.nativeEnvelopeSchemaSha256 === undefined
       ? {}
       : { nativeEnvelopeSchemaSha256: participant.bindingMetadata.nativeEnvelopeSchemaSha256 }),
+    ...(participant.bindingMetadata?.structuredResultDeliveryMode === undefined
+      ? {}
+      : { structuredResultDeliveryMode: participant.bindingMetadata.structuredResultDeliveryMode }),
+    ...(participant.bindingMetadata?.nativeReceiptSchemaSha256 === undefined
+      ? {}
+      : { nativeReceiptSchemaSha256: participant.bindingMetadata.nativeReceiptSchemaSha256 }),
     timeoutMs: participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
   };
 }

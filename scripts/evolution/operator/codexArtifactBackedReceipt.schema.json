@@ -2,7 +2,10 @@
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "artifact-backed-structured-final-result-receipt-v1"
+      ]
     },
     "bytes": {
       "type": "integer"

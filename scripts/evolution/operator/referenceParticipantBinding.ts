@@ -4,7 +4,10 @@ import {
   canonicalJson,
   sha256Hex,
 } from '../phase0/provenance';
-import { ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH } from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
+import {
+  ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION,
+  ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH,
+} from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
 import {
   OPERATOR_BINDING_CODEX_CURRENT,
   ParticipantBindingUnavailableError,
@@ -160,8 +163,16 @@ function isReceiptSchema(value: unknown): boolean {
     || !hasExactKeys(value.properties, ['schemaVersion', 'bytes', 'sha256'])) {
     return false;
   }
+  const schemaVersion = value.properties.schemaVersion;
+  if (!isRecord(schemaVersion)
+    || !hasExactKeys(schemaVersion, ['type', 'enum'])
+    || schemaVersion.type !== 'string'
+    || !Array.isArray(schemaVersion.enum)
+    || schemaVersion.enum.length !== 1
+    || schemaVersion.enum[0] !== ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION) {
+    return false;
+  }
   return [
-    ['schemaVersion', 'string'],
     ['bytes', 'integer'],
     ['sha256', 'string'],
   ].every(([field, type]) => {

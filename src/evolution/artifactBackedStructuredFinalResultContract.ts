@@ -3,13 +3,16 @@ export const ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH =
 
 export const ARTIFACT_BACKED_STRUCTURED_RESULT_MAX_BYTES = 1_048_576 as const;
 
+export const ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION =
+  'artifact-backed-structured-final-result-receipt-v1' as const;
+
 export interface ArtifactBackedStructuredFinalResultReceiptV1 {
-  schemaVersion: 'artifact-backed-structured-final-result-receipt-v1';
+  schemaVersion: typeof ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION;
   bytes: number;
   sha256: string;
 }
 
-const RECEIPT_SCHEMA_VERSION = 'artifact-backed-structured-final-result-receipt-v1';
+const RECEIPT_SCHEMA_VERSION = ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION;
 const RECEIPT_SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const RECEIPT_KEYS = new Set(['schemaVersion', 'bytes', 'sha256']);
 
@@ -58,7 +61,11 @@ export function renderArtifactBackedStructuredFinalResultInstructionsV1(input: {
     `Write the complete JSON object to the Host-reserved result file:\n${ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH}`,
     `Do not use the terminal message to carry the ${input.roleSchemaName}.`,
     'After writing the result file, compute its exact byte length and SHA-256.',
-    'Your terminal result must contain only Artifact-Backed Structured Final Result Receipt V1 with the exact byte length and SHA-256.',
+    'The terminal output must contain only the small JSON receipt for this artifact. Do not emit the result object in terminal output, prose, Markdown, or a continuation.',
+    'Return the receipt as one JSON object with exactly these three fields:',
+    `schemaVersion: "${ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION}"`,
+    'bytes: exact artifact byte length as a non-negative integer',
+    'sha256: exact artifact SHA-256 as 64 lowercase hexadecimal characters',
     'The Host will reject rather than repair either the receipt or result artifact.',
   ].join('\n');
 }

@@ -211,7 +211,7 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     await writeFile(artifactSchemaPath, artifactSchemaBytes);
     const artifactSchema = JSON.parse(artifactSchemaBytes.toString('utf8')) as {
       type?: unknown;
-      properties?: Record<string, { type?: unknown }>;
+      properties?: Record<string, Record<string, unknown>>;
       required?: unknown;
       additionalProperties?: unknown;
     };
@@ -219,7 +219,10 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     assert.deepEqual(Object.keys(artifactSchema.properties ?? {}).sort(), ['bytes', 'schemaVersion', 'sha256']);
     assert.deepEqual(artifactSchema.required, ['schemaVersion', 'bytes', 'sha256']);
     assert.equal(artifactSchema.additionalProperties, false);
-    assert.deepEqual(artifactSchema.properties?.schemaVersion?.type, 'string');
+    assert.deepEqual(artifactSchema.properties?.schemaVersion, {
+      type: 'string',
+      enum: ['artifact-backed-structured-final-result-receipt-v1'],
+    });
     assert.deepEqual(artifactSchema.properties?.bytes?.type, 'integer');
     assert.deepEqual(artifactSchema.properties?.sha256?.type, 'string');
     assert.doesNotMatch(artifactSchemaBytes.toString('utf8'), /SolutionWorkV1|AutonomousAuthoring|Card/);
@@ -279,6 +282,30 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     const artifactReviewerArgs = artifactResolved.participant.buildArgs({ ...solutionJob, role: 'reviewer' });
     assert.equal(artifactReviewerArgs.includes('--output-schema'), false);
     assert.equal(Object.hasOwn(artifactResolved.participant, 'sameThreadContinuation'), false);
+
+    const unconstrainedArtifactSchemaBytes = Buffer.from(JSON.stringify({
+      ...artifactSchema,
+      properties: {
+        ...artifactSchema.properties,
+        schemaVersion: { type: 'string' },
+      },
+    }));
+    await writeFile(artifactSchemaPath, unconstrainedArtifactSchemaBytes);
+    await assert.rejects(
+      captureArtifactBackedReferenceParticipantBindingLock({
+        repositoryRoot,
+        bindingId: 'CODEX_CURRENT',
+        model: 'gpt-6-luna',
+        reasoningEffort: 'max',
+        ambientCodexConfigPath: configPath,
+      }),
+      /receipt schema must contain only the transport receipt fields/,
+    );
+    await assert.rejects(
+      resolveArtifactBackedReferenceParticipantBindingFromLock({ repositoryRoot, lock: artifactLock }),
+      /receipt schema must contain only the transport receipt fields/,
+    );
+    await writeFile(artifactSchemaPath, artifactSchemaBytes);
 
     await writeFile(configPath, 'model = "changed"\n');
     await assert.rejects(

@@ -86,7 +86,10 @@ export async function runArtifactBackedStructuredFinalResultTests(): Promise<voi
   assert.match(instructions, /\.evolution-participant\/final-result\.json/);
   assert.match(instructions, /complete ExampleRoleV1/);
   assert.match(instructions, /artifact/i);
-  assert.match(instructions, /terminal result must contain only.*Receipt V1/i);
+  assert.match(instructions, /terminal output must contain only the small JSON receipt/i);
+  assert.match(instructions, /schemaVersion: "artifact-backed-structured-final-result-receipt-v1"/);
+  assert.match(instructions, /bytes: exact artifact byte length as a non-negative integer/);
+  assert.match(instructions, /sha256: exact artifact SHA-256 as 64 lowercase hexadecimal characters/);
   assert.match(instructions, /reject rather than repair/i);
 
   await withFixture(async ({ workspaceRoot, resultPath }) => {

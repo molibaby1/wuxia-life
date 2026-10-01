@@ -13,6 +13,7 @@ import {
   REFERENCE_ARTIFACT_BACKED_OBSERVATION_TIMEOUT_MS,
   runReferenceArtifactBackedCommunicationMatrix,
 } from '../../scripts/evolution/contractConformance/referenceArtifactBackedCommunicationMatrix';
+import { renderArtifactBackedStructuredFinalResultInstructionsV1 } from '../../src/evolution/artifactBackedStructuredFinalResultContract';
 import { parseReferenceArtifactBackedCommunicationMatrixArgs } from '../../scripts/evolution/contractConformance/runReferenceArtifactBackedCommunicationMatrix';
 import {
   artifactBackedReferenceParticipantBindingLockSha256,
@@ -118,6 +119,9 @@ export async function runReferenceArtifactBackedCommunicationMatrixTests(): Prom
       runStructuredParticipantExecution: runStructured as never,
     });
 
+    const sharedInstructions = renderArtifactBackedStructuredFinalResultInstructionsV1({
+      roleSchemaName: 'SyntheticLargeEnvelopeV1',
+    });
     assert.equal(captureCount, 1);
     assert.equal(resolveCount, 3);
     assert.equal(result.schemaVersion, 'reference-artifact-backed-communication-matrix-v1');
@@ -133,6 +137,12 @@ export async function runReferenceArtifactBackedCommunicationMatrixTests(): Prom
     assert.ok(invocations.every(call => /final-result\.json/.test(String(call.initialPrompt))
       && /receipt/.test(String(call.initialPrompt))));
     assert.ok(invocations.every(call => String(call.initialPrompt).includes(JSON.stringify(payload))));
+    assert.equal(payload.schemaVersion, 'reference-communication-large-object-v1');
+    assert.ok(invocations.every(call => call.expectedRoleSchemaName === 'SyntheticLargeEnvelopeV1'));
+    assert.ok(invocations.every(call => String(call.initialPrompt).includes(sharedInstructions)));
+    assert.ok(invocations.every(call => /schemaVersion: "artifact-backed-structured-final-result-receipt-v1"/.test(String(call.initialPrompt))));
+    assert.ok(invocations.every(call => String(call.initialPrompt).includes('"schemaVersion":"reference-communication-large-object-v1"')));
+    assert.ok(invocations.every(call => /not the terminal receipt schemaVersion/i.test(String(call.initialPrompt))));
     assert.ok(invocations.every(call => /terminal output must contain only the small JSON receipt/i.test(String(call.initialPrompt))));
     assert.equal((result as { observationCeilingMs?: number }).observationCeilingMs, 300_000);
 

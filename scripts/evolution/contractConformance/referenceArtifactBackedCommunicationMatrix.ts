@@ -13,7 +13,10 @@ import {
   resolveArtifactBackedReferenceParticipantBindingFromLock,
   type ArtifactBackedReferenceParticipantBindingLockV2,
 } from '../operator/referenceParticipantBinding';
-import { ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH } from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
+import {
+  ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH,
+  renderArtifactBackedStructuredFinalResultInstructionsV1,
+} from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
 import {
   runStructuredParticipantExecution,
   type StructuredParticipantExecutionResult,
@@ -132,8 +135,8 @@ async function writeJsonCreateOnly(path: string, value: unknown): Promise<void> 
 function promptForSyntheticResult(trialId: string, payload: Record<string, unknown>): string {
   return [
     `Artifact-backed synthetic transport trial ${trialId}.`,
-    `Write the complete JSON object below to the fixed Host-owned workspace path ${ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH}.`,
-    'The terminal output must contain only the small JSON receipt for that exact artifact. Do not emit the object in terminal output, prose, Markdown, or a continuation.',
+    renderArtifactBackedStructuredFinalResultInstructionsV1({ roleSchemaName: 'SyntheticLargeEnvelopeV1' }),
+    'SyntheticLargeEnvelopeV1 names the artifact object Role/schema; it is not the terminal receipt schemaVersion.',
     'Preserve the complete object, all correctness-bearing fields, and structural keys. The x-only padding may have any non-empty x-only length that leaves the serialized object between 22 and 26 KiB.',
     JSON.stringify(payload),
   ].join('\n');

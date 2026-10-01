@@ -284,7 +284,10 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(artifactPrompt, /Artifact-Backed Structured Final Result Receipt V1/);
   assert.match(artifactPrompt, /complete SolutionWorkV1 as one valid JSON object/i);
   assert.match(artifactPrompt, new RegExp(escapeRegex(ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH)));
-  assert.match(artifactPrompt, /terminal result must contain only.*Receipt V1/i);
+  assert.match(artifactPrompt, /terminal output must contain only the small JSON receipt/i);
+  assert.match(artifactPrompt, /schemaVersion: "artifact-backed-structured-final-result-receipt-v1"/);
+  assert.match(artifactPrompt, /bytes: exact artifact byte length as a non-negative integer/);
+  assert.match(artifactPrompt, /sha256: exact artifact SHA-256 as 64 lowercase hexadecimal characters/);
   assert.match(artifactPrompt, /exact byte length and SHA-256/i);
   assert.match(artifactPrompt, /reject rather than repair/i);
   assert.doesNotMatch(artifactPrompt, /Structured Final Output Contract V1/);

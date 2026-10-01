@@ -68,6 +68,8 @@ export interface WorkspaceAgentJobInput {
   workspaceRoot: string;
   prompt: string;
   traceArtifactPath?: string;
+  providerStdoutArtifactPath?: string;
+  providerStderrArtifactPath?: string;
 }
 
 export interface ParticipantThreadRef {
@@ -154,6 +156,16 @@ async function writeCreateOnly(path: string, value: unknown): Promise<void> {
   const handle = await open(path, 'wx');
   try {
     await handle.writeFile(`${canonicalJson(value)}\n`);
+  } finally {
+    await handle.close();
+  }
+}
+
+async function writeCreateOnlyBuffer(path: string, value: Buffer): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  const handle = await open(path, 'wx');
+  try {
+    await handle.writeFile(value);
   } finally {
     await handle.close();
   }
@@ -269,10 +281,29 @@ async function runWorkspaceAgentProcess(
     let args: string[];
     let settled = false;
     let timeoutTimer: NodeJS.Timeout | undefined;
+    let stdout = '';
+    let stderr = '';
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+    const persistProviderStreams = async (): Promise<void> => {
+      const streams = [
+        [input.providerStdoutArtifactPath, stdoutChunks],
+        [input.providerStderrArtifactPath, stderrChunks],
+      ] as const;
+      await Promise.all(streams.map(async ([path, chunks]) => {
+        if (path === undefined) return;
+        try {
+          await writeCreateOnlyBuffer(path, Buffer.concat(chunks));
+        } catch {
+          // Raw provider streams are sidecar evidence and do not change job interpretation.
+        }
+      }));
+    };
     const finish = async (result: Omit<WorkspaceAgentJobResult, 'executionTrace'>, outcome: ParticipantExecutionTraceV1['terminal']['outcome']): Promise<void> => {
       if (settled) return;
       settled = true;
       if (timeoutTimer !== undefined) clearTimeout(timeoutTimer);
+      await persistProviderStreams();
       await persistTrace(outcome);
       resolveResult({ ...result, executionTrace: trace } as WorkspaceAgentJobResult);
     };
@@ -292,8 +323,6 @@ async function runWorkspaceAgentProcess(
       return;
     }
 
-    let stdout = '';
-    let stderr = '';
     timeoutTimer = setTimeout(() => {
       const timeoutElapsedMs = elapsedMs();
       child.kill('SIGTERM');
@@ -308,10 +337,12 @@ async function runWorkspaceAgentProcess(
     }, timeoutMs);
 
     child.stdout.on('data', chunk => {
+      stdoutChunks.push(Buffer.isBuffer(chunk) ? Buffer.from(chunk) : Buffer.from(String(chunk)));
       stdout += String(chunk);
       observeOutput('stdout', chunk);
     });
     child.stderr.on('data', chunk => {
+      stderrChunks.push(Buffer.isBuffer(chunk) ? Buffer.from(chunk) : Buffer.from(String(chunk)));
       stderr += String(chunk);
       observeOutput('stderr', chunk);
     });

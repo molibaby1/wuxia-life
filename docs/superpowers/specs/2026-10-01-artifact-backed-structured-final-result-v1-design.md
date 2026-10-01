@@ -1,7 +1,8 @@
 # Artifact-Backed Structured Final Result V1 — Design
 
 **Date:** 2026-10-01
-**Status:** DRAFT FOR HUMAN REVIEW
+**Status:** APPROVED DESIGN
+**Human approval:** 2026-10-01 — approved fixed Host path, small receipt + SHA, 1 MiB transport ceiling, and zero-retransmission artifact-backed pilot
 **Project:** wuxia-life / Auto Evolution
 **Scope:** Solution Participant structured-result transport; controlled reference path first
 
@@ -322,9 +323,10 @@ After the Participant process has completed successfully and the terminal receip
 6. compute SHA-256 from those exact bytes;
 7. require exact equality with receipt `bytes` and `sha256`;
 8. persist the exact raw artifact bytes to the Host-owned destination evidence directory using create-only semantics;
-9. apply the structured JSON-object envelope validator to those same bytes;
-10. pass the parsed object to the existing Role-specific validator;
-11. run the existing accepted-result validations.
+9. decode those exact bytes as strict UTF-8 and reject invalid UTF-8 rather than replacement-decoding it;
+10. apply the structured JSON-object envelope validator to the strictly decoded text;
+11. pass the parsed object to the existing Role-specific validator;
+12. run the existing accepted-result validations.
 
 The Host MUST NOT:
 
@@ -577,6 +579,7 @@ Tests MUST prove:
 - byte-length mismatch is rejected;
 - SHA mismatch is rejected;
 - exact artifact bytes are what get hashed and parsed;
+- invalid UTF-8 artifact bytes are rejected without replacement decoding;
 - pretty-printed valid result JSON is accepted;
 - invalid artifact JSON is rejected without extraction/repair;
 - invalid `SolutionWorkV1` is rejected by existing validator;
@@ -761,7 +764,7 @@ Implementation is accepted only if all are true:
 7. Host computes byte length and SHA from exact file bytes;
 8. receipt and file integrity must match exactly;
 9. Host persists exact raw artifact bytes create-only;
-10. artifact bytes satisfy strict structured-result JSON envelope semantics;
+10. artifact bytes must decode as strict UTF-8 and satisfy strict structured-result JSON envelope semantics;
 11. existing `validateSolutionWork()` remains authoritative and unchanged in meaning;
 12. existing accepted-result/reference/Contract checks remain authoritative;
 13. downstream receives validated `SolutionWorkV1`, not receipt metadata;

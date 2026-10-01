@@ -11,7 +11,8 @@
       "type": "integer"
     },
     "sha256": {
-      "type": "string"
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
     }
   },
   "required": [

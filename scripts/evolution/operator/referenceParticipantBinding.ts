@@ -172,13 +172,15 @@ function isReceiptSchema(value: unknown): boolean {
     || schemaVersion.enum[0] !== ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION) {
     return false;
   }
-  return [
-    ['bytes', 'integer'],
-    ['sha256', 'string'],
-  ].every(([field, type]) => {
-    const schema = value.properties[field as string];
-    return isRecord(schema) && hasExactKeys(schema, ['type']) && schema.type === type;
-  });
+  const bytes = value.properties.bytes;
+  const sha256 = value.properties.sha256;
+  return isRecord(bytes)
+    && hasExactKeys(bytes, ['type'])
+    && bytes.type === 'integer'
+    && isRecord(sha256)
+    && hasExactKeys(sha256, ['type', 'pattern'])
+    && sha256.type === 'string'
+    && sha256.pattern === '^[0-9a-f]{64}$';
 }
 
 async function readArtifactReceiptSchemaSha256(repositoryRoot: string): Promise<string> {

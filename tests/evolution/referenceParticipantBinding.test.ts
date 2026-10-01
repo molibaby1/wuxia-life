@@ -224,7 +224,10 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
       enum: ['artifact-backed-structured-final-result-receipt-v1'],
     });
     assert.deepEqual(artifactSchema.properties?.bytes?.type, 'integer');
-    assert.deepEqual(artifactSchema.properties?.sha256?.type, 'string');
+    assert.deepEqual(artifactSchema.properties?.sha256, {
+      type: 'string',
+      pattern: '^[0-9a-f]{64}$',
+    });
     assert.doesNotMatch(artifactSchemaBytes.toString('utf8'), /SolutionWorkV1|AutonomousAuthoring|Card/);
 
     const artifactLock = await captureArtifactBackedReferenceParticipantBindingLock({
@@ -282,6 +285,35 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     const artifactReviewerArgs = artifactResolved.participant.buildArgs({ ...solutionJob, role: 'reviewer' });
     assert.equal(artifactReviewerArgs.includes('--output-schema'), false);
     assert.equal(Object.hasOwn(artifactResolved.participant, 'sameThreadContinuation'), false);
+
+    for (const sha256Schema of [
+      { type: 'string' },
+      { type: 'string', pattern: '^[A-Fa-f0-9]{64}$' },
+    ]) {
+      const invalidSha256SchemaBytes = Buffer.from(JSON.stringify({
+        ...artifactSchema,
+        properties: {
+          ...artifactSchema.properties,
+          sha256: sha256Schema,
+        },
+      }));
+      await writeFile(artifactSchemaPath, invalidSha256SchemaBytes);
+      await assert.rejects(
+        captureArtifactBackedReferenceParticipantBindingLock({
+          repositoryRoot,
+          bindingId: 'CODEX_CURRENT',
+          model: 'gpt-6-luna',
+          reasoningEffort: 'max',
+          ambientCodexConfigPath: configPath,
+        }),
+        /receipt schema must contain only the transport receipt fields/,
+      );
+      await assert.rejects(
+        resolveArtifactBackedReferenceParticipantBindingFromLock({ repositoryRoot, lock: artifactLock }),
+        /receipt schema must contain only the transport receipt fields/,
+      );
+    }
+    await writeFile(artifactSchemaPath, artifactSchemaBytes);
 
     const unconstrainedArtifactSchemaBytes = Buffer.from(JSON.stringify({
       ...artifactSchema,

@@ -75,6 +75,7 @@ export async function runArtifactBackedStructuredFinalResultTests(): Promise<voi
     { ...validReceipt, bytes: ARTIFACT_BACKED_STRUCTURED_RESULT_MAX_BYTES + 1 },
     { ...validReceipt, sha256: 'A'.repeat(64) },
     { ...validReceipt, sha256: 'a'.repeat(63) },
+    { ...validReceipt, sha256: 'a'.repeat(65) },
     { ...validReceipt, sha256: 'g'.repeat(64) },
   ]) {
     assert.throws(() => validateArtifactBackedStructuredFinalResultReceipt(invalid));

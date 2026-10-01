@@ -12,6 +12,7 @@ import {
   validateSolutionReview,
   type SolutionReviewV1,
 } from '../../../src/evolution/solutionReviewContract';
+import { renderArtifactBackedStructuredFinalResultInstructionsV1 } from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
 import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
@@ -19,7 +20,10 @@ import {
   type WorkspaceAgentParticipantOptions,
 } from './agentParticipant';
 import { isEnvelopeRetransmissionEnabledForRole } from './envelopeRetransmission';
-import { runStructuredParticipantExecution } from './runStructuredParticipantExecution';
+import {
+  runStructuredParticipantExecution,
+  type StructuredResultDeliveryMode,
+} from './runStructuredParticipantExecution';
 import {
   assertArtifactReferenceFile,
   assertRepoReferenceFileAgainstAuthoritative,
@@ -48,6 +52,7 @@ export interface RunSolutionAgentInput {
   destinationRoot: string;
   skillAssignments: readonly ParticipantSkillAssignment[];
   participant: WorkspaceAgentParticipantOptions;
+  structuredResultDelivery?: StructuredResultDeliveryMode;
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
   referenceResponsibilityContext?: PreschoolReferenceResponsibilityContextV1;
 }
@@ -192,6 +197,7 @@ export function buildSolutionAgentPrompt(
   assignedSkills: DeliveredParticipantSkill[],
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1,
   referenceResponsibilityContext?: PreschoolReferenceResponsibilityContextV1,
+  structuredResultDelivery?: StructuredResultDeliveryMode,
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
     `Skill: ${skill.identity}`,
@@ -217,9 +223,9 @@ export function buildSolutionAgentPrompt(
     'Diagnostic evidence referenced by the Problem Package is trusted internal source-run provenance. It is not player-observable evidence. Producer attribution identifies which captured runtime producer generated an observed entry; it does not by itself prove the broader causal mechanism or that a proposed change is correct.',
     'The observable payload referenced by ProblemPackage.source.observablePayloadRef may include validated Experience Semantic Context on each entry. Read it as player-observable meaning: milestone meaning, life-stage meaning, experience category, and expected experience signals.',
     'The Experience Semantic Context is descriptive only. It contains no hidden runtime state, and you must not treat it as a solution recommendation, quality score, authority, or permission.',
-    renderStructuredFinalOutputContractV1({
-      roleSchemaName: 'SolutionWorkV1',
-    }),
+    structuredResultDelivery?.kind === 'WORKSPACE_ARTIFACT_RECEIPT_V1'
+      ? renderArtifactBackedStructuredFinalResultInstructionsV1({ roleSchemaName: 'SolutionWorkV1' })
+      : renderStructuredFinalOutputContractV1({ roleSchemaName: 'SolutionWorkV1' }),
     renderSolutionWorkSchemaGuidance(),
     '',
     'Convergence discipline (Solution work only):',
@@ -264,7 +270,9 @@ export function buildSolutionAgentPrompt(
     '',
     'Problem Package (the package references evidence; interpret it yourself):',
     canonicalJson(problemPackage),
-    'Final JSON serialization check (required): before sending, verify that the complete result parses as one JSON object, every object and array is closed, and all strings are escaped.',
+    ...(structuredResultDelivery?.kind === 'WORKSPACE_ARTIFACT_RECEIPT_V1' ? [] : [
+      'Final JSON serialization check (required): before sending, verify that the complete result parses as one JSON object, every object and array is closed, and all strings are escaped.',
+    ]),
   ].join('\n');
 }
 
@@ -274,6 +282,7 @@ export function buildSolutionRevisionPrompt(
   originalReview: SolutionReviewV1,
   assignedSkills: DeliveredParticipantSkill[],
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1,
+  structuredResultDelivery?: StructuredResultDeliveryMode,
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
     `Skill: ${skill.identity}`,
@@ -289,8 +298,12 @@ export function buildSolutionRevisionPrompt(
     'Perform bounded work only: investigate the concrete decision-relevant follow-up in the current execution context and do not broaden the problem.',
     'If unavailable evidence prevents resolving a material question, return INSUFFICIENT_EVIDENCE. If Human authority is required for the remaining decision, return ESCALATE.',
     'Do not manufacture another player run to satisfy this revision. Do not execute authoritative product changes.',
-    'Return a fresh SolutionWorkV1 result using the existing output contract. Preserve authority, permission, and scope boundaries; do not treat the Reviewer request as permission.',
-    renderStructuredFinalOutputContractV1({ roleSchemaName: 'SolutionWorkV1' }),
+    structuredResultDelivery?.kind === 'WORKSPACE_ARTIFACT_RECEIPT_V1'
+      ? 'Return a fresh SolutionWorkV1 result using the artifact-backed delivery instructions below. Preserve authority, permission, and scope boundaries; do not treat the Reviewer request as permission.'
+      : 'Return a fresh SolutionWorkV1 result using the existing output contract. Preserve authority, permission, and scope boundaries; do not treat the Reviewer request as permission.',
+    structuredResultDelivery?.kind === 'WORKSPACE_ARTIFACT_RECEIPT_V1'
+      ? renderArtifactBackedStructuredFinalResultInstructionsV1({ roleSchemaName: 'SolutionWorkV1' })
+      : renderStructuredFinalOutputContractV1({ roleSchemaName: 'SolutionWorkV1' }),
     renderSolutionWorkSchemaGuidance(),
     '',
     ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket),
@@ -354,7 +367,10 @@ async function runSolutionAgentWithPrompt(
     initialPrompt: prompt,
     expectedRoleSchemaName: 'SolutionWorkV1',
     participant: input.participant,
-    retransmissionEnabled: isEnvelopeRetransmissionEnabledForRole('solution'),
+    retransmissionEnabled: input.structuredResultDelivery?.kind === 'WORKSPACE_ARTIFACT_RECEIPT_V1'
+      ? false
+      : isEnvelopeRetransmissionEnabledForRole('solution'),
+    structuredResultDelivery: input.structuredResultDelivery,
     validateSchema: validateSolutionWork,
     validateAcceptedResult: async result => {
       if (result.problemId !== problemPackage.problemId) {
@@ -507,7 +523,13 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
     problemPackage,
     problemPackageSha256,
     assignedSkills,
-    buildSolutionAgentPrompt(problemPackage, assignedSkills, input.autonomousAuthoringContractPacket, input.referenceResponsibilityContext),
+    buildSolutionAgentPrompt(
+      problemPackage,
+      assignedSkills,
+      input.autonomousAuthoringContractPacket,
+      input.referenceResponsibilityContext,
+      input.structuredResultDelivery,
+    ),
   );
 }
 
@@ -548,6 +570,7 @@ export async function runSolutionRevisionAgent(
       originalReview,
       assignedSkills,
       input.autonomousAuthoringContractPacket,
+      input.structuredResultDelivery,
     ),
   );
 }

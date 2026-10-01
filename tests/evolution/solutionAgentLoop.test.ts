@@ -20,6 +20,8 @@ import {
 import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolContractPacket';
 import type { PreschoolReferenceResponsibilityContextV1 } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
+import { ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH } from '../../src/evolution/artifactBackedStructuredFinalResultContract';
+import type { StructuredResultDeliveryMode } from '../../scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
@@ -263,6 +265,44 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assertSolutionWorkSchemaGuidance(ordinaryPrompt);
   assert.doesNotMatch(ordinaryPrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES|If the Layer A case is APPLICABLE/);
   assert.match(ordinaryPrompt, /Return zero to three options or an explicit no-proposal\/insufficient-evidence\/escalate result/);
+
+  const artifactDelivery: StructuredResultDeliveryMode = {
+    kind: 'WORKSPACE_ARTIFACT_RECEIPT_V1',
+    resultRelativePath: ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH,
+  };
+  const artifactPrompt = buildSolutionAgentPrompt(
+    problemPackage,
+    [],
+    autonomousAuthoringContractPacket,
+    referenceContext,
+    artifactDelivery,
+  );
+  assert.match(artifactPrompt, /own investigation and solution reasoning/i);
+  assert.match(artifactPrompt, /pre-synthesis convergence checkpoint/i);
+  assert.match(artifactPrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES/);
+  assertSolutionWorkSchemaGuidance(artifactPrompt);
+  assert.match(artifactPrompt, /Artifact-Backed Structured Final Result Receipt V1/);
+  assert.match(artifactPrompt, /complete SolutionWorkV1 as one valid JSON object/i);
+  assert.match(artifactPrompt, new RegExp(escapeRegex(ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH)));
+  assert.match(artifactPrompt, /terminal result must contain only.*Receipt V1/i);
+  assert.match(artifactPrompt, /exact byte length and SHA-256/i);
+  assert.match(artifactPrompt, /reject rather than repair/i);
+  assert.doesNotMatch(artifactPrompt, /Structured Final Output Contract V1/);
+  assert.doesNotMatch(artifactPrompt, /Final JSON serialization check \(required\)/);
+  assert.equal(artifactPrompt.match(/\.evolution-participant\/final-result\.json/g)?.length, 1);
+
+  const artifactRevisionPrompt = buildSolutionRevisionPrompt(
+    problemPackage,
+    solutionResult as SolutionWorkV1,
+    originalReview,
+    [],
+    undefined,
+    artifactDelivery,
+  );
+  assert.match(artifactRevisionPrompt, /bounded revision/i);
+  assert.match(artifactRevisionPrompt, /Artifact-Backed Structured Final Result Receipt V1/);
+  assert.match(artifactRevisionPrompt, /\.evolution-participant\/final-result\.json/);
+  assert.doesNotMatch(artifactRevisionPrompt, /Structured Final Output Contract V1/);
 
   const root = await mkdtemp(join(tmpdir(), 'solution-agent-loop-'));
   const workspaceRoot = join(root, 'workspace');
@@ -547,6 +587,66 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     expectedContentSha256: canonicalSkillSha256,
     contentSha256: canonicalSkillSha256,
   }]);
+
+  let artifactContinuationCalled = false;
+  const artifactPayload = JSON.stringify(solutionResult);
+  const artifactRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-artifact-backed-000001',
+    jobNumber: 4,
+    destinationRoot: join(root, 'solution-artifact-backed'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    structuredResultDelivery: artifactDelivery,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', [
+        "const fs = require('node:fs');",
+        "const path = require('node:path');",
+        "const crypto = require('node:crypto');",
+        `const raw = Buffer.from(${JSON.stringify(artifactPayload)}, 'utf8');`,
+        `const resultPath = path.join(process.cwd(), ${JSON.stringify(ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH)});`,
+        'fs.mkdirSync(path.dirname(resultPath), { recursive: true });',
+        "fs.writeFileSync(resultPath, raw, { flag: 'wx' });",
+        "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: raw.byteLength, sha256: crypto.createHash('sha256').update(raw).digest('hex') }));",
+      ].join(' ')],
+      sameThreadContinuation: {
+        provider: 'test-provider',
+        buildArgs: () => {
+          artifactContinuationCalled = true;
+          return ['-e', 'process.exit(1)'];
+        },
+      },
+    },
+  });
+  assert.equal(artifactRun.ok, true);
+  assert.deepEqual(artifactRun.result, solutionResult);
+  assert.equal(artifactContinuationCalled, false);
+  assert.deepEqual(
+    JSON.parse(await readFile(join(root, 'solution-artifact-backed/result.json'), 'utf8')),
+    solutionResult,
+  );
+  assert.equal(
+    await readFile(join(root, 'solution-artifact-backed/raw-output.txt'), 'utf8'),
+    JSON.stringify({
+      schemaVersion: 'artifact-backed-structured-final-result-receipt-v1',
+      bytes: Buffer.byteLength(artifactPayload),
+      sha256: createHash('sha256').update(artifactPayload).digest('hex'),
+    }),
+  );
+  assert.equal(
+    await readFile(join(root, 'solution-artifact-backed/structured-result-artifact.raw.json'), 'utf8'),
+    artifactPayload,
+  );
+  const artifactValidation = JSON.parse(
+    await readFile(join(root, 'solution-artifact-backed/artifact-backed-validation.json'), 'utf8'),
+  );
+  assert.equal(artifactValidation.deliveryMode, 'WORKSPACE_ARTIFACT_RECEIPT_V1');
+  assert.equal(artifactValidation.roleSchemaValidationAttempted, true);
+  assert.equal(artifactValidation.accepted, true);
 
   const originalSolutionWork = solutionResult as SolutionWorkV1;
   const revisionPrompt = buildSolutionRevisionPrompt(

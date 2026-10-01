@@ -170,6 +170,20 @@ export interface PreschoolReferenceTrialExecutionAuthorizationV2 {
   canonicalSha256: string;
 }
 
+export interface PreschoolReferenceTrialExecutionAuthorizationV3 {
+  schemaVersion: 'preschool-reference-trial-execution-authorization-v3';
+  authorizationRef: string;
+  runRef: string;
+  attemptRef: string;
+  authorizedAt: string;
+  acknowledgedLegacyHistory: PreschoolReferenceTrialAcknowledgedHistoryV1;
+  solutionParticipantBindingLock: ArtifactBackedReferenceParticipantBindingLockV2;
+  solutionParticipantBindingLockSha256: string;
+  downstreamParticipantBindingLock: ReferenceParticipantBindingLockV1;
+  downstreamParticipantBindingLockSha256: string;
+  canonicalSha256: string;
+}
+
 type TrialStage = 'PREFLIGHT' | 'PREPARATION' | 'INPUTS' | 'BINDING' | 'SOLUTION' | 'REVIEWER' | 'ADMISSION' | 'SHADOW_AUTHORING' | 'VERIFICATION' | 'PROMOTION' | 'CLEANUP';
 const TRIAL_STAGE_ORDER: TrialStage[] = [
   'PREFLIGHT', 'PREPARATION', 'INPUTS', 'BINDING', 'SOLUTION', 'REVIEWER',
@@ -212,7 +226,7 @@ interface AvailableInvocationProvenanceV1 {
 }
 type InvocationProvenance = null | AvailableInvocationProvenanceV1 | { status: 'CORRUPTED'; artifactRef: string; diagnostic: string };
 
-interface AttemptManifest {
+interface AttemptManifestV1 {
   schemaVersion: 'preschool-reference-trial-attempt-manifest-v1';
   runRef: typeof PRESCHOOL_REFERENCE_TRIAL_RUN_REF;
   attemptRef: string;
@@ -250,6 +264,45 @@ interface AttemptManifest {
     trialResultStatus?: 'PRESENT_UNREMOVED';
     diagnosticFailures?: string[];
   };
+}
+
+interface AttemptManifest extends Omit<AttemptManifestV1,
+  'schemaVersion' | 'participantBindingLock' | 'participantBindingLockSha256'> {
+  schemaVersion: 'preschool-reference-trial-attempt-manifest-v2';
+  roleSpecificParticipantBindings: {
+    solution: {
+      transport: 'WORKSPACE_ARTIFACT_RECEIPT_V1';
+      lock: ArtifactBackedReferenceParticipantBindingLockV2;
+      lockSha256: string;
+    };
+    downstream: {
+      transport: 'TERMINAL_JSON';
+      lock: ReferenceParticipantBindingLockV1;
+      lockSha256: string;
+    };
+  };
+}
+
+const REFERENCE_PARTICIPANT_BINDING_CORE_FIELDS = [
+  'bindingId',
+  'provider',
+  'executableRealPath',
+  'executableVersion',
+  'modelConfigured',
+  'reasoningEffort',
+  'ambientCodexConfigPath',
+  'ambientCodexConfigSha256',
+] as const;
+
+function assertReferenceParticipantBindingCoreIdentity(
+  solution: ArtifactBackedReferenceParticipantBindingLockV2,
+  downstream: ReferenceParticipantBindingLockV1,
+): void {
+  for (const field of REFERENCE_PARTICIPANT_BINDING_CORE_FIELDS) {
+    if (solution[field] !== downstream[field]) {
+      throw new TrialAdmissionStop(`Solution and downstream Participant binding core identity differs at ${field}.`);
+    }
+  }
 }
 
 interface AttemptManifestSnapshot {
@@ -330,6 +383,7 @@ export interface RunPreschoolReferenceTrialInput {
 
 export interface PreschoolReferenceTrialDependencies {
   resolveReferenceParticipantBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+  resolveArtifactBackedReferenceParticipantBindingFromLock?: typeof resolveArtifactBackedReferenceParticipantBindingFromLock;
 }
 
 export function canonicalAttemptManifestJson(value: unknown): string {
@@ -395,7 +449,8 @@ function readAttemptManifestState(manifestPath: string, attemptRef: string): Att
       throw new TrialAdmissionStop(`Existing attempt manifest ${attemptRef} is malformed.`);
     }
     const manifest = parsed as Record<string, unknown>;
-    if (manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v1'
+    if (!(manifest.schemaVersion === 'preschool-reference-trial-attempt-manifest-v1'
+      || manifest.schemaVersion === 'preschool-reference-trial-attempt-manifest-v2')
       || manifest.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
       || manifest.attemptRef !== attemptRef
       || !['CREATED', 'RUNNING', 'SUCCEEDED', 'FAILED', 'STOPPED'].includes(String(manifest.state))) {
@@ -485,7 +540,7 @@ async function readExecutionAuthorization(
   path: string,
   attemptRef: string,
   expectedExecutionAuthorizationSha256: string,
-): Promise<PreschoolReferenceTrialExecutionAuthorizationV2> {
+): Promise<PreschoolReferenceTrialExecutionAuthorizationV3> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(await readFile(path, 'utf8')) as unknown;
@@ -495,21 +550,34 @@ async function readExecutionAuthorization(
   if (!isRecord(parsed)) throw new TrialAdmissionStop('Execution authorization artifact must be a JSON object.');
   assertExactObjectKeys(parsed, [
     'schemaVersion', 'authorizationRef', 'runRef', 'attemptRef', 'authorizedAt',
-    'acknowledgedLegacyHistory', 'participantBindingLock', 'participantBindingLockSha256', 'canonicalSha256',
+    'acknowledgedLegacyHistory',
+    'solutionParticipantBindingLock', 'solutionParticipantBindingLockSha256',
+    'downstreamParticipantBindingLock', 'downstreamParticipantBindingLockSha256',
+    'canonicalSha256',
   ], 'Execution authorization artifact');
   const body = Object.fromEntries(Object.entries(parsed).filter(([key]) => key !== 'canonicalSha256'));
   const computedCanonicalSha256 = sha256Hex(canonicalAttemptManifestJson(body));
-  let computedParticipantBindingLockSha256: string | null = null;
-  if (isRecord(parsed.participantBindingLock)) {
+  let computedSolutionBindingLockSha256: string | null = null;
+  if (isRecord(parsed.solutionParticipantBindingLock)) {
     try {
-      computedParticipantBindingLockSha256 = referenceParticipantBindingLockSha256(
-        parsed.participantBindingLock as unknown as ReferenceParticipantBindingLockV1,
+      computedSolutionBindingLockSha256 = artifactBackedReferenceParticipantBindingLockSha256(
+        parsed.solutionParticipantBindingLock as unknown as ArtifactBackedReferenceParticipantBindingLockV2,
       );
     } catch {
-      computedParticipantBindingLockSha256 = null;
+      computedSolutionBindingLockSha256 = null;
     }
   }
-  if (parsed.schemaVersion !== 'preschool-reference-trial-execution-authorization-v2'
+  let computedDownstreamBindingLockSha256: string | null = null;
+  if (isRecord(parsed.downstreamParticipantBindingLock)) {
+    try {
+      computedDownstreamBindingLockSha256 = referenceParticipantBindingLockSha256(
+        parsed.downstreamParticipantBindingLock as unknown as ReferenceParticipantBindingLockV1,
+      );
+    } catch {
+      computedDownstreamBindingLockSha256 = null;
+    }
+  }
+  if (parsed.schemaVersion !== 'preschool-reference-trial-execution-authorization-v3'
     || typeof parsed.authorizationRef !== 'string'
     || parsed.authorizationRef.trim().length === 0
     || parsed.authorizationRef.length > 256
@@ -521,11 +589,22 @@ async function readExecutionAuthorization(
     || new Date(parsed.authorizedAt).toISOString() !== parsed.authorizedAt
     || typeof parsed.canonicalSha256 !== 'string'
     || !/^[a-f0-9]{64}$/.test(parsed.canonicalSha256)
-    || typeof parsed.participantBindingLockSha256 !== 'string'
-    || !/^[a-f0-9]{64}$/.test(parsed.participantBindingLockSha256)
-    || computedParticipantBindingLockSha256 !== parsed.participantBindingLockSha256
+    || typeof parsed.solutionParticipantBindingLockSha256 !== 'string'
+    || !/^[a-f0-9]{64}$/.test(parsed.solutionParticipantBindingLockSha256)
+    || computedSolutionBindingLockSha256 !== parsed.solutionParticipantBindingLockSha256
+    || typeof parsed.downstreamParticipantBindingLockSha256 !== 'string'
+    || !/^[a-f0-9]{64}$/.test(parsed.downstreamParticipantBindingLockSha256)
+    || computedDownstreamBindingLockSha256 !== parsed.downstreamParticipantBindingLockSha256
     || computedCanonicalSha256 !== parsed.canonicalSha256) {
-    throw new TrialAdmissionStop('Execution authorization identity, schema, binding-lock digest, timestamp, or canonical digest is invalid.');
+    throw new TrialAdmissionStop('Execution authorization identity, schema, role-specific binding-lock digest, timestamp, or canonical digest is invalid.');
+  }
+  try {
+    assertReferenceParticipantBindingCoreIdentity(
+      parsed.solutionParticipantBindingLock as unknown as ArtifactBackedReferenceParticipantBindingLockV2,
+      parsed.downstreamParticipantBindingLock as unknown as ReferenceParticipantBindingLockV1,
+    );
+  } catch (error) {
+    throw new TrialAdmissionStop(error instanceof Error ? error.message : String(error));
   }
   if (typeof expectedExecutionAuthorizationSha256 !== 'string'
     || !/^[a-f0-9]{64}$/.test(expectedExecutionAuthorizationSha256)) {
@@ -537,7 +616,7 @@ async function readExecutionAuthorization(
   if (!isRecord(parsed.acknowledgedLegacyHistory)) {
     throw new TrialAdmissionStop('Execution authorization legacy history acknowledgement is malformed.');
   }
-  return parsed as unknown as PreschoolReferenceTrialExecutionAuthorizationV2;
+  return parsed as unknown as PreschoolReferenceTrialExecutionAuthorizationV3;
 }
 
 function nextManifestUpdatedAt(previousUpdatedAt: string): string {
@@ -563,7 +642,9 @@ export async function admitReferenceTrialAttempt(input: {
   attemptRef: string;
   executionAuthorizationPath: string;
   expectedExecutionAuthorizationSha256: string;
-}, resolveBindingFromLock: typeof resolveReferenceParticipantBindingFromLock = resolveReferenceParticipantBindingFromLock): Promise<{ outputRoot: string; manifest: AttemptManifest }> {
+}, resolveDownstreamBindingFromLock: typeof resolveReferenceParticipantBindingFromLock = resolveReferenceParticipantBindingFromLock,
+resolveSolutionBindingFromLock: typeof resolveArtifactBackedReferenceParticipantBindingFromLock = resolveArtifactBackedReferenceParticipantBindingFromLock,
+): Promise<{ outputRoot: string; manifest: AttemptManifest }> {
   const liveRoot = resolve(input.liveRepositoryRoot);
   const attemptRef = validateReferenceTrialAttemptRef(input.attemptRef);
   const authorizationPath = isAbsolute(input.executionAuthorizationPath)
@@ -608,15 +689,29 @@ export async function admitReferenceTrialAttempt(input: {
       }
     }
 
-    await resolveBindingFromLock({ repositoryRoot: liveRoot, lock: authorization.participantBindingLock });
+    await resolveSolutionBindingFromLock({
+      repositoryRoot: liveRoot,
+      lock: authorization.solutionParticipantBindingLock,
+    });
+    await resolveDownstreamBindingFromLock({
+      repositoryRoot: liveRoot,
+      lock: authorization.downstreamParticipantBindingLock,
+    });
 
     const outputRoot = join(trialRoot, 'attempts', attemptRef);
     await mkdir(dirname(outputRoot), { recursive: true });
     await mkdir(outputRoot, { recursive: false });
-    await writeCreateOnlyJson(join(outputRoot, 'participant-binding-lock.json'), authorization.participantBindingLock);
+    await writeCreateOnlyJson(
+      join(outputRoot, 'solution-participant-binding-lock.json'),
+      authorization.solutionParticipantBindingLock,
+    );
+    await writeCreateOnlyJson(
+      join(outputRoot, 'downstream-participant-binding-lock.json'),
+      authorization.downstreamParticipantBindingLock,
+    );
     const createdAt = new Date().toISOString();
     const manifest: AttemptManifest = {
-      schemaVersion: 'preschool-reference-trial-attempt-manifest-v1',
+      schemaVersion: 'preschool-reference-trial-attempt-manifest-v2',
       runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
       attemptRef,
       createdAt,
@@ -637,8 +732,18 @@ export async function admitReferenceTrialAttempt(input: {
       expectedAuthorizationDigest: input.expectedExecutionAuthorizationSha256,
       authorizedAt: authorization.authorizedAt,
       acknowledgedLegacyHistory: structuredClone(authorization.acknowledgedLegacyHistory),
-      participantBindingLock: structuredClone(authorization.participantBindingLock),
-      participantBindingLockSha256: authorization.participantBindingLockSha256,
+      roleSpecificParticipantBindings: {
+        solution: {
+          transport: 'WORKSPACE_ARTIFACT_RECEIPT_V1',
+          lock: structuredClone(authorization.solutionParticipantBindingLock),
+          lockSha256: authorization.solutionParticipantBindingLockSha256,
+        },
+        downstream: {
+          transport: 'TERMINAL_JSON',
+          lock: structuredClone(authorization.downstreamParticipantBindingLock),
+          lockSha256: authorization.downstreamParticipantBindingLockSha256,
+        },
+      },
       artifactRefs: {
         attemptManifest: 'attempt-manifest.json',
         trialResult: 'trial-result.json',
@@ -649,13 +754,18 @@ export async function admitReferenceTrialAttempt(input: {
         solutionInvocation: 'solution-agent/invocation.json',
         solutionCompletion: 'solution-agent/execution-trace.json',
         solutionPrompt: 'solution-agent/participant-prompt.txt',
+        solutionArtifactBackedValidation: 'solution-agent/artifact-backed-validation.json',
+        solutionStructuredResultArtifact: 'solution-agent/structured-result-artifact.raw.json',
+        solutionTerminalReceiptRawOutput: 'solution-agent/raw-output.txt',
+        solutionValidatedResult: 'solution-agent/result.json',
         reviewerInvocation: 'reviewer-agent/invocation.json',
         reviewerCompletion: 'reviewer-agent/execution-trace.json',
         reviewerPrompt: 'reviewer-agent/participant-prompt.txt',
         shadowInvocation: 'shadow-authoring/invocation.json',
         shadowCompletion: 'shadow-authoring/execution-trace.json',
         shadowPrompt: 'shadow-authoring/participant-prompt.txt',
-        participantBindingLock: 'participant-binding-lock.json',
+        solutionParticipantBindingLock: 'solution-participant-binding-lock.json',
+        downstreamParticipantBindingLock: 'downstream-participant-binding-lock.json',
       },
       inputSet: absentInputSet(),
       participantPromptProvenance: {
@@ -852,7 +962,7 @@ async function readAttemptManifestSnapshot(path: string, context: string): Promi
   }
   if (!isRecord(parsed)) throw new Error(`Cannot ${context} because the current attempt manifest is malformed.`);
   const manifest = parsed as unknown as AttemptManifest;
-  if (manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v1'
+  if (manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v2'
     || manifest.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
     || typeof manifest.attemptRef !== 'string'
     || !['CREATED', 'RUNNING', 'SUCCEEDED', 'FAILED', 'STOPPED'].includes(manifest.state)
@@ -863,7 +973,7 @@ async function readAttemptManifestSnapshot(path: string, context: string): Promi
 }
 
 function assertAttemptManifestIdentity(snapshot: AttemptManifestSnapshot, expected: AttemptManifest): void {
-  if (snapshot.manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v1'
+  if (snapshot.manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v2'
     || snapshot.manifest.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
     || snapshot.manifest.runRef !== expected.runRef
     || snapshot.manifest.attemptRef !== expected.attemptRef) {
@@ -1446,16 +1556,30 @@ async function assertAuthorizationAndHistoryUnchanged(
   );
   if (authorization.authorizationRef !== manifest.authorizationRef
     || authorization.canonicalSha256 !== manifest.authorizationDigest
-    || authorization.participantBindingLockSha256 !== manifest.participantBindingLockSha256
-    || referenceParticipantBindingLockSha256(authorization.participantBindingLock)
-      !== referenceParticipantBindingLockSha256(manifest.participantBindingLock)) {
+    || authorization.solutionParticipantBindingLockSha256
+      !== manifest.roleSpecificParticipantBindings.solution.lockSha256
+    || artifactBackedReferenceParticipantBindingLockSha256(authorization.solutionParticipantBindingLock)
+      !== artifactBackedReferenceParticipantBindingLockSha256(manifest.roleSpecificParticipantBindings.solution.lock)
+    || authorization.downstreamParticipantBindingLockSha256
+      !== manifest.roleSpecificParticipantBindings.downstream.lockSha256
+    || referenceParticipantBindingLockSha256(authorization.downstreamParticipantBindingLock)
+      !== referenceParticipantBindingLockSha256(manifest.roleSpecificParticipantBindings.downstream.lock)) {
     throw new TrialPreflightStop('Execution authorization changed after attempt admission.');
   }
-  const persistedLock = JSON.parse(await readFile(join(referenceTrialRoot(liveRoot), 'attempts', manifest.attemptRef, 'participant-binding-lock.json'), 'utf8')) as unknown;
-  if (!isRecord(persistedLock)
-    || referenceParticipantBindingLockSha256(persistedLock as unknown as ReferenceParticipantBindingLockV1)
-      !== manifest.participantBindingLockSha256) {
-    throw new TrialPreflightStop('Persisted Participant binding lock changed after attempt admission.');
+  const attemptRoot = join(referenceTrialRoot(liveRoot), 'attempts', manifest.attemptRef);
+  const [persistedSolutionLock, persistedDownstreamLock] = await Promise.all([
+    readFile(join(attemptRoot, 'solution-participant-binding-lock.json'), 'utf8'),
+    readFile(join(attemptRoot, 'downstream-participant-binding-lock.json'), 'utf8'),
+  ]).then(([solution, downstream]) => [JSON.parse(solution) as unknown, JSON.parse(downstream) as unknown]);
+  if (!isRecord(persistedSolutionLock)
+    || artifactBackedReferenceParticipantBindingLockSha256(
+      persistedSolutionLock as unknown as ArtifactBackedReferenceParticipantBindingLockV2,
+    ) !== manifest.roleSpecificParticipantBindings.solution.lockSha256
+    || !isRecord(persistedDownstreamLock)
+    || referenceParticipantBindingLockSha256(
+      persistedDownstreamLock as unknown as ReferenceParticipantBindingLockV1,
+    ) !== manifest.roleSpecificParticipantBindings.downstream.lockSha256) {
+    throw new TrialPreflightStop('Persisted role-specific Participant binding lock changed after attempt admission.');
   }
   const history = await captureReferenceTrialLegacyHistory(referenceTrialRoot(liveRoot));
   const withoutCurrentAttempt: PreschoolReferenceTrialAcknowledgedHistoryV1 = {
@@ -2019,7 +2143,8 @@ async function runVerifiedHistoricalTrial(input: {
   manifestPath: string;
   manifest: AttemptManifest;
   executionAuthorizationPath: string;
-  resolveParticipantBinding: typeof resolveReferenceParticipantBindingFromLock;
+  resolveSolutionParticipantBinding: typeof resolveArtifactBackedReferenceParticipantBindingFromLock;
+  resolveDownstreamParticipantBinding: typeof resolveReferenceParticipantBindingFromLock;
 }): Promise<PreschoolReferenceTrialVerifiedV2> {
   const liveRoot = resolve(input.liveRepositoryRoot);
   const liveRepositoryFingerprintBefore = await captureAuthoritativeFingerprint(liveRoot);
@@ -2047,11 +2172,17 @@ async function runVerifiedHistoricalTrial(input: {
     await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
     input.manifest.currentStage = 'BINDING';
     await writeAttemptManifest(input.manifestPath, input.manifest);
-    const binding: ResolvedOperatorParticipantBinding = await input.resolveParticipantBinding({
+    const solutionBinding: ResolvedOperatorParticipantBinding = await input.resolveSolutionParticipantBinding({
       repositoryRoot: liveRoot,
-      lock: input.manifest.participantBindingLock,
+      lock: input.manifest.roleSpecificParticipantBindings.solution.lock,
     });
-    const solutionParticipant = withParticipantContaminationGuard(binding.participant);
+    const downstreamBinding: ResolvedOperatorParticipantBinding = await input.resolveDownstreamParticipantBinding({
+      repositoryRoot: liveRoot,
+      lock: input.manifest.roleSpecificParticipantBindings.downstream.lock,
+    });
+    await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
+    const solutionParticipant = withParticipantContaminationGuard(solutionBinding.participant);
+    const downstreamParticipant = downstreamBinding.participant;
     const workspaceDestinationRoot = join(temporaryRoot, 'participant-workspaces');
 
     const solutionWorkspace = await prepareReferenceTrialParticipantWorkspace({
@@ -2068,27 +2199,30 @@ async function runVerifiedHistoricalTrial(input: {
       manifestPath: input.manifestPath,
       manifest: input.manifest,
       role: 'solution',
-      invoke: () => runSolutionAgent({
-        problemPackage: trialInputs.problemPackage,
-        problemPackagePath: trialInputs.problemPackagePath,
-        workspaceRoot: solutionWorkspace.workspaceRoot,
-        repositoryRoot: trialBaselineRoot,
-        artifactRoot: outputRoot,
-        workspaceBaselineFingerprintSha256: solutionWorkspace.workspaceBaselineFingerprintSha256,
-        invocationRef: referenceTrialInvocationRef(input.attemptRef, 'solution'),
-        jobNumber: 1,
-        destinationRoot: join(outputRoot, 'solution-agent'),
-        skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
-        participant: solutionParticipant,
-        autonomousAuthoringContractPacket: trialInputs.contractPacket,
-        referenceResponsibilityContext: {
-          validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
-          responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
-          briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
-          attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
-          brief: input.responsibilityBrief.brief,
-        } satisfies PreschoolReferenceResponsibilityContextV1,
-      }),
+      invoke: async () => (await executePreschoolArtifactBackedSolution({
+        evidencePath: join(outputRoot, 'solution-agent/artifact-backed-validation.json'),
+        runInput: {
+          problemPackage: trialInputs.problemPackage,
+          problemPackagePath: trialInputs.problemPackagePath,
+          workspaceRoot: solutionWorkspace.workspaceRoot,
+          repositoryRoot: trialBaselineRoot,
+          artifactRoot: outputRoot,
+          workspaceBaselineFingerprintSha256: solutionWorkspace.workspaceBaselineFingerprintSha256,
+          invocationRef: referenceTrialInvocationRef(input.attemptRef, 'solution'),
+          jobNumber: 1,
+          destinationRoot: join(outputRoot, 'solution-agent'),
+          skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+          participant: solutionParticipant,
+          autonomousAuthoringContractPacket: trialInputs.contractPacket,
+          referenceResponsibilityContext: {
+            validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+            responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+            briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+            attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+            brief: input.responsibilityBrief.brief,
+          } satisfies PreschoolReferenceResponsibilityContextV1,
+        },
+      })).solution,
     });
     input.manifest.invocationRefs.solution = await readInvocationProvenance(
       join(outputRoot, 'solution-agent/invocation.json'),
@@ -2107,7 +2241,8 @@ async function runVerifiedHistoricalTrial(input: {
     if (!solutionProvenance || solutionProvenance.status !== 'AVAILABLE') {
       throw new TrialInvocationProvenanceFailure(['solution: completed invocation provenance is unavailable.']);
     }
-    const reviewerParticipant = withVerifiedSolutionWorkContaminationGuard(binding.participant, {
+    await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
+    const reviewerParticipant = withVerifiedSolutionWorkContaminationGuard(downstreamParticipant, {
       attemptRef: input.attemptRef,
       solution,
       solutionProvenance,
@@ -2168,6 +2303,7 @@ async function runVerifiedHistoricalTrial(input: {
       throw new TrialInvocationProvenanceFailure(['reviewer: completed invocation provenance is unavailable.']);
     }
 
+    await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
     const selectedOption = acceptedAuthoringOption(solution, reviewer);
     input.manifest.currentStage = 'ADMISSION';
     await writeAttemptManifest(input.manifestPath, input.manifest);
@@ -2216,7 +2352,7 @@ async function runVerifiedHistoricalTrial(input: {
     if (decision.route !== 'READY_FOR_SHADOW_AUTHORING') {
       throw new Error(`Reference trial did not route to READY_FOR_SHADOW_AUTHORING: ${decision.route}`);
     }
-    const shadowParticipant = withVerifiedAcceptedCardsContaminationGuard(binding.participant, {
+    const shadowParticipant = withVerifiedAcceptedCardsContaminationGuard(downstreamParticipant, {
       attemptRef: input.attemptRef,
       solution,
       solutionProvenance,
@@ -2257,6 +2393,7 @@ async function runVerifiedHistoricalTrial(input: {
     if (execution.status !== 'completed' || execution.failure !== null) {
       throw new TrialParticipantFailure('process', 'shadow-authoring/execution-trace.json', `Shadow Executor failed: ${execution.failure ?? 'unknown failure'}`);
     }
+    await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
     if (execution.authoritativeFingerprintBefore !== baselineFingerprint
       || execution.authoritativeFingerprintAfter !== baselineFingerprint) {
       throw new Error('The historical candidate baseline changed during shadow execution.');
@@ -2346,6 +2483,8 @@ export async function runPreschoolReferenceTrial(
   const liveRoot = resolve(input.liveRepositoryRoot);
   const resolveBindingFromLock = dependencies.resolveReferenceParticipantBindingFromLock
     ?? resolveReferenceParticipantBindingFromLock;
+  const resolveArtifactBackedBindingFromLock = dependencies.resolveArtifactBackedReferenceParticipantBindingFromLock
+    ?? resolveArtifactBackedReferenceParticipantBindingFromLock;
   const authorizationStop = (reason: string): PreschoolReferenceTrialAuthorizationStopV1 => ({
     schemaVersion: 'preschool-reference-trial-stop-v1',
     status: 'REFERENCE_EXECUTION_AUTHORIZATION_UNAVAILABLE',
@@ -2389,7 +2528,7 @@ export async function runPreschoolReferenceTrial(
         attemptRef,
         executionAuthorizationPath,
         expectedExecutionAuthorizationSha256: expectedExecutionAuthorizationSha256!,
-      }, resolveBindingFromLock);
+      }, resolveBindingFromLock, resolveArtifactBackedBindingFromLock);
     } catch (error) {
       return authorizationStop(error instanceof Error ? error.message : String(error));
     }
@@ -2471,17 +2610,18 @@ export async function runPreschoolReferenceTrial(
     admitted.manifest.currentStage = 'PREPARATION';
     await writeAttemptManifest(manifestPath, admitted.manifest);
     const result = await runVerifiedHistoricalTrial({
-    liveRepositoryRoot: liveRoot,
-    evidence: acceptedEvidence.evidence,
-    observablePayloadBytes,
-    responsibilityBrief: responsibilityBrief.value,
-    attemptRef,
-    outputRoot: admitted.outputRoot,
-    manifestPath,
-    manifest: admitted.manifest,
-    executionAuthorizationPath,
-    resolveParticipantBinding: resolveBindingFromLock,
-  });
+      liveRepositoryRoot: liveRoot,
+      evidence: acceptedEvidence.evidence,
+      observablePayloadBytes,
+      responsibilityBrief: responsibilityBrief.value,
+      attemptRef,
+      outputRoot: admitted.outputRoot,
+      manifestPath,
+      manifest: admitted.manifest,
+      executionAuthorizationPath,
+      resolveSolutionParticipantBinding: resolveArtifactBackedBindingFromLock,
+      resolveDownstreamParticipantBinding: resolveBindingFromLock,
+    });
     await finalizeReferenceTrialSuccess(
       manifestPath,
       admitted.manifest,

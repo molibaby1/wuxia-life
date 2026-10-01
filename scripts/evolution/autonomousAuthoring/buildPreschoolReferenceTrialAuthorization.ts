@@ -8,6 +8,9 @@ import {
   validateReferenceTrialAttemptRef,
 } from './runPreschoolReferenceTrial';
 import {
+  artifactBackedReferenceParticipantBindingLockSha256,
+  resolveArtifactBackedReferenceParticipantBindingFromLock,
+  type ArtifactBackedReferenceParticipantBindingLockV2,
   referenceParticipantBindingLockSha256,
   resolveReferenceParticipantBindingFromLock,
   type ReferenceParticipantBindingLockV1,
@@ -47,13 +50,19 @@ export async function buildPreschoolReferenceTrialAuthorizationCandidate(input: 
   attemptRef: string;
   authorizationRef: string;
   authorizedAt: string;
-  participantBindingLockPath: string;
-  expectedParticipantBindingLockSha256: string;
+  solutionParticipantBindingLockPath: string;
+  expectedSolutionParticipantBindingLockSha256: string;
+  downstreamParticipantBindingLockPath: string;
+  expectedDownstreamParticipantBindingLockSha256: string;
   destinationPath: string;
-}, resolveBindingFromLock: typeof resolveReferenceParticipantBindingFromLock = resolveReferenceParticipantBindingFromLock): Promise<{
+}, dependencies: {
+  resolveSolutionBindingFromLock?: typeof resolveArtifactBackedReferenceParticipantBindingFromLock;
+  resolveDownstreamBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+} = {}): Promise<{
   canonicalSha256: string;
   rawSha256: string;
-  participantBindingLockSha256: string;
+  solutionParticipantBindingLockSha256: string;
+  downstreamParticipantBindingLockSha256: string;
 }> {
   const liveRepositoryRoot = resolve(input.liveRepositoryRoot);
   const attemptRef = validateReferenceTrialAttemptRef(input.attemptRef);
@@ -64,30 +73,52 @@ export async function buildPreschoolReferenceTrialAuthorizationCandidate(input: 
     || new Date(input.authorizedAt).toISOString() !== input.authorizedAt) {
     throw new Error('Authorization timestamp must be an exact ISO-8601 instant.');
   }
-  if (!/^[a-f0-9]{64}$/.test(input.expectedParticipantBindingLockSha256)) {
-    throw new Error('Expected Participant binding lock SHA-256 is invalid.');
+  if (!/^[a-f0-9]{64}$/.test(input.expectedSolutionParticipantBindingLockSha256)
+    || !/^[a-f0-9]{64}$/.test(input.expectedDownstreamParticipantBindingLockSha256)) {
+    throw new Error('Expected role-specific Participant binding lock SHA-256 is invalid.');
   }
-  if (!input.participantBindingLockPath || !input.destinationPath) {
-    throw new Error('Binding lock and destination paths are required.');
+  if (!input.solutionParticipantBindingLockPath || !input.downstreamParticipantBindingLockPath || !input.destinationPath) {
+    throw new Error('Both role-specific binding lock and destination paths are required.');
   }
-  const bindingLockPath = isAbsolute(input.participantBindingLockPath)
-    ? input.participantBindingLockPath
-    : resolve(liveRepositoryRoot, input.participantBindingLockPath);
+  const solutionBindingLockPath = isAbsolute(input.solutionParticipantBindingLockPath)
+    ? input.solutionParticipantBindingLockPath
+    : resolve(liveRepositoryRoot, input.solutionParticipantBindingLockPath);
+  const downstreamBindingLockPath = isAbsolute(input.downstreamParticipantBindingLockPath)
+    ? input.downstreamParticipantBindingLockPath
+    : resolve(liveRepositoryRoot, input.downstreamParticipantBindingLockPath);
   const destinationPath = isAbsolute(input.destinationPath)
     ? input.destinationPath
     : resolve(liveRepositoryRoot, input.destinationPath);
   assertAuthorizationDestinationOutsideReferenceHistory(liveRepositoryRoot, destinationPath);
-  let parsedLock: unknown;
+  let parsedSolutionLock: unknown;
   try {
-    parsedLock = JSON.parse(await readFile(bindingLockPath, 'utf8')) as unknown;
+    parsedSolutionLock = JSON.parse(await readFile(solutionBindingLockPath, 'utf8')) as unknown;
   } catch (error) {
-    throw new Error(`Participant binding lock could not be read or parsed: ${String(error)}`);
+    throw new Error(`Artifact-backed Solution binding lock could not be read or parsed: ${String(error)}`);
   }
-  if (!isRecord(parsedLock)) throw new Error('Participant binding lock must be a JSON object.');
-  const participantBindingLock = parsedLock as unknown as ReferenceParticipantBindingLockV1;
-  const participantBindingLockSha256 = referenceParticipantBindingLockSha256(participantBindingLock);
-  if (participantBindingLockSha256 !== input.expectedParticipantBindingLockSha256) {
-    throw new Error('Participant binding lock SHA-256 does not match the expected value.');
+  if (!isRecord(parsedSolutionLock)) throw new Error('Artifact-backed Solution binding lock must be a JSON object.');
+  let parsedDownstreamLock: unknown;
+  try {
+    parsedDownstreamLock = JSON.parse(await readFile(downstreamBindingLockPath, 'utf8')) as unknown;
+  } catch (error) {
+    throw new Error(`Downstream Participant binding lock could not be read or parsed: ${String(error)}`);
+  }
+  if (!isRecord(parsedDownstreamLock)) throw new Error('Downstream Participant binding lock must be a JSON object.');
+  const solutionParticipantBindingLock = parsedSolutionLock as unknown as ArtifactBackedReferenceParticipantBindingLockV2;
+  const downstreamParticipantBindingLock = parsedDownstreamLock as unknown as ReferenceParticipantBindingLockV1;
+  const solutionParticipantBindingLockSha256 = artifactBackedReferenceParticipantBindingLockSha256(solutionParticipantBindingLock);
+  const downstreamParticipantBindingLockSha256 = referenceParticipantBindingLockSha256(downstreamParticipantBindingLock);
+  if (solutionParticipantBindingLockSha256 !== input.expectedSolutionParticipantBindingLockSha256
+    || downstreamParticipantBindingLockSha256 !== input.expectedDownstreamParticipantBindingLockSha256) {
+    throw new Error('Role-specific Participant binding lock SHA-256 does not match the expected value.');
+  }
+  for (const field of [
+    'bindingId', 'provider', 'executableRealPath', 'executableVersion', 'modelConfigured',
+    'reasoningEffort', 'ambientCodexConfigPath', 'ambientCodexConfigSha256',
+  ] as const) {
+    if (solutionParticipantBindingLock[field] !== downstreamParticipantBindingLock[field]) {
+      throw new Error(`Solution and downstream Participant binding core identity differs at ${field}.`);
+    }
   }
 
   const acknowledgedLegacyHistory = await captureReferenceTrialLegacyHistory(
@@ -99,17 +130,26 @@ export async function buildPreschoolReferenceTrialAuthorizationCandidate(input: 
   if (acknowledgedLegacyHistory.attempts.some(attempt => attempt.manifestState === 'CREATED' || attempt.manifestState === 'RUNNING')) {
     throw new Error('A reference trial attempt is active; authorization candidate cannot be built.');
   }
-  await resolveBindingFromLock({ repositoryRoot: liveRepositoryRoot, lock: participantBindingLock });
+  await (dependencies.resolveSolutionBindingFromLock ?? resolveArtifactBackedReferenceParticipantBindingFromLock)({
+    repositoryRoot: liveRepositoryRoot,
+    lock: solutionParticipantBindingLock,
+  });
+  await (dependencies.resolveDownstreamBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
+    repositoryRoot: liveRepositoryRoot,
+    lock: downstreamParticipantBindingLock,
+  });
 
   const body = {
-    schemaVersion: 'preschool-reference-trial-execution-authorization-v2',
+    schemaVersion: 'preschool-reference-trial-execution-authorization-v3',
     authorizationRef: input.authorizationRef,
     runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
     attemptRef,
     authorizedAt: input.authorizedAt,
     acknowledgedLegacyHistory,
-    participantBindingLock,
-    participantBindingLockSha256,
+    solutionParticipantBindingLock,
+    solutionParticipantBindingLockSha256,
+    downstreamParticipantBindingLock,
+    downstreamParticipantBindingLockSha256,
   } as const;
   const canonicalSha256 = sha256Hex(canonicalAttemptManifestJson(body));
   const artifact = { ...body, canonicalSha256 };
@@ -119,6 +159,7 @@ export async function buildPreschoolReferenceTrialAuthorizationCandidate(input: 
   return {
     canonicalSha256,
     rawSha256: sha256Hex(bytes),
-    participantBindingLockSha256,
+    solutionParticipantBindingLockSha256,
+    downstreamParticipantBindingLockSha256,
   };
 }

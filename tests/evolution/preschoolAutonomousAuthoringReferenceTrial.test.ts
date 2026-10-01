@@ -22,7 +22,9 @@ import {
   buildPreschoolReferenceTrialAuthorizationCandidate,
 } from '../../scripts/evolution/autonomousAuthoring/buildPreschoolReferenceTrialAuthorization';
 import {
+  artifactBackedReferenceParticipantBindingLockSha256,
   referenceParticipantBindingLockSha256,
+  type ArtifactBackedReferenceParticipantBindingLockV2,
   type ReferenceParticipantBindingLockV1,
 } from '../../scripts/evolution/operator/referenceParticipantBinding';
 import { runStructuredParticipantExecution } from '../../scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution';
@@ -86,6 +88,26 @@ const TEST_PARTICIPANT_BINDING_LOCK: ReferenceParticipantBindingLockV1 = {
   },
 };
 const TEST_PARTICIPANT_BINDING_LOCK_SHA256 = referenceParticipantBindingLockSha256(TEST_PARTICIPANT_BINDING_LOCK);
+const TEST_SOLUTION_PARTICIPANT_BINDING_LOCK: ArtifactBackedReferenceParticipantBindingLockV2 = {
+  schemaVersion: 'reference-participant-binding-lock-v2',
+  bindingId: TEST_PARTICIPANT_BINDING_LOCK.bindingId,
+  provider: TEST_PARTICIPANT_BINDING_LOCK.provider,
+  executableRealPath: TEST_PARTICIPANT_BINDING_LOCK.executableRealPath,
+  executableVersion: TEST_PARTICIPANT_BINDING_LOCK.executableVersion,
+  modelConfigured: TEST_PARTICIPANT_BINDING_LOCK.modelConfigured,
+  reasoningEffort: TEST_PARTICIPANT_BINDING_LOCK.reasoningEffort,
+  ambientCodexConfigPath: TEST_PARTICIPANT_BINDING_LOCK.ambientCodexConfigPath,
+  ambientCodexConfigSha256: TEST_PARTICIPANT_BINDING_LOCK.ambientCodexConfigSha256,
+  structuredResultDelivery: {
+    kind: 'WORKSPACE_ARTIFACT_RECEIPT_V1',
+    resultRelativePath: '.evolution-participant/final-result.json',
+    receiptSchemaRef: 'scripts/evolution/operator/codexArtifactBackedReceipt.schema.json',
+    receiptSchemaSha256: sha256Hex('{"type":"object"}'),
+  },
+};
+const TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256 = artifactBackedReferenceParticipantBindingLockSha256(
+  TEST_SOLUTION_PARTICIPANT_BINDING_LOCK,
+);
 
 async function testBindingLockResolver(input: { repositoryRoot: string; lock: ReferenceParticipantBindingLockV1 }): Promise<never> {
   assert.equal(input.repositoryRoot.length > 0, true);
@@ -93,8 +115,20 @@ async function testBindingLockResolver(input: { repositoryRoot: string; lock: Re
   return {} as never;
 }
 
+async function testArtifactBackedBindingLockResolver(input: {
+  repositoryRoot: string;
+  lock: ArtifactBackedReferenceParticipantBindingLockV2;
+}): Promise<never> {
+  assert.equal(input.repositoryRoot.length > 0, true);
+  assert.equal(
+    artifactBackedReferenceParticipantBindingLockSha256(input.lock),
+    TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256,
+  );
+  return {} as never;
+}
+
 async function admitForTest(input: Parameters<typeof admitReferenceTrialAttempt>[0]) {
-  return admitReferenceTrialAttempt(input, testBindingLockResolver);
+  return admitReferenceTrialAttempt(input, testBindingLockResolver, testArtifactBackedBindingLockResolver);
 }
 
 async function testRetransmissionPromptPersistedBeforeSend(root: string): Promise<void> {
@@ -295,7 +329,7 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'retransmission-success' | 'retransmission-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
@@ -523,10 +557,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     'process.stdout.write(process.argv[3]);',
   ].join('\n');
   const jobs: string[] = [];
-  const retransmissionScenario = scenario === 'retransmission-success' || scenario === 'retransmission-failure';
   const outputRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ATTEMPTS_PATH, 'attempt-000900');
-  let deliveredRetransmissionPrompt: string | undefined;
-  let continuationCount = 0;
   const participant: WorkspaceAgentParticipantOptions = {
     executable: process.execPath,
     buildArgs: job => {
@@ -534,36 +565,41 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       if (job.role === 'solution' && scenario === 'participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Participant failure"); process.exitCode = 23'];
       }
-      if (job.role === 'solution' && scenario === 'retransmission-success') {
-        return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(schemaInvalidSolution)];
+      if (job.role === 'solution' && scenario === 'artifact-backed-role-schema-failure') {
+        const bytes = JSON.stringify(schemaInvalidSolution);
+        return ['-e', [
+          "const fs = require('node:fs');",
+          "const path = require('node:path');",
+          "const crypto = require('node:crypto');",
+          'const bytes = Buffer.from(process.argv[1]);',
+          "const artifactPath = path.resolve('.evolution-participant/final-result.json');",
+          'fs.mkdirSync(path.dirname(artifactPath), { recursive: true });',
+          'fs.writeFileSync(artifactPath, bytes);',
+          "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
+        ].join('\n'), bytes];
       }
-      if (job.role === 'solution' && scenario === 'retransmission-failure') {
+      if (job.role === 'solution' && scenario === 'artifact-backed-receipt-failure') {
         return ['-e', 'process.stdout.write("invalid structured terminal envelope")'];
       }
-      if (job.role === 'solution') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(solution)];
+      if (job.role === 'solution') {
+        const bytes = JSON.stringify(solution);
+        return ['-e', [
+          "const fs = require('node:fs');",
+          "const path = require('node:path');",
+          "const crypto = require('node:crypto');",
+          'const bytes = Buffer.from(process.argv[1]);',
+          "const artifactPath = path.resolve('.evolution-participant/final-result.json');",
+          'fs.mkdirSync(path.dirname(artifactPath), { recursive: true });',
+          'fs.writeFileSync(artifactPath, bytes);',
+          "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
+        ].join('\n'), bytes];
+      }
       if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(review)];
       return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult), scenario];
     },
-    ...(retransmissionScenario ? {
-      interpretCompletedOutput: ({ stdout, expectedThreadRef }: { stdout: string; expectedThreadRef?: { provider: string; opaqueId: string } }) => ({
-        ok: true as const,
-        rawOutput: stdout,
-        threadRef: expectedThreadRef ?? { provider: 'synthetic-provider', opaqueId: 'thread-000900' },
-      }),
-      sameThreadContinuation: {
-        provider: 'synthetic-provider',
-        buildArgs: (job: WorkspaceAgentJobInput) => {
-          continuationCount += 1;
-          deliveredRetransmissionPrompt = job.prompt;
-          assert.equal(readFileSync(join(outputRoot, 'solution-agent', RETRANSMISSION_PROMPT_ARTIFACT), 'utf8'), job.prompt);
-          return scenario === 'retransmission-failure'
-            ? ['-e', 'process.stderr.write("synthetic continuation failure"); process.exitCode = 23']
-            : ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(solution)];
-        },
-      },
-    } : {}),
   };
   let participantBindingResolutionCount = 0;
+  let artifactBackedBindingResolutionCount = 0;
   const before = await captureAuthoritativeFingerprint(liveRepositoryRoot);
   const trialRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ROOT_PATH);
   await mkdir(join(trialRoot, 'attempts'), { recursive: true });
@@ -591,16 +627,28 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       }
       return { participant } as never;
     },
+    resolveArtifactBackedReferenceParticipantBindingFromLock: async ({ lock }) => {
+      assert.equal(artifactBackedReferenceParticipantBindingLockSha256(lock), TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256);
+      artifactBackedBindingResolutionCount += 1;
+      if (scenario === 'history-drift-at-binding' && artifactBackedBindingResolutionCount === 2) {
+        await put(liveRepositoryRoot, `${REFERENCE_TRIAL_ROOT_PATH}/attempts/attempt-000899/unexpected.txt`, 'history drift during binding');
+      }
+      return { participant } as never;
+    },
   });
   const expectedSuccessfulScenario = scenario === 'success'
-    || scenario === 'retransmission-success'
     || scenario === 'solution-id-prefix-collision'
     || scenario === 'solution-exact-answer-id';
   if (!expectedSuccessfulScenario) {
-    const solutionOnlyFailure = scenario === 'participant-failure' || scenario === 'retransmission-failure';
+    const solutionOnlyFailure = scenario === 'participant-failure'
+      || scenario === 'artifact-backed-role-schema-failure'
+      || scenario === 'artifact-backed-receipt-failure';
     if (scenario === 'binding-drift-at-invocation') {
       await assert.rejects(trial, /synthetic Participant binding drift at BINDING/);
       assert.equal(participantBindingResolutionCount, 2);
+    } else if (scenario === 'history-drift-at-binding') {
+      await assert.rejects(trial, /Legacy attempt or run-level history changed after authorization admission/);
+      assert.equal(artifactBackedBindingResolutionCount, 2);
     } else if (solutionOnlyFailure) {
       await assert.rejects(trial, /Solution Participant failed/);
     } else if (scenario === 'reviewer-static-answer-marker') {
@@ -614,7 +662,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         ? /Shadow workspace changed paths outside the Contract/
         : /Structural capacity deficit must decrease from a positive value to zero/);
     }
-    assert.deepEqual(jobs, scenario === 'binding-drift-at-invocation'
+    assert.deepEqual(jobs, scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding'
       ? []
       : solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
       ? ['solution']
@@ -623,8 +671,8 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         : ['solution', 'reviewer', 'configuration-execution']);
     const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
     assert.equal(failedManifest.state, 'FAILED');
-    if (scenario === 'binding-drift-at-invocation') assert.equal(failedManifest.currentStage, 'BINDING');
-    const invokedPromptRoles = scenario === 'binding-drift-at-invocation'
+    if (scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding') assert.equal(failedManifest.currentStage, 'BINDING');
+    const invokedPromptRoles = scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding'
       ? [] as const
       : solutionOnlyFailure
       ? ['solution'] as const
@@ -634,14 +682,17 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         ? ['solution', 'reviewer'] as const
         : ['solution', 'reviewer', 'shadowAuthoring'] as const;
     await assertParticipantPromptProvenanceMatchesDisk(outputRoot, failedManifest, [...invokedPromptRoles]);
-    if (scenario === 'retransmission-failure') {
-      assert.equal(continuationCount, 1);
-      assert.equal(failedManifest.participantPromptProvenance.solution.retransmissionPrompts.length, 1);
-      const bytes = await readFile(join(outputRoot, 'solution-agent', RETRANSMISSION_PROMPT_ARTIFACT));
-      assert.deepEqual(bytes, Buffer.from(deliveredRetransmissionPrompt!));
-      const recorded = failedManifest.participantPromptProvenance.solution.retransmissionPrompts[0];
-      assert.equal(recorded.sha256, sha256Hex(bytes));
-      assert.equal(recorded.byteLength, bytes.byteLength);
+    if (scenario === 'artifact-backed-role-schema-failure') {
+      const validation = JSON.parse(await readFile(join(outputRoot, 'solution-agent/artifact-backed-validation.json'), 'utf8')) as Record<string, any>;
+      assert.equal(validation.receiptValidationValid, true);
+      assert.equal(validation.artifactIntegrityValid, true);
+      assert.equal(validation.artifactEnvelopeValid, true);
+      assert.equal(validation.roleSchemaValidationAttempted, true);
+      assert.equal(validation.roleSchemaValid, false);
+      assert.equal(validation.earliestFailureBoundary, 'ROLE_SCHEMA');
+      const trace = JSON.parse(await readFile(join(outputRoot, 'solution-agent/execution-trace.json'), 'utf8')) as { events: Array<{ type: string }> };
+      assert.equal(trace.events.some(event => event.type === 'participant_envelope_retransmission_requested'), false);
+      await assert.rejects(readFile(join(outputRoot, 'reviewer-agent/invocation.json')), { code: 'ENOENT' });
     }
     for (const role of ['solution', 'reviewer', 'shadowAuthoring'] as const) {
       if (!invokedPromptRoles.includes(role)) assert.equal(failedManifest.participantPromptProvenance[role].status, 'NOT_INVOKED');
@@ -657,10 +708,12 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       assert.equal(submittedBrief.responsibilities.length, 5);
       await assert.rejects(readFile(join(outputRoot, 'decision.json')), { code: 'ENOENT' });
       await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
-    } else if (scenario !== 'retransmission-failure'
+    } else if (scenario !== 'artifact-backed-receipt-failure'
+      && scenario !== 'artifact-backed-role-schema-failure'
       && scenario !== 'participant-failure'
       && scenario !== 'reviewer-static-answer-marker'
-      && scenario !== 'binding-drift-at-invocation') {
+      && scenario !== 'binding-drift-at-invocation'
+      && scenario !== 'history-drift-at-binding') {
       const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
       assert.equal(decision.route, 'READY_FOR_SHADOW_AUTHORING');
     }
@@ -668,8 +721,8 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     assert.equal(after, before);
     process.stdout.write(scenario === 'omitted-responsibility'
       ? `historical integration negative omitted-responsibility: PASS — rejected by Host Admission: INSUFFICIENT_EVIDENCE (The reference responsibility set was not preserved one-to-one.); proposal=4, brief=5; authoritative fingerprint before=${before} after=${after}\n`
-      : scenario === 'retransmission-failure'
-        ? 'synthetic public runner retransmission-failure: PASS\n'
+      : scenario === 'artifact-backed-role-schema-failure'
+        ? 'synthetic Artifact-Backed Solution Role-schema failure before Reviewer: PASS\n'
         : `historical integration negative ${scenario}: PASS\n`);
     return;
   }
@@ -683,7 +736,52 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(result.newEntryCount, brief.responsibilities.length);
   const succeededManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
   assert.equal(succeededManifest.state, 'SUCCEEDED');
+  assert.equal(succeededManifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
   assert.equal(succeededManifest.terminalOutcome.trialResultRef, 'trial-result.json');
+  const artifactBackedValidation = JSON.parse(
+    await readFile(join(outputRoot, 'solution-agent/artifact-backed-validation.json'), 'utf8'),
+  ) as Record<string, unknown>;
+  assert.equal(artifactBackedValidation.schemaVersion, 'artifact-backed-validation-v1');
+  assert.equal(artifactBackedValidation.receiptValidationValid, true);
+  assert.equal(artifactBackedValidation.artifactIntegrityValid, true);
+  assert.equal(artifactBackedValidation.artifactEnvelopeValid, true);
+  assert.equal(artifactBackedValidation.roleSchemaValidationAttempted, true);
+  assert.equal(artifactBackedValidation.roleSchemaValid, true);
+  assert.equal(artifactBackedValidation.accepted, true);
+  assert.equal(succeededManifest.roleSpecificParticipantBindings.solution.transport, 'WORKSPACE_ARTIFACT_RECEIPT_V1');
+  assert.equal(succeededManifest.roleSpecificParticipantBindings.downstream.transport, 'TERMINAL_JSON');
+  assert.equal(
+    succeededManifest.roleSpecificParticipantBindings.solution.lockSha256,
+    TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256,
+  );
+  assert.equal(
+    succeededManifest.roleSpecificParticipantBindings.downstream.lockSha256,
+    TEST_PARTICIPANT_BINDING_LOCK_SHA256,
+  );
+  const solutionTransportArtifacts = succeededManifest.artifactRefs as Record<string, string>;
+  assert.equal(solutionTransportArtifacts.solutionArtifactBackedValidation, 'solution-agent/artifact-backed-validation.json');
+  assert.equal(solutionTransportArtifacts.solutionStructuredResultArtifact, 'solution-agent/structured-result-artifact.raw.json');
+  assert.equal(solutionTransportArtifacts.solutionTerminalReceiptRawOutput, 'solution-agent/raw-output.txt');
+  assert.equal(solutionTransportArtifacts.solutionValidatedResult, 'solution-agent/result.json');
+  assert.deepEqual(
+    await readFile(join(outputRoot, 'solution-agent/structured-result-artifact.raw.json')),
+    Buffer.from(JSON.stringify(solution)),
+  );
+  const receipt = JSON.parse(await readFile(join(outputRoot, 'solution-agent/raw-output.txt'), 'utf8')) as Record<string, unknown>;
+  assert.equal(receipt.schemaVersion, 'artifact-backed-structured-final-result-receipt-v1');
+  await readFile(join(outputRoot, 'solution-agent/invocation.json'));
+  await readFile(join(outputRoot, 'solution-agent/execution-trace.json'));
+  const validatedSolution = JSON.parse(await readFile(join(outputRoot, 'solution-agent/result.json'), 'utf8'));
+  assert.deepEqual(validatedSolution, solution);
+  const solutionTrace = JSON.parse(await readFile(join(outputRoot, 'solution-agent/execution-trace.json'), 'utf8')) as {
+    events: Array<{ type: string }>;
+  };
+  assert.equal(solutionTrace.events.some(event => event.type === 'participant_envelope_retransmission_requested'), false);
+  const reviewerPrompt = await readFile(join(outputRoot, 'reviewer-agent/participant-prompt.txt'), 'utf8');
+  assert.equal(reviewerPrompt.includes(canonicalJson(solution)), true);
+  assert.doesNotMatch(reviewerPrompt, /WORKSPACE_ARTIFACT_RECEIPT_V1|Artifact-Backed Receipt/i);
+  const shadowPrompt = await readFile(join(outputRoot, 'shadow-authoring/participant-prompt.txt'), 'utf8');
+  assert.doesNotMatch(shadowPrompt, /WORKSPACE_ARTIFACT_RECEIPT_V1|Artifact-Backed Receipt/i);
   assert.equal(result.schemaVersion, 'preschool-reference-trial-result-v2');
   const savedResult = JSON.parse(await readFile(join(outputRoot, 'trial-result.json'), 'utf8')) as Record<string, any>;
   assert.equal(savedResult.schemaVersion, 'preschool-reference-trial-result-v2');
@@ -692,31 +790,6 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(savedResult.executionAuthorization.authorizationDigest, succeededManifest.authorizationDigest);
   assert.deepEqual(savedResult.invocationRefs, succeededManifest.invocationRefs);
   await assertParticipantPromptProvenanceMatchesDisk(outputRoot, succeededManifest, ['solution', 'reviewer', 'shadowAuthoring']);
-  if (scenario === 'retransmission-success') {
-    assert.equal(continuationCount, 1);
-    const bytes = await readFile(join(outputRoot, 'solution-agent', RETRANSMISSION_PROMPT_ARTIFACT));
-    assert.deepEqual(bytes, Buffer.from(deliveredRetransmissionPrompt!));
-    assert.match(deliveredRetransmissionPrompt!, /Failure class: SCHEMA_FAILURE/);
-    assert.match(deliveredRetransmissionPrompt!, /scopeCheck must be CONTRACT_PRESERVING/);
-    const recorded = succeededManifest.participantPromptProvenance.solution.retransmissionPrompts[0];
-    assert.equal(recorded.artifactRef, `solution-agent/${RETRANSMISSION_PROMPT_ARTIFACT}`);
-    assert.equal(recorded.sha256, sha256Hex(bytes));
-    assert.equal(recorded.byteLength, bytes.byteLength);
-    assert.equal(await readFile(join(outputRoot, 'solution-agent/terminal-attempt-0.txt'), 'utf8'), JSON.stringify(schemaInvalidSolution));
-    assert.equal(await readFile(join(outputRoot, 'solution-agent/terminal-attempt-1.txt'), 'utf8'), JSON.stringify(solution));
-    const solutionTrace = JSON.parse(await readFile(join(outputRoot, 'solution-agent/execution-trace.json'), 'utf8')) as {
-      events: Array<Record<string, unknown>>;
-    };
-    const firstValidation = solutionTrace.events.find(event => event.type === 'participant_terminal_validation' && event.attempt === 0);
-    assert.equal(firstValidation?.envelopeValid, true);
-    assert.equal(firstValidation?.schemaValid, false);
-    const retransmissionRequest = solutionTrace.events.find(event => event.type === 'participant_envelope_retransmission_requested');
-    assert.equal(retransmissionRequest?.failureClass, 'SCHEMA_FAILURE');
-    assert.equal(retransmissionRequest?.sameThread, true);
-    const secondValidation = solutionTrace.events.find(event => event.type === 'participant_terminal_validation' && event.attempt === 1);
-    assert.equal(secondValidation?.schemaValid, true);
-    assert.equal(secondValidation?.accepted, true);
-  }
   assert.deepEqual(jobs, ['solution', 'reviewer', 'configuration-execution']);
   assert.equal(await captureAuthoritativeFingerprint(liveRepositoryRoot), before);
   const packageJson = JSON.parse(await readFile(result.promotionPackagePath, 'utf8')) as { schemaVersion: string; authoritativeRepositoryUnchanged: boolean; naturalPverPerformed: boolean };
@@ -731,18 +804,22 @@ function authorizationBody(input: {
   attemptRef: string;
   authorizationRef?: string;
   runRef?: string;
-  participantBindingLock?: ReferenceParticipantBindingLockV1;
+  solutionParticipantBindingLock?: ArtifactBackedReferenceParticipantBindingLockV2;
+  downstreamParticipantBindingLock?: ReferenceParticipantBindingLockV1;
 }): Record<string, unknown> {
-  const participantBindingLock = input.participantBindingLock ?? TEST_PARTICIPANT_BINDING_LOCK;
+  const solutionParticipantBindingLock = input.solutionParticipantBindingLock ?? TEST_SOLUTION_PARTICIPANT_BINDING_LOCK;
+  const downstreamParticipantBindingLock = input.downstreamParticipantBindingLock ?? TEST_PARTICIPANT_BINDING_LOCK;
   return {
-    schemaVersion: 'preschool-reference-trial-execution-authorization-v2',
+    schemaVersion: 'preschool-reference-trial-execution-authorization-v3',
     authorizationRef: input.authorizationRef ?? 'human-authorization-000001',
     runRef: input.runRef ?? 'preschool-pver-20260922231805-71297571',
     attemptRef: input.attemptRef,
     authorizedAt: '2026-09-29T00:00:00.000Z',
     acknowledgedLegacyHistory: input.acknowledgedLegacyHistory,
-    participantBindingLock,
-    participantBindingLockSha256: referenceParticipantBindingLockSha256(participantBindingLock),
+    solutionParticipantBindingLock,
+    solutionParticipantBindingLockSha256: artifactBackedReferenceParticipantBindingLockSha256(solutionParticipantBindingLock),
+    downstreamParticipantBindingLock,
+    downstreamParticipantBindingLockSha256: referenceParticipantBindingLockSha256(downstreamParticipantBindingLock),
   };
 }
 
@@ -760,51 +837,79 @@ async function testAuthorizationCandidateBuilder(root: string): Promise<void> {
   const liveRepositoryRoot = join(root, 'authorization-candidate-builder-fixture');
   await mkdir(liveRepositoryRoot, { recursive: true });
   const trialRoot = await createLegacyAttemptHistory(liveRepositoryRoot);
+  const legacyManifestPath = join(trialRoot, 'attempts/attempt-000002/attempt-manifest.json');
+  const legacyManifestBytes = Buffer.from(`${JSON.stringify({
+    schemaVersion: 'preschool-reference-trial-attempt-manifest-v1',
+    runRef: 'preschool-pver-20260922231805-71297571',
+    attemptRef: 'attempt-000002',
+    state: 'FAILED',
+  })}\n`);
+  await writeFile(legacyManifestPath, legacyManifestBytes);
   const acknowledgedLegacyHistory = await captureReferenceTrialLegacyHistory(trialRoot);
-  const participantBindingLockPath = join(root, 'matrix-binding-lock.json');
-  await writeFile(participantBindingLockPath, `${canonicalJson(TEST_PARTICIPANT_BINDING_LOCK)}\n`, { flag: 'wx' });
+  assert.equal(acknowledgedLegacyHistory.attempts[0]?.manifestState, 'FAILED');
+  assert.equal(
+    acknowledgedLegacyHistory.attempts[0]?.artifacts.some(item => item.path === 'attempt-manifest.json' && item.sha256 === sha256Hex(legacyManifestBytes)),
+    true,
+  );
+  const solutionParticipantBindingLockPath = join(root, 'matrix-solution-binding-lock.json');
+  const downstreamParticipantBindingLockPath = join(root, 'matrix-downstream-binding-lock.json');
+  await writeFile(solutionParticipantBindingLockPath, `${canonicalJson(TEST_SOLUTION_PARTICIPANT_BINDING_LOCK)}\n`, { flag: 'wx' });
+  await writeFile(downstreamParticipantBindingLockPath, `${canonicalJson(TEST_PARTICIPANT_BINDING_LOCK)}\n`, { flag: 'wx' });
   const destinationPath = join(liveRepositoryRoot, 'authorization-candidate.json');
   const input = {
     liveRepositoryRoot,
     attemptRef: 'attempt-000006',
     authorizationRef: 'synthetic-human-authorization-builder',
     authorizedAt: '2026-09-30T00:00:00.000Z',
-    participantBindingLockPath,
-    expectedParticipantBindingLockSha256: TEST_PARTICIPANT_BINDING_LOCK_SHA256,
+    solutionParticipantBindingLockPath,
+    expectedSolutionParticipantBindingLockSha256: TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256,
+    downstreamParticipantBindingLockPath,
+    expectedDownstreamParticipantBindingLockSha256: TEST_PARTICIPANT_BINDING_LOCK_SHA256,
     destinationPath,
   };
-  const candidate = await buildPreschoolReferenceTrialAuthorizationCandidate(input, testBindingLockResolver);
+  const builderResolvers = {
+    resolveSolutionBindingFromLock: testArtifactBackedBindingLockResolver,
+    resolveDownstreamBindingFromLock: testBindingLockResolver,
+  };
+  const candidate = await buildPreschoolReferenceTrialAuthorizationCandidate(input, builderResolvers);
   const bytes = await readFile(destinationPath);
   const authorization = JSON.parse(bytes.toString('utf8')) as Record<string, any>;
-  assert.equal(candidate.participantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
-  assert.equal(authorization.schemaVersion, 'preschool-reference-trial-execution-authorization-v2');
+  assert.equal(candidate.solutionParticipantBindingLockSha256, TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.equal(candidate.downstreamParticipantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.equal(authorization.schemaVersion, 'preschool-reference-trial-execution-authorization-v3');
   assert.deepEqual(authorization.acknowledgedLegacyHistory, acknowledgedLegacyHistory);
-  assert.deepEqual(authorization.participantBindingLock, TEST_PARTICIPANT_BINDING_LOCK);
-  assert.equal(authorization.participantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.deepEqual(authorization.solutionParticipantBindingLock, TEST_SOLUTION_PARTICIPANT_BINDING_LOCK);
+  assert.deepEqual(authorization.downstreamParticipantBindingLock, TEST_PARTICIPANT_BINDING_LOCK);
+  assert.equal(authorization.solutionParticipantBindingLockSha256, TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.equal(authorization.downstreamParticipantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
   assert.equal(candidate.canonicalSha256, authorization.canonicalSha256);
   const { canonicalSha256, ...body } = authorization;
   assert.equal(candidate.canonicalSha256, sha256Hex(canonicalJson(body)));
   assert.equal(candidate.rawSha256, sha256Hex(bytes));
+  assert.deepEqual(await readFile(legacyManifestPath), legacyManifestBytes);
   await assert.rejects(
     readFile(join(trialRoot, 'attempts/attempt-000006/attempt-manifest.json')),
     { code: 'ENOENT' },
   );
   await assert.rejects(
-    buildPreschoolReferenceTrialAuthorizationCandidate(input, testBindingLockResolver),
+    buildPreschoolReferenceTrialAuthorizationCandidate(input, builderResolvers),
     { code: 'EEXIST' },
   );
 
   await assert.rejects(buildPreschoolReferenceTrialAuthorizationCandidate({
     ...input,
     destinationPath: join(liveRepositoryRoot, 'wrong-lock-digest.json'),
-    expectedParticipantBindingLockSha256: '0'.repeat(64),
-  }, testBindingLockResolver), /binding lock.*SHA-256/i);
+    expectedSolutionParticipantBindingLockSha256: '0'.repeat(64),
+  }, builderResolvers), /binding lock.*SHA-256/i);
   await assert.rejects(readFile(join(liveRepositoryRoot, 'wrong-lock-digest.json')), { code: 'ENOENT' });
   await assert.rejects(buildPreschoolReferenceTrialAuthorizationCandidate({
     ...input,
     destinationPath: join(liveRepositoryRoot, 'binding-drift.json'),
-  }, async () => {
+  }, {
+    ...builderResolvers,
+    resolveSolutionBindingFromLock: async () => {
     throw new Error('executable version drift');
+    },
   }), /executable version drift/);
   await assert.rejects(readFile(join(liveRepositoryRoot, 'binding-drift.json')), { code: 'ENOENT' });
 
@@ -1600,7 +1705,10 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
       '--attempt-ref', 'attempt-000009',
       '--execution-authorization', cliExactAuthorizationPath,
       '--execution-authorization-sha256', cliExactDigest,
-    ], { resolveReferenceParticipantBindingFromLock: testBindingLockResolver });
+    ], {
+      resolveReferenceParticipantBindingFromLock: testBindingLockResolver,
+      resolveArtifactBackedReferenceParticipantBindingFromLock: testArtifactBackedBindingLockResolver,
+    });
     assert.equal(exactExternalDigest.code, 1);
     assert.equal(JSON.parse(exactExternalDigest.output).status, 'REFERENCE_EVIDENCE_UNAVAILABLE', exactExternalDigest.output);
     const cliAdmittedManifest = JSON.parse(await readFile(join(cliTrialRoot, 'attempts/attempt-000009/attempt-manifest.json'), 'utf8')) as Record<string, any>;
@@ -1632,9 +1740,21 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   assert.match(admitted.manifest.authorizationDigest, /^[a-f0-9]{64}$/);
   assert.equal(admitted.manifest.authorizationDigest, admitted.manifest.expectedAuthorizationDigest);
   assert.equal(admitted.manifest.authorizationArtifactPath, authorizationPath);
-  assert.equal(admitted.manifest.participantBindingLockSha256, TEST_PARTICIPANT_BINDING_LOCK_SHA256);
+  assert.equal(admitted.manifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
+  assert.equal(
+    admitted.manifest.roleSpecificParticipantBindings.solution.lockSha256,
+    TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256,
+  );
+  assert.equal(
+    admitted.manifest.roleSpecificParticipantBindings.downstream.lockSha256,
+    TEST_PARTICIPANT_BINDING_LOCK_SHA256,
+  );
   assert.deepEqual(
-    JSON.parse(await readFile(join(admitted.outputRoot, 'participant-binding-lock.json'), 'utf8')),
+    JSON.parse(await readFile(join(admitted.outputRoot, 'solution-participant-binding-lock.json'), 'utf8')),
+    TEST_SOLUTION_PARTICIPANT_BINDING_LOCK,
+  );
+  assert.deepEqual(
+    JSON.parse(await readFile(join(admitted.outputRoot, 'downstream-participant-binding-lock.json'), 'utf8')),
     TEST_PARTICIPANT_BINDING_LOCK,
   );
   const admittedManifestPath = join(admitted.outputRoot, 'attempt-manifest.json');
@@ -1739,8 +1859,31 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   }), undefined, '0'.repeat(64));
   await assertDenied('wrong-binding-lock-digest', {
     ...authorizationBody({ acknowledgedLegacyHistory: invalidHistory, attemptRef: 'attempt-000006' }),
-    participantBindingLockSha256: '0'.repeat(64),
+    solutionParticipantBindingLockSha256: '0'.repeat(64),
   });
+  await assertDenied('wrong-downstream-binding-lock-digest', {
+    ...authorizationBody({ acknowledgedLegacyHistory: invalidHistory, attemptRef: 'attempt-000006' }),
+    downstreamParticipantBindingLockSha256: '0'.repeat(64),
+  });
+  await assertDenied('binding-core-identity-mismatch', authorizationBody({
+    acknowledgedLegacyHistory: invalidHistory,
+    attemptRef: 'attempt-000006',
+    downstreamParticipantBindingLock: {
+      ...TEST_PARTICIPANT_BINDING_LOCK,
+      modelConfigured: 'gpt-6-sol',
+    },
+  }));
+  const v2TerminalOnlyBody = {
+    schemaVersion: 'preschool-reference-trial-execution-authorization-v2',
+    authorizationRef: 'terminal-only-v2-authorization',
+    runRef: 'preschool-pver-20260922231805-71297571',
+    attemptRef: 'attempt-000006',
+    authorizedAt: '2026-09-29T00:00:00.000Z',
+    acknowledgedLegacyHistory: invalidHistory,
+    participantBindingLock: TEST_PARTICIPANT_BINDING_LOCK,
+    participantBindingLockSha256: TEST_PARTICIPANT_BINDING_LOCK_SHA256,
+  };
+  await assertDenied('terminal-only-v2-authorization', v2TerminalOnlyBody);
   await assertDenied('legacy-v1-authorization', {
     schemaVersion: 'preschool-reference-trial-execution-authorization-v1',
     authorizationRef: 'historical-v1-authorization',
@@ -1783,29 +1926,53 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   await mkdir(driftFixture, { recursive: true });
   const driftTrialRoot = await createLegacyAttemptHistory(driftFixture);
   const driftHistory = await captureReferenceTrialLegacyHistory(driftTrialRoot);
-  const driftCases: Array<{ name: string; lock: ReferenceParticipantBindingLockV1; message: string }> = [
+  const driftCases: Array<{
+    name: string;
+    solutionLock: ArtifactBackedReferenceParticipantBindingLockV2;
+    downstreamLock: ReferenceParticipantBindingLockV1;
+    message: string;
+    resolverRole: 'solution' | 'downstream';
+  }> = [
     {
       name: 'config',
-      lock: { ...TEST_PARTICIPANT_BINDING_LOCK, ambientCodexConfigSha256: 'b'.repeat(64) },
+      solutionLock: { ...TEST_SOLUTION_PARTICIPANT_BINDING_LOCK, ambientCodexConfigSha256: 'b'.repeat(64) },
+      downstreamLock: { ...TEST_PARTICIPANT_BINDING_LOCK, ambientCodexConfigSha256: 'b'.repeat(64) },
       message: 'ambient Codex config drift',
+      resolverRole: 'solution',
     },
     {
       name: 'executable-path',
-      lock: { ...TEST_PARTICIPANT_BINDING_LOCK, executableRealPath: '/synthetic/codex/other-codex' },
+      solutionLock: { ...TEST_SOLUTION_PARTICIPANT_BINDING_LOCK, executableRealPath: '/synthetic/codex/other-codex' },
+      downstreamLock: { ...TEST_PARTICIPANT_BINDING_LOCK, executableRealPath: '/synthetic/codex/other-codex' },
       message: 'executable real path drift',
+      resolverRole: 'solution',
     },
     {
       name: 'executable-version',
-      lock: { ...TEST_PARTICIPANT_BINDING_LOCK, executableVersion: 'codex synthetic-1.0.1' },
+      solutionLock: { ...TEST_SOLUTION_PARTICIPANT_BINDING_LOCK, executableVersion: 'codex synthetic-1.0.1' },
+      downstreamLock: { ...TEST_PARTICIPANT_BINDING_LOCK, executableVersion: 'codex synthetic-1.0.1' },
       message: 'executable version drift',
+      resolverRole: 'solution',
     },
     {
-      name: 'schema',
-      lock: {
+      name: 'solution-schema',
+      solutionLock: {
+        ...TEST_SOLUTION_PARTICIPANT_BINDING_LOCK,
+        structuredResultDelivery: { ...TEST_SOLUTION_PARTICIPANT_BINDING_LOCK.structuredResultDelivery, receiptSchemaSha256: 'c'.repeat(64) },
+      },
+      downstreamLock: TEST_PARTICIPANT_BINDING_LOCK,
+      message: 'artifact receipt schema drift',
+      resolverRole: 'solution',
+    },
+    {
+      name: 'downstream-schema',
+      solutionLock: TEST_SOLUTION_PARTICIPANT_BINDING_LOCK,
+      downstreamLock: {
         ...TEST_PARTICIPANT_BINDING_LOCK,
         nativeEnvelopeAssistance: { ...TEST_PARTICIPANT_BINDING_LOCK.nativeEnvelopeAssistance, schemaSha256: 'c'.repeat(64) },
       },
       message: 'native envelope schema drift',
+      resolverRole: 'downstream',
     },
   ];
   for (const [index, drift] of driftCases.entries()) {
@@ -1814,16 +1981,20 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
     const digest = await writeAuthorization(authorizationPath, authorizationBody({
       acknowledgedLegacyHistory: driftHistory,
       attemptRef,
-      participantBindingLock: drift.lock,
+      solutionParticipantBindingLock: drift.solutionLock,
+      downstreamParticipantBindingLock: drift.downstreamLock,
     }));
     await assert.rejects(admitReferenceTrialAttempt({
       liveRepositoryRoot: driftFixture,
       attemptRef,
       executionAuthorizationPath: authorizationPath,
       expectedExecutionAuthorizationSha256: digest,
-    }, async ({ lock }) => {
-      assert.equal(referenceParticipantBindingLockSha256(lock), referenceParticipantBindingLockSha256(drift.lock));
-      throw new Error(drift.message);
+    }, async () => {
+      if (drift.resolverRole === 'downstream') throw new Error(drift.message);
+      return {} as never;
+    }, async () => {
+      if (drift.resolverRole === 'solution') throw new Error(drift.message);
+      return {} as never;
     }), new RegExp(drift.message));
     await assert.rejects(
       readFile(join(driftTrialRoot, 'attempts', attemptRef, 'attempt-manifest.json')),
@@ -1851,6 +2022,7 @@ async function testConcurrentProductionAttemptAdmission(root: string): Promise<v
     return { attemptRef, executionAuthorizationPath, expectedExecutionAuthorizationSha256 };
   }));
   let participantBindingCalls = 0;
+  let artifactBackedBindingCalls = 0;
   const results = await Promise.all(authorizations.map(authorization => runPreschoolReferenceTrial({
     liveRepositoryRoot: fixtureRoot,
     attemptRef: authorization.attemptRef,
@@ -1862,11 +2034,16 @@ async function testConcurrentProductionAttemptAdmission(root: string): Promise<v
       participantBindingCalls += 1;
       return testBindingLockResolver(input);
     },
+    resolveArtifactBackedReferenceParticipantBindingFromLock: async input => {
+      artifactBackedBindingCalls += 1;
+      return testArtifactBackedBindingLockResolver(input);
+    },
   })));
 
   assert.equal(results.filter(result => result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE').length, 1);
   assert.equal(results.filter(result => result.status === 'REFERENCE_EXECUTION_AUTHORIZATION_UNAVAILABLE').length, 1);
   assert.equal(participantBindingCalls, 1);
+  assert.equal(artifactBackedBindingCalls, 1);
   const afterHistory = await captureReferenceTrialLegacyHistory(trialRoot);
   assert.deepEqual(afterHistory.attempts.slice(0, initialHistory.attempts.length), initialHistory.attempts);
   assert.deepEqual(afterHistory.runLevelMaterial, initialHistory.runLevelMaterial);
@@ -2067,7 +2244,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       bytes: fullBriefBytes,
       sha256: sha256Hex(fullBriefBytes),
     });
-    for (const scenario of ['retransmission-success', 'retransmission-failure'] as const) {
+    for (const scenario of ['artifact-backed-role-schema-failure', 'artifact-backed-receipt-failure'] as const) {
       await testSyntheticLayerAEndToEnd(root, {
         evidence: capacityEvidencePath,
         observable: syntheticPayloadPath,
@@ -2443,6 +2620,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       await testSyntheticLayerAEndToEnd(root, paths, 'residual-v5-deficit');
       await testSyntheticLayerAEndToEnd(root, paths, 'participant-failure');
       await testSyntheticLayerAEndToEnd(root, paths, 'binding-drift-at-invocation');
+      await testSyntheticLayerAEndToEnd(root, paths, 'history-drift-at-binding');
     }
     if (acceptedEvidenceTestPath && acceptedObservableTestPath) {
       for (const [responsibilityBriefPath, reason] of [

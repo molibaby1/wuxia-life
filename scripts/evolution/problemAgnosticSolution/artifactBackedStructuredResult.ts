@@ -2,14 +2,17 @@ import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
 import { open, lstat, mkdir, realpath } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   ARTIFACT_BACKED_STRUCTURED_RESULT_MAX_BYTES,
+  ARTIFACT_BACKED_STRUCTURED_RESULT_PREFLIGHT_COMMAND,
   ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH,
   type ArtifactBackedStructuredFinalResultReceiptV1,
 } from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
 import { validateStructuredTerminalEnvelope } from '../../../src/evolution/structuredTerminalEnvelope';
 
 const RAW_ARTIFACT_EVIDENCE_NAME = 'structured-result-artifact.raw.json';
+const PREFLIGHT_SCRIPT_RELATIVE_PATH = 'scripts/evolution/problemAgnosticSolution/preflightSolutionWorkArtifact.ts';
 
 export interface ConsumedArtifactBackedStructuredResult {
   rawBytes: Buffer;
@@ -96,6 +99,48 @@ async function assertResultAbsent(resultPath: string): Promise<void> {
   throw new Error(`Host-fixed result path already exists: ${resultPath}`);
 }
 
+function javascriptStringLiteral(value: string): string {
+  return JSON.stringify(value).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+}
+
+async function installPreflightLauncher(workspaceRoot: string, parentPath: string): Promise<void> {
+  const hostRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+  const hostTsxPath = resolve(hostRoot, 'node_modules/.bin/tsx');
+  const hostPreflightPath = resolve(hostRoot, PREFLIGHT_SCRIPT_RELATIVE_PATH);
+  const launcherPath = resolve(workspaceRoot, ARTIFACT_BACKED_STRUCTURED_RESULT_PREFLIGHT_COMMAND);
+  if (!isInside(workspaceRoot, launcherPath) || dirname(launcherPath) !== parentPath) {
+    throw new Error('Host preflight launcher path escapes the reserved participant directory');
+  }
+
+  const launcher = [
+    '#!/usr/bin/env node',
+    '(async () => {',
+    "  const { spawnSync } = await import('node:child_process');",
+    `  const result = spawnSync(${javascriptStringLiteral(hostTsxPath)}, [${javascriptStringLiteral(hostPreflightPath)}, ...process.argv.slice(2)], { stdio: 'inherit', shell: false });`,
+    "  if (result.error) { console.error(`Unable to start Host Role-schema preflight: ${result.error.message}`); process.exitCode = 1; }",
+    '  else { process.exitCode = result.status ?? 1; }',
+    '})().catch(error => { console.error(`Unable to start Host Role-schema preflight: ${error instanceof Error ? error.message : String(error)}`); process.exitCode = 1; });',
+    '',
+  ].join('\n');
+
+  let handle;
+  try {
+    handle = await open(launcherPath, 'wx', 0o755);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+      throw new Error(`Host Role-schema preflight launcher already exists: ${launcherPath}`);
+    }
+    throw new Error(`unable to create Host Role-schema preflight launcher ${launcherPath}: ${String(error)}`);
+  }
+
+  try {
+    await handle.writeFile(launcher);
+    await handle.chmod(0o755);
+  } finally {
+    await handle.close();
+  }
+}
+
 export async function prepareArtifactBackedStructuredResult(input: {
   workspaceRoot: string;
 }): Promise<{ resultPath: string }> {
@@ -107,6 +152,7 @@ export async function prepareArtifactBackedStructuredResult(input: {
     createIfMissing: true,
   });
   await assertResultAbsent(paths.resultPath);
+  await installPreflightLauncher(workspaceRoot, paths.parentPath);
   return { resultPath: paths.resultPath };
 }
 

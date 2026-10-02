@@ -1,6 +1,9 @@
 export const ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH =
   '.evolution-participant/final-result.json' as const;
 
+export const ARTIFACT_BACKED_STRUCTURED_RESULT_PREFLIGHT_COMMAND =
+  '.evolution-participant/preflight-solution-work' as const;
+
 export const ARTIFACT_BACKED_STRUCTURED_RESULT_MAX_BYTES = 1_048_576 as const;
 
 export const ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION =
@@ -53,14 +56,27 @@ export function validateArtifactBackedStructuredFinalResultReceipt(
 
 export function renderArtifactBackedStructuredFinalResultInstructionsV1(input: {
   roleSchemaName: string;
+  preflightCommand?: string;
 }): string {
+  const preflightInstructions = input.preflightCommand === undefined
+    ? []
+    : [
+      'Before calculating the receipt, run the Host-provided Role-schema preflight command:',
+      `./${input.preflightCommand}`,
+      'If it exits non-zero or does not print the exact PASS marker "ROLE_SCHEMA_PREFLIGHT_PASS", use the validator error to correct the artifact yourself in this same Solution turn, then run the preflight command again.',
+      "Only after a PASS marker may you compute the artifact's exact byte length and SHA-256 for the receipt. Do not modify the artifact after PASS.",
+    ];
+
   return [
     'Artifact-Backed Structured Final Result Receipt V1',
     '',
     `Produce the complete ${input.roleSchemaName} as one valid JSON object.`,
     `Write the complete JSON object to the Host-reserved result file:\n${ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH}`,
     `Do not use the terminal message to carry the ${input.roleSchemaName}.`,
-    'After writing the result file, compute its exact byte length and SHA-256.',
+    ...preflightInstructions,
+    ...(input.preflightCommand === undefined
+      ? ['After writing the result file, compute its exact byte length and SHA-256.']
+      : []),
     'The terminal output must contain only the small JSON receipt for this artifact. Do not emit the result object in terminal output, prose, Markdown, or a continuation.',
     'Return the receipt as one JSON object with exactly these three fields:',
     `schemaVersion: "${ARTIFACT_BACKED_STRUCTURED_FINAL_RESULT_RECEIPT_SCHEMA_VERSION}"`,

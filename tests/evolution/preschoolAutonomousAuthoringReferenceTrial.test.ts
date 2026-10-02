@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { WorkspaceAgentJobInput, WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import type { RunSolutionAgentInput, SolutionAgentRunResult } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
 import { persistParticipantPromptAndBinding } from '../../scripts/evolution/participantObservability';
 import {
   assertPreschoolReferenceResponsibilitiesPreserved,
@@ -42,6 +43,7 @@ import {
   prepareReferenceTrialParticipantWorkspace,
   readAttemptParticipantPromptProvenance,
   referenceTrialInvocationRef,
+  runPreschoolReferenceArtifactBackedSolutionCommunicationProbe,
   runPreschoolReferenceTrial,
   runPreschoolReferenceTrialCli,
   readExactReferenceObservablePayload,
@@ -379,6 +381,197 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   await writeFile(join(sourceRoot, retransmissionPath), await readFile(join(process.cwd(), retransmissionPath)));
   const module = await import(pathToFileURL(join(sourceRoot, runnerPath)).href);
   return module.runPreschoolReferenceTrial as typeof runPreschoolReferenceTrial;
+}
+
+async function loadSyntheticArtifactBackedSolutionProbeRunner(root: string, inputSha256: {
+  evidence: string;
+  observable: string;
+  brief: string;
+}): Promise<{
+  repositoryRoot: string;
+  runProbe: typeof runPreschoolReferenceArtifactBackedSolutionCommunicationProbe;
+}> {
+  const suffix = 'artifact-backed-probe';
+  const repositoryRoot = join(root, `synthetic-public-runner-source-${suffix}`);
+  await loadSyntheticPublicRunner(root, inputSha256, { suffix });
+  const runnerPath = 'scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts';
+  const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
+  const staged = spawnSync('git', ['-C', repositoryRoot, 'add', '--', runnerPath, briefPath], { encoding: 'utf8' });
+  assert.equal(staged.status, 0, staged.stderr);
+  const committed = spawnSync('git', [
+    '-C', repositoryRoot,
+    '-c', 'user.name=Probe regression fixture',
+    '-c', 'user.email=probe-regression-fixture@example.invalid',
+    'commit', '--quiet', '-m', 'test: bind synthetic reference probe inputs',
+  ], { encoding: 'utf8' });
+  assert.equal(committed.status, 0, committed.stderr);
+  const module = await import(pathToFileURL(join(repositoryRoot, runnerPath)).href);
+  const runProbe: typeof runPreschoolReferenceArtifactBackedSolutionCommunicationProbe =
+    module.runPreschoolReferenceArtifactBackedSolutionCommunicationProbe;
+  return { repositoryRoot, runProbe };
+}
+
+async function writeProbeHistoryAttempt(repositoryRoot: string, state: 'CREATED' | 'RUNNING' | 'FAILED'): Promise<string> {
+  const attemptRoot = join(repositoryRoot, REFERENCE_TRIAL_ROOT_PATH, 'attempts/attempt-000012');
+  await mkdir(attemptRoot, { recursive: true });
+  await writeFile(join(attemptRoot, 'attempt-manifest.json'), `${JSON.stringify({
+    schemaVersion: 'preschool-reference-trial-attempt-manifest-v2',
+    runRef: 'preschool-pver-20260922231805-71297571',
+    attemptRef: 'attempt-000012',
+    state,
+  })}\n`);
+  return attemptRoot;
+}
+
+async function testArtifactBackedSolutionProbeHistoryContainment(root: string, inputs: {
+  evidencePath: string;
+  observablePayloadPath: string;
+  responsibilityBriefPath: string;
+  evidenceSha256: string;
+  observableSha256: string;
+  responsibilityBriefSha256: string;
+}): Promise<void> {
+  const loaded = await loadSyntheticArtifactBackedSolutionProbeRunner(root, {
+    evidence: inputs.evidenceSha256,
+    observable: inputs.observableSha256,
+    brief: inputs.responsibilityBriefSha256,
+  });
+  const trialRoot = join(loaded.repositoryRoot, REFERENCE_TRIAL_ROOT_PATH);
+  const attemptRoot = await writeProbeHistoryAttempt(loaded.repositoryRoot, 'FAILED');
+  const solutionStub = (onInvoke?: (input: RunSolutionAgentInput) => Promise<void>) => {
+    const calls = { count: 0 };
+    return {
+      calls,
+      dependencies: {
+        resolveArtifactBackedReferenceParticipantBindingFromLock: async () => ({
+          participant: { executable: 'fake-participant', buildArgs: () => [] },
+        } as never),
+        runSolutionAgent: async (input: RunSolutionAgentInput): Promise<SolutionAgentRunResult> => {
+          calls.count += 1;
+          await mkdir(input.destinationRoot, { recursive: true });
+          await writeFile(join(input.destinationRoot, 'artifact-backed-validation.json'), JSON.stringify({
+            schemaVersion: 'artifact-backed-validation-v1',
+            receiptValidationValid: true,
+            artifactIntegrityValid: true,
+            artifactEnvelopeValid: true,
+            roleSchemaValidationAttempted: true,
+            roleSchemaValid: true,
+          }));
+          await writeFile(join(input.destinationRoot, 'execution-trace.json'), JSON.stringify({
+            schemaVersion: 'participant-execution-trace-v1',
+            invocation: { startedAt: '2026-10-02T00:00:00.000Z', timeoutMs: 1_800_000 },
+            events: [{
+              seq: 0,
+              type: 'participant_terminal_validation',
+              elapsedMs: 1,
+              envelopeValid: true,
+              schemaValidationAttempted: true,
+              schemaValid: true,
+              accepted: true,
+            }],
+            terminal: { outcome: 'completed', elapsedMs: 1, lastObservableActivityElapsedMs: 1 },
+          }));
+          await onInvoke?.(input);
+          return {
+            ok: true,
+            result: {} as never,
+            invocationPath: join(input.destinationRoot, 'invocation.json'),
+            rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+            resultPath: join(input.destinationRoot, 'result.json'),
+          };
+        },
+      },
+    };
+  };
+  const probeInput = (probeRef: string, destinationRoot: string) => ({
+    liveRepositoryRoot: loaded.repositoryRoot,
+    evidencePath: inputs.evidencePath,
+    observablePayloadPath: inputs.observablePayloadPath,
+    responsibilityBriefPath: inputs.responsibilityBriefPath,
+    probeRef,
+    destinationRoot,
+    participantBindingLock: TEST_SOLUTION_PARTICIPANT_BINDING_LOCK,
+  });
+
+  const terminalStub = solutionStub();
+  const terminalDestination = join(root, 'artifact-backed-probe-terminal-history-output');
+  const terminalResult = await loaded.runProbe(
+    probeInput('terminal-history-allowed', terminalDestination),
+    terminalStub.dependencies,
+  );
+  assert.equal(terminalStub.calls.count, 1);
+  assert.equal(terminalResult.status, 'SUCCEEDED');
+  assert.equal(terminalResult.solutionOutcome.status, 'SUCCEEDED');
+  assert.equal(terminalResult.governedHistoryUnchanged, true);
+  assert.equal(terminalResult.governedHistorySha256Before, terminalResult.governedHistorySha256After);
+  assert.equal(terminalResult.attempt000012Absent, false);
+  assert.equal(terminalResult.authoritativeFingerprintUnchanged, true);
+  assert.equal(terminalResult.authoritativeFingerprintBefore, terminalResult.authoritativeFingerprintAfter);
+  assert.equal(terminalResult.admissionLockAbsent, true);
+  assert.equal(terminalResult.noReviewerShadowPromotion, true);
+  assert.equal((await readdir(terminalDestination)).includes('probe-result.json'), true);
+
+  for (const activeState of ['CREATED', 'RUNNING'] as const) {
+    await writeProbeHistoryAttempt(loaded.repositoryRoot, activeState);
+    const activeStub = solutionStub();
+    await assert.rejects(
+      loaded.runProbe(
+        probeInput(`active-${activeState.toLowerCase()}-blocked`, join(root, `artifact-backed-probe-${activeState.toLowerCase()}-output`)),
+        activeStub.dependencies,
+      ),
+      /Active governed attempt attempt-000012/,
+    );
+    assert.equal(activeStub.calls.count, 0, `${activeState} history must stop before Solution execution`);
+  }
+  await writeProbeHistoryAttempt(loaded.repositoryRoot, 'FAILED');
+
+  const admissionLockPath = `${trialRoot}.admission.lock`;
+  await mkdir(admissionLockPath);
+  const lockedStub = solutionStub();
+  try {
+    await assert.rejects(
+      loaded.runProbe(
+        probeInput('admission-lock-blocked', join(root, 'artifact-backed-probe-admission-lock-output')),
+        lockedStub.dependencies,
+      ),
+      /admission lock exists/,
+    );
+    assert.equal(lockedStub.calls.count, 0);
+  } finally {
+    await rm(admissionLockPath, { recursive: true, force: true });
+  }
+
+  const mutationStub = solutionStub(async () => {
+    await writeFile(join(attemptRoot, 'arbitrary-history-mutation.json'), '{"changed":true}\n');
+  });
+  const mutationResult = await loaded.runProbe(
+    probeInput('history-mutation-contained', join(root, 'artifact-backed-probe-history-mutation-output')),
+    mutationStub.dependencies,
+  );
+  assert.equal(mutationStub.calls.count, 1);
+  assert.equal(mutationResult.status, 'CONTAINMENT_FAILURE');
+  assert.equal(mutationResult.governedHistoryUnchanged, false);
+  assert.notEqual(mutationResult.governedHistorySha256Before, mutationResult.governedHistorySha256After);
+  assert.equal(mutationResult.authoritativeFingerprintUnchanged, true);
+  assert.equal(mutationResult.admissionLockAbsent, true);
+  assert.equal(mutationResult.noReviewerShadowPromotion, true);
+
+  const lockMutationStub = solutionStub(async () => {
+    await mkdir(admissionLockPath);
+  });
+  try {
+    const lockMutationResult = await loaded.runProbe(
+      probeInput('admission-lock-mutation-contained', join(root, 'artifact-backed-probe-admission-lock-mutation-output')),
+      lockMutationStub.dependencies,
+    );
+    assert.equal(lockMutationStub.calls.count, 1);
+    assert.equal(lockMutationResult.status, 'CONTAINMENT_FAILURE');
+    assert.equal(lockMutationResult.governedHistoryUnchanged, true);
+    assert.equal(lockMutationResult.admissionLockAbsent, false);
+    assert.equal(lockMutationResult.noReviewerShadowPromotion, true);
+  } finally {
+    await rm(admissionLockPath, { recursive: true, force: true });
+  }
 }
 
 function syntheticCapacityEvidence(): Record<string, unknown> {
@@ -2186,6 +2379,14 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     const capacityEvidenceBytes = Buffer.from(canonicalJson(syntheticCapacityEvidence()));
     const capacityEvidencePath = join(root, 'synthetic-capacity-evidence.json');
     await writeFile(capacityEvidencePath, capacityEvidenceBytes);
+    await testArtifactBackedSolutionProbeHistoryContainment(root, {
+      evidencePath: capacityEvidencePath,
+      observablePayloadPath: syntheticPayloadPath,
+      responsibilityBriefPath: fullBriefPath,
+      evidenceSha256: sha256Hex(capacityEvidenceBytes),
+      observableSha256: sha256Hex(syntheticPayloadBytes),
+      responsibilityBriefSha256: sha256Hex(fullBriefBytes),
+    });
     const syntheticRunner = await loadSyntheticPublicRunner(root, {
       evidence: sha256Hex(capacityEvidenceBytes),
       observable: sha256Hex(syntheticPayloadBytes),

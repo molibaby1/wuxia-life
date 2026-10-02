@@ -14,6 +14,70 @@ const OUTPUT_ACTIVITY_WINDOW_MS = 100;
  * (e.g. ENVELOPE_RETRANSMISSION_TIMEOUT_MS = 60000).
  */
 export const DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS = 1_800_000;
+export const SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS = 1_800_000;
+export const SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS = 600_000;
+export const SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS = 2_700_000;
+
+type WorkspaceAgentTimeoutPolicy =
+  | { kind: 'FIXED'; timeoutMs: number }
+  | {
+      kind: 'SOLUTION_ACTIVITY_AWARE_V2';
+      evaluationStartMs: number;
+      stdoutInactivityMs: number;
+      absoluteCapMs: number;
+    };
+
+export interface SolutionActivityAwareTimeoutPolicyTraceV1 {
+  kind: 'SOLUTION_ACTIVITY_AWARE_V2';
+  evaluationStartMs: number;
+  stdoutInactivityMs: number;
+  absoluteCapMs: number;
+}
+
+const SOLUTION_INITIAL_TIMEOUT_POLICY: WorkspaceAgentTimeoutPolicy = {
+  kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+  evaluationStartMs: SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS,
+  stdoutInactivityMs: SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS,
+  absoluteCapMs: SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS,
+};
+
+function resolveWorkspaceAgentInitialTimeoutPolicy(
+  role: WorkspaceAgentJobInput['role'],
+  explicitTimeoutMs?: number,
+): WorkspaceAgentTimeoutPolicy {
+  if (explicitTimeoutMs !== undefined) return { kind: 'FIXED', timeoutMs: explicitTimeoutMs };
+  if (role === 'solution') return SOLUTION_INITIAL_TIMEOUT_POLICY;
+  return { kind: 'FIXED', timeoutMs: DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS };
+}
+
+function timeoutPolicyLimitMs(policy: WorkspaceAgentTimeoutPolicy): number {
+  return policy.kind === 'FIXED' ? policy.timeoutMs : policy.absoluteCapMs;
+}
+
+function timeoutPolicyTraceMetadata(
+  policy: WorkspaceAgentTimeoutPolicy,
+): SolutionActivityAwareTimeoutPolicyTraceV1 | undefined {
+  return policy.kind === 'SOLUTION_ACTIVITY_AWARE_V2'
+    ? {
+        kind: policy.kind,
+        evaluationStartMs: policy.evaluationStartMs,
+        stdoutInactivityMs: policy.stdoutInactivityMs,
+        absoluteCapMs: policy.absoluteCapMs,
+      }
+    : undefined;
+}
+
+export function describeWorkspaceAgentInitialTimeout(
+  role: WorkspaceAgentJobInput['role'],
+  explicitTimeoutMs?: number,
+): { timeoutMs: number; timeoutPolicy?: SolutionActivityAwareTimeoutPolicyTraceV1 } {
+  const policy = resolveWorkspaceAgentInitialTimeoutPolicy(role, explicitTimeoutMs);
+  const timeoutPolicy = timeoutPolicyTraceMetadata(policy);
+  return {
+    timeoutMs: timeoutPolicyLimitMs(policy),
+    ...(timeoutPolicy === undefined ? {} : { timeoutPolicy }),
+  };
+}
 
 export type ParticipantExecutionTraceEventType =
   | 'process_start'
@@ -53,12 +117,14 @@ export interface ParticipantExecutionTraceV1 {
   invocation: {
     startedAt: string;
     timeoutMs: number;
+    timeoutPolicy?: SolutionActivityAwareTimeoutPolicyTraceV1;
   };
   events: ParticipantExecutionTraceEventV1[];
   terminal: {
     outcome: 'completed' | 'timeout' | 'process_error';
     elapsedMs: number;
     lastObservableActivityElapsedMs?: number;
+    lastStdoutActivityElapsedMs?: number;
   };
 }
 
@@ -181,13 +247,15 @@ async function runWorkspaceAgentProcess(
   input: WorkspaceAgentJobInput,
   options: WorkspaceAgentParticipantOptions,
   execution: {
-    timeoutMs: number;
+    timeoutPolicy: WorkspaceAgentTimeoutPolicy;
     buildArgs: () => string[];
     expectedThreadRef?: ParticipantThreadRef;
   },
 ): Promise<WorkspaceAgentJobResult> {
   const spawnProcess = options.spawnProcess ?? spawn;
-  const { timeoutMs, buildArgs, expectedThreadRef } = execution;
+  const { timeoutPolicy, buildArgs, expectedThreadRef } = execution;
+  const timeoutMs = timeoutPolicyLimitMs(timeoutPolicy);
+  const timeoutPolicyMetadata = timeoutPolicyTraceMetadata(timeoutPolicy);
 
   return new Promise(resolveResult => {
     const startedAt = performance.now();
@@ -196,6 +264,7 @@ async function runWorkspaceAgentProcess(
       invocation: {
         startedAt: new Date().toISOString(),
         timeoutMs,
+        ...(timeoutPolicyMetadata === undefined ? {} : { timeoutPolicy: timeoutPolicyMetadata }),
       },
       events: [],
       terminal: {
@@ -205,8 +274,10 @@ async function runWorkspaceAgentProcess(
     };
     let sequence = 0;
     let lastObservableActivityElapsedMs: number | undefined;
+    let lastStdoutActivityElapsedMs: number | undefined;
     let lastOutputEventElapsedMs: number | undefined;
     let activityFlushTimer: NodeJS.Timeout | undefined;
+    let rescheduleActivityAwareTimeout: (() => void) | undefined;
     const pendingActivity = new Map<'stdout' | 'stderr', { bytes: number; elapsedMs: number }>();
     const elapsedMs = (): number => Math.max(0, Math.round(performance.now() - startedAt));
     const record = (event: Omit<ParticipantExecutionTraceEventV1, 'seq'>): void => {
@@ -254,6 +325,10 @@ async function runWorkspaceAgentProcess(
         elapsedMs: observedAt,
       });
       lastObservableActivityElapsedMs = observedAt;
+      if (stream === 'stdout') {
+        lastStdoutActivityElapsedMs = observedAt;
+        rescheduleActivityAwareTimeout?.();
+      }
       if (lastOutputEventElapsedMs === undefined || observedAt - lastOutputEventElapsedMs >= OUTPUT_ACTIVITY_WINDOW_MS) {
         flushPendingActivity();
       } else {
@@ -267,6 +342,7 @@ async function runWorkspaceAgentProcess(
         outcome,
         elapsedMs: terminalElapsedMs,
         ...(lastObservableActivityElapsedMs === undefined ? {} : { lastObservableActivityElapsedMs }),
+        ...(lastStdoutActivityElapsedMs === undefined ? {} : { lastStdoutActivityElapsedMs }),
       };
       if (input.traceArtifactPath !== undefined) {
         try {
@@ -280,6 +356,7 @@ async function runWorkspaceAgentProcess(
     let processStarted = false;
     let args: string[];
     let settled = false;
+    let timeoutTriggered = false;
     let timeoutTimer: NodeJS.Timeout | undefined;
     let stdout = '';
     let stderr = '';
@@ -303,9 +380,61 @@ async function runWorkspaceAgentProcess(
       if (settled) return;
       settled = true;
       if (timeoutTimer !== undefined) clearTimeout(timeoutTimer);
+      flushPendingActivity();
       await persistProviderStreams();
       await persistTrace(outcome);
       resolveResult({ ...result, executionTrace: trace } as WorkspaceAgentJobResult);
+    };
+    const terminateForTimeout = (detail?: string): void => {
+      if (settled || timeoutTriggered) return;
+      timeoutTriggered = true;
+      if (timeoutTimer !== undefined) {
+        clearTimeout(timeoutTimer);
+        timeoutTimer = undefined;
+      }
+      const timeoutElapsedMs = elapsedMs();
+      child.kill('SIGTERM');
+      flushPendingActivity();
+      record({ type: 'timeout', elapsedMs: timeoutElapsedMs, ...(detail === undefined ? {} : { detail }) });
+      void finish({
+        ok: false,
+        errorKind: 'timeout',
+        message: detail === undefined
+          ? `workspace Agent job timed out after ${timeoutMs}ms`
+          : `workspace Agent job timed out under SOLUTION_ACTIVITY_AWARE_V2: ${detail}`,
+        rawOutput: combinedOutput(stdout, stderr),
+      }, 'timeout');
+    };
+    const scheduleActivityAwareTimeout = (): void => {
+      if (timeoutPolicy.kind !== 'SOLUTION_ACTIVITY_AWARE_V2' || settled || timeoutTriggered) return;
+      if (timeoutTimer !== undefined) clearTimeout(timeoutTimer);
+
+      const currentElapsedMs = elapsedMs();
+      if (currentElapsedMs >= timeoutPolicy.absoluteCapMs) {
+        terminateForTimeout('SOLUTION_ABSOLUTE_CAP');
+        return;
+      }
+
+      let nextDeadlineMs: number;
+      if (currentElapsedMs < timeoutPolicy.evaluationStartMs) {
+        nextDeadlineMs = timeoutPolicy.evaluationStartMs;
+      } else {
+        const lastStdoutMs = lastStdoutActivityElapsedMs ?? 0;
+        const inactivityDeadlineMs = Math.max(
+          timeoutPolicy.evaluationStartMs,
+          lastStdoutMs + timeoutPolicy.stdoutInactivityMs,
+        );
+        if (currentElapsedMs >= inactivityDeadlineMs) {
+          terminateForTimeout('SOLUTION_STDOUT_INACTIVITY');
+          return;
+        }
+        nextDeadlineMs = inactivityDeadlineMs;
+      }
+
+      timeoutTimer = setTimeout(
+        scheduleActivityAwareTimeout,
+        Math.max(1, Math.min(nextDeadlineMs, timeoutPolicy.absoluteCapMs) - currentElapsedMs),
+      );
     };
     try {
       args = buildArgs();
@@ -322,19 +451,6 @@ async function runWorkspaceAgentProcess(
       }, 'process_error');
       return;
     }
-
-    timeoutTimer = setTimeout(() => {
-      const timeoutElapsedMs = elapsedMs();
-      child.kill('SIGTERM');
-      flushPendingActivity();
-      record({ type: 'timeout', elapsedMs: timeoutElapsedMs });
-      void finish({
-        ok: false,
-        errorKind: 'timeout',
-        message: `workspace Agent job timed out after ${timeoutMs}ms`,
-        rawOutput: combinedOutput(stdout, stderr),
-      }, 'timeout');
-    }, timeoutMs);
 
     child.stdout.on('data', chunk => {
       stdoutChunks.push(Buffer.isBuffer(chunk) ? Buffer.from(chunk) : Buffer.from(String(chunk)));
@@ -404,16 +520,27 @@ async function runWorkspaceAgentProcess(
         ...(typeof code === 'number' ? { exitCode: code } : {}),
       }, 'process_error');
     });
+
+    if (timeoutPolicy.kind === 'FIXED') {
+      timeoutTimer = setTimeout(() => terminateForTimeout(), timeoutPolicy.timeoutMs);
+    } else {
+      rescheduleActivityAwareTimeout = scheduleActivityAwareTimeout;
+      scheduleActivityAwareTimeout();
+    }
   });
 }
 
 export async function runWorkspaceAgentJob(
   input: WorkspaceAgentJobInput,
   options: WorkspaceAgentParticipantOptions,
+  /** Host-only deterministic scheduler seam; production callers use the Role-derived policy. */
+  timeoutPolicyOverride?: WorkspaceAgentTimeoutPolicy,
 ): Promise<WorkspaceAgentJobResult> {
-  const timeoutMs = options.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS;
+  const timeoutPolicy = options.timeoutMs === undefined
+    ? timeoutPolicyOverride ?? resolveWorkspaceAgentInitialTimeoutPolicy(input.role)
+    : { kind: 'FIXED' as const, timeoutMs: options.timeoutMs };
   return runWorkspaceAgentProcess(input, options, {
-    timeoutMs,
+    timeoutPolicy,
     buildArgs: () => options.buildArgs(input),
   });
 }
@@ -446,7 +573,7 @@ export async function runWorkspaceAgentContinuation(
     };
   }
   return runWorkspaceAgentProcess(input, options, {
-    timeoutMs,
+    timeoutPolicy: { kind: 'FIXED', timeoutMs },
     buildArgs: () => continuation.buildArgs(input, threadRef),
     expectedThreadRef: threadRef,
   });

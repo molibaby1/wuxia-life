@@ -1,10 +1,7 @@
 import { mkdir, open } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { canonicalJson } from './phase0/provenance';
-import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
-  type WorkspaceAgentParticipantOptions,
-} from './problemAgnosticSolution/agentParticipant';
+import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
 
 export function buildParticipantBindingReceipt(
   participant: WorkspaceAgentParticipantOptions,
@@ -31,7 +28,7 @@ export function buildParticipantBindingReceipt(
     ...(participant.bindingMetadata?.nativeReceiptSchemaSha256 === undefined
       ? {}
       : { nativeReceiptSchemaSha256: participant.bindingMetadata.nativeReceiptSchemaSha256 }),
-    timeoutMs: participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+    ...(participant.timeoutMs === undefined ? {} : { timeoutMs: participant.timeoutMs }),
   };
 }
 

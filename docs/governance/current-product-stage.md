@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-01（PD-118 Source-local Candidate Pool / Multi-candidate Session v1 engineering delivered；default ordinary path active；deterministic acceptance verified；Solution structured-output schema retransmission robustness extension authorized；Reference Participant Binding / Native Envelope Assistance corrected Matrix A 3/3、Matrix B 0/3 timeout；Artifact-Backed Structured Final Result V1 synthetic matrix 3/3 PASS、两次 historical probes 均到达 Role-schema validation；exact-binding communication gate satisfied，新 Layer A campaign may be proposed，但没有 attempt 获得授权，仍需独立 Human authorization）。
+> 最后更新：2026-10-02（PD-099 v2 Human accepted 并完成 deterministic engineering verification；新增两次独立 natural Solution runtime TIMEOUT evidence。2026-10-01 Reference Participant Binding / Native Envelope Assistance corrected Matrix B 的 `1800000ms` timeout 是 v1 fixed-cutoff 历史行为，保持原始历史含义；Layer A campaign 仍未获授权）。
 
 ---
 
@@ -57,7 +57,8 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - 两类 trigger 均禁止 Host repair / extraction / normalization 与 semantic correction；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
 - Sidecar Run Report 现已可从 `solution-agent/execution-trace.json` 观察 first-pass / retransmission / final structured-output 指标，但不影响 runtime outcome；
 - 不代表完整 P3 启动或 broader Participant Communication Contract 激活。
-- **Participant / model hard-timeout policy v1（PD-099）：默认 hard boundary = `1800000ms`；abnormal-safety only，不是 ordinary execution budget；正常 Participant execution 应在 boundary 内自然完成；retransmission / retry ceilings 保持独立（Slice #2 retransmission ceiling 仍为 `60000ms`）。**
+- **PD-099 v2 — Solution activity-aware abnormal-safety timeout：HUMAN ACCEPTED / ENGINEERING IMPLEMENTED / DETERMINISTIC GATES VERIFIED。** Solution attempt 0 在 `1800000ms` 开始按 stdout silence `600000ms` 评估，并受 `2700000ms` absolute cap 限制；stderr 不刷新 inactivity。base Solution 与 fresh bounded Solution revision 共用此 Host policy。所有 non-Solution initial roles 仍为 `1800000ms` fixed default；same-thread retransmission 仍为 `60000ms` fixed ceiling。v1 的无条件 `1800000ms` fixed cutoff 保留为历史，不覆盖本条现行 authority。该 correction 不是 ordinary execution budget，也不建立 45 分钟性能目标；timeout 仍为 Participant runtime `TIMEOUT` 并按 PD-119 fail closed。
+- **PD-099 v2 的 natural evidence：**`ordinary-run-20260917-000004` 的 Solution 在 `1800000ms` timeout 前 `10571ms` 仍有 stdout（terminal elapsed `1800057ms`，last stdout `1789486ms`）；`ordinary-run-20261002-000001` / `hypothesis-000002` 在 `1800000ms` timeout 前 `70082ms` 仍有 stdout（terminal elapsed `1800013ms`，last stdout `1729931ms`）。两者是同类 `PARTICIPANT_RUNTIME / TIMEOUT`，支持无条件 fixed cutoff 与仍活跃 observable stdout 不匹配；不证明较长运行的原因或语义结果，也不构成 `NATURAL_ACTIVATION_OBSERVED`、`NATURAL_SEMANTIC_DERIVATION_PASS` 或 Layer A PASS。
 
 这些结果支持当前系统进入真实使用 / 观察阶段。
 

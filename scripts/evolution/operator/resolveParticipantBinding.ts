@@ -1,7 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
   type WorkspaceAgentJobInput,
   type WorkspaceAgentParticipantOptions,
   type WorkspaceAgentCompletedOutputInput,
@@ -90,7 +89,6 @@ export function createCodexCurrentParticipant(
   // Matches the repository's ordinary-run Codex host binding (no -m override).
   return {
     executable,
-    timeoutMs: DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
     bindingMetadata: {
       bindingId: OPERATOR_BINDING_CODEX_CURRENT,
       executableVersion,

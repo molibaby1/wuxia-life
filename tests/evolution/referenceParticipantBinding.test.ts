@@ -415,6 +415,7 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     const ordinary = await resolveOperatorParticipantBinding();
     assert.equal(ordinary.participant.model, undefined);
     assert.equal(ordinary.participant.reasoningEffort, undefined);
+    assert.equal(ordinary.participant.timeoutMs, undefined);
     assert.deepEqual(ordinary.participant.bindingMetadata, {
       bindingId: 'CODEX_CURRENT',
       executableVersion: 'codex 1.2.3',
@@ -427,6 +428,7 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     const ordinaryReceipt = buildParticipantBindingReceipt(ordinary.participant);
     assert.equal(Object.hasOwn(ordinaryReceipt, 'ambientCodexConfigSha256'), false);
     assert.equal(Object.hasOwn(ordinaryReceipt, 'nativeEnvelopeSchemaSha256'), false);
+    assert.equal(Object.hasOwn(ordinaryReceipt, 'timeoutMs'), false);
   } finally {
     if (originalPath === undefined) delete process.env.PATH;
     else process.env.PATH = originalPath;

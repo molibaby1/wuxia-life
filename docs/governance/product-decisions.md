@@ -1425,6 +1425,25 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要把 retransmission / retry ceiling 与 hard-timeout 合并；
 - 需要按 Role / provider 引入不同 hard-timeout defaults。
 
+**历史说明：**以上内容记录 2026-08-29 接受的 PD-099 v1。v1 将所有 Participant initial execution 统一设为 `1800000ms` fixed hard cutoff；当时并无 stdout activity-aware semantics。该历史事实及其当时的重新讨论条件保留，不回写为 v2。
+
+#### 2026-10-02：PD-099 v2 — Solution activity-aware abnormal-safety timeout policy
+
+**实施决策（Human accepted：2026-10-02；当前 operative policy）**
+
+本次是针对已重复自然观察到的 timeout-policy mismatch 所作的 bounded abnormal-safety correction。两次独立 ordinary run 均在固定 `1800000ms` cutoff 前仍观察到 Solution stdout activity；这支持修正 Host 的无条件 fixed cutoff，不证明 Participant / provider 为何需要较长 execution，也不建立“Solution 应该运行 45 分钟”的性能目标。
+
+- **Solution initial execution，仅 attempt 0：**从 invocation elapsed `1800000ms` 开始评估 stdout inactivity；若从最近一次真实 stdout chunk arrival 起连续无 stdout 达到 `600000ms`，以 `TIMEOUT` 终止。若进程尚未收到 stdout，则以 process start 作为 silence 起点。
+- 若 `elapsed >= 2700000ms`，无论 stdout 是否仍活跃，一律以 `TIMEOUT` 终止。这是 absolute abnormal-safety cap。
+- `stderr` activity 不刷新 inactivity deadline。Activity source 是 Host 实际收到的 stdout chunk arrival。
+- 上述 initial execution 包含 base Solution 与 bounded continuation 中的 fresh Solution revision；两者都使用相同 v2 policy。
+- 所有 non-Solution initial roles 继续使用 `1800000ms` fixed default。
+- same-thread envelope/schema retransmission 继续使用独立的 `60000ms` fixed ceiling；不适用 v2 activity-aware policy。
+- v2 timeout 仍分类为 Participant runtime `TIMEOUT`，并继续遵守 PD-119 既有 fail-closed containment；不新增 Decision route、recovery 或 automatic semantic retry。
+- `1800000ms` 与 `2700000ms` 都是 abnormal-safety policy boundary，不是 ordinary Solution execution budget、期望完成时间或质量目标。
+
+本修正只改变 Host-owned Solution initial-execution timeout scheduler；Participant prompt、binding、provider、Contract、Schema、model、retry 与 PD-119 fail-closed semantics 均不因此改变。
+
 ### PD-100：Human Follow-up Loop v1 与 RUN / OBSERVE Evidence Review Policy
 
 **实施决策（Human accepted：2026-08-29；本条为 authority closure）**

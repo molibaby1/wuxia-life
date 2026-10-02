@@ -7,7 +7,7 @@ import {
   validateArtifactBackedStructuredFinalResultReceipt,
 } from '../../../src/evolution/artifactBackedStructuredFinalResultContract';
 import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+  describeWorkspaceAgentInitialTimeout,
   runWorkspaceAgentContinuation,
   runWorkspaceAgentJob,
   type ParticipantExecutionTraceEventV1,
@@ -105,6 +105,7 @@ function composeExecutionTrace(input: {
   aggregateStartedWallClockMs: number;
   aggregateStartedMonotonic: number;
   timeoutMs: number;
+  timeoutPolicy?: ParticipantExecutionTraceV1['invocation']['timeoutPolicy'];
   attempt0Trace: ParticipantExecutionTraceV1;
   attempt1Trace?: ParticipantExecutionTraceV1;
   attempt1ElapsedOffsetMs?: number;
@@ -128,12 +129,18 @@ function composeExecutionTrace(input: {
   const lastObservableActivityElapsedMs = attempt1Last === undefined
     ? attempt0Last
     : Math.max(attempt0Last ?? 0, attempt1Last + attempt1Offset);
+  const attempt0LastStdout = input.attempt0Trace.terminal.lastStdoutActivityElapsedMs;
+  const attempt1LastStdout = input.attempt1Trace?.terminal.lastStdoutActivityElapsedMs;
+  const lastStdoutActivityElapsedMs = attempt1LastStdout === undefined
+    ? attempt0LastStdout
+    : Math.max(attempt0LastStdout ?? 0, attempt1LastStdout + attempt1Offset);
 
   return {
     schemaVersion: 'participant-execution-trace-v1',
     invocation: {
       startedAt: new Date(input.aggregateStartedWallClockMs).toISOString(),
       timeoutMs: input.timeoutMs,
+      ...(input.timeoutPolicy === undefined ? {} : { timeoutPolicy: input.timeoutPolicy }),
     },
     events,
     terminal: {
@@ -142,6 +149,7 @@ function composeExecutionTrace(input: {
       ...(lastObservableActivityElapsedMs === undefined
         ? {}
         : { lastObservableActivityElapsedMs }),
+      ...(lastStdoutActivityElapsedMs === undefined ? {} : { lastStdoutActivityElapsedMs }),
     },
   };
 }
@@ -152,6 +160,7 @@ function runtimeFailureResult(
     aggregateStartedWallClockMs: number;
     aggregateStartedMonotonic: number;
     timeoutMs: number;
+    timeoutPolicy?: ParticipantExecutionTraceV1['invocation']['timeoutPolicy'];
     attempt0Trace: ParticipantExecutionTraceV1;
     attempt1Trace?: ParticipantExecutionTraceV1;
     attempt1ElapsedOffsetMs?: number;
@@ -174,6 +183,7 @@ function runtimeFailureResult(
       aggregateStartedWallClockMs: input.aggregateStartedWallClockMs,
       aggregateStartedMonotonic: input.aggregateStartedMonotonic,
       timeoutMs: input.timeoutMs,
+      timeoutPolicy: input.timeoutPolicy,
       attempt0Trace: input.attempt0Trace,
       attempt1Trace: input.attempt1Trace,
       attempt1ElapsedOffsetMs: input.attempt1ElapsedOffsetMs,
@@ -348,7 +358,8 @@ export async function runStructuredParticipantExecution<T>(input: {
   });
   const aggregateStartedWallClockMs = Date.now();
   const aggregateStartedMonotonic = performance.now();
-  const timeoutMs = input.participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS;
+  const initialTimeout = describeWorkspaceAgentInitialTimeout(input.role, input.participant.timeoutMs);
+  const timeoutMs = initialTimeout.timeoutMs;
   const elapsedMs = (): number => Math.max(0, Math.round(performance.now() - aggregateStartedMonotonic));
   const lifecycleEvents: Omit<ParticipantExecutionTraceEventV1, 'seq'>[] = [];
   let recovery: EnvelopeRetransmissionObservation = notAttemptedRecovery();
@@ -357,6 +368,7 @@ export async function runStructuredParticipantExecution<T>(input: {
     aggregateStartedWallClockMs,
     aggregateStartedMonotonic,
     timeoutMs,
+    timeoutPolicy: initialTimeout.timeoutPolicy,
   };
 
   const jobInput: WorkspaceAgentJobInput = {
@@ -399,6 +411,7 @@ export async function runStructuredParticipantExecution<T>(input: {
         invocation: {
           startedAt: new Date(aggregateStartedWallClockMs).toISOString(),
           timeoutMs,
+          ...(initialTimeout.timeoutPolicy === undefined ? {} : { timeoutPolicy: initialTimeout.timeoutPolicy }),
         },
         events: [],
         terminal: { outcome: 'process_error', elapsedMs: elapsedMs() },

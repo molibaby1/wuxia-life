@@ -4,7 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+  SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS,
+  SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS,
+  SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS,
   runWorkspaceAgentJob,
   runWorkspaceAgentContinuation,
   type WorkspaceAgentJobInput,
@@ -51,7 +53,13 @@ export async function runAgentParticipantTests(): Promise<void> {
   assert.match(success.ok ? success.rawOutput : '', new RegExp(workspaceRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   const completedTrace = JSON.parse(await readFile(traceInput(input.invocationRef).traceArtifactPath, 'utf8'));
   assert.equal(completedTrace.schemaVersion, 'participant-execution-trace-v1');
-  assert.equal(completedTrace.invocation.timeoutMs, DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS);
+  assert.equal(completedTrace.invocation.timeoutMs, SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS);
+  assert.deepEqual(completedTrace.invocation.timeoutPolicy, {
+    kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+    evaluationStartMs: SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS,
+    stdoutInactivityMs: SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS,
+    absoluteCapMs: SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS,
+  });
   assert.deepEqual(completedTrace.events.map((event: { seq: number }) => event.seq), [0, 1, 2]);
   assert.deepEqual(completedTrace.events.map((event: { type: string }) => event.type), [
     'process_start',
@@ -60,6 +68,7 @@ export async function runAgentParticipantTests(): Promise<void> {
   ]);
   assert.equal(completedTrace.terminal.outcome, 'completed');
   assert.equal(completedTrace.terminal.lastObservableActivityElapsedMs, completedTrace.events[1].elapsedMs);
+  assert.equal(completedTrace.terminal.lastStdoutActivityElapsedMs, completedTrace.events[1].elapsedMs);
   assert.ok(completedTrace.terminal.elapsedMs >= completedTrace.events[1].elapsedMs);
   assert.ok(completedTrace.events.every((event: { elapsedMs: number }, index: number, events: Array<{ elapsedMs: number }>) => (
     index === 0 || event.elapsedMs >= events[index - 1]!.elapsedMs
@@ -92,6 +101,7 @@ export async function runAgentParticipantTests(): Promise<void> {
   assert.deepEqual(noOutputTrace.events.map((event: { type: string }) => event.type), ['process_start', 'process_close']);
   assert.equal(noOutputTrace.terminal.outcome, 'completed');
   assert.equal('lastObservableActivityElapsedMs' in noOutputTrace.terminal, false);
+  assert.equal('lastStdoutActivityElapsedMs' in noOutputTrace.terminal, false);
 
   const buildArgsFailure = await runWorkspaceAgentJob(
     traceInput('solution-build-args-failure'),

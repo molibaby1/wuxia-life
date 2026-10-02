@@ -15,10 +15,13 @@ import {
   type StructuredParticipantExecutionResult,
 } from '../../scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution';
 import {
+  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+  runWorkspaceAgentContinuation,
   runWorkspaceAgentJob,
   type WorkspaceAgentJobInput,
   type WorkspaceAgentParticipantOptions,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import { ENVELOPE_RETRANSMISSION_TIMEOUT_MS } from '../../scripts/evolution/problemAgnosticSolution/envelopeRetransmission';
 
 const RECEIPT_SCHEMA_VERSION = 'artifact-backed-structured-final-result-receipt-v1';
 
@@ -192,6 +195,13 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     });
 
     assert.equal(result.ok, true);
+    assert.equal(result.executionTrace.invocation.timeoutMs, 2_700_000);
+    assert.deepEqual(result.executionTrace.invocation.timeoutPolicy, {
+      kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+      evaluationStartMs: 1_800_000,
+      stdoutInactivityMs: 600_000,
+      absoluteCapMs: 2_700_000,
+    });
     assert.deepEqual(result.ok ? result.value : undefined, validObject);
     assert.equal(result.ok ? result.acceptedAttempt : undefined, 0);
     assert.deepEqual(result.recovery, { eligible: false, attempted: false, outcome: 'NOT_ATTEMPTED' });
@@ -306,6 +316,12 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(continuationCalls, 1);
     assert.equal(result.recovery.attempted, true);
     assert.equal(result.ok ? result.acceptedAttempt : undefined, 1);
+    const retransmissionEvent = result.executionTrace.events.find(
+      event => event.type === 'participant_envelope_retransmission_requested',
+    );
+    assert.equal(retransmissionEvent?.sameThread, true);
+    assert.equal(retransmissionEvent?.timeoutMs, ENVELOPE_RETRANSMISSION_TIMEOUT_MS);
+    assert.equal(ENVELOPE_RETRANSMISSION_TIMEOUT_MS, 60_000);
   });
 
   const invalidCases: Array<{
@@ -468,6 +484,169 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
     assert.equal(await readFile(stdoutPath, 'utf8'), 'timeout stdout');
     assert.equal(await readFile(stderrPath, 'utf8'), 'timeout stderr');
+  });
+
+  await withFixture(async ({ workspaceRoot }) => {
+    const policy = {
+      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      evaluationStartMs: 400,
+      stdoutInactivityMs: 900,
+      absoluteCapMs: 2_000,
+    };
+    const job: WorkspaceAgentJobInput = {
+      invocationRef: 'solution-active-stdout-before-deadline',
+      role: 'solution',
+      workspaceRoot,
+      prompt: 'short timeout policy test',
+    };
+    const delayedStdoutScript = 'setTimeout(()=>process.stdout.write("active"),150);setTimeout(()=>process.exit(0),650)';
+    const fixedBaseline = await runWorkspaceAgentJob(job, {
+      executable: process.execPath,
+      timeoutMs: policy.evaluationStartMs,
+      buildArgs: () => ['-e', delayedStdoutScript],
+    });
+    assert.equal(fixedBaseline.ok, false, 'the old fixed cutoff stops this same execution before stdout');
+    assert.equal(fixedBaseline.ok ? undefined : fixedBaseline.errorKind, 'timeout');
+
+    const result = await runWorkspaceAgentJob(job, {
+      executable: process.execPath,
+      buildArgs: () => ['-e', delayedStdoutScript],
+    }, policy);
+
+    assert.equal(result.ok, true, 'stdout before the evaluation point must keep Solution alive beyond the old fixed cutoff');
+    assert.equal(result.executionTrace.events.some(event => event.type === 'timeout'), false);
+  });
+
+  await withFixture(async ({ workspaceRoot }) => {
+    const policy = {
+      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      evaluationStartMs: 180,
+      stdoutInactivityMs: 420,
+      absoluteCapMs: 1_500,
+    };
+    const result = await runWorkspaceAgentJob({
+      invocationRef: 'solution-stdout-inactivity',
+      role: 'solution',
+      workspaceRoot,
+      prompt: 'short timeout policy test',
+    }, {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'setTimeout(()=>{},5000)'],
+    }, policy);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
+    assert.equal(
+      result.executionTrace.events.find(event => event.type === 'timeout')?.detail,
+      'SOLUTION_STDOUT_INACTIVITY',
+    );
+  });
+
+  await withFixture(async ({ workspaceRoot }) => {
+    const policy = {
+      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      evaluationStartMs: 180,
+      stdoutInactivityMs: 420,
+      absoluteCapMs: 1_500,
+    };
+    const result = await runWorkspaceAgentJob({
+      invocationRef: 'solution-stderr-does-not-refresh',
+      role: 'solution',
+      workspaceRoot,
+      prompt: 'short timeout policy test',
+    }, {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'setInterval(()=>process.stderr.write("still active\\n"),60)'],
+    }, policy);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
+    assert.equal(
+      result.executionTrace.events.find(event => event.type === 'timeout')?.detail,
+      'SOLUTION_STDOUT_INACTIVITY',
+    );
+    assert.equal(result.executionTrace.events.some(event => event.type === 'output_activity' && event.stream === 'stderr'), true);
+  });
+
+  await withFixture(async ({ workspaceRoot }) => {
+    const policy = {
+      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      evaluationStartMs: 180,
+      stdoutInactivityMs: 500,
+      absoluteCapMs: 1_600,
+    };
+    const result = await runWorkspaceAgentJob({
+      invocationRef: 'solution-absolute-cap',
+      role: 'solution',
+      workspaceRoot,
+      prompt: 'short timeout policy test',
+    }, {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'setInterval(()=>process.stdout.write("active\\n"),50)'],
+    }, policy);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
+    assert.equal(
+      result.executionTrace.events.find(event => event.type === 'timeout')?.detail,
+      'SOLUTION_ABSOLUTE_CAP',
+    );
+  });
+
+  await withFixture(async ({ workspaceRoot }) => {
+    const defaultReviewer = await runWorkspaceAgentJob({
+      invocationRef: 'reviewer-default-timeout-policy',
+      role: 'reviewer',
+      workspaceRoot,
+      prompt: 'short fixed timeout default test',
+    }, {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'process.stdout.write("completed")'],
+    });
+    assert.equal(defaultReviewer.ok, true);
+    assert.equal(defaultReviewer.executionTrace.invocation.timeoutMs, DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS);
+    assert.equal(defaultReviewer.executionTrace.invocation.timeoutPolicy, undefined);
+
+    const result = await runWorkspaceAgentJob({
+      invocationRef: 'reviewer-fixed-timeout',
+      role: 'reviewer',
+      workspaceRoot,
+      prompt: 'short fixed timeout test',
+    }, {
+      executable: process.execPath,
+      timeoutMs: 400,
+      buildArgs: () => ['-e', 'setInterval(()=>process.stdout.write("active\\n"),50)'],
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
+    assert.equal(result.executionTrace.invocation.timeoutMs, 400);
+    assert.equal(result.executionTrace.invocation.timeoutPolicy, undefined);
+    assert.equal(result.executionTrace.events.find(event => event.type === 'timeout')?.detail, undefined);
+    assert.equal(DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS, 1_800_000);
+  });
+
+  await withFixture(async ({ workspaceRoot }) => {
+    const job: WorkspaceAgentJobInput = {
+      invocationRef: 'solution-retransmission-fixed-timeout',
+      role: 'solution',
+      workspaceRoot,
+      prompt: 'short fixed retransmission timeout test',
+    };
+    const result = await runWorkspaceAgentContinuation(job, {
+      executable: process.execPath,
+      buildArgs: () => [],
+      sameThreadContinuation: {
+        provider: 'test-provider',
+        buildArgs: () => ['-e', 'setInterval(()=>process.stdout.write("active\\n"),50)'],
+      },
+    }, { provider: 'test-provider', opaqueId: 'thread-000003' }, 400);
+
+    assert.equal(result.ok, false);
+    assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
+    assert.equal(result.executionTrace.invocation.timeoutMs, 400);
+    assert.equal(result.executionTrace.invocation.timeoutPolicy, undefined);
+    assert.equal(result.executionTrace.events.find(event => event.type === 'timeout')?.detail, undefined);
   });
 
   await withFixture(async ({ workspaceRoot, destinationRoot }) => {

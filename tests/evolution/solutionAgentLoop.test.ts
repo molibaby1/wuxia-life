@@ -575,6 +575,13 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   );
   const solutionTrace = JSON.parse(await readFile(join(root, 'solution-agent/execution-trace.json'), 'utf8'));
   assert.equal(solutionTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(solutionTrace.invocation.timeoutMs, 2_700_000);
+  assert.deepEqual(solutionTrace.invocation.timeoutPolicy, {
+    kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+    evaluationStartMs: 1_800_000,
+    stdoutInactivityMs: 600_000,
+    absoluteCapMs: 2_700_000,
+  });
   assert.equal(solutionTrace.terminal.outcome, 'completed');
   assert.equal(solutionTrace.events[0].type, 'process_start');
   assert.equal(solutionTrace.events.at(-1).type, 'participant_terminal_validation');
@@ -735,6 +742,14 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   });
   assert.equal(revisionRun.ok, true);
   assert.equal(revisionInvocationRef, 'solution-revision-000001');
+  const revisionTrace = JSON.parse(await readFile(join(root, 'solution-revision/execution-trace.json'), 'utf8'));
+  assert.equal(revisionTrace.invocation.timeoutMs, 2_700_000);
+  assert.deepEqual(revisionTrace.invocation.timeoutPolicy, {
+    kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+    evaluationStartMs: 1_800_000,
+    stdoutInactivityMs: 600_000,
+    absoluteCapMs: 2_700_000,
+  });
   const revisionInvocation = JSON.parse(await readFile(join(root, 'solution-revision/invocation.json'), 'utf8'));
   assert.equal(revisionInvocation.invocationRef, 'solution-revision-000001');
 

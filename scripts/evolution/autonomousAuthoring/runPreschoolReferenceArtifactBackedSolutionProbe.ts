@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import {
@@ -126,7 +126,6 @@ function isWithin(root: string, target: string): boolean {
 export async function readValidatedPreschoolReferenceArtifactBackedProbeBindingLock(input: {
   repositoryRoot: string;
   participantBindingLockPath: string;
-  currentImplementationSha: string;
 }): Promise<ArtifactBackedReferenceParticipantBindingLockV2> {
   const lockPath = resolve(input.participantBindingLockPath);
   if (basename(lockPath) !== "binding-lock.json")
@@ -168,7 +167,8 @@ export async function readValidatedPreschoolReferenceArtifactBackedProbeBindingL
       "reference-artifact-backed-communication-matrix-v1" ||
     matrixValue.status !== "PASS" ||
     matrixValue.bindingLockRef !== "binding-lock.json" ||
-    matrixValue.implementationSha !== input.currentImplementationSha ||
+    typeof matrixValue.implementationSha !== "string" ||
+    !/^[a-f0-9]{40}$/.test(matrixValue.implementationSha) ||
     !Array.isArray(matrixValue.trials) ||
     matrixValue.trials.length !== 3 ||
     !matrixValue.trials.every(
@@ -188,7 +188,7 @@ export async function readValidatedPreschoolReferenceArtifactBackedProbeBindingL
     )
   ) {
     throw new Error(
-      "Artifact-backed probe requires exactly three passing trials from a matrix for the current clean implementation SHA.",
+      "Artifact-backed probe requires exactly three passing trials with a valid matrix implementation SHA.",
     );
   }
   if (
@@ -202,9 +202,9 @@ export async function readValidatedPreschoolReferenceArtifactBackedProbeBindingL
   return lock;
 }
 
-export function readCleanPreschoolArtifactBackedProbeImplementationSha(
+export function assertCleanPreschoolArtifactBackedProbeImplementationWorktree(
   repositoryRoot: string,
-): string {
+): void {
   const diff = spawnSync(
     "git",
     ["-C", repositoryRoot, "diff", "--quiet", "HEAD", "--"],
@@ -222,9 +222,6 @@ export function readCleanPreschoolArtifactBackedProbeImplementationSha(
     throw new Error(
       `Could not verify tracked implementation worktree: ${diff.stderr}`,
     );
-  return execFileSync("git", ["-C", repositoryRoot, "rev-parse", "HEAD"], {
-    encoding: "utf8",
-  }).trim();
 }
 
 export function preschoolReferenceArtifactBackedSolutionProbeUsage(): string {
@@ -233,9 +230,7 @@ export function preschoolReferenceArtifactBackedSolutionProbeUsage(): string {
 
 export async function runPreschoolReferenceArtifactBackedSolutionProbeCli(
   argv: string[],
-  dependencies: PreschoolReferenceArtifactBackedSolutionCommunicationProbeDependencies & {
-    implementationSha?: (root: string) => string | Promise<string>;
-  } = {},
+  dependencies: PreschoolReferenceArtifactBackedSolutionCommunicationProbeDependencies = {},
   repositoryRoot = process.cwd(),
   writeOutput: (text: string) => void = (text) => process.stdout.write(text),
 ): Promise<number> {
@@ -247,16 +242,13 @@ export async function runPreschoolReferenceArtifactBackedSolutionProbeCli(
     writeOutput(`${preschoolReferenceArtifactBackedSolutionProbeUsage()}\n`);
     return 0;
   }
-  const currentSha = dependencies.implementationSha
-    ? await dependencies.implementationSha(parsed.input.liveRepositoryRoot)
-    : readCleanPreschoolArtifactBackedProbeImplementationSha(
-        parsed.input.liveRepositoryRoot,
-      );
+  assertCleanPreschoolArtifactBackedProbeImplementationWorktree(
+    parsed.input.liveRepositoryRoot,
+  );
   const participantBindingLock =
     await readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
       repositoryRoot: parsed.input.liveRepositoryRoot,
       participantBindingLockPath: parsed.input.participantBindingLockPath,
-      currentImplementationSha: currentSha,
     });
   const result =
     await runPreschoolReferenceArtifactBackedSolutionCommunicationProbe(

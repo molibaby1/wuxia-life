@@ -2,7 +2,17 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-02（PD-099 v2 Human accepted 并完成 deterministic engineering verification；新增两次独立 natural Solution runtime TIMEOUT evidence。2026-10-01 Reference Participant Binding / Native Envelope Assistance corrected Matrix B 的 `1800000ms` timeout 是 v1 fixed-cutoff 历史行为，保持原始历史含义；Layer A campaign 仍未获授权）。
+> 最后更新：2026-10-03（PD-099 v2 Human accepted 并完成 deterministic engineering verification；Artifact-Backed Historical Solution-only probes 尚未在 containment 修复后的当前实现上完成；Layer A campaign 仍未获授权）。
+
+## 当前导航
+
+- **总体产品阶段：**`RUN / OBSERVE`；这不表示现在立即继续 ordinary AE sampling。
+- **Primary objective：**Contract-driven autonomous content authoring。PD-121 唯一激活的 reference Contract 仍为 `preschool-shared-neutral-passive-capacity-v1@1`。
+- **Current Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导。
+- **Immediate prerequisite：**在 containment 修复后的当前实现上完成剩余的 Artifact-Backed Historical Solution-only Probe #1 / #2。
+- **Return rule：**若 prerequisite 暴露真实 blocker，只处理该 blocker；blocker closure 后返回上述 prerequisite。
+- **当前 parked / non-blocking：**ordinary AE sampling；当前 3 个 Human Follow-up items；Layer B natural semantic derivation；Layer C natural effectiveness；新的 timeout / communication campaign（除非它直接阻塞当前 prerequisite）。
+- **授权边界：**本导航只恢复优先级与返回点，不授权执行 Layer A campaign。
 
 ---
 
@@ -11,6 +21,8 @@
 Auto Evolution 当前处于：
 
 > **EARLY OPERATIONAL / RUN-OBSERVE STAGE — 核心 Agent workflow、旁路运行报告与一次跨轮工程路径已经可用；当前重点是进入真实使用并观察，而不是继续预先扩展系统。**
+
+这里的 `RUN / OBSERVE` 是总体产品阶段，不表示当前立即继续 ordinary AE sampling；当前 Human-prioritized 顺序见上方导航。
 
 real cross-round transition 已自然观察到一次；这仍不是 production-ready / fully autonomous 的声明；长期稳定性尚未证明。
 
@@ -41,7 +53,7 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - **PD-118 Source-local Candidate Pool / Multi-candidate Session v1：ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED；**
 - 已验证 canonical Candidate Pool / Logical Session contracts、一次性 Source Analysis、保留原始 hypothesis identity 的 Candidate Lane、单 Source deterministic serial Pool processing、durable Host resume、candidate-local continuation、一次 source-change barrier、immutable per-slice report snapshots、multi-action Human projection、Logical Session index grouping 与 terminal forensic evidence。
 - 默认 ordinary operator 已切换到 exact START/RESUME semantics；legacy multi-round / Selection artifacts 仅保留为历史读取与 replay 兼容面，不再是新 ordinary path 的 winner-selection 入口。
-- RUN / OBSERVE 已确认当前 earliest material workflow bottleneck：`selectFirstHypothesis` 使 participant order 决定 candidate survival，且单 candidate terminal 被错误放大为 Pool/session terminal；正式方向不是调 smarter selector，而是 preserve-all + deterministic candidate activation。
+- PD-118 migration 前，RUN / OBSERVE 曾确认 `selectFirstHypothesis` 使 participant order 决定 candidate survival，且单 candidate terminal 被错误放大为 Pool/session terminal；该 bounded engineering migration 已完成，不表示这是当前主线目标。
 - PD-118 保留 PD-100 HFL trigger、PD-111 evidence safety、PD-117 continuation shape / semantic retry=0 与 P2 one-source-transition ceiling；改变的是 Selection winner semantics、continuation/budget ownership、Logical Session / Host slice、Pool persistence/resume 与 multi-candidate report semantics。
 - **Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy：HUMAN ACCEPTED / AUTHORITY RECORDED；**
 - **Human Follow-up Loop v1 minimal runtime：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / `HFL_REAL_USE_VALIDATED`；**
@@ -58,7 +70,7 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - Sidecar Run Report 现已可从 `solution-agent/execution-trace.json` 观察 first-pass / retransmission / final structured-output 指标，但不影响 runtime outcome；
 - 不代表完整 P3 启动或 broader Participant Communication Contract 激活。
 - **PD-099 v2 — Solution activity-aware abnormal-safety timeout：HUMAN ACCEPTED / ENGINEERING IMPLEMENTED / DETERMINISTIC GATES VERIFIED。** Solution attempt 0 在 `1800000ms` 开始按 stdout silence `600000ms` 评估，并受 `2700000ms` absolute cap 限制；stderr 不刷新 inactivity。base Solution 与 fresh bounded Solution revision 共用此 Host policy。所有 non-Solution initial roles 仍为 `1800000ms` fixed default；same-thread retransmission 仍为 `60000ms` fixed ceiling。v1 的无条件 `1800000ms` fixed cutoff 保留为历史，不覆盖本条现行 authority。该 correction 不是 ordinary execution budget，也不建立 45 分钟性能目标；timeout 仍为 Participant runtime `TIMEOUT` 并按 PD-119 fail closed。
-- **PD-099 v2 的 natural evidence：**`ordinary-run-20260917-000004` 的 Solution 在 `1800000ms` timeout 前 `10571ms` 仍有 stdout（terminal elapsed `1800057ms`，last stdout `1789486ms`）；`ordinary-run-20261002-000001` / `hypothesis-000002` 在 `1800000ms` timeout 前 `70082ms` 仍有 stdout（terminal elapsed `1800013ms`，last stdout `1729931ms`）。两者是同类 `PARTICIPANT_RUNTIME / TIMEOUT`，支持无条件 fixed cutoff 与仍活跃 observable stdout 不匹配；不证明较长运行的原因或语义结果，也不构成 `NATURAL_ACTIVATION_OBSERVED`、`NATURAL_SEMANTIC_DERIVATION_PASS` 或 Layer A PASS。
+- **PD-099 v2 的历史决策依据：**以下两次自然 Solution timeout 均发生于旧 v1 fixed-cutoff 行为下：`ordinary-run-20260917-000004` 的 terminal elapsed 为 `1800057ms`、last stdout 为 `1789486ms`；`ordinary-run-20261002-000001` / `hypothesis-000002` 分别为 `1800013ms` 与 `1729931ms`。两者在旧 cutoff 前仍有 stdout，支持修正无条件 fixed cutoff 与仍活跃 observable stdout 不匹配；不证明较长运行的原因或语义结果，也不构成 `NATURAL_ACTIVATION_OBSERVED`、`NATURAL_SEMANTIC_DERIVATION_PASS` 或 Layer A PASS。
 
 这些结果支持当前系统进入真实使用 / 观察阶段。
 
@@ -78,8 +90,8 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - 每个真实 run 都能或都应该进入下一轮；
 - Participant Communication Contract 的最终形态；
 - Structured Final Output Contract V1 的 first harness matrix 仅为 `CONTRACT_CONFORMANCE_PROMISING`（小样本、contract-only）；fixed Cursor model matrix 与真实 Solution workload matrix 尚未证明；
-- **Reference Participant Binding / Native Envelope Assistance：**Task 4 corrected implementation 已交付（`aab6d25c12a904e900ba24460cf29586f812cb23`）；fresh matrix `reference-binding-2026-10-01-corrected-v1` 在单一 sealed binding 下，Matrix A 为 3/3 completed 且 Host envelope-valid。Corrected Matrix B 为 0/3：B-01 / B-02 / B-03 均在 `1_800_000ms` initial hard timeout 到期，实际耗时分别为 `1_800_010ms` / `1_800_009ms` / `1_800_019ms`；没有完成的 JSON terminal payload，故 Host envelope 无效、结构校验及 parsed payload size 未评估。按 gate 未运行 Matrix C/D；这组 corrected evidence 不判定 60 秒 continuation ceiling。旧 v1/v2 matrix evidence 保持原样且未与本次 binding 混合；生产 timeout 未修改。此 terminal-mode evidence 不替代下方 Artifact-Backed V1 reopening gate 结论。
-- **Artifact-Backed Structured Final Result V1 controlled Solution gate：**implementation 已提交并推送。Fresh matrix `artifact-backed-v1-receipt-propagation-20261001-01` 为 `PASS`（3/3；receipt、artifact integrity、envelope 与 synthetic structure 均通过；retransmissions = 0），binding-lock SHA-256：`226223ba3a2ee56c50a6aec3c31991014184a054d30622916586323f54a40d46`。Historical Solution-only probe `artifact-backed-v1-historical-solution-01-20261001` 与 `artifact-backed-v1-historical-solution-02-20261001` 均到达 Host `SolutionWorkV1` Role-schema validation；#1 为 `ROLE_SCHEMA_FAILURE`，到达该 schema boundary 后因 `payload.cards[0].scopeCheck` 不是 `CONTRACT_PRESERVING` 而失败，不是 semantic success；#2 为 `SUCCEEDED`。两次 probe 的 authoritative fingerprint 与 governed history 均未改变，`attempt-000012` 与 admission lock 均不存在，Reviewer / Shadow / promotion 均未运行。因此，artifact-backed communication reopening gate 对当前 exact sealed binding 已满足；新的 governed Layer A campaign **may be proposed**，但这不构成 Layer A 自动 reopening，也未授权任何新 governed attempt。任何新 campaign 仍需独立 Human authorization。
+- **Reference Participant Binding / Native Envelope Assistance：**Task 4 corrected implementation 已交付（`aab6d25c12a904e900ba24460cf29586f812cb23`）；fresh matrix `reference-binding-2026-10-01-corrected-v1` 在单一 sealed binding 下，Matrix A 为 3/3 completed 且 Host envelope-valid。Corrected Matrix B 为 0/3：B-01 / B-02 / B-03 均在旧 PD-099 v1 `1_800_000ms` fixed cutoff 到期，实际耗时分别为 `1_800_010ms` / `1_800_009ms` / `1_800_019ms`；没有完成的 JSON terminal payload，故 Host envelope 无效、结构校验及 parsed payload size 未评估。按 gate 未运行 Matrix C/D；这组 corrected evidence 不判定 60 秒 continuation ceiling。旧 v1/v2 matrix evidence 保持原样且未与本次 binding 混合；该 matrix 未修改 timeout policy，此历史 Solution cutoff 已由 PD-099 v2 取代。此 terminal-mode evidence 不替代下方 Artifact-Backed V1 reopening gate 结论。
+- **Artifact-Backed Structured Final Result V1 controlled Solution gate：**历史 artifact-backed re-establishment synthetic matrix `artifact-backed-v1-receipt-propagation-20261001-01` 为 `PASS`（3/3；receipt、artifact integrity、envelope 与 synthetic structure 均通过；retransmissions = 0），binding-lock SHA-256：`226223ba3a2ee56c50a6aec3c31991014184a054d30622916586323f54a40d46`。这只保留历史 transport / synthetic evidence，不代表 containment 修复后的当前 implementation 已重新建立 communication gate。历史 `attempt-000012` 为 `FAILED / SOLUTION / TIMEOUT`；旧 containment invariant 曾在 preflight 因该 terminal attempt 拒绝启动 Probe #1 的 Participant，Probe #2 也未运行，`attempt-000013` 不存在。该 invariant 此后已修复、工程验证并推送，但 Probe #1 / #2 尚未在当前实现上完成；因此当前 artifact-backed communication reopening gate **尚未重新建立**。Reviewer / Shadow / promotion 未运行；Layer A campaign 仍需独立 Human authorization。
 - Envelope Failure Bounded Retransmission 超出已验证边界的扩展（第二重传、`SCHEMA_FAILURE` recovery、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；
 - report analysis / automatic intervention；
 - Game 与 Auto Evolution 已经物理解耦；
@@ -105,34 +117,27 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 
 ## 4. 当前阶段：RUN / OBSERVE
 
-当前不新增新的核心能力阶段。
+当前不新增新的核心能力阶段。总体阶段仍为 `RUN / OBSERVE`，但在上述 Human-prioritized prerequisite 完成前，ordinary AE sampling 处于 parked / non-blocking 状态。
 
-默认动作是：
+当前导航顺序是：
 
 ```text
-使用现有 Auto Evolution workflow
+在 containment 修复后的当前实现上完成 Historical Solution-only Probe #1 / #2
 ↓
-使用 P1 Sidecar Run Report 看见实际运行
+若发现真实 blocker，只处理该 blocker；closure 后返回上述 prerequisite
 ↓
-真实运行自然产生什么 outcome，就按既有 STOP / permission / provenance 处理
+Layer A campaign 仍需独立 Human authorization，本导航不授权启动
 ↓
-如果自然出现 READY_FOR_CONFIG_EXECUTION，允许现有 P2 mechanism 接管一次跨轮
-↓
-继续记录真实 evidence
+Layer A 成功后停止历史案例调优，再回到 natural RUN / OBSERVE；Layer B / C 分别按其自然样本与 promotion 后 PVER 边界处理
 ```
 
 ### 当前目标
 
-- 让现有系统实际运行；
-- 观察 P1 Report 是否足以让 Human 理解运行轨迹；
-- 一次自然产生、已授权的真实 P2 cross-round evidence 已完成（ordinary-run-20260913-000006），不再作为 next goal；
-- 继续 RUN / OBSERVE，使用真实 runs 查找下一个 earliest material bottleneck；
-- 不继续为 P2 / PD-117 人为制造验证样本；
-- PD-117 不再是当前局部优化目标；
-- 真实运行暴露具体问题时再修正对应模块；
-- 不为了“完成验证”人为制造 READY、反复 retry 或预选保证可修改的问题。
-- 对正式 `ESCALATE_HUMAN` outcome，按 Human Follow-up Loop v1 保留后续异步 review 语义；不把它变成 RUN / OBSERVE 的同步 gate。
-- 真实运行已经暴露并确认 Selection / candidate-lifecycle bottleneck；不再通过额外 ordinary runs 重复证明该已确认问题。PD-118 bounded engineering migration 已完成并通过 deterministic acceptance；下一步是在不人为制造 READY / Selection 样本的前提下，恢复以新 workflow 为基础的 ordinary RUN / OBSERVE。
+- 在 containment 修复后的当前实现上完成剩余 Historical Solution-only artifact-backed probes #1 / #2；当前导航不授权 Layer A campaign。
+- 若该 prerequisite 暴露真实 blocker，只处理该 blocker；blocker closure 后返回并完成该 prerequisite。
+- 当前 3 个 Human Follow-up active items 是保留的 operational work，non-blocking，不构成当前 Contract validation 的同步 gate。
+- ordinary AE sampling、Layer B natural semantic derivation、Layer C natural effectiveness 和新的 timeout / communication campaign 均 parked；只有直接阻塞当前 prerequisite 的具体问题才进入处理。
+- Layer A 成功后停止历史案例调优，再回到 natural RUN / OBSERVE；不得为 Layer B 制造自然样本，Layer C 仍须在 promotion 后通过 subsequent Natural PVER 判断。
 - **PD-117 Bounded More-Work Continuation v1：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED / INITIAL NATURAL EFFECTIVENESS SUPPORTED ACROSS MULTIPLE INDEPENDENT CASES；GLOBAL / LONG-RUN EFFECTIVENESS NOT YET ESTABLISHED；** 首个符合条件的 Reviewer `REQUEST_MORE_WORK` 在单次 session 内最多触发一次 Host continuation、最多增加两个 Participant jobs；base Decision、PD-100 HFL trigger、PD-111 evidence scope 与 full P3 boundary 保持不变。自然 evidence anchor：ordinary-run-20260913-000001（continuation 后再次 `REQUEST_MORE_WORK`）与 ordinary-run-20260913-000006（continuation 后 `ACCEPT_OPTION` → disposable workspace 配置执行 → modified rerun B → Round 2 以 `DEFER_MORE_WORK_REQUESTED` 终止，`authoritativeRootChanged = false`）；Batch #3 early-stop sampling 不用于 activation-rate 统计；不宣称 global effectiveness / 成功率 / READY 率提升。
 
 ### Engineering convenience（非 Product Decision）
@@ -164,12 +169,12 @@ PD-100 中的 2-run recurrence、3 active items、5 fresh normal runs 仅是可�
 
 **Run/Observe → Bounded P3 Program（PRD A/B/C）terminal decision：`NO_BOUNDED_P3_SLICE_JUSTIFIED`。**  
 证据索引：`.tmp/evolution/communication-evidence-synthesis-20260829/decision.json`（不把 run-by-run transcript 写入本文件）。  
-含义：当前不提出下一个 bounded P3 communication slice；不授权任何 P3 implementation PRD；继续 ordinary RUN / OBSERVE。  
+含义：当时不提出下一个 bounded P3 communication slice，也不授权任何 P3 implementation PRD；总体阶段仍为 RUN / OBSERVE，当前 ordinary AE sampling 的排序见文件前部导航。
 未改变：Slice #1 matrix 状态、Slice #2 已验证边界；已改变：P2 real transition 已获得首次自然实例 evidence，长期稳定性仍未证明。
 
 完整 P3 仍应继续从真实运行与多轮 evidence 中逐步归纳，不启动协议平台化建设。
 
-但 Run / Observe 已暴露足够具体的 terminal-output communication variance，且 Human 已重新排序并授权一个 bounded corrective：
+此前 Run / Observe 已暴露具体的 terminal-output communication variance，Human 当时已重新排序并授权 bounded corrective；下列 Slice #1 / #2 是该历史 corrective 的状态，不表示当前开启了新的 timeout / communication campaign：
 
 **Minimal Slice #1 — Structured Final Output Contract V1：
 ENGINEERING DELIVERED / FIRST CONTRACT CONFORMANCE MATRIX = `CONTRACT_CONFORMANCE_PROMISING`（Human acceptance: `PROMISING_WITH_CAVEATS`；contract-only；full runtime communication仍 UNVERIFIED）。**
@@ -183,7 +188,7 @@ Minimal Slice #2 已验证边界：
 - 原始已验证 Trigger：terminal `ENVELOPE_FAILURE`；2026-09-30 授权扩展后当前 Trigger：terminal `ENVELOPE_FAILURE` 或合法 JSON object envelope 上的 Host `SCHEMA_FAILURE`；
 - Recovery：exactly one same-thread retransmission；
 - Retransmission ceiling：60000ms；
-- Initial Participant timeout（Slice #2 验证时的 historical baseline）：`240000ms`；当前 Participant hard-timeout authority 见 PD-099 / `1800000ms`，与 retransmission ceiling 独立；
+- Initial Participant timeout（Slice #2 验证时的 historical baseline）：`240000ms`；当前 timeout policy 见 PD-099 v2：Solution initial execution 从 `1800000ms` 起按 stdout silence `600000ms` 判断，并受 `2700000ms` absolute cap 限制；non-Solution initial roles 仍为 `1800000ms` fixed default。Retransmission ceiling `60000ms` 独立；
 - `SCHEMA_FAILURE`：仅首次 Solution role-schema failure 可触发该一次重传；无 same-thread capability、accepted-result failure、非 Solution role 或重传后失败均 fail closed；
 - Host repair / extraction / normalization：forbidden；
 - semantic correction：forbidden；
@@ -310,11 +315,11 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 14. MCP 是否已选定？→ **NO**
 15. code-level autonomous modification？→ **NOT AUTHORIZED**
 16. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**
-17. Participant hard-timeout authority？→ **`1800000ms` abnormal-safety hard boundary（PD-099）；不是 ordinary budget；retransmission ceiling 仍独立为 `60000ms`**
+17. Participant timeout authority？→ **PD-099 v2：Solution initial execution 从 `1800000ms` 起按 stdout inactivity `600000ms` timeout，并受 `2700000ms` absolute cap 限制；non-Solution initial roles 为 `1800000ms` fixed default；retransmission ceiling 独立为 `60000ms`**
 18. Human Follow-up Loop v1 authority？→ **HUMAN ACCEPTED / AUTHORITY RECORDED（PD-100）**
 18b. Human Follow-up Loop v1 minimal runtime？→ **ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / HFL_REAL_USE_VALIDATED**
 19. Ordinary unresolved Human work item 是否阻塞 RUN / OBSERVE？→ **NO**
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 next engineering target？→ **基于已迁移 workflow 继续 RUN / OBSERVE；不把自然 effectiveness 写成已证明**
+23. 当前 immediate prerequisite？→ **在 containment 修复后的当前实现上完成 Historical Solution-only artifact-backed probes #1 / #2；Layer A campaign 尚未获授权**

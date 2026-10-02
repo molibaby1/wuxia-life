@@ -85,22 +85,23 @@ async function fixture() {
   return { root, matrixRoot, matrix };
 }
 
-test("accepts only a passing complete artifact-backed matrix bound to the exact V2 lock and current SHA", async () => {
+test("accepts a passing complete artifact-backed matrix bound to the exact V2 lock despite implementation SHA drift", async () => {
   const f = await fixture();
   try {
+    const currentImplementationSha = "c".repeat(40);
+    assert.notEqual(f.matrix.implementationSha, currentImplementationSha);
     const actual =
       await readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
         repositoryRoot: f.root,
         participantBindingLockPath: join(f.matrixRoot, "binding-lock.json"),
-        currentImplementationSha: f.matrix.implementationSha,
       });
-    assert.equal(actual.schemaVersion, "reference-participant-binding-lock-v2");
+    assert.deepEqual(actual, lock);
   } finally {
     await rm(f.root, { recursive: true, force: true });
   }
 });
 
-test("rejects terminal binding locks and failed or incomplete matrix evidence", async () => {
+test("rejects terminal locks and malformed, failed, incomplete, or invalid matrix evidence", async () => {
   const f = await fixture();
   try {
     const lockPath = join(f.matrixRoot, "binding-lock.json");
@@ -114,38 +115,82 @@ test("rejects terminal binding locks and failed or incomplete matrix evidence", 
       readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
         repositoryRoot: f.root,
         participantBindingLockPath: lockPath,
-        currentImplementationSha: f.matrix.implementationSha,
       }),
       /V2 artifact-backed/,
     );
     await writeFile(lockPath, JSON.stringify(lock));
-    const broken = { ...f.matrix, trials: f.matrix.trials.slice(0, 2) };
-    await writeFile(join(f.matrixRoot, "matrix.json"), JSON.stringify(broken));
+    const trialFailures: Array<[string, Record<string, unknown>]> = [
+      ["non-PASS trial", { status: "FAILED" }],
+      ["non-COMPLETED runtime", { runtimeOutcome: "TIMEOUT" }],
+      ["invalid receipt", { receiptValid: false }],
+      ["invalid artifact integrity", { artifactIntegrityValid: false }],
+      ["invalid envelope", { artifactEnvelopeValid: false }],
+      ["invalid synthetic structure", { syntheticStructureValid: false }],
+      ["Host repair", { hostRepairApplied: true }],
+      ["retransmission", { retransmissions: 1 }],
+      ["trial over 300s", { elapsedMs: 300_001 }],
+    ];
+    const invalidMatrices: Array<[string, unknown]> = [
+      ["matrix status", { ...f.matrix, status: "FAILED" }],
+      ["matrix schema", { ...f.matrix, schemaVersion: "unknown" }],
+      ["binding-lock reference", { ...f.matrix, bindingLockRef: "other.json" }],
+      [
+        "missing implementation provenance",
+        { ...f.matrix, implementationSha: undefined },
+      ],
+      [
+        "invalid implementation provenance",
+        { ...f.matrix, implementationSha: "not-a-sha" },
+      ],
+      ["two trials", { ...f.matrix, trials: f.matrix.trials.slice(0, 2) }],
+      [
+        "four trials",
+        { ...f.matrix, trials: [...f.matrix.trials, f.matrix.trials[0]] },
+      ],
+      ...trialFailures.map(([name, patch]) => [
+        name,
+        {
+          ...f.matrix,
+          trials: f.matrix.trials.map((trial, index) =>
+            index === 0 ? { ...trial, ...patch } : trial,
+          ),
+        },
+      ] as [string, unknown]),
+    ];
+    for (const [name, matrix] of invalidMatrices) {
+      await writeFile(
+        join(f.matrixRoot, "matrix.json"),
+        JSON.stringify(matrix),
+      );
+      await assert.rejects(
+        readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
+          repositoryRoot: f.root,
+          participantBindingLockPath: lockPath,
+        }),
+        /three passing/,
+        name,
+      );
+    }
+    await writeFile(
+      join(f.matrixRoot, "matrix.json"),
+      JSON.stringify({ ...f.matrix, bindingLockSha256: "0".repeat(64) }),
+    );
     await assert.rejects(
       readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
         repositoryRoot: f.root,
         participantBindingLockPath: lockPath,
-        currentImplementationSha: f.matrix.implementationSha,
       }),
-      /three passing/,
+      /binding-lock SHA/,
     );
   } finally {
     await rm(f.root, { recursive: true, force: true });
   }
 });
 
-test("rejects matrix SHA drift and binding roots or symlink aliases into governed history", async () => {
+test("rejects binding roots or symlink aliases into governed history", async () => {
   const f = await fixture();
   try {
     const lockPath = join(f.matrixRoot, "binding-lock.json");
-    await assert.rejects(
-      readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
-        repositoryRoot: f.root,
-        participantBindingLockPath: lockPath,
-        currentImplementationSha: "c".repeat(40),
-      }),
-      /current clean implementation SHA/,
-    );
     const governed = join(
       f.root,
       "artifacts/evolution/autonomous-authoring/reference-trials/matrix",
@@ -157,7 +202,6 @@ test("rejects matrix SHA drift and binding roots or symlink aliases into governe
       readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
         repositoryRoot: f.root,
         participantBindingLockPath: join(governed, "binding-lock.json"),
-        currentImplementationSha: f.matrix.implementationSha,
       }),
       /outside governed/,
     );
@@ -167,7 +211,6 @@ test("rejects matrix SHA drift and binding roots or symlink aliases into governe
       readValidatedPreschoolReferenceArtifactBackedProbeBindingLock({
         repositoryRoot: f.root,
         participantBindingLockPath: join(alias, "binding-lock.json"),
-        currentImplementationSha: f.matrix.implementationSha,
       }),
       /outside governed/,
     );

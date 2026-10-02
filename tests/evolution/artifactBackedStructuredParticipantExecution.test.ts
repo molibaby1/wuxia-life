@@ -6,8 +6,10 @@ import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import {
   ARTIFACT_BACKED_STRUCTURED_RESULT_MAX_BYTES,
+  ARTIFACT_BACKED_STRUCTURED_RESULT_PREFLIGHT_COMMAND,
   ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH,
 } from '../../src/evolution/artifactBackedStructuredFinalResultContract';
+import { validateSolutionWork } from '../../src/evolution/solutionWorkContract';
 import {
   runStructuredParticipantExecution,
   type StructuredParticipantExecutionResult,
@@ -59,6 +61,7 @@ function participantFor(input: {
   artifactBytes?: Buffer;
   artifactKind?: 'file' | 'missing' | 'symlink' | 'directory' | 'oversize';
   outsidePath?: string;
+  preflightLauncherPath?: string;
   stderr?: string;
   onContinuation?: () => void;
 }): WorkspaceAgentParticipantOptions {
@@ -73,12 +76,20 @@ function participantFor(input: {
         : input.artifactKind === 'oversize'
           ? `fs.writeFileSync(artifactPath, Buffer.alloc(${ARTIFACT_BACKED_STRUCTURED_RESULT_MAX_BYTES + 1}, 0x20));`
         : `fs.writeFileSync(artifactPath, Buffer.from(${JSON.stringify(artifactBytesBase64 ?? '')}, 'base64'));`;
+  const preflight = input.preflightLauncherPath === undefined
+    ? []
+    : [
+      "const childProcess = require('node:child_process');",
+      `const preflight = childProcess.spawnSync(${JSON.stringify(input.preflightLauncherPath)}, [], { encoding: 'utf8' });`,
+      "if (preflight.status !== 0 || preflight.stdout !== 'ROLE_SCHEMA_PREFLIGHT_PASS\\n') throw new Error('Role-schema preflight failed: ' + preflight.stderr);",
+    ];
   const script = [
     "const fs = require('node:fs');",
     "const path = require('node:path');",
     `const artifactPath = path.resolve(${JSON.stringify(artifactRelativePath)});`,
     'fs.mkdirSync(path.dirname(artifactPath), { recursive: true });',
     writeArtifact,
+    ...preflight,
     `process.stdout.write(${JSON.stringify(input.terminalOutput)});`,
     `process.stderr.write(${JSON.stringify(input.stderr ?? 'provider stderr')});`,
   ].join('\n');
@@ -211,6 +222,59 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
   });
 
   await withFixture(async ({ workspaceRoot, destinationRoot }) => {
+    const validSolutionWork = {
+      schemaVersion: 'solution-work-v1',
+      status: 'OPTIONS',
+      problemId: 'problem-000001',
+      options: [{
+        optionId: 'option-000001',
+        proposedChange: 'A bounded proposal.',
+        rationale: 'It addresses the observed gap.',
+        repoRefs: [],
+        artifactRefs: [],
+        changeScope: 'program',
+        expectedPlayerObservableDifference: 'A suitable scene is available.',
+        risks: [],
+        unknowns: [],
+      }],
+      recommendedOptionId: 'option-000001',
+      summary: 'A bounded proposal.',
+      repoRefs: [],
+      artifactRefs: [],
+    };
+    const artifactBytes = Buffer.from(JSON.stringify(validSolutionWork));
+    const receipt = receiptFor(artifactBytes);
+    const launcherPath = join(workspaceRoot, ARTIFACT_BACKED_STRUCTURED_RESULT_PREFLIGHT_COMMAND);
+    let schemaCalls = 0;
+    let continuationCalls = 0;
+    const participant = participantFor({
+      terminalOutput: receipt,
+      artifactBytes,
+      preflightLauncherPath: launcherPath,
+      onContinuation: () => { continuationCalls += 1; },
+    });
+    participant.bindingMetadata = { structuredResultDeliveryMode: 'WORKSPACE_ARTIFACT_RECEIPT_V1' };
+
+    const result = await artifactExecution({
+      workspaceRoot,
+      destinationRoot,
+      participant,
+      validateSchema: value => {
+        schemaCalls += 1;
+        return validateSolutionWork(value) as unknown as Record<string, unknown>;
+      },
+    });
+
+    assert.equal(result.ok, true);
+    assert.equal(result.ok ? result.acceptedAttempt : undefined, 0);
+    assert.deepEqual(result.recovery, { eligible: false, attempted: false, outcome: 'NOT_ATTEMPTED' });
+    assert.equal(schemaCalls, 1, 'Host must independently run its Role validator after Participant preflight PASS');
+    assert.equal(continuationCalls, 0);
+    assert.deepEqual(result.ok ? result.value : undefined, validSolutionWork);
+    assert.deepEqual(Object.keys(JSON.parse(receipt)), ['schemaVersion', 'bytes', 'sha256']);
+  });
+
+  await withFixture(async ({ workspaceRoot, destinationRoot }) => {
     const result = await runStructuredParticipantExecution(executionInput({
       workspaceRoot,
       destinationRoot,
@@ -330,7 +394,9 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
         participant,
         validateSchema: value => {
           schemaCalls += 1;
-          if (testCase.name === 'role-schema-failure') throw new Error('role schema rejected');
+          if (testCase.name === 'role-schema-failure') {
+            return validateSolutionWork(value) as unknown as Record<string, unknown>;
+          }
           return value;
         },
         validateAcceptedResult: async () => {

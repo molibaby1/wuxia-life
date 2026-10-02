@@ -289,10 +289,24 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(artifactPrompt, /bytes: exact artifact byte length as a non-negative integer/);
   assert.match(artifactPrompt, /sha256: exact artifact SHA-256 as 64 lowercase hexadecimal characters/);
   assert.match(artifactPrompt, /exact byte length and SHA-256/i);
+  assert.ok(artifactPrompt.indexOf(ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH)
+    < artifactPrompt.indexOf('./.evolution-participant/preflight-solution-work'));
+  assert.ok(artifactPrompt.indexOf('./.evolution-participant/preflight-solution-work')
+    < artifactPrompt.indexOf("compute the artifact's exact byte length and SHA-256"));
+  assert.match(artifactPrompt, /ROLE_SCHEMA_PREFLIGHT_PASS/);
   assert.match(artifactPrompt, /reject rather than repair/i);
   assert.doesNotMatch(artifactPrompt, /Structured Final Output Contract V1/);
   assert.doesNotMatch(artifactPrompt, /Final JSON serialization check \(required\)/);
   assert.equal(artifactPrompt.match(/\.evolution-participant\/final-result\.json/g)?.length, 1);
+
+  const terminalPrompt = buildSolutionAgentPrompt(
+    problemPackage,
+    [],
+    undefined,
+    undefined,
+    { kind: 'TERMINAL_JSON' },
+  );
+  assert.doesNotMatch(terminalPrompt, /preflight-solution-work|ROLE_SCHEMA_PREFLIGHT_PASS/);
 
   const artifactRevisionPrompt = buildSolutionRevisionPrompt(
     problemPackage,

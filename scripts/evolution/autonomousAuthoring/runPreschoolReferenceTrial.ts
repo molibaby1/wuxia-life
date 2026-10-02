@@ -3096,13 +3096,15 @@ export async function runPreschoolReferenceArtifactBackedSolutionCommunicationPr
     : resolve(liveRoot, input.destinationRoot);
   assertReferenceSolutionProbeDestination(liveRoot, destinationRoot);
   const trialRoot = referenceTrialRoot(liveRoot);
-  const attemptTwelvePath = join(trialRoot, 'attempts/attempt-000012');
   const admissionLockPath = `${trialRoot}.admission.lock`;
-  if (referenceProbePathExists(attemptTwelvePath)) {
-    throw new Error('attempt-000012 already exists; probe will not run.');
-  }
   if (referenceProbePathExists(admissionLockPath)) {
     throw new Error('Reference-trial admission lock exists; probe will not run.');
+  }
+  const historyBefore = await captureReferenceTrialLegacyHistory(trialRoot);
+  const activeAttempt = historyBefore.attempts.find(item =>
+    item.manifestState === 'CREATED' || item.manifestState === 'RUNNING');
+  if (activeAttempt) {
+    throw new Error(`Active governed attempt ${activeAttempt.attemptRef} (${activeAttempt.manifestState}); probe will not run.`);
   }
 
   const evidencePath = isAbsolute(input.evidencePath)
@@ -3129,7 +3131,6 @@ export async function runPreschoolReferenceArtifactBackedSolutionCommunicationPr
   if (!responsibilityBrief.ok) throw new Error(responsibilityBrief.reason);
   await assertCurrentAuthorityDocuments(liveRoot);
 
-  const historyBefore = await captureReferenceTrialLegacyHistory(trialRoot);
   const governedHistorySha256Before = sha256Hex(canonicalJson(historyBefore));
   const authoritativeFingerprintBefore = await captureAuthoritativeFingerprint(liveRoot);
   const participantBindingLockSha256 = artifactBackedReferenceParticipantBindingLockSha256(input.participantBindingLock);
@@ -3250,6 +3251,7 @@ export async function runPreschoolReferenceArtifactBackedSolutionCommunicationPr
   const governedHistorySha256After = sha256Hex(canonicalJson(historyAfter));
   const authoritativeFingerprintUnchanged = authoritativeFingerprintAfter === authoritativeFingerprintBefore;
   const governedHistoryUnchanged = governedHistorySha256After === governedHistorySha256Before;
+  const attemptTwelvePath = join(trialRoot, 'attempts/attempt-000012');
   const attempt000012Absent = !referenceProbePathExists(attemptTwelvePath);
   const admissionLockAbsent = !referenceProbePathExists(admissionLockPath);
   const noReviewerShadowPromotion = ![
@@ -3260,7 +3262,6 @@ export async function runPreschoolReferenceArtifactBackedSolutionCommunicationPr
   ].some(name => referenceProbePathExists(join(destinationRoot, name)));
   const status = authoritativeFingerprintUnchanged
     && governedHistoryUnchanged
-    && attempt000012Absent
     && admissionLockAbsent
     && noReviewerShadowPromotion
     ? solutionOutcome.status

@@ -233,10 +233,27 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   for (const text of [referencePrompt, referenceInsufficientPrompt]) {
     assert.match(text, /Human-approved input for Layer A/);
     assert.match(text, /Do not evaluate whether Solution independently discovered/);
-    assert.match(text, /Independently verify one-to-one preservation/);
+    assert.match(text, /Verify one-to-one preservation by comparing the selected option's autonomousAuthoring\.responsibilities with that option's contractPayload\.cards/);
     assert.match(text, /A child needs a shared play experience/);
     assert.match(text, /does not force ACCEPT_OPTION or APPLICABLE/);
   }
+  assert.match(referencePrompt, /autonomousAuthoringAssessment must contain exactly these fields: schemaVersion="autonomous-authoring-review-assessment-v1", contractId, contractVersion, applicabilityAssessment, conformance, executionEnvelope, assessment, blockers/i);
+  assert.match(referencePrompt, /No responsibilities field or other extra fields/i);
+  assert.match(referencePrompt, /one-to-one preservation by comparing the selected option's autonomousAuthoring\.responsibilities with that option's contractPayload\.cards/i);
+  assert.match(referencePrompt, /Do not copy the responsibility list into autonomousAuthoringAssessment/i);
+  assert.match(referencePrompt, /Record the independent responsibility-preservation conclusion in autonomousAuthoringAssessment\.assessment and\/or concerns/i);
+  assert.match(referencePrompt, /Host independently performs the mechanical one-to-one responsibility gate/i);
+  assert.match(referencePrompt, /authoritySourceRef in the Contract Packet is provenance metadata/i);
+  assert.match(referencePrompt, /If the full source authority is intentionally withheld.*do not emit authoritySourceRef as a repoRef/i);
+  assert.match(referencePrompt, /Use the Contract Packet artifact and materialized delegated authority documents for review and provenance/i);
+  assert.match(referencePrompt, /attempt-specific Layer A execution authorization.*already been Host-admitted/i);
+  assert.match(referencePrompt, /Do not request that trial-launch authorization again/i);
+  assert.match(referencePrompt, /executionAuthorityAssessment concerns whether the already Human-approved reusable Contract delegates isolated shadow execution/i);
+  assert.match(referencePrompt, /When PD-121 Contract coverage applies, use WITHIN_CURRENT_AUTHORITY for shadow execution/i);
+  assert.match(referencePrompt, /This does not authorize authoritative repository promotion/i);
+  assert.match(referencePrompt, /authoritative repository promotion, which remains Human-controlled/i);
+  assert.match(referencePrompt, /This Host protocol fact does not prescribe the Reviewer decision, applicability, or conformance/i);
+  assert.doesNotMatch(prompt, /attempt-specific Layer A execution authorization.*already been Host-admitted/i);
   assert.match(referencePrompt, /responsibility evidenceRefs are empty/);
   assert.match(referencePrompt, /developmental age reasoning is independently authored/);
   assert.doesNotMatch(prompt, /Human-approved input for Layer A/);
@@ -478,6 +495,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     reviewOutput({ ...autonomousAuthoringAssessment, conformance: 'NON_CONFORMING' }),
     reviewOutput({ ...autonomousAuthoringAssessment, executionEnvelope: 'EXECUTION_ENVELOPE_EXCEEDED' }),
     reviewOutput({ ...autonomousAuthoringAssessment, blockers: ['one blocker'] }),
+    reviewOutput({ ...autonomousAuthoringAssessment, responsibilities: autonomousAuthoringProposal.responsibilities }),
   ];
   for (const [index, invalidReview] of invalidAcceptedAuthoringReviews.entries()) {
     const invalidAuthoringResult = await runSolutionReviewer({

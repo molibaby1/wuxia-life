@@ -2,17 +2,21 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-03（PD-099 v2 Human accepted 并完成 deterministic engineering verification；Artifact-Backed Historical Solution-only probes 尚未在 containment 修复后的当前实现上完成；Layer A campaign 仍未获授权）。
+> 最后更新：2026-10-03（Artifact-Backed Historical Solution-only Probe #1 / #2 已在 containment 修复后的当前实现上成功完成，communication reopening gate = `REESTABLISHED`；attempt-000013 已以 `FAILED / REVIEWER / invalid_output` 终止，其 Reviewer communication blocker 已 corrected and deterministically verified；Layer A overall proof = `NOT ESTABLISHED`）。
 
 ## 当前导航
 
 - **总体产品阶段：**`RUN / OBSERVE`；这不表示现在立即继续 ordinary AE sampling。
 - **Primary objective：**Contract-driven autonomous content authoring。PD-121 唯一激活的 reference Contract 仍为 `preschool-shared-neutral-passive-capacity-v1@1`。
 - **Current Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导。
-- **Immediate prerequisite：**在 containment 修复后的当前实现上完成剩余的 Artifact-Backed Historical Solution-only Probe #1 / #2。
-- **Return rule：**若 prerequisite 暴露真实 blocker，只处理该 blocker；blocker closure 后返回上述 prerequisite。
-- **当前 parked / non-blocking：**ordinary AE sampling；当前 3 个 Human Follow-up items；Layer B natural semantic derivation；Layer C natural effectiveness；新的 timeout / communication campaign（除非它直接阻塞当前 prerequisite）。
-- **授权边界：**本导航只恢复优先级与返回点，不授权执行 Layer A campaign。
+- **Artifact-backed communication reopening gate：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
+- **Latest governed attempt：**`attempt-000013 = FAILED` at `REVIEWER / invalid_output`（terminal）；该 attempt-specific 一次性 Human execution authorization 已消费。
+- **Current blocker：**`NONE` — attempt-000013 Reviewer communication blocker has been corrected and deterministically verified。
+- **Current return point：**fresh attempt-specific authorization preparation for `attempt-000014`。
+- **attempt-000014：**not yet exact-digest approved；execution is not authorized。
+- **Layer A overall proof：**`NOT ESTABLISHED`。
+- **当前 parked / non-blocking：**ordinary AE sampling；Human Follow-up Loop v1 / 当前 3 个 Human Follow-up items；Layer B natural semantic derivation；Layer C natural effectiveness。
+- **授权边界：**attempt-000013 的一次性 Human authorization 不可复用；attempt-000014 必须有新的 attempt-specific authorization。
 
 ---
 
@@ -91,7 +95,7 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - Participant Communication Contract 的最终形态；
 - Structured Final Output Contract V1 的 first harness matrix 仅为 `CONTRACT_CONFORMANCE_PROMISING`（小样本、contract-only）；fixed Cursor model matrix 与真实 Solution workload matrix 尚未证明；
 - **Reference Participant Binding / Native Envelope Assistance：**Task 4 corrected implementation 已交付（`aab6d25c12a904e900ba24460cf29586f812cb23`）；fresh matrix `reference-binding-2026-10-01-corrected-v1` 在单一 sealed binding 下，Matrix A 为 3/3 completed 且 Host envelope-valid。Corrected Matrix B 为 0/3：B-01 / B-02 / B-03 均在旧 PD-099 v1 `1_800_000ms` fixed cutoff 到期，实际耗时分别为 `1_800_010ms` / `1_800_009ms` / `1_800_019ms`；没有完成的 JSON terminal payload，故 Host envelope 无效、结构校验及 parsed payload size 未评估。按 gate 未运行 Matrix C/D；这组 corrected evidence 不判定 60 秒 continuation ceiling。旧 v1/v2 matrix evidence 保持原样且未与本次 binding 混合；该 matrix 未修改 timeout policy，此历史 Solution cutoff 已由 PD-099 v2 取代。此 terminal-mode evidence 不替代下方 Artifact-Backed V1 reopening gate 结论。
-- **Artifact-Backed Structured Final Result V1 controlled Solution gate：**历史 artifact-backed re-establishment synthetic matrix `artifact-backed-v1-receipt-propagation-20261001-01` 为 `PASS`（3/3；receipt、artifact integrity、envelope 与 synthetic structure 均通过；retransmissions = 0），binding-lock SHA-256：`226223ba3a2ee56c50a6aec3c31991014184a054d30622916586323f54a40d46`。这只保留历史 transport / synthetic evidence，不代表 containment 修复后的当前 implementation 已重新建立 communication gate。历史 `attempt-000012` 为 `FAILED / SOLUTION / TIMEOUT`；旧 containment invariant 曾在 preflight 因该 terminal attempt 拒绝启动 Probe #1 的 Participant，Probe #2 也未运行，`attempt-000013` 不存在。该 invariant 此后已修复、工程验证并推送，但 Probe #1 / #2 尚未在当前实现上完成；因此当前 artifact-backed communication reopening gate **尚未重新建立**。Reviewer / Shadow / promotion 未运行；Layer A campaign 仍需独立 Human authorization。
+- **Artifact-Backed Structured Final Result V1 controlled Solution gate：**历史 artifact-backed re-establishment synthetic matrix `artifact-backed-v1-receipt-propagation-20261001-01` 为 `PASS`（3/3；receipt、artifact integrity、envelope 与 synthetic structure 均通过；retransmissions = 0），binding-lock SHA-256：`226223ba3a2ee56c50a6aec3c31991014184a054d30622916586323f54a40d46`。Artifact-Backed Historical Solution-only Probe #1 / #2 已在 containment 修复后的当前实现上成功完成，artifact-backed communication reopening gate = `REESTABLISHED`；历史 synthetic evidence 仍不等同于 Layer A downstream proof。`attempt-000012` 曾以 `FAILED / SOLUTION / TIMEOUT` 终止；之后 `attempt-000013` 已由 Human 单次授权并运行，现以 `FAILED / REVIEWER / invalid_output` terminal 结束，Reviewer assessment 因包含 schema 禁止的 `responsibilities` 字段而未通过 structured validation。该一次性授权已消费；Reviewer invocation 已发生，但 Host 未获得合法 review，Shadow / promotion 未运行。Layer A overall proof = `NOT ESTABLISHED`；任何后续 attempt（包括 `attempt-000014`）都需要新的 attempt-specific Human authorization。
 - Envelope Failure Bounded Retransmission 超出已验证边界的扩展（第二重传、`SCHEMA_FAILURE` recovery、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；
 - report analysis / automatic intervention；
 - Game 与 Auto Evolution 已经物理解耦；
@@ -122,21 +126,23 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 当前导航顺序是：
 
 ```text
-在 containment 修复后的当前实现上完成 Historical Solution-only Probe #1 / #2
+Historical Solution-only Probe #1 / #2 已成功完成；artifact-backed communication reopening gate = REESTABLISHED
 ↓
-若发现真实 blocker，只处理该 blocker；closure 后返回上述 prerequisite
+attempt-000013 Reviewer communication blocker 已修复并 deterministic verified
 ↓
-Layer A campaign 仍需独立 Human authorization，本导航不授权启动
+为 attempt-000014 准备 fresh attempt-specific authorization candidate（candidate 尚未获得 exact-digest Human approval；attempt execution remains unauthorized）
 ↓
-Layer A 成功后停止历史案例调优，再回到 natural RUN / OBSERVE；Layer B / C 分别按其自然样本与 promotion 后 PVER 边界处理
+Layer A overall proof 当前为 NOT ESTABLISHED；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
 ```
 
 ### 当前目标
 
-- 在 containment 修复后的当前实现上完成剩余 Historical Solution-only artifact-backed probes #1 / #2；当前导航不授权 Layer A campaign。
-- 若该 prerequisite 暴露真实 blocker，只处理该 blocker；blocker closure 后返回并完成该 prerequisite。
+- Artifact-backed communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。
+- Current blocker = `NONE`；attempt-000013 暴露的 Reviewer communication blocker 已 corrected and deterministically verified。当前返回点是为 attempt-000014 准备 fresh attempt-specific authorization candidate，不运行 Participant。
+- attempt-000013 是 terminal `FAILED / REVIEWER / invalid_output`，其一次性 Human authorization 已消费；attempt-000014 candidate 尚未获得 exact-digest Human approval，execution is not authorized。
+- Layer A overall proof = `NOT ESTABLISHED`；本导航不授权运行新 attempt。
 - 当前 3 个 Human Follow-up active items 是保留的 operational work，non-blocking，不构成当前 Contract validation 的同步 gate。
-- ordinary AE sampling、Layer B natural semantic derivation、Layer C natural effectiveness 和新的 timeout / communication campaign 均 parked；只有直接阻塞当前 prerequisite 的具体问题才进入处理。
+- ordinary AE sampling、Human Follow-up Loop v1、Layer B natural semantic derivation 与 Layer C natural effectiveness 继续 parked。
 - Layer A 成功后停止历史案例调优，再回到 natural RUN / OBSERVE；不得为 Layer B 制造自然样本，Layer C 仍须在 promotion 后通过 subsequent Natural PVER 判断。
 - **PD-117 Bounded More-Work Continuation v1：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED / INITIAL NATURAL EFFECTIVENESS SUPPORTED ACROSS MULTIPLE INDEPENDENT CASES；GLOBAL / LONG-RUN EFFECTIVENESS NOT YET ESTABLISHED；** 首个符合条件的 Reviewer `REQUEST_MORE_WORK` 在单次 session 内最多触发一次 Host continuation、最多增加两个 Participant jobs；base Decision、PD-100 HFL trigger、PD-111 evidence scope 与 full P3 boundary 保持不变。自然 evidence anchor：ordinary-run-20260913-000001（continuation 后再次 `REQUEST_MORE_WORK`）与 ordinary-run-20260913-000006（continuation 后 `ACCEPT_OPTION` → disposable workspace 配置执行 → modified rerun B → Round 2 以 `DEFER_MORE_WORK_REQUESTED` 终止，`authoritativeRootChanged = false`）；Batch #3 early-stop sampling 不用于 activation-rate 统计；不宣称 global effectiveness / 成功率 / READY 率提升。
 
@@ -322,4 +328,4 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 immediate prerequisite？→ **在 containment 修复后的当前实现上完成 Historical Solution-only artifact-backed probes #1 / #2；Layer A campaign 尚未获授权**
+23. 当前 immediate prerequisite？→ **为 attempt-000014 准备 fresh attempt-specific authorization candidate；attempt-000013 Reviewer communication blocker 已 corrected and deterministically verified，artifact-backed communication reopening gate 已 REESTABLISHED。candidate 尚未获得 exact-digest Human approval，attempt-000014 execution 未获授权；Layer A overall proof = NOT ESTABLISHED。**

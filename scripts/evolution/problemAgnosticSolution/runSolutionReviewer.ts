@@ -111,7 +111,11 @@ function renderAutonomousAuthoringReviewGuidance(
       'The supplied responsibility set is Human-approved input for Layer A.',
       `Read the Reference Responsibility Brief at ${referenceContext.briefRef} and attestation at ${referenceContext.attestationRef}: ${canonicalJson(referenceContext.brief)}`,
       'Do not evaluate whether Solution independently discovered the responsibilities. Do not request proof that the brief responsibilities were derived from the historical observable payload; that is outside Layer A.',
-      'Independently verify one-to-one preservation of the supplied responsibility set.',
+      "Verify one-to-one preservation by comparing the selected option's autonomousAuthoring.responsibilities with that option's contractPayload.cards: no addition, omission, merge, or split; each Card must preserve its corresponding responsibility.",
+      'Do not copy the responsibility list into autonomousAuthoringAssessment. Record the independent responsibility-preservation conclusion in autonomousAuthoringAssessment.assessment and/or concerns; the Host independently performs the mechanical one-to-one responsibility gate.',
+      'authoritySourceRef in the Contract Packet is provenance metadata. If the full source authority is intentionally withheld from this Participant workspace, do not emit authoritySourceRef as a repoRef. Use the Contract Packet artifact and materialized delegated authority documents for review and provenance instead.',
+      'This Reviewer invocation occurs after the attempt-specific Layer A execution authorization has already been Host-admitted for this governed historical trial. Do not request that trial-launch authorization again.',
+      'This Host protocol fact does not prescribe the Reviewer decision, applicability, or conformance. executionAuthorityAssessment concerns whether the already Human-approved reusable Contract delegates isolated shadow execution for this proposal. When PD-121 Contract coverage applies, use WITHIN_CURRENT_AUTHORITY for shadow execution. This does not authorize authoritative repository promotion, which remains Human-controlled.',
       'The Human brief does not force ACCEPT_OPTION or APPLICABLE.',
     ] : []),
     ...(solutionWork.options.some(option => option.autonomousAuthoring !== undefined) ? [
@@ -127,9 +131,10 @@ function renderAutonomousAuthoringReviewGuidance(
       '- blockers = []',
       'If any required assessment value cannot be established, choose the existing REQUEST_MORE_WORK, DEFER, REJECT, or ESCALATE decision instead of encoding a contradiction.',
       'Emit autonomousAuthoringAssessment with the same contractId and contractVersion as the selected option.',
+      'autonomousAuthoringAssessment must contain exactly these fields: schemaVersion="autonomous-authoring-review-assessment-v1", contractId, contractVersion, applicabilityAssessment, conformance, executionEnvelope, assessment, blockers. No responsibilities field or other extra fields.',
     ] : []),
     ...(referenceContext && solutionWork.options.some(option => option.autonomousAuthoring !== undefined) ? [
-      'For APPLICABLE proposals, every brief responsibility must appear exactly once: no addition, omission, merge, or split; primaryLifeFunction and playerVisibleNeed must exactly match the brief; responsibility evidenceRefs are empty.',
+      'For APPLICABLE proposals, the selected option proposal and its Cards must preserve each brief responsibility exactly once; primaryLifeFunction and playerVisibleNeed must exactly match the brief, and proposal responsibility evidenceRefs are empty.',
       'Verify developmental age reasoning is independently authored, concrete scene is independently authored, closest-entry distinction is independently authored, shared-neutral portability is independently established, transient-role and no-new-state boundaries hold, and implementation remains inside Contract v1.',
     ] : []),
   ];

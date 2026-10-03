@@ -133,9 +133,9 @@ attempt-000013 Reviewer communication blocker 已修复并 deterministic verifie
 ↓
 pre-upgrade attempt-000014 authorization 因 Participant binding drift 失效；attempt-000014 = NOT_ADMITTED；没有创建 governed attempt，编号仍可复用
 ↓
-PD-122 Revision 1 Harness hardening
-→ deterministic verification
-→ fresh exact current binding
+PD-122 Revision 1 Harness hardening → IMPLEMENTED / deterministic verification → VERIFIED
+↓
+fresh exact current binding
 → fresh attempt-000014 authorization candidate
 → Human exact canonical-SHA approval
 → one real governed attempt-000014

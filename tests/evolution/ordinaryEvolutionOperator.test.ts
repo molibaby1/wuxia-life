@@ -270,7 +270,13 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     assert.equal(await readFile(join(destinationRoot, 'terminal-attempt-0.txt'), 'utf8'), scenario.name === 'broken-transport' ? 'null' : scenario.first);
     if (calls === 2) {
       const requested = execution.executionTrace.events.find(e => e.type === 'participant_envelope_retransmission_requested');
-      assert.equal(requested?.timeoutMs, 60000);
+      assert.equal(requested?.timeoutMs, 2_700_000);
+      assert.deepEqual(requested?.timeoutPolicy, {
+        kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+        evaluationStartMs: 1_800_000,
+        stdoutInactivityMs: 600_000,
+        absoluteCapMs: 2_700_000,
+      });
       if (scenario.name === 'schema-recovered') {
         assert.equal(requested?.failureClass, 'SCHEMA_FAILURE');
         assert.match(continuationPrompt, /Failure class: SCHEMA_FAILURE/);

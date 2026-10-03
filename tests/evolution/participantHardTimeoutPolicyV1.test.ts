@@ -4,7 +4,6 @@ import {
   PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS,
   PARTICIPANT_TIMEOUT_EVALUATION_START_MS,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
-import { ENVELOPE_RETRANSMISSION_TIMEOUT_MS } from '../../scripts/evolution/problemAgnosticSolution/envelopeRetransmission';
 
 export async function runParticipantHardTimeoutPolicyV1Tests(): Promise<void> {
   assert.equal(
@@ -14,7 +13,6 @@ export async function runParticipantHardTimeoutPolicyV1Tests(): Promise<void> {
   );
   assert.equal(PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS, 600_000);
   assert.equal(PARTICIPANT_ABSOLUTE_TIMEOUT_MS, 2_700_000);
-  assert.equal(ENVELOPE_RETRANSMISSION_TIMEOUT_MS, 60_000);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

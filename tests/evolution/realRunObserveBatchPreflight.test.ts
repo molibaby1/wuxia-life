@@ -1,12 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { PARTICIPANT_TIMEOUT_EVALUATION_START_MS } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
-import { ENVELOPE_RETRANSMISSION_TIMEOUT_MS } from '../../scripts/evolution/problemAgnosticSolution/envelopeRetransmission';
 
 export async function runRealRunObserveBatchPreflightTests(): Promise<void> {
   assert.equal(PARTICIPANT_TIMEOUT_EVALUATION_START_MS, 1_800_000);
-  assert.equal(ENVELOPE_RETRANSMISSION_TIMEOUT_MS, 60_000);
-
   const stage = await readFile('docs/governance/current-product-stage.md', 'utf8');
   assert.match(stage, /1800000ms/);
   assert.match(stage, /PD-099/);

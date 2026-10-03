@@ -19,7 +19,6 @@ import {
   type WorkspaceAgentParticipantOptions,
 } from './agentParticipant';
 import {
-  ENVELOPE_RETRANSMISSION_TIMEOUT_MS,
   isEnvelopeRetransmissionEnabledForRole,
   type EnvelopeRetransmissionObservation,
   type EnvelopeRetransmissionOutcome,
@@ -721,7 +720,8 @@ export async function runStructuredParticipantExecution<T>(input: {
     retransmissionAttempt: 1,
     failureClass: initialFailure.failureClass,
     sameThread: true,
-    timeoutMs: ENVELOPE_RETRANSMISSION_TIMEOUT_MS,
+    timeoutMs: initialTimeout.timeoutMs,
+    ...(initialTimeout.timeoutPolicy === undefined ? {} : { timeoutPolicy: initialTimeout.timeoutPolicy }),
     participantCapability: 'SAME_THREAD_CONTINUATION',
   });
 
@@ -748,7 +748,6 @@ export async function runStructuredParticipantExecution<T>(input: {
     },
     input.participant,
     threadRef!,
-    ENVELOPE_RETRANSMISSION_TIMEOUT_MS,
   );
 
   const continuationRuntimeOutcome = attempt1Job.ok

@@ -99,6 +99,7 @@ export interface ParticipantExecutionTraceEventV1 {
   failureClass?: 'ENVELOPE_FAILURE' | 'SCHEMA_FAILURE';
   sameThread?: boolean;
   timeoutMs?: number;
+  timeoutPolicy?: ParticipantActivityAwareTimeoutPolicyTraceV1;
   participantCapability?: 'SAME_THREAD_CONTINUATION';
   runtimeOutcome?: 'COMPLETED' | 'TIMEOUT' | 'CONTINUATION_FAILURE' | 'RUNTIME_FAILURE';
   retransmissionEligible?: boolean;

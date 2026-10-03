@@ -5,11 +5,11 @@ import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
   type WorkspaceAgentJobInput,
   type WorkspaceAgentParticipantOptions,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import {
-  ENVELOPE_RETRANSMISSION_TIMEOUT_MS,
   isEnvelopeRetransmissionEnabledForRole,
   renderEnvelopeRetransmissionRequestV1,
 } from '../../scripts/evolution/problemAgnosticSolution/envelopeRetransmission';
@@ -32,6 +32,7 @@ function createContinuationCapableParticipant(
   options?: {
     threadRef?: { provider: string; opaqueId: string };
     spawnProcess?: typeof spawn;
+    timeoutMs?: number;
     omitContinuation?: boolean;
     continuationProvider?: string;
     env?: Record<string, string>;
@@ -40,6 +41,7 @@ function createContinuationCapableParticipant(
   const threadRef = options?.threadRef ?? { provider: 'test-provider', opaqueId: 'thread-000001' };
   const participant: WorkspaceAgentParticipantOptions = {
     executable: process.execPath,
+    timeoutMs: options?.timeoutMs,
     buildArgs: () => ['-e', 'process.stdout.write(process.argv[1]);', outputs.initial],
     interpretCompletedOutput: ({ stdout, expectedThreadRef }) => ({
       ok: true as const,
@@ -79,17 +81,6 @@ function createHangingSpawn(counter: { count: number }): typeof spawn {
   }) as typeof spawn;
 }
 
-function withScaledContinuationTimeout<T>(fn: () => Promise<T>): Promise<T> {
-  const originalSetTimeout = globalThis.setTimeout;
-  globalThis.setTimeout = ((handler, timeoutMs, ...args) => {
-    const scaled = timeoutMs === ENVELOPE_RETRANSMISSION_TIMEOUT_MS ? 50 : timeoutMs;
-    return originalSetTimeout(handler, scaled, ...args);
-  }) as typeof setTimeout;
-  return fn().finally(() => {
-    globalThis.setTimeout = originalSetTimeout;
-  });
-}
-
 function eventElapsed(trace: { events: Array<{ type: string; elapsedMs: number; attempt?: number }> }, type: string, attempt?: number): number {
   const event = trace.events.find(e => e.type === type && (attempt === undefined || e.attempt === attempt));
   assert.ok(event, `missing event ${type}`);
@@ -102,6 +93,7 @@ async function runExecution(
   options?: {
     role?: WorkspaceAgentJobInput['role'];
     initialPrompt?: string;
+    retransmissionEnabled?: boolean;
     validateSchema?: (value: Record<string, unknown>) => Record<string, unknown>;
     validateAcceptedResult?: (value: Record<string, unknown>) => Promise<void>;
   },
@@ -114,18 +106,18 @@ async function runExecution(
     initialPrompt: options?.initialPrompt ?? 'Return fixture output.',
     expectedRoleSchemaName: 'SolutionWorkV1',
     participant,
-    retransmissionEnabled: true,
+    retransmissionEnabled: options?.retransmissionEnabled ?? true,
     validateSchema: options?.validateSchema ?? validateFixture,
     validateAcceptedResult: options?.validateAcceptedResult ?? (async () => {}),
   });
 }
 
 export async function runEnvelopeRetransmissionTests(): Promise<void> {
-  assert.equal(ENVELOPE_RETRANSMISSION_TIMEOUT_MS, 60_000);
-
   assert.equal(isEnvelopeRetransmissionEnabledForRole('solution'), true);
-  assert.equal(isEnvelopeRetransmissionEnabledForRole('reviewer'), false);
-  assert.equal(isEnvelopeRetransmissionEnabledForRole('configuration-execution'), false);
+  assert.equal(isEnvelopeRetransmissionEnabledForRole('reviewer'), true);
+  assert.equal(isEnvelopeRetransmissionEnabledForRole('configuration-execution'), true);
+  assert.equal(isEnvelopeRetransmissionEnabledForRole('feedback'), false);
+  assert.equal(isEnvelopeRetransmissionEnabledForRole('hypothesis'), false);
 
   const prompt = renderEnvelopeRetransmissionRequestV1({
     expectedRoleSchemaName: 'SolutionWorkV1',
@@ -206,7 +198,13 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
     event => event.type === 'participant_envelope_retransmission_requested',
   );
   assert.ok(requestEvent);
-  assert.equal(requestEvent.timeoutMs, ENVELOPE_RETRANSMISSION_TIMEOUT_MS);
+  assert.equal(requestEvent.timeoutMs, PARTICIPANT_ABSOLUTE_TIMEOUT_MS);
+  assert.deepEqual(requestEvent.timeoutPolicy, {
+    kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+    evaluationStartMs: 1_800_000,
+    stdoutInactivityMs: 600_000,
+    absoluteCapMs: 2_700_000,
+  });
 
   const startedAtMs = Date.parse(recovery.executionTrace.invocation.startedAt);
   assert.ok(Number.isFinite(startedAtMs));
@@ -240,7 +238,8 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
     event => event.type === 'participant_envelope_retransmission_requested',
   );
   assert.ok(envOverrideRequest);
-  assert.equal(envOverrideRequest.timeoutMs, ENVELOPE_RETRANSMISSION_TIMEOUT_MS);
+  assert.equal(envOverrideRequest.timeoutMs, PARTICIPANT_ABSOLUTE_TIMEOUT_MS);
+  assert.deepEqual(envOverrideRequest.timeoutPolicy, requestEvent.timeoutPolicy);
 
   const schemaInvalidRoot = await mkdtemp(join(tmpdir(), 'envelope-retransmission-schema0-'));
   const schemaInvalidCounter = { count: 0 };
@@ -409,7 +408,7 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
       { initial: schemaInvalidRaw, continuation: schemaValidRaw },
       { spawnProcess: countingSpawn(reviewerSchemaFailureCounter) },
     ),
-    { role: 'reviewer', validateSchema: validateScopeSchema },
+    { role: 'reviewer', retransmissionEnabled: false, validateSchema: validateScopeSchema },
   );
   assert.equal(reviewerSchemaFailure.ok, false);
   assert.equal(reviewerSchemaFailureCounter.count, 1);
@@ -421,14 +420,14 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
 
   const schemaTimeoutRoot = await mkdtemp(join(tmpdir(), 'schema-retransmission-timeout-'));
   const schemaTimeoutCounter = { count: 0 };
-  const schemaTimeout = await withScaledContinuationTimeout(() => runExecution(
+  const schemaTimeout = await runExecution(
     schemaTimeoutRoot,
     createContinuationCapableParticipant(
       { initial: schemaInvalidRaw, continuation: schemaValidRaw },
-      { spawnProcess: createHangingSpawn(schemaTimeoutCounter) },
+      { spawnProcess: createHangingSpawn(schemaTimeoutCounter), timeoutMs: 1_000 },
     ),
     { validateSchema: validateScopeSchema },
-  ));
+  );
   assert.equal(schemaTimeout.ok, false);
   if (!schemaTimeout.ok) assert.equal(schemaTimeout.errorKind, 'timeout');
   assert.equal(schemaTimeoutCounter.count, 2);
@@ -526,10 +525,10 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
 
   const timeoutRoot = await mkdtemp(join(tmpdir(), 'envelope-retransmission-timeout-'));
   const timeoutCounter = { count: 0 };
-  const timeoutResult = await withScaledContinuationTimeout(() => runExecution(timeoutRoot, createContinuationCapableParticipant(
+  const timeoutResult = await runExecution(timeoutRoot, createContinuationCapableParticipant(
     { initial: attempt0Raw, continuation: attempt1Raw },
-    { spawnProcess: createHangingSpawn(timeoutCounter) },
-  )));
+    { spawnProcess: createHangingSpawn(timeoutCounter), timeoutMs: 1_000 },
+  ));
   assert.equal(timeoutResult.ok, false);
   if (!timeoutResult.ok) {
     assert.equal(timeoutResult.errorKind, 'timeout');
@@ -537,15 +536,62 @@ export async function runEnvelopeRetransmissionTests(): Promise<void> {
       origin: 'PARTICIPANT_RUNTIME',
       reason: 'TIMEOUT',
       participantErrorKind: 'timeout',
-      message: 'workspace Agent job timed out after 60000ms',
+      message: 'workspace Agent job timed out after 1000ms',
     });
   }
   assert.equal(timeoutCounter.count, 2);
+  const timeoutRequest = timeoutResult.executionTrace.events.find(
+    event => event.type === 'participant_envelope_retransmission_requested',
+  );
+  assert.ok(timeoutRequest);
+  assert.equal(timeoutRequest.timeoutMs, 1_000);
+  assert.equal(timeoutRequest.timeoutPolicy, undefined);
   assert.deepEqual(timeoutResult.recovery, {
     eligible: true,
     attempted: true,
     outcome: 'TIMEOUT',
   });
+
+  const acceptedResultAfterCorrectionRoot = await mkdtemp(join(tmpdir(), 'envelope-retransmission-accepted-result-after-correction-'));
+  const acceptedResultAfterCorrectionCounter = { count: 0 };
+  let acceptedResultAfterCorrectionCalls = 0;
+  const acceptedResultAfterCorrection = await runExecution(
+    acceptedResultAfterCorrectionRoot,
+    createContinuationCapableParticipant(
+      { initial: attempt0Raw, continuation: attempt1Raw },
+      { spawnProcess: countingSpawn(acceptedResultAfterCorrectionCounter) },
+    ),
+    {
+      validateAcceptedResult: async () => {
+        acceptedResultAfterCorrectionCalls += 1;
+        throw new Error('accepted result rejected after structural correction');
+      },
+    },
+  );
+  assert.equal(acceptedResultAfterCorrection.ok, false);
+  if (!acceptedResultAfterCorrection.ok) {
+    assert.equal(acceptedResultAfterCorrection.errorKind, 'invalid_output');
+    assert.equal(acceptedResultAfterCorrection.failure.origin, 'UNKNOWN');
+  }
+  assert.equal(acceptedResultAfterCorrectionCalls, 1);
+  assert.equal(acceptedResultAfterCorrectionCounter.count, 2);
+  assert.equal(acceptedResultAfterCorrection.recovery.outcome, 'SUCCEEDED');
+  assert.equal(
+    acceptedResultAfterCorrection.executionTrace.events.filter(
+      event => event.type === 'participant_envelope_retransmission_requested',
+    ).length,
+    1,
+  );
+  assert.equal(
+    acceptedResultAfterCorrection.executionTrace.events.filter(
+      event => event.type === 'participant_terminal_validation' && event.attempt === 1,
+    ).length,
+    1,
+  );
+  await assert.rejects(
+    () => readFile(join(acceptedResultAfterCorrectionRoot, 'terminal-attempt-2.txt'), 'utf8'),
+    /ENOENT/,
+  );
 
   const continuationFailureRoot = await mkdtemp(join(tmpdir(), 'envelope-retransmission-continuation-failure-'));
   const continuationFailureCounter = { count: 0 };

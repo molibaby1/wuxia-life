@@ -21,7 +21,6 @@ import {
   type WorkspaceAgentJobInput,
   type WorkspaceAgentParticipantOptions,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
-import { ENVELOPE_RETRANSMISSION_TIMEOUT_MS } from '../../scripts/evolution/problemAgnosticSolution/envelopeRetransmission';
 
 const RECEIPT_SCHEMA_VERSION = 'artifact-backed-structured-final-result-receipt-v1';
 
@@ -320,8 +319,13 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
       event => event.type === 'participant_envelope_retransmission_requested',
     );
     assert.equal(retransmissionEvent?.sameThread, true);
-    assert.equal(retransmissionEvent?.timeoutMs, ENVELOPE_RETRANSMISSION_TIMEOUT_MS);
-    assert.equal(ENVELOPE_RETRANSMISSION_TIMEOUT_MS, 60_000);
+    assert.equal(retransmissionEvent?.timeoutMs, PARTICIPANT_ABSOLUTE_TIMEOUT_MS);
+    assert.deepEqual(retransmissionEvent?.timeoutPolicy, {
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+      evaluationStartMs: 1_800_000,
+      stdoutInactivityMs: 600_000,
+      absoluteCapMs: 2_700_000,
+    });
   });
 
   const invalidCases: Array<{

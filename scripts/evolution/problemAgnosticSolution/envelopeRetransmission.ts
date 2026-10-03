@@ -1,8 +1,6 @@
 import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import type { WorkspaceAgentJobInput } from './agentParticipant';
 
-export const ENVELOPE_RETRANSMISSION_TIMEOUT_MS = 60_000 as const;
-
 export type EnvelopeRetransmissionOutcome =
   | 'NOT_ATTEMPTED'
   | 'SUCCEEDED'
@@ -21,7 +19,7 @@ export interface EnvelopeRetransmissionObservation {
 export function isEnvelopeRetransmissionEnabledForRole(
   role: WorkspaceAgentJobInput['role'],
 ): boolean {
-  return role === 'solution';
+  return role === 'solution' || role === 'reviewer' || role === 'configuration-execution';
 }
 
 export function renderEnvelopeRetransmissionRequestV1(input: {

@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import {
-  SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS,
-  SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS,
-  SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS,
+  PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
+  PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS,
+  PARTICIPANT_TIMEOUT_EVALUATION_START_MS,
   runWorkspaceAgentJob,
   runWorkspaceAgentContinuation,
   type WorkspaceAgentJobInput,
@@ -53,12 +53,12 @@ export async function runAgentParticipantTests(): Promise<void> {
   assert.match(success.ok ? success.rawOutput : '', new RegExp(workspaceRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   const completedTrace = JSON.parse(await readFile(traceInput(input.invocationRef).traceArtifactPath, 'utf8'));
   assert.equal(completedTrace.schemaVersion, 'participant-execution-trace-v1');
-  assert.equal(completedTrace.invocation.timeoutMs, SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS);
+  assert.equal(completedTrace.invocation.timeoutMs, PARTICIPANT_ABSOLUTE_TIMEOUT_MS);
   assert.deepEqual(completedTrace.invocation.timeoutPolicy, {
-    kind: 'SOLUTION_ACTIVITY_AWARE_V2',
-    evaluationStartMs: SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS,
-    stdoutInactivityMs: SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS,
-    absoluteCapMs: SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS,
+    kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+    evaluationStartMs: PARTICIPANT_TIMEOUT_EVALUATION_START_MS,
+    stdoutInactivityMs: PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS,
+    absoluteCapMs: PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
   });
   assert.deepEqual(completedTrace.events.map((event: { seq: number }) => event.seq), [0, 1, 2]);
   assert.deepEqual(completedTrace.events.map((event: { type: string }) => event.type), [
@@ -73,6 +73,23 @@ export async function runAgentParticipantTests(): Promise<void> {
   assert.ok(completedTrace.events.every((event: { elapsedMs: number }, index: number, events: Array<{ elapsedMs: number }>) => (
     index === 0 || event.elapsedMs >= events[index - 1]!.elapsedMs
   )));
+
+  for (const role of ['reviewer', 'configuration-execution'] as const) {
+    const roleInput = { ...traceInput(`${role}-default-policy`), role };
+    const roleResult = await runWorkspaceAgentJob(roleInput, {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'process.stdout.write("completed")'],
+    });
+    assert.equal(roleResult.ok, true);
+    const roleTrace = JSON.parse(await readFile(roleInput.traceArtifactPath, 'utf8'));
+    assert.equal(roleTrace.invocation.timeoutMs, 2_700_000);
+    assert.deepEqual(roleTrace.invocation.timeoutPolicy, {
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+      evaluationStartMs: 1_800_000,
+      stdoutInactivityMs: 600_000,
+      absoluteCapMs: 2_700_000,
+    });
+  }
 
   const explicitTimeoutMs = 5_000;
   const explicitTimeout = await runWorkspaceAgentJob(
@@ -334,7 +351,39 @@ export async function runAgentParticipantTests(): Promise<void> {
   const continued = await runWorkspaceAgentContinuation(
     {
       ...input,
+      role: 'reviewer',
       invocationRef: 'solution-continuation',
+      workspaceRoot,
+      prompt: 'Re-emit only.',
+    },
+    continuationParticipant,
+    {
+      provider: 'test-provider',
+      opaqueId: 'thread-000001',
+    },
+  );
+
+  assert.equal(continued.ok, true);
+  assert.equal(
+    continued.ok ? continued.rawOutput : undefined,
+    'continued:thread-000001',
+  );
+  assert.deepEqual(continued.executionTrace.invocation, {
+    startedAt: continued.executionTrace.invocation.startedAt,
+    timeoutMs: PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
+    timeoutPolicy: {
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+      evaluationStartMs: PARTICIPANT_TIMEOUT_EVALUATION_START_MS,
+      stdoutInactivityMs: PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS,
+      absoluteCapMs: PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
+    },
+  });
+
+  const continuedWithFixedTimeout = await runWorkspaceAgentContinuation(
+    {
+      ...input,
+      role: 'reviewer',
+      invocationRef: 'reviewer-continuation-fixed-timeout',
       workspaceRoot,
       prompt: 'Re-emit only.',
     },
@@ -345,12 +394,9 @@ export async function runAgentParticipantTests(): Promise<void> {
     },
     60_000,
   );
-
-  assert.equal(continued.ok, true);
-  assert.equal(
-    continued.ok ? continued.rawOutput : undefined,
-    'continued:thread-000001',
-  );
+  assert.equal(continuedWithFixedTimeout.ok, true);
+  assert.equal(continuedWithFixedTimeout.executionTrace.invocation.timeoutMs, 60_000);
+  assert.equal(continuedWithFixedTimeout.executionTrace.invocation.timeoutPolicy, undefined);
 
   let mismatchSpawnCount = 0;
   const mismatch = await runWorkspaceAgentContinuation(

@@ -7,47 +7,40 @@ import type { StructuredTerminalEnvelopeFailureReason } from '../../../src/evolu
 
 const OUTPUT_ACTIVITY_WINDOW_MS = 100;
 
-/**
- * Participant / model hard-timeout policy v1.
- * Abnormal-safety hard boundary only — not an ordinary execution budget.
- * Retransmission / retry / other workflow ceilings remain independent
- * (e.g. ENVELOPE_RETRANSMISSION_TIMEOUT_MS = 60000).
- */
-export const DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS = 1_800_000;
-export const SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS = 1_800_000;
-export const SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS = 600_000;
-export const SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS = 2_700_000;
+/** Participant abnormal-safety watchdog values; these are not execution budgets. */
+export const PARTICIPANT_TIMEOUT_EVALUATION_START_MS = 1_800_000;
+export const PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS = 600_000;
+export const PARTICIPANT_ABSOLUTE_TIMEOUT_MS = 2_700_000;
 
 type WorkspaceAgentTimeoutPolicy =
   | { kind: 'FIXED'; timeoutMs: number }
   | {
-      kind: 'SOLUTION_ACTIVITY_AWARE_V2';
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1';
       evaluationStartMs: number;
       stdoutInactivityMs: number;
       absoluteCapMs: number;
     };
 
-export interface SolutionActivityAwareTimeoutPolicyTraceV1 {
-  kind: 'SOLUTION_ACTIVITY_AWARE_V2';
+export interface ParticipantActivityAwareTimeoutPolicyTraceV1 {
+  kind: 'PARTICIPANT_ACTIVITY_AWARE_V1';
   evaluationStartMs: number;
   stdoutInactivityMs: number;
   absoluteCapMs: number;
 }
 
-const SOLUTION_INITIAL_TIMEOUT_POLICY: WorkspaceAgentTimeoutPolicy = {
-  kind: 'SOLUTION_ACTIVITY_AWARE_V2',
-  evaluationStartMs: SOLUTION_INITIAL_TIMEOUT_EVALUATION_START_MS,
-  stdoutInactivityMs: SOLUTION_INITIAL_STDOUT_INACTIVITY_TIMEOUT_MS,
-  absoluteCapMs: SOLUTION_INITIAL_ABSOLUTE_TIMEOUT_MS,
+const PARTICIPANT_INITIAL_TIMEOUT_POLICY: WorkspaceAgentTimeoutPolicy = {
+  kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+  evaluationStartMs: PARTICIPANT_TIMEOUT_EVALUATION_START_MS,
+  stdoutInactivityMs: PARTICIPANT_STDOUT_INACTIVITY_TIMEOUT_MS,
+  absoluteCapMs: PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
 };
 
 function resolveWorkspaceAgentInitialTimeoutPolicy(
-  role: WorkspaceAgentJobInput['role'],
+  _role: WorkspaceAgentJobInput['role'],
   explicitTimeoutMs?: number,
 ): WorkspaceAgentTimeoutPolicy {
   if (explicitTimeoutMs !== undefined) return { kind: 'FIXED', timeoutMs: explicitTimeoutMs };
-  if (role === 'solution') return SOLUTION_INITIAL_TIMEOUT_POLICY;
-  return { kind: 'FIXED', timeoutMs: DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS };
+  return PARTICIPANT_INITIAL_TIMEOUT_POLICY;
 }
 
 function timeoutPolicyLimitMs(policy: WorkspaceAgentTimeoutPolicy): number {
@@ -56,8 +49,8 @@ function timeoutPolicyLimitMs(policy: WorkspaceAgentTimeoutPolicy): number {
 
 function timeoutPolicyTraceMetadata(
   policy: WorkspaceAgentTimeoutPolicy,
-): SolutionActivityAwareTimeoutPolicyTraceV1 | undefined {
-  return policy.kind === 'SOLUTION_ACTIVITY_AWARE_V2'
+): ParticipantActivityAwareTimeoutPolicyTraceV1 | undefined {
+  return policy.kind === 'PARTICIPANT_ACTIVITY_AWARE_V1'
     ? {
         kind: policy.kind,
         evaluationStartMs: policy.evaluationStartMs,
@@ -70,7 +63,7 @@ function timeoutPolicyTraceMetadata(
 export function describeWorkspaceAgentInitialTimeout(
   role: WorkspaceAgentJobInput['role'],
   explicitTimeoutMs?: number,
-): { timeoutMs: number; timeoutPolicy?: SolutionActivityAwareTimeoutPolicyTraceV1 } {
+): { timeoutMs: number; timeoutPolicy?: ParticipantActivityAwareTimeoutPolicyTraceV1 } {
   const policy = resolveWorkspaceAgentInitialTimeoutPolicy(role, explicitTimeoutMs);
   const timeoutPolicy = timeoutPolicyTraceMetadata(policy);
   return {
@@ -401,17 +394,17 @@ async function runWorkspaceAgentProcess(
         errorKind: 'timeout',
         message: detail === undefined
           ? `workspace Agent job timed out after ${timeoutMs}ms`
-          : `workspace Agent job timed out under SOLUTION_ACTIVITY_AWARE_V2: ${detail}`,
+          : `workspace Agent job timed out under PARTICIPANT_ACTIVITY_AWARE_V1: ${detail}`,
         rawOutput: combinedOutput(stdout, stderr),
       }, 'timeout');
     };
     const scheduleActivityAwareTimeout = (): void => {
-      if (timeoutPolicy.kind !== 'SOLUTION_ACTIVITY_AWARE_V2' || settled || timeoutTriggered) return;
+      if (timeoutPolicy.kind !== 'PARTICIPANT_ACTIVITY_AWARE_V1' || settled || timeoutTriggered) return;
       if (timeoutTimer !== undefined) clearTimeout(timeoutTimer);
 
       const currentElapsedMs = elapsedMs();
       if (currentElapsedMs >= timeoutPolicy.absoluteCapMs) {
-        terminateForTimeout('SOLUTION_ABSOLUTE_CAP');
+        terminateForTimeout('PARTICIPANT_ABSOLUTE_CAP');
         return;
       }
 
@@ -425,7 +418,7 @@ async function runWorkspaceAgentProcess(
           lastStdoutMs + timeoutPolicy.stdoutInactivityMs,
         );
         if (currentElapsedMs >= inactivityDeadlineMs) {
-          terminateForTimeout('SOLUTION_STDOUT_INACTIVITY');
+          terminateForTimeout('PARTICIPANT_STDOUT_INACTIVITY');
           return;
         }
         nextDeadlineMs = inactivityDeadlineMs;
@@ -549,15 +542,25 @@ export async function runWorkspaceAgentContinuation(
   input: WorkspaceAgentJobInput,
   options: WorkspaceAgentParticipantOptions,
   threadRef: ParticipantThreadRef,
-  timeoutMs: number,
+  timeoutMs?: number,
+  /** Host-only deterministic scheduler seam; production callers use the Role-derived policy. */
+  timeoutPolicyOverride?: WorkspaceAgentTimeoutPolicy,
 ): Promise<WorkspaceAgentJobResult> {
   const continuation = options.sameThreadContinuation;
+  const timeoutPolicy = timeoutMs !== undefined
+    ? { kind: 'FIXED' as const, timeoutMs }
+    : options.timeoutMs !== undefined
+      ? { kind: 'FIXED' as const, timeoutMs: options.timeoutMs }
+      : timeoutPolicyOverride ?? resolveWorkspaceAgentInitialTimeoutPolicy(input.role);
+  const effectiveTimeoutMs = timeoutPolicyLimitMs(timeoutPolicy);
+  const timeoutPolicyMetadata = timeoutPolicyTraceMetadata(timeoutPolicy);
   if (continuation === undefined || continuation.provider !== threadRef.provider) {
     const trace: ParticipantExecutionTraceV1 = {
       schemaVersion: 'participant-execution-trace-v1',
       invocation: {
         startedAt: new Date().toISOString(),
-        timeoutMs,
+        timeoutMs: effectiveTimeoutMs,
+        ...(timeoutPolicyMetadata === undefined ? {} : { timeoutPolicy: timeoutPolicyMetadata }),
       },
       events: [],
       terminal: {
@@ -573,7 +576,7 @@ export async function runWorkspaceAgentContinuation(
     };
   }
   return runWorkspaceAgentProcess(input, options, {
-    timeoutPolicy: { kind: 'FIXED', timeoutMs },
+    timeoutPolicy,
     buildArgs: () => continuation.buildArgs(input, threadRef),
     expectedThreadRef: threadRef,
   });

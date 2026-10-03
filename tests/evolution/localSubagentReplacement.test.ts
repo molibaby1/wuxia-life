@@ -6,7 +6,6 @@ import { getP8PersonaById } from '../../src/p8/personas';
 import { runMinimalExternalFeedback } from '../../scripts/evolution/runMinimalExternalFeedback';
 import { runImprovementHypothesis } from '../../scripts/evolution/runImprovementHypothesis';
 import { NO_PROBLEM_JSON_EXAMPLE } from '../../scripts/evolution/improvementHypothesis/deepseekImprovementHypothesis';
-import { DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 
 export async function runLocalSubagentReplacementTests(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -81,7 +80,7 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
   assert.equal(binding.modelConfigured, 'gpt-5.6-luna');
   assert.equal(binding.modelResolution, 'EXPLICIT');
   assert.equal(binding.reasoningEffort, 'high');
-  assert.equal(binding.timeoutMs, DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS);
+  assert.equal('timeoutMs' in binding, false);
   const bindingText = JSON.stringify(binding);
   assert.equal(bindingText.includes('env'), false);
   assert.equal(bindingText.includes('apiKey'), false);
@@ -91,6 +90,12 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
   );
   assert.equal(successTrace.schemaVersion, 'participant-execution-trace-v1');
   assert.equal(successTrace.terminal.outcome, 'completed');
+  assert.deepEqual(successTrace.invocation.timeoutPolicy, {
+    kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+    evaluationStartMs: 1_800_000,
+    stdoutInactivityMs: 600_000,
+    absoluteCapMs: 2_700_000,
+  });
 
   const hypothesis = await runImprovementHypothesis({
     runRef: 'local-subagent-feedback-001',

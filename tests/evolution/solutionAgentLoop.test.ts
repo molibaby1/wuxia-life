@@ -577,7 +577,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.equal(solutionTrace.schemaVersion, 'participant-execution-trace-v1');
   assert.equal(solutionTrace.invocation.timeoutMs, 2_700_000);
   assert.deepEqual(solutionTrace.invocation.timeoutPolicy, {
-    kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+    kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
     evaluationStartMs: 1_800_000,
     stdoutInactivityMs: 600_000,
     absoluteCapMs: 2_700_000,
@@ -745,7 +745,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   const revisionTrace = JSON.parse(await readFile(join(root, 'solution-revision/execution-trace.json'), 'utf8'));
   assert.equal(revisionTrace.invocation.timeoutMs, 2_700_000);
   assert.deepEqual(revisionTrace.invocation.timeoutPolicy, {
-    kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+    kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
     evaluationStartMs: 1_800_000,
     stdoutInactivityMs: 600_000,
     absoluteCapMs: 2_700_000,

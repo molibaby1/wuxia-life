@@ -15,7 +15,7 @@ import {
   type StructuredParticipantExecutionResult,
 } from '../../scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution';
 import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+  PARTICIPANT_ABSOLUTE_TIMEOUT_MS,
   runWorkspaceAgentContinuation,
   runWorkspaceAgentJob,
   type WorkspaceAgentJobInput,
@@ -197,7 +197,7 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(result.ok, true);
     assert.equal(result.executionTrace.invocation.timeoutMs, 2_700_000);
     assert.deepEqual(result.executionTrace.invocation.timeoutPolicy, {
-      kind: 'SOLUTION_ACTIVITY_AWARE_V2',
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
       evaluationStartMs: 1_800_000,
       stdoutInactivityMs: 600_000,
       absoluteCapMs: 2_700_000,
@@ -488,7 +488,7 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
 
   await withFixture(async ({ workspaceRoot }) => {
     const policy = {
-      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1' as const,
       evaluationStartMs: 400,
       stdoutInactivityMs: 900,
       absoluteCapMs: 2_000,
@@ -519,7 +519,7 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
 
   await withFixture(async ({ workspaceRoot }) => {
     const policy = {
-      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1' as const,
       evaluationStartMs: 180,
       stdoutInactivityMs: 420,
       absoluteCapMs: 1_500,
@@ -538,13 +538,13 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
     assert.equal(
       result.executionTrace.events.find(event => event.type === 'timeout')?.detail,
-      'SOLUTION_STDOUT_INACTIVITY',
+      'PARTICIPANT_STDOUT_INACTIVITY',
     );
   });
 
   await withFixture(async ({ workspaceRoot }) => {
     const policy = {
-      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1' as const,
       evaluationStartMs: 180,
       stdoutInactivityMs: 420,
       absoluteCapMs: 1_500,
@@ -563,14 +563,14 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
     assert.equal(
       result.executionTrace.events.find(event => event.type === 'timeout')?.detail,
-      'SOLUTION_STDOUT_INACTIVITY',
+      'PARTICIPANT_STDOUT_INACTIVITY',
     );
     assert.equal(result.executionTrace.events.some(event => event.type === 'output_activity' && event.stream === 'stderr'), true);
   });
 
   await withFixture(async ({ workspaceRoot }) => {
     const policy = {
-      kind: 'SOLUTION_ACTIVITY_AWARE_V2' as const,
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1' as const,
       evaluationStartMs: 180,
       stdoutInactivityMs: 500,
       absoluteCapMs: 1_600,
@@ -589,7 +589,7 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(result.ok ? undefined : result.errorKind, 'timeout');
     assert.equal(
       result.executionTrace.events.find(event => event.type === 'timeout')?.detail,
-      'SOLUTION_ABSOLUTE_CAP',
+      'PARTICIPANT_ABSOLUTE_CAP',
     );
   });
 
@@ -604,8 +604,13 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
       buildArgs: () => ['-e', 'process.stdout.write("completed")'],
     });
     assert.equal(defaultReviewer.ok, true);
-    assert.equal(defaultReviewer.executionTrace.invocation.timeoutMs, DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS);
-    assert.equal(defaultReviewer.executionTrace.invocation.timeoutPolicy, undefined);
+    assert.equal(defaultReviewer.executionTrace.invocation.timeoutMs, PARTICIPANT_ABSOLUTE_TIMEOUT_MS);
+    assert.deepEqual(defaultReviewer.executionTrace.invocation.timeoutPolicy, {
+      kind: 'PARTICIPANT_ACTIVITY_AWARE_V1',
+      evaluationStartMs: 1_800_000,
+      stdoutInactivityMs: 600_000,
+      absoluteCapMs: 2_700_000,
+    });
 
     const result = await runWorkspaceAgentJob({
       invocationRef: 'reviewer-fixed-timeout',
@@ -623,7 +628,6 @@ export async function runArtifactBackedStructuredParticipantExecutionTests(): Pr
     assert.equal(result.executionTrace.invocation.timeoutMs, 400);
     assert.equal(result.executionTrace.invocation.timeoutPolicy, undefined);
     assert.equal(result.executionTrace.events.find(event => event.type === 'timeout')?.detail, undefined);
-    assert.equal(DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS, 1_800_000);
   });
 
   await withFixture(async ({ workspaceRoot }) => {

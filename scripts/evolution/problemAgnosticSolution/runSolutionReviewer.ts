@@ -8,20 +8,18 @@ import {
   validateSolutionReview,
   type SolutionReviewV1,
 } from '../../../src/evolution/solutionReviewContract';
-import { validateStructuredTerminalEnvelope } from '../../../src/evolution/structuredTerminalEnvelope';
 import { validateSolutionWork, type SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
 import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
-  classifyWorkspaceAgentFailure,
   ParticipantOutputValidationError,
   type ParticipantFailureFacts,
 } from './participantFailureClassification';
 import {
-  runWorkspaceAgentJob,
   type WorkspaceAgentJobFailure,
   type WorkspaceAgentParticipantOptions,
 } from './agentParticipant';
+import { runStructuredParticipantExecution } from './runStructuredParticipantExecution';
 import {
   assertArtifactReferenceFile,
   assertRepoReferenceFileAgainstAuthoritative,
@@ -31,7 +29,6 @@ import {
   type ParticipantSkillAssignment,
   type DeliveredParticipantSkill,
 } from './solutionParticipantSkills';
-import { persistParticipantPromptAndBinding } from '../participantObservability';
 import type { PreschoolAutonomousAuthoringContractPacketV1 } from '../autonomousAuthoring/buildPreschoolContractPacket';
 import type { PreschoolReferenceResponsibilityContextV1 } from '../autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 
@@ -262,155 +259,93 @@ async function runSolutionReviewerWithPrompt(
   } as const;
 
   const deliveredSkills = assignedSkills.map(({ content: _content, ...provenance }) => provenance);
-  await persistParticipantPromptAndBinding({
+  const execution = await runStructuredParticipantExecution<SolutionReviewV1>({
+    invocationRef: input.invocationRef,
+    role: 'reviewer',
+    workspaceRoot: input.workspaceRoot,
     destinationRoot: input.destinationRoot,
-    prompt,
+    initialPrompt: prompt,
+    expectedRoleSchemaName: 'SolutionReviewV1',
     participant: input.participant,
-  });
-  const job = await runWorkspaceAgentJob(
-    {
-      invocationRef: input.invocationRef,
-      role: 'reviewer',
-      workspaceRoot: input.workspaceRoot,
-      prompt,
-      traceArtifactPath: join(input.destinationRoot, 'execution-trace.json'),
+    structuredResultDelivery: { kind: 'TERMINAL_JSON' },
+    retransmissionEnabled: true,
+    validateSchema: validateSolutionReview,
+    validateAcceptedResult: async review => {
+      if (review.problemId !== problemPackage.problemId) {
+        throw new ParticipantOutputValidationError({
+          origin: 'OUTPUT_IDENTITY',
+          reason: 'PROBLEM_ID_MISMATCH',
+          participantErrorKind: 'invalid_output',
+          message: 'SolutionReview problemId does not match ProblemPackage',
+        });
+      }
+      if (review.decision === 'ACCEPT_OPTION') {
+        const selectedOption = input.solutionWork.options.find(option => option.optionId === review.acceptedOptionId);
+        if (!selectedOption) {
+          throw new ParticipantOutputValidationError({
+            origin: 'OUTPUT_INTERNAL_CONSISTENCY',
+            reason: 'OPTION_ID_MISMATCH',
+            participantErrorKind: 'invalid_output',
+            message: `acceptedOptionId does not exist in SolutionWork: ${review.acceptedOptionId}`,
+          });
+        }
+        if (selectedOption.autonomousAuthoring) {
+          const assessment = review.autonomousAuthoringAssessment;
+          if (
+            !assessment
+            || assessment.contractId !== selectedOption.autonomousAuthoring.contractId
+            || assessment.contractVersion !== selectedOption.autonomousAuthoring.contractVersion
+            || assessment.applicabilityAssessment !== 'APPLICABLE'
+            || assessment.conformance !== 'CONFORMING'
+            || assessment.executionEnvelope !== 'WITHIN_ENVELOPE'
+            || assessment.blockers.length !== 0
+          ) {
+            throw new ParticipantOutputValidationError({
+              origin: 'OUTPUT_SCHEMA',
+              reason: 'ROLE_SCHEMA_INVALID',
+              participantErrorKind: 'invalid_output',
+              message: 'accepted autonomousAuthoring option requires a matching conforming in-envelope assessment with no blockers',
+            });
+          }
+        }
+      }
+      await validateReferences(review, input);
     },
-    input.participant,
-  );
+  });
 
-  if (!job.ok) {
-    await writeCreateOnly(rawOutputPath, job.rawOutput ?? '');
+  await writeCreateOnly(rawOutputPath, execution.rawOutput ?? '');
+  await writeCreateOnly(join(input.destinationRoot, 'execution-trace.json'), execution.executionTrace);
+  if (!execution.ok) {
     await writeCreateOnly(invocationPath, {
       ...commonInvocation,
       deliveredSkills,
       status: 'failed',
-      errorKind: job.errorKind,
-    });
-    await writeCreateOnly(failurePath, { schemaVersion: 'solution-reviewer-failure-v1', errorKind: job.errorKind, message: job.message });
-    return {
-      ok: false,
-      errorKind: job.errorKind,
-      message: job.message,
-      failure: classifyWorkspaceAgentFailure(job),
-      invocationPath,
-      rawOutputPath,
-      failurePath,
-    };
-  }
-
-  try {
-    await writeCreateOnly(join(input.destinationRoot, 'stderr.txt'), job.stderr);
-  } catch {
-    // Available stderr is forensic sidecar evidence; preserve the semantic review result.
-  }
-  let review: SolutionReviewV1;
-  const invalidOutputFailure = async (failure: ParticipantFailureFacts): Promise<SolutionReviewerRunResult> => {
-    await writeCreateOnly(rawOutputPath, job.rawOutput);
-    await writeCreateOnly(invocationPath, {
-      ...commonInvocation,
-      deliveredSkills,
-      status: 'failed',
-      errorKind: 'invalid_output',
+      errorKind: execution.errorKind,
     });
     await writeCreateOnly(failurePath, {
       schemaVersion: 'solution-reviewer-failure-v1',
-      errorKind: 'invalid_output',
-      message: failure.message,
+      errorKind: execution.errorKind,
+      message: execution.message,
     });
     return {
       ok: false,
-      errorKind: 'invalid_output',
-      message: failure.message,
-      failure,
+      errorKind: execution.errorKind,
+      message: execution.message,
+      failure: execution.failure,
       invocationPath,
       rawOutputPath,
       failurePath,
     };
-  };
-
-  try {
-    const envelope = validateStructuredTerminalEnvelope(job.rawOutput);
-    if (!envelope.ok) {
-      throw new ParticipantOutputValidationError({
-        origin: 'OUTPUT_ENVELOPE',
-        reason: envelope.reason === 'EMPTY'
-          ? 'EMPTY_ENVELOPE'
-          : envelope.reason === 'INVALID_JSON'
-            ? 'INVALID_JSON_ENVELOPE'
-            : 'NON_OBJECT_ENVELOPE',
-        participantErrorKind: 'invalid_output',
-        message: 'structured terminal envelope validation failed',
-      });
-    }
-    review = validateSolutionReview(envelope.parsedObject);
-  } catch (error) {
-    const failure: ParticipantFailureFacts = error instanceof ParticipantOutputValidationError
-      ? error.facts
-      : {
-          origin: 'OUTPUT_SCHEMA',
-          reason: 'ROLE_SCHEMA_INVALID',
-          participantErrorKind: 'invalid_output',
-          message: String(error),
-        };
-    return invalidOutputFailure(failure);
   }
 
   try {
-    if (review.problemId !== problemPackage.problemId) {
-      throw new ParticipantOutputValidationError({
-        origin: 'OUTPUT_IDENTITY',
-        reason: 'PROBLEM_ID_MISMATCH',
-        participantErrorKind: 'invalid_output',
-        message: 'SolutionReview problemId does not match ProblemPackage',
-      });
-    }
-    if (review.decision === 'ACCEPT_OPTION') {
-      const selectedOption = input.solutionWork.options.find(option => option.optionId === review.acceptedOptionId);
-      if (!selectedOption) {
-        throw new ParticipantOutputValidationError({
-          origin: 'OUTPUT_INTERNAL_CONSISTENCY',
-          reason: 'OPTION_ID_MISMATCH',
-          participantErrorKind: 'invalid_output',
-          message: `acceptedOptionId does not exist in SolutionWork: ${review.acceptedOptionId}`,
-        });
-      }
-      if (selectedOption.autonomousAuthoring) {
-        const assessment = review.autonomousAuthoringAssessment;
-        if (
-          !assessment
-          || assessment.contractId !== selectedOption.autonomousAuthoring.contractId
-          || assessment.contractVersion !== selectedOption.autonomousAuthoring.contractVersion
-          || assessment.applicabilityAssessment !== 'APPLICABLE'
-          || assessment.conformance !== 'CONFORMING'
-          || assessment.executionEnvelope !== 'WITHIN_ENVELOPE'
-          || assessment.blockers.length !== 0
-        ) {
-          throw new ParticipantOutputValidationError({
-            origin: 'OUTPUT_SCHEMA',
-            reason: 'ROLE_SCHEMA_INVALID',
-            participantErrorKind: 'invalid_output',
-            message: 'accepted autonomousAuthoring option requires a matching conforming in-envelope assessment with no blockers',
-          });
-        }
-      }
-    }
-    await validateReferences(review, input);
-  } catch (error) {
-    const failure: ParticipantFailureFacts = error instanceof ParticipantOutputValidationError
-      ? error.facts
-      : {
-          origin: 'UNKNOWN',
-          reason: 'UNCLASSIFIED',
-          participantErrorKind: null,
-          message: String(error),
-        };
-    return invalidOutputFailure(failure);
+    await writeCreateOnly(join(input.destinationRoot, 'stderr.txt'), execution.stderr);
+  } catch {
+    // Available stderr is forensic sidecar evidence; preserve the semantic review result.
   }
-
-  await writeCreateOnly(rawOutputPath, job.rawOutput);
   await writeCreateOnly(invocationPath, { ...commonInvocation, deliveredSkills, status: 'completed' });
-  await writeCreateOnly(reviewPath, review);
-  return { ok: true, review, invocationPath, rawOutputPath, reviewPath };
+  await writeCreateOnly(reviewPath, execution.value);
+  return { ok: true, review: execution.value, invocationPath, rawOutputPath, reviewPath };
 }
 
 async function skillDeliveryFailure(

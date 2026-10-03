@@ -16,6 +16,7 @@ import { buildPreschoolAutonomousAuthoringContractPacket } from '../../scripts/e
 import type { PreschoolReferenceResponsibilityContextV1 } from '../../scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief';
 import { REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
+import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 import type {
   AutonomousAuthoringProposalV1,
@@ -163,6 +164,30 @@ function escapeRegex(value: string): string {
 
 type TestSolutionReviewerInput = Omit<RunSolutionReviewerInput, 'repositoryRoot'> & { repositoryRoot?: string };
 type TestSolutionReReviewerInput = Omit<RunSolutionReReviewerInput, 'repositoryRoot'> & { repositoryRoot?: string };
+
+function continuationReviewerParticipant(
+  initialOutput: string,
+  continuationOutput: string,
+  continuationCalls: { count: number },
+): WorkspaceAgentParticipantOptions {
+  const threadRef = { provider: 'reviewer-test', opaqueId: 'reviewer-thread-000001' };
+  return {
+    executable: process.execPath,
+    buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(initialOutput)})`],
+    interpretCompletedOutput: ({ stdout, expectedThreadRef }) => ({
+      ok: true,
+      rawOutput: stdout,
+      threadRef: expectedThreadRef ?? threadRef,
+    }),
+    sameThreadContinuation: {
+      provider: threadRef.provider,
+      buildArgs: () => {
+        continuationCalls.count += 1;
+        return ['-e', `process.stdout.write(${JSON.stringify(continuationOutput)})`];
+      },
+    },
+  };
+}
 
 function runSolutionReviewer(input: TestSolutionReviewerInput) {
   return runSolutionReviewerImpl({
@@ -487,6 +512,30 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   const rereviewerInvocation = JSON.parse(await readFile(join(root, 'solution-rereviewer/invocation.json'), 'utf8'));
   assert.equal(rereviewerInvocation.invocationRef, 'solution-rereviewer-000001');
 
+  const malformedRereviewerContinuationCalls = { count: 0 };
+  const malformedRereviewerResult = await runSolutionReReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork: revisedSolutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-rereviewer-malformed-envelope',
+    jobNumber: 2,
+    destinationRoot: join(root, 'solution-rereviewer-malformed-envelope'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
+    participant: continuationReviewerParticipant(
+      'not-json',
+      JSON.stringify(reviewOutput(autonomousAuthoringAssessment)),
+      malformedRereviewerContinuationCalls,
+    ),
+    originalSolutionWork: autonomousSolutionWork,
+    originalReview: originalReviewForRereview,
+  });
+  assert.equal(malformedRereviewerResult.ok, true);
+  assert.equal(malformedRereviewerContinuationCalls.count, 1);
+
   const invalidAcceptedAuthoringReviews = [
     reviewOutput(undefined),
     reviewOutput({ ...autonomousAuthoringAssessment, contractId: 'another-contract-v1' }),
@@ -521,6 +570,29 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
       assert.equal(invalidAuthoringResult.failure.reason, 'ROLE_SCHEMA_INVALID');
     }
   }
+
+  const authoringConsistencyContinuationCalls = { count: 0 };
+  const authoringConsistencyResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork: autonomousSolutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-authoring-consistency-failure',
+    jobNumber: 4,
+    destinationRoot: join(root, 'reviewer-authoring-consistency-failure'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    autonomousAuthoringContractPacket,
+    participant: continuationReviewerParticipant(
+      JSON.stringify(reviewOutput({ ...autonomousAuthoringAssessment, conformance: 'NON_CONFORMING' })),
+      JSON.stringify(reviewOutput(autonomousAuthoringAssessment)),
+      authoringConsistencyContinuationCalls,
+    ),
+  });
+  assert.equal(authoringConsistencyResult.ok, false, JSON.stringify(authoringConsistencyResult));
+  assert.equal(authoringConsistencyResult.ok ? undefined : authoringConsistencyResult.errorKind, 'invalid_output');
+  assert.equal(authoringConsistencyContinuationCalls.count, 0);
 
   const acceptedAuthoringReview = await runSolutionReviewer({
     problemPackage,
@@ -646,6 +718,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.equal(JSON.parse(await readFile(join(timeoutRoot, 'failure.json'), 'utf8')).errorKind, 'timeout');
   assert.ok(!JSON.stringify(timeoutTrace).includes('reviewer started'), 'Activity trace must not duplicate output payload');
 
+  const malformedEnvelopeContinuationCalls = { count: 0 };
   const malformedEnvelopeResult = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
@@ -657,17 +730,16 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'malformed-envelope-reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', 'process.stdout.write("not-json")'],
-    },
+    participant: continuationReviewerParticipant(
+      'not-json',
+      JSON.stringify(reviewOutput(autonomousAuthoringAssessment)),
+      malformedEnvelopeContinuationCalls,
+    ),
   });
-  assert.equal(malformedEnvelopeResult.ok, false);
-  if (!malformedEnvelopeResult.ok) {
-    assert.equal(malformedEnvelopeResult.failure.origin, 'OUTPUT_ENVELOPE');
-    assert.equal(malformedEnvelopeResult.failure.reason, 'INVALID_JSON_ENVELOPE');
-  }
+  assert.equal(malformedEnvelopeResult.ok, true);
+  assert.equal(malformedEnvelopeContinuationCalls.count, 1);
 
+  const malformedSchemaContinuationCalls = { count: 0 };
   const malformedSchemaResult = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
@@ -679,17 +751,45 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'malformed-schema-reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', 'process.stdout.write(JSON.stringify({ schemaVersion: "solution-review-v1" }));'],
-    },
+    participant: continuationReviewerParticipant(
+      JSON.stringify({ schemaVersion: 'solution-review-v1' }),
+      JSON.stringify(reviewOutput(autonomousAuthoringAssessment)),
+      malformedSchemaContinuationCalls,
+    ),
   });
-  assert.equal(malformedSchemaResult.ok, false);
-  if (!malformedSchemaResult.ok) {
-    assert.equal(malformedSchemaResult.failure.origin, 'OUTPUT_SCHEMA');
-    assert.equal(malformedSchemaResult.failure.reason, 'ROLE_SCHEMA_INVALID');
+  assert.equal(malformedSchemaResult.ok, true);
+  assert.equal(malformedSchemaContinuationCalls.count, 1);
+
+  for (const [label, destinationRoot, result] of [
+    ['malformed-envelope', join(root, 'malformed-envelope-reviewer-agent'), malformedEnvelopeResult],
+    ['malformed-schema', join(root, 'malformed-schema-reviewer-agent'), malformedSchemaResult],
+  ] as const) {
+    assert.ok(result.ok, `${label} correction should preserve the public success result`);
+    assert.equal(result.ok ? result.review.decision : undefined, 'ACCEPT_OPTION');
+    assert.equal(
+      await readFile(join(destinationRoot, 'raw-output.txt'), 'utf8'),
+      JSON.stringify(reviewOutput(autonomousAuthoringAssessment)),
+    );
+    assert.equal(JSON.parse(await readFile(join(destinationRoot, 'invocation.json'), 'utf8')).status, 'completed');
+    assert.equal(JSON.parse(await readFile(join(destinationRoot, 'review.json'), 'utf8')).acceptedOptionId, 'option-000001');
+    const trace = JSON.parse(await readFile(join(destinationRoot, 'execution-trace.json'), 'utf8'));
+    assert.equal(trace.terminal.outcome, 'completed');
+    assert.equal(
+      trace.events.filter((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested').length,
+      1,
+    );
+    assert.equal(
+      trace.events.filter((event: { type: string; attempt?: number }) => (
+        event.type === 'participant_terminal_validation' && event.attempt === 1
+      )).length,
+      1,
+    );
+    assert.ok(await readFile(join(destinationRoot, 'terminal-attempt-0.txt'), 'utf8'));
+    assert.ok(await readFile(join(destinationRoot, 'terminal-attempt-1.txt'), 'utf8'));
+    assert.ok(await readFile(join(destinationRoot, 'participant-envelope-retransmission-prompt-1.txt'), 'utf8'));
   }
 
+  const wrongProblemIdContinuationCalls = { count: 0 };
   const wrongProblemIdResult = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
@@ -701,17 +801,20 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'wrong-problem-id-reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, problemId: 'problem-999999' }))})`],
-    },
+    participant: continuationReviewerParticipant(
+      JSON.stringify({ ...review, problemId: 'problem-999999' }),
+      JSON.stringify(review),
+      wrongProblemIdContinuationCalls,
+    ),
   });
   assert.equal(wrongProblemIdResult.ok, false);
   if (!wrongProblemIdResult.ok) {
     assert.equal(wrongProblemIdResult.failure.origin, 'OUTPUT_IDENTITY');
     assert.equal(wrongProblemIdResult.failure.reason, 'PROBLEM_ID_MISMATCH');
   }
+  assert.equal(wrongProblemIdContinuationCalls.count, 0);
 
+  const optionIdMismatchContinuationCalls = { count: 0 };
   const optionIdMismatchResult = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
@@ -723,17 +826,20 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'option-id-mismatch-reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, acceptedOptionId: 'option-999999' }))})`],
-    },
+    participant: continuationReviewerParticipant(
+      JSON.stringify({ ...review, acceptedOptionId: 'option-999999' }),
+      JSON.stringify(review),
+      optionIdMismatchContinuationCalls,
+    ),
   });
   assert.equal(optionIdMismatchResult.ok, false);
   if (!optionIdMismatchResult.ok) {
     assert.equal(optionIdMismatchResult.failure.origin, 'OUTPUT_INTERNAL_CONSISTENCY');
     assert.equal(optionIdMismatchResult.failure.reason, 'OPTION_ID_MISMATCH');
   }
+  assert.equal(optionIdMismatchContinuationCalls.count, 0);
 
+  const missingRepoRefContinuationCalls = { count: 0 };
   const missingRepoRefResult = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
@@ -745,16 +851,18 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'missing-repo-ref-reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, repoRefs: ['src/missing-review-repo-ref.ts'] }))})`],
-    },
+    participant: continuationReviewerParticipant(
+      JSON.stringify({ ...review, repoRefs: ['src/missing-review-repo-ref.ts'] }),
+      JSON.stringify(review),
+      missingRepoRefContinuationCalls,
+    ),
   });
   assert.equal(missingRepoRefResult.ok, false);
   if (!missingRepoRefResult.ok) {
     assert.equal(missingRepoRefResult.failure.origin, 'OUTPUT_REFERENCE');
     assert.equal(missingRepoRefResult.failure.reason, 'MISSING_TARGET');
   }
+  assert.equal(missingRepoRefContinuationCalls.count, 0);
 
   const locatorReview = { ...review, repoRefs: ['src/example.ts:1-2'] };
   const locatorResult = await runSolutionReviewer({
@@ -780,6 +888,7 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     ['src/example.ts:1-2'],
   );
 
+  const artifactReferenceContinuationCalls = { count: 0 };
   const artifactLocatorResult = await runSolutionReviewer({
     problemPackage,
     problemPackagePath: packagePath,
@@ -791,13 +900,15 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     jobNumber: 4,
     destinationRoot: join(root, 'artifact-locator-reviewer-agent'),
     skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
-    participant: {
-      executable: process.execPath,
-      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...review, artifactRefs: ['source/observable-payload.json:10'] }))})`],
-    },
+    participant: continuationReviewerParticipant(
+      JSON.stringify({ ...review, artifactRefs: ['source/observable-payload.json:10'] }),
+      JSON.stringify(review),
+      artifactReferenceContinuationCalls,
+    ),
   });
   assert.equal(artifactLocatorResult.ok, false);
   assert.equal(artifactLocatorResult.ok ? undefined : artifactLocatorResult.errorKind, 'invalid_output');
+  assert.equal(artifactReferenceContinuationCalls.count, 0);
 
   const artifactFragmentResult = await runSolutionReviewer({
     problemPackage,

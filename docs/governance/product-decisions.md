@@ -2347,8 +2347,15 @@ responsibilityProvenance = HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES
 
 Participant binding drift 仍会使既有 attempt authorization 失效。受治理执行必须使用 fresh exact current binding、角色专属 binding-lock digest，以及 Human 对该 attempt authorization canonical SHA 的新批准；Host 在创建 governed attempt 前仍须重新解析并精确比对当前 binding，任何漂移都 fail closed，禁止静默 rebind。
 
-binding drift 本身不再自动要求 Matrix A/B/C、artifact probes 或完整 synthetic communication certification campaign。完成 fresh exact binding 与 fresh Human authorization 后，下一验证默认走真实 governed workload；合成 communication experiment 只在真实路径出现具体 communication uncertainty、且需要受控隔离时作为诊断工具。
+binding drift 本身不再自动要求 Matrix A/B/C、artifact probes 或完整 synthetic communication certification campaign。完成 Harness hardening、deterministic verification、fresh exact binding 与 fresh Human authorization 后，下一验证默认走真实 governed workload；合成 communication experiment 只在真实路径出现具体 communication uncertainty、且需要受控隔离时作为诊断工具。
 
-本决策不改变 PD-099 v2、PD-119、Role / Contract / Schema 语义、Solution artifact-backed transport、Reviewer / Shadow authority 或 Human promotion authority。Reviewer structural correction、timeout / watchdog 扩展和额外 workload splitting 均不是下一个 #14 的前置条件。
+2026-10-03 Revision 1（Human accepted） supersedes the earlier pre-#14 implementation-priority statement. Before preparing a fresh `attempt-000014` authorization candidate, deterministic Harness hardening MUST establish:
+
+1. at most one same-thread correction for terminal envelope or exact Role-schema failure, covering terminal-mode Solution, Reviewer / Re-reviewer, and Shadow Authoring / `configuration-execution` where applicable;
+2. role-neutral activity-aware watchdog semantics for every default workspace Participant Role and structural-correction continuation, using the accepted PD-099 v2 values (`1_800_000ms` evaluation start, `600_000ms` stdout inactivity, `2_700_000ms` absolute cap); non-empty stdout refreshes progress and stderr does not.
+
+Explicit caller timeouts remain fixed overrides. Accepted-result, identity, reference, Contract, semantic, runtime, timeout, permission, provenance, and integrity failures are not correction-eligible. Artifact-backed Solution correction remains out of scope and fail closed. This decision does not alter PD-119, Role / Contract / Schema semantics, Reviewer / Shadow authority, Human promotion authority, or the prohibition on extra workload splitting.
+
+After deterministic verification, the real governed workload remains the primary evidence path. No synthetic recertification campaign is restored.
 
 本决策不生成新的 `attempt-000014` authorization candidate，也不授权执行 `attempt-000014`。binding drift 后仍必须取得 fresh exact binding 与 fresh exact-digest Human authorization。

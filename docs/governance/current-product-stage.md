@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-03（PD-122 已记录；artifact-backed 首次 communication reopening gate = `REESTABLISHED`；attempt-000013 以 `FAILED / REVIEWER / invalid_output` 终止且 mismatch 已 deterministic verified；pre-upgrade attempt-000014 authorization 因 binding drift 失效，`attempt-000014 = NOT_ADMITTED`，未创建 governed attempt；Layer A proof 仍为 `NOT ESTABLISHED`）。
+> 最后更新：2026-10-03（PD-122 Revision 1 已 Human accepted；Harness hardening 与 deterministic verification 必须先于新的 attempt-000014 authorization candidate；artifact-backed 首次 communication reopening gate = `REESTABLISHED`；attempt-000013 以 `FAILED / REVIEWER / invalid_output` 终止且 mismatch 已 deterministic verified；pre-upgrade attempt-000014 authorization 因 binding drift 失效，`attempt-000014 = NOT_ADMITTED`，未创建 governed attempt；Layer A proof 仍为 `NOT ESTABLISHED`）。
 
 ## 当前导航
 
@@ -11,8 +11,8 @@
 - **Current Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
 - **Latest governed attempt：**`attempt-000013 = FAILED` at `REVIEWER / invalid_output`（terminal）；该 attempt-specific 一次性 Human execution authorization 已消费。
-- **Current blocker：**fresh exact current binding and fresh exact-digest Human authorization are required; execution remains unauthorized。
-- **Current return point：**fresh exact current binding → fresh `attempt-000014` authorization candidate → Human exact canonical-SHA approval → one real governed `attempt-000014`。
+- **Current blocker：**PD-122 Revision 1 Harness hardening and deterministic verification must complete before fresh binding / authorization preparation; execution remains unauthorized。
+- **Current return point：**Revision 1 Harness hardening → deterministic verification → fresh exact current binding → fresh `attempt-000014` authorization candidate → Human exact canonical-SHA approval → one real governed `attempt-000014`。
 - **attempt-000014：**the pre-upgrade Human-approved authorization became stale after Participant binding drift; admission returned `NOT_ADMITTED` under that authorization. No governed attempt directory, Solution, Reviewer, Shadow, V1–V5, or promotion was created, so the identifier remains reusable after fresh authorization. The stale authorization MUST NOT be reused.
 - **Current binding diagnostics：**under the new binding, Matrix A passed 3/3. Matrix B timed out on its first large terminal Solution-like payload; this is diagnostic evidence for that workload and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix C and later artifact/probe steps were not run.
 - **Layer A overall proof：**`NOT ESTABLISHED`。
@@ -74,7 +74,7 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - 两类 trigger 均禁止 Host repair / extraction / normalization 与 semantic correction；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
 - Sidecar Run Report 现已可从 `solution-agent/execution-trace.json` 观察 first-pass / retransmission / final structured-output 指标，但不影响 runtime outcome；
 - 不代表完整 P3 启动或 broader Participant Communication Contract 激活。
-- **PD-099 v2 — Solution activity-aware abnormal-safety timeout：HUMAN ACCEPTED / ENGINEERING IMPLEMENTED / DETERMINISTIC GATES VERIFIED。** Solution attempt 0 在 `1800000ms` 开始按 stdout silence `600000ms` 评估，并受 `2700000ms` absolute cap 限制；stderr 不刷新 inactivity。base Solution 与 fresh bounded Solution revision 共用此 Host policy。所有 non-Solution initial roles 仍为 `1800000ms` fixed default；same-thread retransmission 仍为 `60000ms` fixed ceiling。v1 的无条件 `1800000ms` fixed cutoff 保留为历史，不覆盖本条现行 authority。该 correction 不是 ordinary execution budget，也不建立 45 分钟性能目标；timeout 仍为 Participant runtime `TIMEOUT` 并按 PD-119 fail closed。
+- **PD-099 v2 — Participant activity-aware abnormal-safety timeout values：HUMAN ACCEPTED / ORIGINAL SOLUTION POLICY ENGINEERING IMPLEMENTED / DETERMINISTIC GATES VERIFIED。** Accepted values are `evaluationStartMs = 1800000`, `stdoutInactivityMs = 600000`, and `absoluteCapMs = 2700000`; non-empty stdout refreshes progress and stderr does not. PD-122 Revision 1 extends this policy to every default workspace Participant Role and structural-correction continuation before the next #14. Until that hardening is delivered, the current implementation remains Solution-only with non-Solution initial roles at `1800000ms` fixed default and same-thread retransmission at `60000ms`. Explicit caller timeouts remain fixed overrides. These are abnormal-safety limits, not ordinary execution budgets or performance targets; timeout remains Participant runtime `TIMEOUT` and fails closed under PD-119.
 - **PD-099 v2 的历史决策依据：**以下两次自然 Solution timeout 均发生于旧 v1 fixed-cutoff 行为下：`ordinary-run-20260917-000004` 的 terminal elapsed 为 `1800057ms`、last stdout 为 `1789486ms`；`ordinary-run-20261002-000001` / `hypothesis-000002` 分别为 `1800013ms` 与 `1729931ms`。两者在旧 cutoff 前仍有 stdout，支持修正无条件 fixed cutoff 与仍活跃 observable stdout 不匹配；不证明较长运行的原因或语义结果，也不构成 `NATURAL_ACTIVATION_OBSERVED`、`NATURAL_SEMANTIC_DERIVATION_PASS` 或 Layer A PASS。
 
 这些结果支持当前系统进入真实使用 / 观察阶段。
@@ -133,7 +133,9 @@ attempt-000013 Reviewer communication blocker 已修复并 deterministic verifie
 ↓
 pre-upgrade attempt-000014 authorization 因 Participant binding drift 失效；attempt-000014 = NOT_ADMITTED；没有创建 governed attempt，编号仍可复用
 ↓
-fresh exact current binding
+PD-122 Revision 1 Harness hardening
+→ deterministic verification
+→ fresh exact current binding
 → fresh attempt-000014 authorization candidate
 → Human exact canonical-SHA approval
 → one real governed attempt-000014
@@ -144,8 +146,8 @@ Layer A overall proof = NOT ESTABLISHED；fresh authorization 前 execution unau
 ### 当前目标
 
 - Artifact-backed 首次 communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。此历史 gate 不因 binding drift 自动重跑。
-- Current blocker = fresh exact current binding + fresh exact-digest Human authorization required；attempt-000013 暴露的 Reviewer communication mismatch 已 corrected and deterministically verified。
-- 当前返回点：fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。
+- Current blocker = PD-122 Revision 1 Harness hardening and deterministic verification, followed by fresh exact current binding + fresh exact-digest Human authorization; attempt-000013 暴露的 Reviewer communication mismatch 已 corrected and deterministically verified。
+- 当前返回点：Revision 1 Harness hardening → deterministic verification → fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。
 - pre-upgrade attempt-000014 authorization 因 binding drift 失效；该授权下 `attempt-000014 = NOT_ADMITTED`。没有创建 governed attempt directory、Solution、Reviewer、Shadow、V1–V5 或 promotion，编号仍可复用；旧 authorization 不可重用。
 - under the new binding，Matrix A passed 3/3。Matrix B timed out on the first large terminal Solution-like payload; this is diagnostic only and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix B will not rerun automatically; neither Matrix C nor an artifact-probe campaign is an automatic prerequisite. Use synthetic diagnostics only when a concrete real-path communication failure needs isolation.
 - attempt-000013 是 terminal `FAILED / REVIEWER / invalid_output`，其一次性 Human authorization 已消费；目前没有新的 #14 candidate 或 exact-digest approval，execution remains unauthorized。
@@ -330,11 +332,11 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 14. MCP 是否已选定？→ **NO**
 15. code-level autonomous modification？→ **NOT AUTHORIZED**
 16. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**
-17. Participant timeout authority？→ **PD-099 v2：Solution initial execution 从 `1800000ms` 起按 stdout inactivity `600000ms` timeout，并受 `2700000ms` absolute cap 限制；non-Solution initial roles 为 `1800000ms` fixed default；retransmission ceiling 独立为 `60000ms`**
+17. Participant timeout authority？→ **PD-099 v2 values：evaluation start `1800000ms` / stdout inactivity `600000ms` / absolute cap `2700000ms`；PD-122 Revision 1 requires role-neutral defaults for every workspace Participant Role and correction continuation before #14; stdout refreshes, stderr does not; explicit timeout remains fixed override**
 18. Human Follow-up Loop v1 authority？→ **HUMAN ACCEPTED / AUTHORITY RECORDED（PD-100）**
 18b. Human Follow-up Loop v1 minimal runtime？→ **ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / HFL_REAL_USE_VALIDATED**
 19. Ordinary unresolved Human work item 是否阻塞 RUN / OBSERVE？→ **NO**
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 immediate prerequisite？→ **fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。pre-upgrade authorization 已因 binding drift 失效且 attempt-000014 = NOT_ADMITTED；旧授权不可复用，编号仍可复用。不得自动重跑 Matrix B、Matrix C 或 artifact probes；真实 communication failure 可触发 targeted diagnostics。execution 未获授权；Layer A overall proof = NOT ESTABLISHED。**
+23. 当前 immediate prerequisite？→ **PD-122 Revision 1 Harness hardening → deterministic verification → fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。pre-upgrade authorization 已因 binding drift 失效且 attempt-000014 = NOT_ADMITTED；旧授权不可复用，编号仍可复用。不得自动重跑 Matrix B、Matrix C 或 artifact probes；真实 communication failure 可触发 targeted diagnostics。execution 未获授权；Layer A overall proof = NOT ESTABLISHED。**

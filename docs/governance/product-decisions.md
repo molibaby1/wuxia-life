@@ -2356,6 +2356,8 @@ binding drift 本身不再自动要求 Matrix A/B/C、artifact probes 或完整 
 
 Explicit caller timeouts remain fixed overrides. Accepted-result, identity, reference, Contract, semantic, runtime, timeout, permission, provenance, and integrity failures are not correction-eligible. Artifact-backed Solution correction remains out of scope and fail closed. This decision does not alter PD-119, Role / Contract / Schema semantics, Reviewer / Shadow authority, Human promotion authority, or the prohibition on extra workload splitting.
 
+For each attempted correction, retain the original Participant prompt and raw terminal output, initial validation result and exact failure class, correction prompt, corrected raw output, correction execution trace, corrected validation result, and final accepted/failure classification as durable per-invocation evidence. Sidecar reports may summarize this evidence but do not replace it.
+
 After deterministic verification, the real governed workload remains the primary evidence path. No synthetic recertification campaign is restored.
 
 本决策不生成新的 `attempt-000014` authorization candidate，也不授权执行 `attempt-000014`。binding drift 后仍必须取得 fresh exact binding 与 fresh exact-digest Human authorization。

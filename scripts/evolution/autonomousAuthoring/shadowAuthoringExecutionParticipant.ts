@@ -189,7 +189,7 @@ export async function runShadowAuthoringExecution(input: {
       initialPrompt: buildShadowAuthoringPrompt(accepted.cards),
       expectedRoleSchemaName: 'ShadowAuthoringExecutionParticipantResultV1',
       participant: input.participant,
-      retransmissionEnabled: false,
+      retransmissionEnabled: true,
       validateSchema: validateShadowAuthoringExecutionParticipantResult,
       validateAcceptedResult: async () => undefined,
     });

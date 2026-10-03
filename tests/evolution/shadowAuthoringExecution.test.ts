@@ -9,7 +9,10 @@ import {
   compareWorkspaceSnapshots,
 } from '../../scripts/evolution/autonomousAuthoring/workspaceChangeSet';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
-import type { WorkspaceAgentJobInput } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import type {
+  WorkspaceAgentJobInput,
+  WorkspaceAgentParticipantOptions,
+} from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { captureAuthoritativeFingerprint, captureWorkspaceSnapshot } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import { validateAutonomousAuthoringAdmission } from '../../src/evolution/autonomousAuthoringAdmissionContract';
 import { validateAutonomousAuthoringProposal } from '../../src/evolution/autonomousAuthoringContract';
@@ -191,6 +194,38 @@ async function testCanonicalSnapshotsAndDeterministicPatch(): Promise<void> {
   assert.doesNotMatch(first.patch.toString('utf8'), /before-source|after-source|a\/before\/|b\/after\//);
 }
 
+function continuationCapableParticipant(
+  initialScript: string,
+  continuationOutput: string,
+  continuationCalls: { count: number },
+  options?: {
+    timeoutMs?: number;
+    onInitialJob?: (input: WorkspaceAgentJobInput) => void;
+  },
+): WorkspaceAgentParticipantOptions {
+  const threadRef = { provider: 'shadow-test', opaqueId: 'shadow-thread-000001' };
+  return {
+    executable: process.execPath,
+    ...(options?.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
+    buildArgs: input => {
+      options?.onInitialJob?.(input);
+      return ['-e', initialScript];
+    },
+    interpretCompletedOutput: ({ stdout, expectedThreadRef }) => ({
+      ok: true,
+      rawOutput: stdout,
+      threadRef: expectedThreadRef ?? threadRef,
+    }),
+    sameThreadContinuation: {
+      provider: threadRef.provider,
+      buildArgs: () => {
+        continuationCalls.count += 1;
+        return ['-e', `process.stdout.write(${JSON.stringify(continuationOutput)})`];
+      },
+    },
+  };
+}
+
 async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'shadow-executor-'));
   const repositoryRoot = join(root, 'repository');
@@ -217,8 +252,9 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
     "fs.appendFileSync('tests/preschoolPassiveSpineTests.ts', '\\n// appended focused regression\\n');",
     "fs.appendFileSync('tests/annualPassiveMemoryTests.ts', '\\n// appended focused regression\\n');",
     "fs.writeFileSync('src/undeclared-shadow-change.txt', 'host must detect this');",
-    `process.stdout.write(${JSON.stringify(output)});`,
+    'process.stdout.write("not-json");',
   ].join('\n');
+  const continuationCalls = { count: 0 };
   const result = await runShadowAuthoringExecution({
     repositoryRoot,
     workspaceDestinationRoot: join(root, 'isolated-workspaces'),
@@ -227,16 +263,13 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
     solution: accepted.solution,
     review: accepted.review,
     admission: accepted.admission,
-    participant: {
-      executable: process.execPath,
-      buildArgs: input => {
-        observedJob = input;
-        return ['-e', script];
-      },
-    },
+    participant: continuationCapableParticipant(script, output, continuationCalls, {
+      onInitialJob: input => { observedJob = input; },
+    }),
   });
 
   assert.equal(result.status, 'completed');
+  assert.equal(continuationCalls.count, 1);
   assert.equal(result.participantResult.changedFiles[0], 'participant-claimed-only.txt');
   assert.deepEqual(result.canonicalChanges.map(change => change.path), [
     'src/data/lines/preschool-passive-spine.json',
@@ -261,6 +294,92 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   assert.match(result.promotionPatch.toString('utf8'), /diff --git a\/src\/undeclared-shadow-change\.txt b\/src\/undeclared-shadow-change\.txt/);
   assert.equal(await readFile(join(result.artifactRoot, 'participant-prompt.txt'), 'utf8'), observedJob?.prompt);
   assert.equal(await readFile(join(result.artifactRoot, 'raw-output.txt'), 'utf8'), output);
+  assert.equal(await readFile(join(result.artifactRoot, 'terminal-attempt-0.txt'), 'utf8'), 'not-json');
+  assert.equal(await readFile(join(result.artifactRoot, 'terminal-attempt-1.txt'), 'utf8'), output);
+  assert.ok(await readFile(join(result.artifactRoot, 'participant-envelope-retransmission-prompt-1.txt'), 'utf8'));
+  assert.equal(
+    result.executionTrace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
+  );
+  assert.equal(
+    result.executionTrace.events.filter(event => event.type === 'participant_terminal_validation' && event.attempt === 1).length,
+    1,
+  );
+
+  const failedParticipantResult = JSON.stringify({ ...participantResult, status: 'failed' });
+  const runtimeContinuationCalls = { count: 0 };
+  const runtimeBuildCalls = { count: 0 };
+  const runtimeFailure = await runShadowAuthoringExecution({
+    repositoryRoot,
+    workspaceDestinationRoot: join(root, 'timeout-workspaces'),
+    artifactRoot: join(root, 'timeout-shadow-authoring-artifacts'),
+    invocationRef: 'shadow-authoring-timeout-test',
+    solution: accepted.solution,
+    review: accepted.review,
+    admission: accepted.admission,
+    participant: continuationCapableParticipant(
+      'setInterval(() => {}, 1000);',
+      output,
+      runtimeContinuationCalls,
+      { timeoutMs: 50, onInitialJob: () => { runtimeBuildCalls.count += 1; } },
+    ),
+  });
+  assert.equal(runtimeFailure.status, 'failed');
+  assert.equal(runtimeFailure.executionTrace.terminal.outcome, 'timeout');
+  assert.match(runtimeFailure.failure ?? '', /timed out after 50ms/);
+  assert.equal(runtimeBuildCalls.count, 1);
+  assert.equal(runtimeContinuationCalls.count, 0);
+
+  const semanticContinuationCalls = { count: 0 };
+  const semanticBuildCalls = { count: 0 };
+  const semanticFailure = await runShadowAuthoringExecution({
+    repositoryRoot,
+    workspaceDestinationRoot: join(root, 'semantic-failure-workspaces'),
+    artifactRoot: join(root, 'semantic-failure-shadow-authoring-artifacts'),
+    invocationRef: 'shadow-authoring-semantic-failure-test',
+    solution: accepted.solution,
+    review: accepted.review,
+    admission: accepted.admission,
+    participant: continuationCapableParticipant(
+      `process.stdout.write(${JSON.stringify(failedParticipantResult)});`,
+      output,
+      semanticContinuationCalls,
+      { onInitialJob: () => { semanticBuildCalls.count += 1; } },
+    ),
+  });
+  assert.equal(semanticFailure.status, 'failed');
+  assert.equal(semanticFailure.participantResult?.status, 'failed');
+  assert.equal(semanticFailure.failure, 'Shadow Executor reported failed status');
+  assert.equal(semanticBuildCalls.count, 1);
+  assert.equal(semanticContinuationCalls.count, 0);
+
+  const fingerprintContinuationCalls = { count: 0 };
+  const fingerprintBuildCalls = { count: 0 };
+  const authoritativeChangePath = join(repositoryRoot, 'participant-authoritative-change.txt');
+  const fingerprintFailure = await runShadowAuthoringExecution({
+    repositoryRoot,
+    workspaceDestinationRoot: join(root, 'fingerprint-workspaces'),
+    artifactRoot: join(root, 'fingerprint-shadow-authoring-artifacts'),
+    invocationRef: 'shadow-authoring-fingerprint-failure-test',
+    solution: accepted.solution,
+    review: accepted.review,
+    admission: accepted.admission,
+    participant: continuationCapableParticipant(
+      [
+        `require('node:fs').writeFileSync(${JSON.stringify(authoritativeChangePath)}, 'unauthorized');`,
+        `process.stdout.write(${JSON.stringify(output)});`,
+      ].join('\n'),
+      output,
+      fingerprintContinuationCalls,
+      { onInitialJob: () => { fingerprintBuildCalls.count += 1; } },
+    ),
+  });
+  assert.equal(fingerprintFailure.status, 'failed');
+  assert.equal(fingerprintFailure.failure, 'authoritative repository fingerprint changed during shadow execution');
+  assert.notEqual(fingerprintFailure.authoritativeFingerprintAfter, fingerprintFailure.authoritativeFingerprintBefore);
+  assert.equal(await captureAuthoritativeFingerprint(repositoryRoot), fingerprintFailure.authoritativeFingerprintAfter);
+  assert.equal(fingerprintBuildCalls.count, 1);
+  assert.equal(fingerprintContinuationCalls.count, 0);
 }
 
 export async function runShadowAuthoringExecutionTests(): Promise<void> {

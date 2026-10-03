@@ -6,6 +6,12 @@
 **Project:** wuxia-life / Auto Evolution
 **Scope:** Solution Participant structured-result transport; controlled reference path first
 
+## PD-122 current operative clarification (2026-10-03)
+
+The synthetic artifact-backed matrix and two historical Solution-only probes were the mandatory first-establishment gate for this transport; PD-122 does not invalidate that historical evidence or the original reopening decision. PD-122 supersedes the future-operative wording in §24 that every change to a sealed binding fact requires fresh synthetic communication evidence: future binding drift alone does not automatically require rerunning the full certification campaign. A concrete artifact, receipt, or transport failure may still justify targeted diagnostics.
+
+PD-122 leaves Host artifact integrity, strict validation, transport/domain separation, and Role boundaries unchanged. Fresh exact binding and fresh exact-digest Human authorization remain required after binding drift.
+
 ## 1. Purpose
 
 Introduce an artifact-backed transport mode for large machine-consumable Solution results.

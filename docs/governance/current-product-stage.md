@@ -2,21 +2,22 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-03（Artifact-Backed Historical Solution-only Probe #1 / #2 已在 containment 修复后的当前实现上成功完成，communication reopening gate = `REESTABLISHED`；attempt-000013 已以 `FAILED / REVIEWER / invalid_output` 终止，其 Reviewer communication blocker 已 corrected and deterministically verified；Layer A overall proof = `NOT ESTABLISHED`）。
+> 最后更新：2026-10-03（PD-122 已记录；artifact-backed 首次 communication reopening gate = `REESTABLISHED`；attempt-000013 以 `FAILED / REVIEWER / invalid_output` 终止且 mismatch 已 deterministic verified；pre-upgrade attempt-000014 authorization 因 binding drift 失效，`attempt-000014 = NOT_ADMITTED`，未创建 governed attempt；Layer A proof 仍为 `NOT ESTABLISHED`）。
 
 ## 当前导航
 
 - **总体产品阶段：**`RUN / OBSERVE`；这不表示现在立即继续 ordinary AE sampling。
 - **Primary objective：**Contract-driven autonomous content authoring。PD-121 唯一激活的 reference Contract 仍为 `preschool-shared-neutral-passive-capacity-v1@1`。
 - **Current Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导。
-- **Artifact-backed communication reopening gate：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
+- **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
 - **Latest governed attempt：**`attempt-000013 = FAILED` at `REVIEWER / invalid_output`（terminal）；该 attempt-specific 一次性 Human execution authorization 已消费。
-- **Current blocker：**`NONE` — attempt-000013 Reviewer communication blocker has been corrected and deterministically verified。
-- **Current return point：**fresh attempt-specific authorization preparation for `attempt-000014`。
-- **attempt-000014：**not yet exact-digest approved；execution is not authorized。
+- **Current blocker：**fresh exact current binding and fresh exact-digest Human authorization are required; execution remains unauthorized。
+- **Current return point：**fresh exact current binding → fresh `attempt-000014` authorization candidate → Human exact canonical-SHA approval → one real governed `attempt-000014`。
+- **attempt-000014：**the pre-upgrade Human-approved authorization became stale after Participant binding drift; admission returned `NOT_ADMITTED` under that authorization. No governed attempt directory, Solution, Reviewer, Shadow, V1–V5, or promotion was created, so the identifier remains reusable after fresh authorization. The stale authorization MUST NOT be reused.
+- **Current binding diagnostics：**under the new binding, Matrix A passed 3/3. Matrix B timed out on its first large terminal Solution-like payload; this is diagnostic evidence for that workload and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix C and later artifact/probe steps were not run.
 - **Layer A overall proof：**`NOT ESTABLISHED`。
 - **当前 parked / non-blocking：**ordinary AE sampling；Human Follow-up Loop v1 / 当前 3 个 Human Follow-up items；Layer B natural semantic derivation；Layer C natural effectiveness。
-- **授权边界：**attempt-000013 的一次性 Human authorization 不可复用；attempt-000014 必须有新的 attempt-specific authorization。
+- **授权边界：**attempt-000013 的一次性 Human authorization 不可复用；pre-upgrade `attempt-000014` authorization 已因 binding drift 失效；必须重新 sealed binding 并取得新的 attempt-specific exact-SHA Human authorization，才可能进入受治理执行。
 
 ---
 
@@ -126,20 +127,28 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 当前导航顺序是：
 
 ```text
-Historical Solution-only Probe #1 / #2 已成功完成；artifact-backed communication reopening gate = REESTABLISHED
+Historical Solution-only Probe #1 / #2 已成功完成；artifact-backed 首次 communication reopening gate = REESTABLISHED
 ↓
 attempt-000013 Reviewer communication blocker 已修复并 deterministic verified
 ↓
-为 attempt-000014 准备 fresh attempt-specific authorization candidate（candidate 尚未获得 exact-digest Human approval；attempt execution remains unauthorized）
+pre-upgrade attempt-000014 authorization 因 Participant binding drift 失效；attempt-000014 = NOT_ADMITTED；没有创建 governed attempt，编号仍可复用
 ↓
-Layer A overall proof 当前为 NOT ESTABLISHED；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
+fresh exact current binding
+→ fresh attempt-000014 authorization candidate
+→ Human exact canonical-SHA approval
+→ one real governed attempt-000014
+↓
+Layer A overall proof = NOT ESTABLISHED；fresh authorization 前 execution unauthorized；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
 ```
 
 ### 当前目标
 
-- Artifact-backed communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。
-- Current blocker = `NONE`；attempt-000013 暴露的 Reviewer communication blocker 已 corrected and deterministically verified。当前返回点是为 attempt-000014 准备 fresh attempt-specific authorization candidate，不运行 Participant。
-- attempt-000013 是 terminal `FAILED / REVIEWER / invalid_output`，其一次性 Human authorization 已消费；attempt-000014 candidate 尚未获得 exact-digest Human approval，execution is not authorized。
+- Artifact-backed 首次 communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。此历史 gate 不因 binding drift 自动重跑。
+- Current blocker = fresh exact current binding + fresh exact-digest Human authorization required；attempt-000013 暴露的 Reviewer communication mismatch 已 corrected and deterministically verified。
+- 当前返回点：fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。
+- pre-upgrade attempt-000014 authorization 因 binding drift 失效；该授权下 `attempt-000014 = NOT_ADMITTED`。没有创建 governed attempt directory、Solution、Reviewer、Shadow、V1–V5 或 promotion，编号仍可复用；旧 authorization 不可重用。
+- under the new binding，Matrix A passed 3/3。Matrix B timed out on the first large terminal Solution-like payload; this is diagnostic only and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix B will not rerun automatically; neither Matrix C nor an artifact-probe campaign is an automatic prerequisite. Use synthetic diagnostics only when a concrete real-path communication failure needs isolation.
+- attempt-000013 是 terminal `FAILED / REVIEWER / invalid_output`，其一次性 Human authorization 已消费；目前没有新的 #14 candidate 或 exact-digest approval，execution remains unauthorized。
 - Layer A overall proof = `NOT ESTABLISHED`；本导航不授权运行新 attempt。
 - 当前 3 个 Human Follow-up active items 是保留的 operational work，non-blocking，不构成当前 Contract validation 的同步 gate。
 - ordinary AE sampling、Human Follow-up Loop v1、Layer B natural semantic derivation 与 Layer C natural effectiveness 继续 parked。
@@ -328,4 +337,4 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 immediate prerequisite？→ **为 attempt-000014 准备 fresh attempt-specific authorization candidate；attempt-000013 Reviewer communication blocker 已 corrected and deterministically verified，artifact-backed communication reopening gate 已 REESTABLISHED。candidate 尚未获得 exact-digest Human approval，attempt-000014 execution 未获授权；Layer A overall proof = NOT ESTABLISHED。**
+23. 当前 immediate prerequisite？→ **fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。pre-upgrade authorization 已因 binding drift 失效且 attempt-000014 = NOT_ADMITTED；旧授权不可复用，编号仍可复用。不得自动重跑 Matrix B、Matrix C 或 artifact probes；真实 communication failure 可触发 targeted diagnostics。execution 未获授权；Layer A overall proof = NOT ESTABLISHED。**

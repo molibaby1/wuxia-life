@@ -9,6 +9,12 @@
 **Scope:** Participant communication reliability for controlled reference validation
 **Real Layer A:** FROZEN until this design's communication gates are satisfied
 
+## PD-122 current operative clarification (2026-10-03)
+
+PD-122 supersedes only the future-operative rule in §5.5 that an executable or other sealed binding change automatically freezes governed execution until the communication matrix is rerun. The freeze wording above records the posture when this design was approved; the original Matrix campaign and reopening gate remain historically accurate for that campaign.
+
+Exact binding capture, immutable binding-lock digests, fresh exact-digest Human authorization, pre-execution binding re-resolution, and fail-closed drift rejection remain authoritative. Matrix A/B/C/D remain available as targeted diagnostics when a concrete communication failure requires controlled isolation; binding drift alone does not trigger a new campaign. Historical evidence text describing a version/configuration change as requiring new sealed communication evidence records the original controlled campaign and does not create a future universal recertification gate under PD-122.
+
 ## 1. Purpose
 
 Define the smallest communication-layer change needed before another governed Preschool Layer A campaign.

@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-09-15
+> 最后更新：2026-10-03
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -2340,3 +2340,15 @@ responsibilityProvenance = HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES
 - **Layer C — Natural Effectiveness：**SHADOW_AUTHORING_VERIFIED 不等于 Natural Effectiveness。只有 Human exact-patch promotion 后的 subsequent Natural PVER 才能判断效果；shadow result 本身也不改变 authoritative Source Epoch，不触发 PD-118 source-change barrier 或 supersede PENDING candidates。
 
 当前产品阶段仍为 RUN / OBSERVE；不得为 Layer B 制造样本、强迫 READY、预选必成功 candidate 或 retry until success。Layer A real historical trial 仍需独立 Human authorization；本次治理调和不代表 runtime implementation 或任何 proof layer 已完成。
+
+### PD-122：Model-Adaptive Participant Harness v1
+
+**产品决策（Human accepted：2026-10-03）**
+
+Participant binding drift 仍会使既有 attempt authorization 失效。受治理执行必须使用 fresh exact current binding、角色专属 binding-lock digest，以及 Human 对该 attempt authorization canonical SHA 的新批准；Host 在创建 governed attempt 前仍须重新解析并精确比对当前 binding，任何漂移都 fail closed，禁止静默 rebind。
+
+binding drift 本身不再自动要求 Matrix A/B/C、artifact probes 或完整 synthetic communication certification campaign。完成 fresh exact binding 与 fresh Human authorization 后，下一验证默认走真实 governed workload；合成 communication experiment 只在真实路径出现具体 communication uncertainty、且需要受控隔离时作为诊断工具。
+
+本决策不改变 PD-099 v2、PD-119、Role / Contract / Schema 语义、Solution artifact-backed transport、Reviewer / Shadow authority 或 Human promotion authority。Reviewer structural correction、timeout / watchdog 扩展和额外 workload splitting 均不是下一个 #14 的前置条件。
+
+本决策不生成新的 `attempt-000014` authorization candidate，也不授权执行 `attempt-000014`。binding drift 后仍必须取得 fresh exact binding 与 fresh exact-digest Human authorization。

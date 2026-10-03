@@ -1,11 +1,13 @@
 # Auto Evolution 运行报告
 
-- 报告总数：63
-- Logical Session 总数：63
-- Report snapshot 总数：63
+- 报告总数：65
+- Logical Session 总数：65
+- Report snapshot 总数：65
 
 | 创建时间 | 报告 | 会话停止原因 | 多轮结果 | 执行状态 | 工作流路由 | Source Run | 人类结论 | 建议动作 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-10-02T12:08:11.882Z | [candidate-session-report-41fcf0358d21a3ada40924ca6e479aa03a53a56317c8b0b5a61a78ed2fff026a](candidate-session-report-41fcf0358d21a3ada40924ca6e479aa03a53a56317c8b0b5a61a78ed2fff026a/report.md) | FAILED | v7 snapshots: 1 | FAILED | candidate dispositions: 3 | source-epoch-000001 | ordinary-run-20261002-000001 | v7: 1 completed, 1 pending; actions: INVESTIGATE_HOST_FAILURE, REVIEW_HUMAN_FOLLOWUP:candidate-pool-c85256e24082b213bbff20aec5cdda0997252199c7f6f4df472989c7875c0580/hypothesis-000001; （无历史 snapshot） |
+| 2026-09-24T10:25:09.629Z | [candidate-session-report-fadd654090b44fde7bdc949c935b16dde00abd522409f6ba2d4fbbdfa7a456d7](candidate-session-report-fadd654090b44fde7bdc949c935b16dde00abd522409f6ba2d4fbbdfa7a456d7/report.md) | PAUSED | v7 snapshots: 1 | PAUSED | candidate dispositions: 8 | source-epoch-000001 | ordinary-run-20260924-000002 | v7: 3 completed, 5 pending; actions: RESUME_SESSION, REVIEW_HUMAN_FOLLOWUP:candidate-pool-299a9b693a941fbfa7998e2abb20687e9490e232d8e5b2a881cb5458289c4092/hypothesis-000001, REVIEW_HUMAN_FOLLOWUP:candidate-pool-299a9b693a941fbfa7998e2abb20687e9490e232d8e5b2a881cb5458289c4092/hypothesis-000003; （无历史 snapshot） |
 | 2026-09-24T00:03:05.071Z | [candidate-session-report-06fac5431755420e1ff8688cea3766fdcda326327ca8e7cf75639efaa59e4249](candidate-session-report-06fac5431755420e1ff8688cea3766fdcda326327ca8e7cf75639efaa59e4249/report.md) | PAUSED | v7 snapshots: 1 | PAUSED | candidate dispositions: 5 | source-epoch-000002 | ordinary-run-20260924-000001 | v7: 0 completed, 0 pending; actions: （无）; （无历史 snapshot） |
 | 2026-09-19T13:41:13.454Z | [candidate-session-report-1396550742f2cb1e1e3b57904ad124fb61e0b6affab5eea93387f378b355b8b1](candidate-session-report-1396550742f2cb1e1e3b57904ad124fb61e0b6affab5eea93387f378b355b8b1/report.md) | PAUSED | v7 snapshots: 1 | PAUSED | candidate dispositions: 6 | source-epoch-000001 | ordinary-run-20260919-000001 | v7: 2 completed, 4 pending; actions: RESUME_SESSION, REVIEW_HUMAN_FOLLOWUP:candidate-pool-04bc32ee6e4983fcf335511a80c46682e4a68fda0ba1d7653f4c87d34149b082/hypothesis-000002; （无历史 snapshot） |
 | 2026-09-18T01:31:39.870Z | [candidate-session-report-3c992431956a04ca7b0370ebe4a7a162f26f261f1f020746dc70eb0d6874d776](candidate-session-report-3c992431956a04ca7b0370ebe4a7a162f26f261f1f020746dc70eb0d6874d776/report.md) | FAILED | v7 snapshots: 1 | FAILED | candidate dispositions: 8 | source-epoch-000001 | ordinary-run-20260918-000001 | v7: 0 completed, 6 pending; actions: INVESTIGATE_HOST_FAILURE; （无历史 snapshot） |

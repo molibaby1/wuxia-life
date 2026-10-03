@@ -2,13 +2,15 @@
 
 ## 运行报告
 
-- 总数：63
-- Logical Session 总数：63
-- Report snapshot 总数：63
-- 最新：[candidate-session-report-06fac5431755420e1ff8688cea3766fdcda326327ca8e7cf75639efaa59e4249](run-reports/candidate-session-report-06fac5431755420e1ff8688cea3766fdcda326327ca8e7cf75639efaa59e4249/report.md)（2026-09-24T00:03:05.071Z）
+- 总数：65
+- Logical Session 总数：65
+- Report snapshot 总数：65
+- 最新：[candidate-session-report-41fcf0358d21a3ada40924ca6e479aa03a53a56317c8b0b5a61a78ed2fff026a](run-reports/candidate-session-report-41fcf0358d21a3ada40924ca6e479aa03a53a56317c8b0b5a61a78ed2fff026a/report.md)（2026-10-02T12:08:11.882Z）
 - 一句话人类结论：*（无）*
 - 建议动作：*（无）*
 - Multi-candidate actions：
+  - INVESTIGATE_HOST_FAILURE
+  - REVIEW_HUMAN_FOLLOWUP:candidate-pool-c85256e24082b213bbff20aec5cdda0997252199c7f6f4df472989c7875c0580/hypothesis-000001
 - 打开 [run-reports/index.md](run-reports/index.md)
 
 ## Human Follow-up

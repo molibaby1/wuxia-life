@@ -1429,7 +1429,7 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 
 #### 2026-10-02：PD-099 v2 — Solution activity-aware abnormal-safety timeout policy
 
-**实施决策（Human accepted：2026-10-02；当前 operative policy）**
+**实施决策（Human accepted：2026-10-02；values retained, role scope superseded by PD-122 Revision 1）**
 
 本次是针对已重复自然观察到的 timeout-policy mismatch 所作的 bounded abnormal-safety correction。两次独立 ordinary run 均在固定 `1800000ms` cutoff 前仍观察到 Solution stdout activity；这支持修正 Host 的无条件 fixed cutoff，不证明 Participant / provider 为何需要较长 execution，也不建立“Solution 应该运行 45 分钟”的性能目标。
 
@@ -1439,6 +1439,7 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 上述 initial execution 包含 base Solution 与 bounded continuation 中的 fresh Solution revision；两者都使用相同 v2 policy。
 - 所有 non-Solution initial roles 继续使用 `1800000ms` fixed default。
 - same-thread envelope/schema retransmission 继续使用独立的 `60000ms` fixed ceiling；不适用 v2 activity-aware policy。
+- PD-122 Revision 1（Human accepted 2026-10-03）已 supersede 上述两条 role scope：所有 default workspace Participant Roles 与 structural-correction continuation 均使用 PD-099 v2 数值（`1800000ms` / `600000ms` / `2700000ms`）；former `60000ms` retransmission ceiling 不再是 production deadline。数值不变，scope 以 PD-122 为准。
 - v2 timeout 仍分类为 Participant runtime `TIMEOUT`，并继续遵守 PD-119 既有 fail-closed containment；不新增 Decision route、recovery 或 automatic semantic retry。
 - `1800000ms` 与 `2700000ms` 都是 abnormal-safety policy boundary，不是 ordinary Solution execution budget、期望完成时间或质量目标。
 

@@ -331,7 +331,7 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
@@ -730,6 +730,18 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     assessment: 'Synthetic Layer A review.', repoRefs: [catalogRef],
     artifactRefs: [observableRef, briefRef, attestationRef], concerns: [],
   };
+  const reviewerResult = scenario === 'reviewer-contract-escalation' ? {
+    schemaVersion: 'solution-review-v1', problemId, decision: 'ESCALATE',
+    autonomousAuthoringAssessment: {
+      schemaVersion: 'autonomous-authoring-review-assessment-v1',
+      contractId: 'preschool-shared-neutral-passive-capacity-v1', contractVersion: 1,
+      applicabilityAssessment: 'CONTRACT_CHANGE_REQUIRED', conformance: 'NON_CONFORMING', executionEnvelope: 'WITHIN_ENVELOPE',
+      assessment: 'The proposed farewell needs later recognition of the same person.',
+      blockers: ['Later recognition of the same person exceeds transient-role semantics.'],
+    },
+    assessment: 'A durable relationship interpretation requires Human product-governance review.',
+    repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef, attestationRef], concerns: [],
+  } : review;
   const executorResult = {
     schemaVersion: 'shadow-authoring-execution-participant-result-v1', status: 'completed',
     changedFiles: [catalogRef, 'tests/preschoolPassiveSpineTests.ts', 'tests/annualPassiveMemoryTests.ts'],
@@ -787,7 +799,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
           "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
         ].join('\n'), bytes];
       }
-      if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(review)];
+      if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerResult)];
       return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult), scenario];
     },
   };
@@ -847,9 +859,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     } else if (scenario === 'reviewer-static-answer-marker') {
       await assert.rejects(trial, /Participant-visible contamination detected in prompt: preschool_neutral_fair_play/);
     } else if (scenario === 'omitted-responsibility') {
-      await assert.rejects(trial, {
-        message: 'Host admission did not establish eligibility: INSUFFICIENT_EVIDENCE (The reference responsibility set was not preserved one-to-one.)',
-      });
+      await assert.rejects(trial);
+    } else if (scenario === 'reviewer-contract-escalation') {
+      await assert.rejects(trial);
     } else {
       await assert.rejects(trial, scenario === 'unauthorized-shadow-path'
         ? /Shadow workspace changed paths outside the Contract/
@@ -859,7 +871,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       ? []
       : solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
       ? ['solution']
-      : scenario === 'omitted-responsibility'
+      : scenario === 'omitted-responsibility' || scenario === 'reviewer-contract-escalation'
         ? ['solution', 'reviewer']
         : ['solution', 'reviewer', 'configuration-execution']);
     const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
@@ -871,7 +883,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       ? ['solution'] as const
       : scenario === 'reviewer-static-answer-marker'
         ? ['solution', 'reviewer'] as const
-      : scenario === 'omitted-responsibility'
+      : scenario === 'omitted-responsibility' || scenario === 'reviewer-contract-escalation'
         ? ['solution', 'reviewer'] as const
         : ['solution', 'reviewer', 'shadowAuthoring'] as const;
     await assertParticipantPromptProvenanceMatchesDisk(outputRoot, failedManifest, [...invokedPromptRoles]);
@@ -899,7 +911,22 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       const submittedBrief = JSON.parse(await readFile(join(outputRoot, 'source/reference-trial/reference-responsibility-brief.json'), 'utf8')) as typeof brief;
       assert.equal(submittedSolution.options[0]!.autonomousAuthoring.responsibilities.length, 4);
       assert.equal(submittedBrief.responsibilities.length, 5);
-      await assert.rejects(readFile(join(outputRoot, 'decision.json')), { code: 'ENOENT' });
+      const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as Record<string, any>;
+      assert.equal(decision.route, 'DEFER');
+      assert.equal(decision.reasonCode, 'AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'ROUTED_DECISION');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'decision.json');
+      await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
+    } else if (scenario === 'reviewer-contract-escalation') {
+      const reviewerArtifact = JSON.parse(await readFile(join(outputRoot, 'reviewer-agent/review.json'), 'utf8')) as Record<string, any>;
+      assert.equal(reviewerArtifact.decision, 'ESCALATE');
+      assert.equal(reviewerArtifact.autonomousAuthoringAssessment.applicabilityAssessment, 'CONTRACT_CHANGE_REQUIRED');
+      assert.equal(reviewerArtifact.autonomousAuthoringAssessment.conformance, 'NON_CONFORMING');
+      const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as Record<string, any>;
+      assert.equal(decision.route, 'ESCALATE_HUMAN');
+      assert.equal(decision.reasonCode, 'EXPLICIT_ESCALATION');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'ROUTED_DECISION');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'decision.json');
       await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
     } else if (scenario !== 'artifact-backed-receipt-failure'
       && scenario !== 'artifact-backed-role-schema-failure'
@@ -913,7 +940,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     const after = await captureAuthoritativeFingerprint(liveRepositoryRoot);
     assert.equal(after, before);
     process.stdout.write(scenario === 'omitted-responsibility'
-      ? `historical integration negative omitted-responsibility: PASS — rejected by Host Admission: INSUFFICIENT_EVIDENCE (The reference responsibility set was not preserved one-to-one.); proposal=4, brief=5; authoritative fingerprint before=${before} after=${after}\n`
+      ? `historical routed outcome omitted-responsibility: PASS — route=DEFER / AUTONOMOUS_AUTHORING_INSUFFICIENT_EVIDENCE; proposal=4, brief=5; authoritative fingerprint before=${before} after=${after}\n`
+      : scenario === 'reviewer-contract-escalation'
+        ? 'historical routed outcome reviewer-contract-escalation: PASS — route=ESCALATE_HUMAN / EXPLICIT_ESCALATION; no Shadow or promotion\n'
       : scenario === 'artifact-backed-role-schema-failure'
         ? 'synthetic Artifact-Backed Solution Role-schema failure before Reviewer: PASS\n'
         : `historical integration negative ${scenario}: PASS\n`);
@@ -2392,24 +2421,31 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       observable: sha256Hex(syntheticPayloadBytes),
       brief: sha256Hex(fullBriefBytes),
     });
+    const syntheticAcceptedBriefFixture = {
+      brief: fullBrief,
+      bytes: fullBriefBytes,
+      sha256: sha256Hex(fullBriefBytes),
+    };
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
-    }, 'success', syntheticRunner, {
-      brief: fullBrief,
-      bytes: fullBriefBytes,
-      sha256: sha256Hex(fullBriefBytes),
-    });
+    }, 'success', syntheticRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
-    }, 'binding-drift-at-invocation', syntheticRunner, {
-      brief: fullBrief,
-      bytes: fullBriefBytes,
-      sha256: sha256Hex(fullBriefBytes),
-    });
+    }, 'omitted-responsibility', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'reviewer-contract-escalation', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'binding-drift-at-invocation', syntheticRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
@@ -2451,9 +2487,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
         observable: syntheticPayloadPath,
         brief: fullBriefPath,
       }, scenario, syntheticRunner, {
-        brief: fullBrief,
-        bytes: fullBriefBytes,
-        sha256: sha256Hex(fullBriefBytes),
+        ...syntheticAcceptedBriefFixture,
       });
     }
 
@@ -2816,7 +2850,6 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
         brief: acceptedBriefTestPath,
       } as { evidence: string; observable: string; brief: string };
       await testSyntheticLayerAEndToEnd(root, paths, 'success');
-      await testSyntheticLayerAEndToEnd(root, paths, 'omitted-responsibility');
       await testSyntheticLayerAEndToEnd(root, paths, 'unauthorized-shadow-path');
       await testSyntheticLayerAEndToEnd(root, paths, 'residual-v5-deficit');
       await testSyntheticLayerAEndToEnd(root, paths, 'participant-failure');

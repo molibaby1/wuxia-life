@@ -406,6 +406,14 @@ export function createAttemptManifestTransitionToken(manifest: object): string {
 
 class TrialAdmissionStop extends Error {}
 class TrialPreflightStop extends Error {}
+class TrialRoutedDecision extends Error {
+  readonly errorKind = 'ROUTED_DECISION';
+  readonly failureArtifactRef = 'decision.json';
+
+  constructor(decision: ReturnType<typeof routeSolutionDecision>) {
+    super(`Reference trial routed ${decision.route}/${decision.reasonCode}.`);
+  }
+}
 class TrialInvocationProvenanceFailure extends Error {
   readonly errorKind = 'INVOCATION_PROVENANCE_INVALID';
 
@@ -1356,10 +1364,11 @@ export async function finalizeReferenceTrialFailure(
   }
   const participantFailure = error instanceof TrialParticipantFailure;
   const invocationFailure = error instanceof TrialInvocationProvenanceFailure;
+  const routedDecision = error instanceof TrialRoutedDecision;
   const failureMetadata = {
-    errorKind: participantFailure || invocationFailure ? error.errorKind : 'RUNTIME_EXCEPTION',
+    errorKind: participantFailure || invocationFailure || routedDecision ? error.errorKind : 'RUNTIME_EXCEPTION',
     message: error instanceof Error ? error.message : String(error),
-    failureArtifactRef: participantFailure ? error.failureArtifactRef : undefined,
+    failureArtifactRef: participantFailure || routedDecision ? error.failureArtifactRef : undefined,
     diagnostics: invocationFailure ? structuredClone(error.diagnostics) : undefined,
   };
   const initialSnapshot = await readAttemptManifestSnapshot(manifestPath, 'failure finalization');
@@ -1483,7 +1492,7 @@ export async function finalizeReferenceTrialFailure(
         stage: workingManifest.currentStage,
         errorKind: failureMetadata.errorKind,
         failureMessage: failureMetadata.message,
-        ...(participantFailure ? { failureArtifactRef: failureMetadata.failureArtifactRef } : {}),
+        ...(participantFailure || routedDecision ? { failureArtifactRef: failureMetadata.failureArtifactRef } : {}),
         ...(trialResultStatus ? { trialResultRef: 'trial-result.json', trialResultStatus } : {}),
       };
     }
@@ -2304,6 +2313,23 @@ async function runVerifiedHistoricalTrial(input: {
     }
 
     await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
+    if (reviewer.review.decision !== 'ACCEPT_OPTION') {
+      const decision = routeSolutionDecision({
+        problemId: trialInputs.problemPackage.problemId,
+        solutionStatus: solution.result.status,
+        reviewerDecision: reviewer.review.decision,
+        solutionScope: null,
+        reviewScope: null,
+        executionAuthorityAssessment: null,
+        permissions: trialInputs.problemPackage.permissions,
+        budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
+      });
+      await writeCreateOnlyJson(join(outputRoot, 'decision.json'), decision);
+      if (decision.route === 'READY_FOR_CONFIG_EXECUTION' || decision.route === 'READY_FOR_SHADOW_AUTHORING') {
+        throw new Error(`Non-accepting Reviewer decision unexpectedly routed to ${decision.route}.`);
+      }
+      throw new TrialRoutedDecision(decision);
+    }
     const selectedOption = acceptedAuthoringOption(solution, reviewer);
     input.manifest.currentStage = 'ADMISSION';
     await writeAttemptManifest(input.manifestPath, input.manifest);
@@ -2323,19 +2349,6 @@ async function runVerifiedHistoricalTrial(input: {
         attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
       },
     });
-    if (admission.status !== 'ELIGIBLE') {
-      throw new Error(`Host admission did not establish eligibility: ${admission.status} (${admission.reasons.join('; ')})`);
-    }
-    let responsibilityMappings: PreschoolReferenceResponsibilityMappingV1[];
-    try {
-      responsibilityMappings = assertPreschoolReferenceResponsibilitiesPreserved({
-        brief: input.responsibilityBrief.brief,
-        proposal: selectedOption.autonomousAuthoring!,
-      });
-    } catch (error) {
-      throw new Error('Internal invariant failure: eligible Host admission did not preserve reference responsibilities.', { cause: error });
-    }
-
     const decision = routeSolutionDecision({
       problemId: trialInputs.problemPackage.problemId,
       solutionStatus: solution.result.status,
@@ -2349,9 +2362,18 @@ async function runVerifiedHistoricalTrial(input: {
       budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
     });
     await writeCreateOnlyJson(join(outputRoot, 'decision.json'), decision);
-    if (decision.route !== 'READY_FOR_SHADOW_AUTHORING') {
-      throw new Error(`Reference trial did not route to READY_FOR_SHADOW_AUTHORING: ${decision.route}`);
+    if (decision.route !== 'READY_FOR_SHADOW_AUTHORING') throw new TrialRoutedDecision(decision);
+
+    let responsibilityMappings: PreschoolReferenceResponsibilityMappingV1[];
+    try {
+      responsibilityMappings = assertPreschoolReferenceResponsibilitiesPreserved({
+        brief: input.responsibilityBrief.brief,
+        proposal: selectedOption.autonomousAuthoring!,
+      });
+    } catch (error) {
+      throw new Error('Internal invariant failure: eligible Host admission did not preserve reference responsibilities.', { cause: error });
     }
+
     const shadowParticipant = withVerifiedAcceptedCardsContaminationGuard(downstreamParticipant, {
       attemptRef: input.attemptRef,
       solution,

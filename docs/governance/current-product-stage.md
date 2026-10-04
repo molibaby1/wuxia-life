@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-04（PD-122 Revision 1 已 Human accepted；#14 暴露的 reference downstream same-thread capability gap 已修复、deterministic verified 并 land 到 `dev` commit `71d53665af1becc746639806767311933ae3a12d`；attempt-000014 = `FAILED / SHADOW_AUTHORING`，一次性 authorization 已消费；#15 candidate 已在该 commit 后 fresh-bind 并生成，canonical SHA `098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4` 等待 Human exact-SHA approval；Layer A proof 仍为 `NOT ESTABLISHED`，#15 尚未获准或执行）。
+> 最后更新：2026-10-04（PD-122 Revision 1 已 Human accepted；#14 暴露的 reference downstream same-thread capability gap 已修复、deterministic verified 并 land 到 `dev` commit `71d53665af1becc746639806767311933ae3a12d`；attempt-000014 = `FAILED / SHADOW_AUTHORING`，一次性 authorization 已消费；#15 candidate canonical SHA `098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4` 已获 Human exact-SHA approval 并用于一次 governed attempt；attempt-000015 = `FAILED / REVIEWER / RUNTIME_EXCEPTION`，Reviewer artifact 报告 `ESCALATE`、`CONTRACT_CHANGE_REQUIRED / NON_CONFORMING`，涉及 `responsibility-000004` 与 Contract v1 的持续关系语义边界；未运行 Shadow、未产生 promotion；Layer A proof 仍为 `NOT ESTABLISHED`，下一步需要 Human/product-governance 决定，#15 authorization 已消费）。
 
 ## 当前导航
 
@@ -10,14 +10,14 @@
 - **Primary objective：**Contract-driven autonomous content authoring。PD-121 唯一激活的 reference Contract 仍为 `preschool-shared-neutral-passive-capacity-v1@1`。
 - **Current Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
-- **Latest governed attempt：**`attempt-000014 = FAILED` at terminal stage `SHADOW_AUTHORING`; its attempt-specific one-time Human execution authorization has been consumed.
-- **Current blocker：**Human exact canonical-SHA approval for the fresh `attempt-000015` authorization candidate; execution remains unauthorized.
-- **Current return point：**review `artifacts/evolution/autonomous-authoring/authorization-candidates/attempt-000015/authorization-candidate.json` at canonical SHA `098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4` → Human exact canonical-SHA approval → one real governed `attempt-000015`。
+- **Latest governed attempt：**`attempt-000015 = FAILED` at `REVIEWER`; Host terminal status is `RUNTIME_EXCEPTION`, and its attempt-specific one-time authorization has been consumed.
+- **Current blocker：**Human/product-governance decision on whether to change the Contract v1 relationship-semantics boundary or revise the approved responsibility input for `responsibility-000004`.
+- **Current return point：**review `attempt-000015/reviewer-agent/review.json` and its Host terminal manifest; decide the Contract/brief boundary before preparing any later attempt-specific authorization.
 - **attempt-000014：**the pre-upgrade authorization became stale after Participant binding drift and was not reused. A fresh one-time authorization admitted #14, which terminally failed at `SHADOW_AUTHORING`; that authorization is consumed. Detailed Host-verified outcome is recorded below.
 - **Current binding diagnostics：**under the new binding, Matrix A passed 3/3. Matrix B timed out on its first large terminal Solution-like payload; this is diagnostic evidence for that workload and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix C and later artifact/probe steps were not run.
 - **Layer A overall proof：**`NOT ESTABLISHED`。
 - **当前 parked / non-blocking：**ordinary AE sampling；Human Follow-up Loop v1 / 当前 3 个 Human Follow-up items；Layer B natural semantic derivation；Layer C natural effectiveness。
-- **授权边界：**#13 与 #14 的一次性 Human authorizations 均已消费；pre-upgrade #14 authorization 因 binding drift 失效且未复用；#15 candidate 已生成但尚无 exact-SHA approval。只有 Human 批准上述 canonical SHA 后，才可能进入受治理执行。
+- **授权边界：**#13、#14 与 #15 的一次性 Human authorizations 均已消费；pre-upgrade #14 authorization 因 binding drift 失效且未复用；#15 canonical SHA `098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4` 已用于且仅用于 #15。尚无 #16 candidate 或 approval；先解决上述 Contract/brief 治理问题。
 
 ---
 
@@ -141,22 +141,21 @@ reference downstream same-thread capability gap + Shadow exact schemaVersion gui
 → implementation deviation fixed / deterministic verification → VERIFIED
 ↓
 fresh exact current binding captured after dev commit `71d53665af1becc746639806767311933ae3a12d`
-→ attempt-000015 candidate generated at `artifacts/evolution/autonomous-authoring/authorization-candidates/attempt-000015/authorization-candidate.json` (`098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4`; not approved)
-→ Human exact canonical-SHA approval
-→ one real governed attempt-000015
+→ attempt-000015 candidate generated (`098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4`) → Human exact-SHA approval
+→ attempt-000015 FAILED / REVIEWER / RUNTIME_EXCEPTION; Reviewer artifact decision `ESCALATE`, assessment `CONTRACT_CHANGE_REQUIRED / NON_CONFORMING` for responsibility-000004; authorization consumed; no Shadow / promotion
 ↓
-Layer A overall proof = NOT ESTABLISHED；#15 authorization 前 execution unauthorized；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
+Layer A overall proof = NOT ESTABLISHED；等待 Human/product-governance decision；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
 ```
 
 ### 当前目标
 
 - Artifact-backed 首次 communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。此历史 gate 不因 binding drift 自动重跑。
-- Current blocker = Human exact-digest approval for the prepared #15 candidate. Attempt #14 exposed a real reference downstream thread-retention gap; the bounded same-thread transport and Shadow schema communication deviation are fixed, deterministically verified, and landed on `dev`.
-- 当前返回点：review `artifacts/evolution/autonomous-authoring/authorization-candidates/attempt-000015/authorization-candidate.json` at canonical SHA `098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4` → Human exact canonical-SHA approval → one real governed attempt-000015。
+- Current blocker = Human/product-governance decision after attempt-000015 Reviewer escalation. The Reviewer artifact identifies `responsibility-000004` as carrying continuing relationship semantics outside Contract v1; this is Participant assessment, not a Human decision. Host recorded `FAILED / REVIEWER / RUNTIME_EXCEPTION` after the accepted-option gate did not pass.
+- 当前返回点：review `attempt-000015/reviewer-agent/review.json` and `attempt-manifest.json`; decide whether to preserve Contract v1 and revise the responsibility input, or authorize a Contract boundary change. #15 authorization is consumed.
 - #14 的 pre-upgrade authorization 因 binding drift 失效且未复用；新的 #14 一次性 authorization 已消费。#14 在 `SHADOW_AUTHORING` 因错误 `schemaVersion` terminal 失败，未尝试 correction（`CAPABILITY_UNAVAILABLE`），未产生 promotion。
 - under the new binding，Matrix A passed 3/3。Matrix B timed out on the first large terminal Solution-like payload; this is diagnostic only and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix B will not rerun automatically; neither Matrix C nor an artifact-probe campaign is an automatic prerequisite. Use synthetic diagnostics only when a concrete real-path communication failure needs isolation.
-- attempt-000013 与 #14 的一次性 Human authorizations 均已消费；#15 candidate 已生成，exact-digest approval 尚未给出，execution remains unauthorized。
-- 实现纠正任务未执行 #15 或 Matrix/probe campaign；其后续 fresh binding/candidate 准备同样未运行 Participant。Matrix B、Matrix C 或 artifact probes 均不是自动前置条件；只在具体真实通信不确定性出现时使用 targeted diagnostics。
+- attempt-000013、#14 与 #15 的一次性 Human authorizations 均已消费；#15 attempt 已终止，#16 candidate 不存在。
+- 实现纠正任务未运行 Matrix/probe campaign；后续只运行了获批的 #15 attempt。该 attempt 未运行 Shadow、未产生 `decision.json` 或 promotion package；Matrix B、Matrix C 或 artifact probes 均不是自动前置条件，且不解决当前 Contract/brief 治理 blocker。
 - Layer A overall proof = `NOT ESTABLISHED`；本导航不授权运行新 attempt。
 - 当前 3 个 Human Follow-up active items 是保留的 operational work，non-blocking，不构成当前 Contract validation 的同步 gate。
 - ordinary AE sampling、Human Follow-up Loop v1、Layer B natural semantic derivation 与 Layer C natural effectiveness 继续 parked。
@@ -345,4 +344,4 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 immediate prerequisite？→ **Human review 并精确批准 `attempt-000015` candidate canonical SHA `098a651db78f2d3b7f36788cc5d38b8537f27a9cad687c828f6a81964e80eba4`，然后才可运行一次 governed attempt-000015。attempt-000014 = FAILED / SHADOW_AUTHORING，one-time authorization 已消费；PD-122 Revision 1 reference downstream same-thread implementation deviation 已 deterministic fixed/verified 并 land 到 `dev`；Layer A overall proof = NOT ESTABLISHED。#15 尚未批准或执行；不得自动重跑 Matrix B、Matrix C 或 artifact probes，只有具体真实 communication uncertainty 才用 targeted diagnostics。**
+23. 当前 immediate prerequisite？→ **Human/product-governance 决定 `responsibility-000004` 与 Contract v1 relationship-semantics boundary 的冲突如何处理。attempt-000015 = FAILED / REVIEWER / RUNTIME_EXCEPTION；Reviewer artifact decision = ESCALATE / `CONTRACT_CHANGE_REQUIRED`；one-time authorization 已消费，未运行 Shadow、未 promotion；PD-122 Revision 1 reference downstream same-thread implementation deviation 已 deterministic fixed/verified 并 land 到 `dev`；Layer A overall proof = NOT ESTABLISHED。#16 candidate 尚不存在；不得因这次失败自动重跑 Matrix B、Matrix C 或 artifact probes。**

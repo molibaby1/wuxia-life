@@ -45,6 +45,30 @@ assert.equal(
 );
 const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
 assert.match(ciWorkflow, /^\s*run:\s*npm run test:evolution:deterministic\s*$/m);
+function extractCiPushBranches(workflow: string): string[] {
+  const lines = workflow.split(/\r?\n/);
+  const pushIndex = lines.findIndex(line => /^  push:\s*$/.test(line));
+  if (pushIndex === -1) return [];
+
+  const pushEnd = lines.findIndex(
+    (line, index) => index > pushIndex && line.trim() !== '' && !line.startsWith(' '),
+  );
+  const pushBlock = lines.slice(pushIndex + 1, pushEnd === -1 ? lines.length : pushEnd);
+  const branchesIndex = pushBlock.findIndex(line => /^    branches:\s*$/.test(line));
+  if (branchesIndex === -1) return [];
+
+  const branches: string[] = [];
+  for (const line of pushBlock.slice(branchesIndex + 1)) {
+    if (line.trim() === '') continue;
+    if (/^    \S/.test(line)) break;
+    if (/^      -\s/.test(line)) branches.push(line.replace(/^      -\s*/, '').trim());
+  }
+  return branches;
+}
+assert.ok(
+  extractCiPushBranches(ciWorkflow).includes('dev'),
+  'CI workflow push.branches must include dev',
+);
 assert.equal(new Set(suiteNames).size, suiteNames.length, 'suite names must be unique');
 assert.equal(new Set(suiteEntries).size, suiteEntries.length, 'suite entry paths must be unique');
 

@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - ralph/project-stabilization-engineering-recovery
+      - dev
 
 jobs:
   quality:

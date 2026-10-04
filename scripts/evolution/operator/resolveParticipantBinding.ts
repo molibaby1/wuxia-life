@@ -32,11 +32,11 @@ export class ParticipantBindingUnavailableError extends Error {
 
 const CODEX_THREAD_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function interpretCodexSolutionOutput(input: WorkspaceAgentCompletedOutputInput): WorkspaceAgentOutputInterpretation {
-  if (input.job.role !== 'solution') {
-    if (input.expectedThreadRef) return { ok: false, errorKind: 'continuation', message: 'Codex continuation is Solution-only' };
-    return { ok: true, rawOutput: input.stdout };
-  }
+function isCodexReferenceCorrectionRole(role: WorkspaceAgentJobInput['role']): boolean {
+  return role === 'solution' || role === 'reviewer' || role === 'configuration-execution';
+}
+
+function interpretCodexJsonOutput(input: WorkspaceAgentCompletedOutputInput): WorkspaceAgentOutputInterpretation {
   const errorKind = input.expectedThreadRef ? 'continuation' : 'invalid_output';
   let threadId: string | undefined;
   let terminalPayload: string | undefined;
@@ -78,8 +78,28 @@ function interpretCodexSolutionOutput(input: WorkspaceAgentCompletedOutputInput)
     // Decode the CLI transport only; envelope/schema validation receives unchanged text.
     return { ok: true, rawOutput: terminalPayload, threadRef: { provider: 'codex-exec', opaqueId: threadId } };
   } catch (error) {
-    return { ok: false, errorKind, message: `Invalid Codex Solution stream: ${String(error)}` };
+    const roleName = input.job.role === 'solution'
+      ? 'Solution'
+      : input.job.role === 'reviewer'
+        ? 'Reviewer'
+        : 'Configuration Execution';
+    return { ok: false, errorKind, message: `Invalid Codex ${roleName} stream: ${String(error)}` };
   }
+}
+
+function interpretCodexSolutionOutput(input: WorkspaceAgentCompletedOutputInput): WorkspaceAgentOutputInterpretation {
+  if (input.job.role !== 'solution') {
+    if (input.expectedThreadRef) return { ok: false, errorKind: 'continuation', message: 'Codex continuation is Solution-only' };
+    return { ok: true, rawOutput: input.stdout };
+  }
+  return interpretCodexJsonOutput(input);
+}
+
+function interpretCodexReferenceOutput(input: WorkspaceAgentCompletedOutputInput): WorkspaceAgentOutputInterpretation {
+  if (!isCodexReferenceCorrectionRole(input.job.role)) {
+    return interpretCodexSolutionOutput(input);
+  }
+  return interpretCodexJsonOutput(input);
 }
 
 export function createCodexCurrentParticipant(
@@ -140,14 +160,14 @@ export function createCodexReferenceParticipant(input: {
   const sameThreadContinuation: NonNullable<WorkspaceAgentParticipantOptions['sameThreadContinuation']> = {
     provider: 'codex-exec',
     buildArgs: (job, threadRef) => {
-      if (job.role !== 'solution' || threadRef.provider !== 'codex-exec' || !CODEX_THREAD_ID.test(threadRef.opaqueId)) {
-        throw new Error('Codex continuation requires the current Solution thread UUID');
+      if (!isCodexReferenceCorrectionRole(job.role) || threadRef.provider !== 'codex-exec' || !CODEX_THREAD_ID.test(threadRef.opaqueId)) {
+        throw new Error('Codex continuation requires a supported Role and a valid Codex thread UUID');
       }
       return [
         '--sandbox', 'workspace-write',
         'exec', 'resume', '--json',
         ...modelOptions,
-        ...schemaOptions,
+        ...(job.role === 'solution' ? schemaOptions : []),
         '--skip-git-repo-check',
         threadRef.opaqueId,
         job.prompt,
@@ -169,10 +189,11 @@ export function createCodexReferenceParticipant(input: {
           }
         : { nativeEnvelopeSchemaSha256: input.nativeOutputSchemaSha256 }),
     },
+    interpretCompletedOutput: interpretCodexReferenceOutput,
     buildArgs: job => [
       '--sandbox', 'workspace-write',
       'exec',
-      ...(job.role === 'solution' ? ['--json'] : ['--ephemeral']),
+      ...(isCodexReferenceCorrectionRole(job.role) ? ['--json'] : ['--ephemeral']),
       ...modelOptions,
       '--skip-git-repo-check',
       '--color', 'never',

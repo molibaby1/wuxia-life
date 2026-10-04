@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-03（PD-122 Revision 1 已 Human accepted；Harness hardening 已实现且 deterministic gates 已验证，接下来必须 fresh binding 并取得新的 attempt-000014 authorization；artifact-backed 首次 communication reopening gate = `REESTABLISHED`；attempt-000013 以 `FAILED / REVIEWER / invalid_output` 终止且 mismatch 已 deterministic verified；pre-upgrade attempt-000014 authorization 因 binding drift 失效，`attempt-000014 = NOT_ADMITTED`，未创建 governed attempt；Layer A proof 仍为 `NOT ESTABLISHED`）。
+> 最后更新：2026-10-04（PD-122 Revision 1 已 Human accepted；#14 暴露的 reference downstream same-thread capability gap 已修复并 deterministic verified；attempt-000014 = `FAILED / SHADOW_AUTHORING`，一次性 authorization 已消费；Shadow 的错误 Role schemaVersion 未触发 correction，Layer A proof 仍为 `NOT ESTABLISHED`；下一返回点为 #15，尚无 #15 authorization candidate）。
 
 ## 当前导航
 
@@ -10,14 +10,14 @@
 - **Primary objective：**Contract-driven autonomous content authoring。PD-121 唯一激活的 reference Contract 仍为 `preschool-shared-neutral-passive-capacity-v1@1`。
 - **Current Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
-- **Latest governed attempt：**`attempt-000013 = FAILED` at `REVIEWER / invalid_output`（terminal）；该 attempt-specific 一次性 Human execution authorization 已消费。
-- **Current blocker：**fresh exact current binding and fresh attempt-specific exact-SHA Human authorization; execution remains unauthorized。
-- **Current return point：**fresh exact current binding → fresh `attempt-000014` authorization candidate → Human exact canonical-SHA approval → one real governed `attempt-000014`。
-- **attempt-000014：**the pre-upgrade Human-approved authorization became stale after Participant binding drift; admission returned `NOT_ADMITTED` under that authorization. No governed attempt directory, Solution, Reviewer, Shadow, V1–V5, or promotion was created, so the identifier remains reusable after fresh authorization. The stale authorization MUST NOT be reused.
+- **Latest governed attempt：**`attempt-000014 = FAILED` at terminal stage `SHADOW_AUTHORING`; its attempt-specific one-time Human execution authorization has been consumed.
+- **Current blocker：**fresh exact current binding for the corrected implementation, then a fresh attempt-specific exact-SHA Human authorization for #15; execution remains unauthorized.
+- **Current return point：**fresh exact current binding → fresh `attempt-000015` authorization candidate → Human exact canonical-SHA approval → one real governed `attempt-000015`。
+- **attempt-000014：**the pre-upgrade authorization became stale after Participant binding drift and was not reused. A fresh one-time authorization admitted #14, which terminally failed at `SHADOW_AUTHORING`; that authorization is consumed. Detailed Host-verified outcome is recorded below.
 - **Current binding diagnostics：**under the new binding, Matrix A passed 3/3. Matrix B timed out on its first large terminal Solution-like payload; this is diagnostic evidence for that workload and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix C and later artifact/probe steps were not run.
 - **Layer A overall proof：**`NOT ESTABLISHED`。
 - **当前 parked / non-blocking：**ordinary AE sampling；Human Follow-up Loop v1 / 当前 3 个 Human Follow-up items；Layer B natural semantic derivation；Layer C natural effectiveness。
-- **授权边界：**attempt-000013 的一次性 Human authorization 不可复用；pre-upgrade `attempt-000014` authorization 已因 binding drift 失效；必须重新 sealed binding 并取得新的 attempt-specific exact-SHA Human authorization，才可能进入受治理执行。
+- **授权边界：**#13 与 #14 的一次性 Human authorizations 均已消费；pre-upgrade #14 authorization 因 binding drift 失效且未复用；#15 尚无 candidate 或 approval。必须为修正后的实现重新 sealed binding 并取得 #15 exact-SHA Human authorization，才可能进入受治理执行。
 
 ---
 
@@ -96,8 +96,9 @@ real cross-round transition 已自然观察到一次；这仍不是 production-r
 - Participant Communication Contract 的最终形态；
 - Structured Final Output Contract V1 的 first harness matrix 仅为 `CONTRACT_CONFORMANCE_PROMISING`（小样本、contract-only）；fixed Cursor model matrix 与真实 Solution workload matrix 尚未证明；
 - **Reference Participant Binding / Native Envelope Assistance：**Task 4 corrected implementation 已交付（`aab6d25c12a904e900ba24460cf29586f812cb23`）；fresh matrix `reference-binding-2026-10-01-corrected-v1` 在单一 sealed binding 下，Matrix A 为 3/3 completed 且 Host envelope-valid。Corrected Matrix B 为 0/3：B-01 / B-02 / B-03 均在旧 PD-099 v1 `1_800_000ms` fixed cutoff 到期，实际耗时分别为 `1_800_010ms` / `1_800_009ms` / `1_800_019ms`；没有完成的 JSON terminal payload，故 Host envelope 无效、结构校验及 parsed payload size 未评估。按 gate 未运行 Matrix C/D；这组 corrected evidence 不判定 60 秒 continuation ceiling。旧 v1/v2 matrix evidence 保持原样且未与本次 binding 混合；该 matrix 未修改 timeout policy，此历史 Solution cutoff 已由 PD-099 v2 取代。此 terminal-mode evidence 不替代下方 Artifact-Backed V1 reopening gate 结论。
-- **Artifact-Backed Structured Final Result V1 controlled Solution gate：**历史 artifact-backed re-establishment synthetic matrix `artifact-backed-v1-receipt-propagation-20261001-01` 为 `PASS`（3/3；receipt、artifact integrity、envelope 与 synthetic structure 均通过；retransmissions = 0），binding-lock SHA-256：`226223ba3a2ee56c50a6aec3c31991014184a054d30622916586323f54a40d46`。Artifact-Backed Historical Solution-only Probe #1 / #2 已在 containment 修复后的当前实现上成功完成，artifact-backed communication reopening gate = `REESTABLISHED`；历史 synthetic evidence 仍不等同于 Layer A downstream proof。`attempt-000012` 曾以 `FAILED / SOLUTION / TIMEOUT` 终止；之后 `attempt-000013` 已由 Human 单次授权并运行，现以 `FAILED / REVIEWER / invalid_output` terminal 结束，Reviewer assessment 因包含 schema 禁止的 `responsibilities` 字段而未通过 structured validation。该一次性授权已消费；Reviewer invocation 已发生，但 Host 未获得合法 review，Shadow / promotion 未运行。Layer A overall proof = `NOT ESTABLISHED`；任何后续 attempt（包括 `attempt-000014`）都需要新的 attempt-specific Human authorization。
-- Envelope Failure Bounded Retransmission 超出已验证边界的扩展（第二重传、`SCHEMA_FAILURE` recovery、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；
+- **Artifact-Backed Structured Final Result V1 controlled Solution gate：**历史 artifact-backed re-establishment synthetic matrix `artifact-backed-v1-receipt-propagation-20261001-01` 为 `PASS`（3/3；receipt、artifact integrity、envelope 与 synthetic structure 均通过；retransmissions = 0），binding-lock SHA-256：`226223ba3a2ee56c50a6aec3c31991014184a054d30622916586323f54a40d46`。Artifact-Backed Historical Solution-only Probe #1 / #2 已在 containment 修复后的当前实现上成功完成，artifact-backed communication reopening gate = `REESTABLISHED`；历史 synthetic evidence 仍不等同于 Layer A downstream proof。`attempt-000012` 曾以 `FAILED / SOLUTION / TIMEOUT` 终止；`attempt-000013` 以 `FAILED / REVIEWER / invalid_output` terminal 结束，Reviewer assessment 因包含 schema 禁止的 `responsibilities` 字段而未通过 structured validation。其一次性 authorization 已消费；Reviewer invocation 已发生，但 Host 未获得合法 review，Shadow / promotion 未运行。
+- **attempt-000014 — real governed outcome：**Solution artifact-backed path passed；Reviewer accepted the option within current authority；Shadow process completed but Host rejected the terminal Role payload for wrong `schemaVersion` (`preschool-shadow-authoring-result-v1`; expected `shadow-authoring-execution-participant-result-v1`). The eligible schema correction was not attempted because the real reference downstream Participant exposed no usable thread capability (`CAPABILITY_UNAVAILABLE`). The consumed #14 authorization cannot be reused; no promotion was produced. This confirmed a PD-122 Revision 1 implementation deviation, now fixed and deterministically verified. Layer A remains `NOT ESTABLISHED`.
+- Envelope Failure Bounded Retransmission 的真实 Participant runtime 扩展（第二重传、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；PD-122 Revision 1 的一次 same-thread structural correction 当前有 deterministic implementation evidence，未做 Matrix/probe recertification；
 - report analysis / automatic intervention；
 - Game 与 Auto Evolution 已经物理解耦；
 - 世界观 / 产品内容可无成本替换；
@@ -131,26 +132,31 @@ Historical Solution-only Probe #1 / #2 已成功完成；artifact-backed 首次 
 ↓
 attempt-000013 Reviewer communication blocker 已修复并 deterministic verified
 ↓
-pre-upgrade attempt-000014 authorization 因 Participant binding drift 失效；attempt-000014 = NOT_ADMITTED；没有创建 governed attempt，编号仍可复用
+pre-upgrade attempt-000014 authorization 因 Participant binding drift 失效且未复用
 ↓
-PD-122 Revision 1 Harness hardening → IMPLEMENTED / deterministic verification → VERIFIED
+fresh one-time authorization admitted attempt-000014
+→ FAILED / SHADOW_AUTHORING：wrong Role schemaVersion；correction 未尝试（`CAPABILITY_UNAVAILABLE`）；authorization 已消费
 ↓
-fresh exact current binding
-→ fresh attempt-000014 authorization candidate
+reference downstream same-thread capability gap + Shadow exact schemaVersion guidance
+→ implementation deviation fixed / deterministic verification → VERIFIED
+↓
+fresh exact current binding for corrected implementation
+→ fresh attempt-000015 authorization candidate
 → Human exact canonical-SHA approval
-→ one real governed attempt-000014
+→ one real governed attempt-000015
 ↓
-Layer A overall proof = NOT ESTABLISHED；fresh authorization 前 execution unauthorized；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
+Layer A overall proof = NOT ESTABLISHED；#15 authorization 前 execution unauthorized；ordinary AE / Human Follow-up Loop v1 / Layer B / Layer C 继续 parked
 ```
 
 ### 当前目标
 
 - Artifact-backed 首次 communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。此历史 gate 不因 binding drift 自动重跑。
-- Current blocker = fresh exact current binding + fresh exact-digest Human authorization; attempt-000013 暴露的 Reviewer communication mismatch 已 corrected and deterministically verified，PD-122 Revision 1 Harness hardening 与 deterministic gates 已完成。
-- 当前返回点：fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。
-- pre-upgrade attempt-000014 authorization 因 binding drift 失效；该授权下 `attempt-000014 = NOT_ADMITTED`。没有创建 governed attempt directory、Solution、Reviewer、Shadow、V1–V5 或 promotion，编号仍可复用；旧 authorization 不可重用。
+- Current blocker = fresh exact current binding for the corrected implementation + fresh exact-digest Human authorization for #15. Attempt #14 exposed a real reference downstream thread-retention gap; the bounded same-thread transport and Shadow schema communication deviation are now fixed and deterministically verified.
+- 当前返回点：fresh exact current binding → fresh attempt-000015 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000015。
+- #14 的 pre-upgrade authorization 因 binding drift 失效且未复用；新的 #14 一次性 authorization 已消费。#14 在 `SHADOW_AUTHORING` 因错误 `schemaVersion` terminal 失败，未尝试 correction（`CAPABILITY_UNAVAILABLE`），未产生 promotion。
 - under the new binding，Matrix A passed 3/3。Matrix B timed out on the first large terminal Solution-like payload; this is diagnostic only and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix B will not rerun automatically; neither Matrix C nor an artifact-probe campaign is an automatic prerequisite. Use synthetic diagnostics only when a concrete real-path communication failure needs isolation.
-- attempt-000013 是 terminal `FAILED / REVIEWER / invalid_output`，其一次性 Human authorization 已消费；目前没有新的 #14 candidate 或 exact-digest approval，execution remains unauthorized。
+- attempt-000013 与 #14 的一次性 Human authorizations 均已消费；目前不存在 #15 candidate 或 exact-digest approval，execution remains unauthorized。
+- 此纠正任务未生成 #15 authorization candidate、未执行 #15，且未运行 Matrix/probe campaign。Matrix B、Matrix C 或 artifact probes 均不是自动前置条件；只在具体真实通信不确定性出现时使用 targeted diagnostics。
 - Layer A overall proof = `NOT ESTABLISHED`；本导航不授权运行新 attempt。
 - 当前 3 个 Human Follow-up active items 是保留的 operational work，non-blocking，不构成当前 Contract validation 的同步 gate。
 - ordinary AE sampling、Human Follow-up Loop v1、Layer B natural semantic derivation 与 Layer C natural effectiveness 继续 parked。
@@ -332,11 +338,11 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 14. MCP 是否已选定？→ **NO**
 15. code-level autonomous modification？→ **NOT AUTHORIZED**
 16. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**
-17. Participant timeout authority？→ **PD-099 v2 values：evaluation start `1800000ms` / stdout inactivity `600000ms` / absolute cap `2700000ms`；PD-122 Revision 1 requires role-neutral defaults for every workspace Participant Role and correction continuation before #14; stdout refreshes, stderr does not; explicit timeout remains fixed override**
+17. Participant timeout authority？→ **PD-099 v2 values：evaluation start `1800000ms` / stdout inactivity `600000ms` / absolute cap `2700000ms`；PD-122 Revision 1 requires role-neutral defaults for every workspace Participant Role and correction continuation before #15; stdout refreshes, stderr does not; explicit timeout remains fixed override**
 18. Human Follow-up Loop v1 authority？→ **HUMAN ACCEPTED / AUTHORITY RECORDED（PD-100）**
 18b. Human Follow-up Loop v1 minimal runtime？→ **ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / HFL_REAL_USE_VALIDATED**
 19. Ordinary unresolved Human work item 是否阻塞 RUN / OBSERVE？→ **NO**
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 immediate prerequisite？→ **fresh exact current binding → fresh attempt-000014 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000014。PD-122 Revision 1 Harness hardening 与 deterministic verification 已完成。pre-upgrade authorization 已因 binding drift 失效且 attempt-000014 = NOT_ADMITTED；旧授权不可复用，编号仍可复用。不得自动重跑 Matrix B、Matrix C 或 artifact probes；真实 communication failure 可触发 targeted diagnostics。execution 未获授权；Layer A overall proof = NOT ESTABLISHED。**
+23. 当前 immediate prerequisite？→ **为已修正实现建立 fresh exact current binding → fresh attempt-000015 authorization candidate → Human exact canonical-SHA approval → one real governed attempt-000015。attempt-000014 = FAILED / SHADOW_AUTHORING，one-time authorization 已消费；PD-122 Revision 1 reference downstream same-thread implementation deviation 已 deterministic fixed/verified；Layer A overall proof = NOT ESTABLISHED。此处不生成 #15 candidate、不执行 #15；不得自动重跑 Matrix B、Matrix C 或 artifact probes，只有具体真实 communication uncertainty 才用 targeted diagnostics。**

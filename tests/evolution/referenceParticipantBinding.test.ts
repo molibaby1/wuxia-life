@@ -143,6 +143,110 @@ export async function runReferenceParticipantBindingTests(): Promise<void> {
     assert.equal(resumeArgs?.[resumeArgs.indexOf('--output-schema') + 1], join(repositoryRoot, SCHEMA_REF));
     const reviewerArgs = resolved.participant.buildArgs({ ...solutionJob, role: 'reviewer' });
     assert.equal(reviewerArgs.includes('--output-schema'), false);
+
+    const correctionThreadId = '11234567-89ab-cdef-0123-456789abcdef';
+    const correctionThreadRef = { provider: 'codex-exec', opaqueId: correctionThreadId };
+    const rolePayload = JSON.stringify({ schemaVersion: 'role-result-v1', status: 'completed' });
+    const codexEventStream = [
+      { type: 'thread.started', thread_id: correctionThreadId },
+      { type: 'turn.started', turn_id: 'turn-000001' },
+      { type: 'item.completed', item: { type: 'agent_message', id: 'message-000001', text: rolePayload } },
+      { type: 'turn.completed', turn_id: 'turn-000001' },
+    ].map(event => JSON.stringify(event)).join('\n');
+    const correctionRoles = ['reviewer', 'configuration-execution'] as const;
+    const correctionRoleObservations = correctionRoles.map(role => {
+      const job = { ...solutionJob, role, prompt: `Continue ${role} in this thread.` };
+      const args = resolved.participant.buildArgs(job);
+      const interpreted = resolved.participant.interpretCompletedOutput?.({
+        job,
+        stdout: codexEventStream,
+        stderr: '',
+      });
+      let continuationArgs: string[] | undefined;
+      try {
+        continuationArgs = resolved.participant.sameThreadContinuation?.buildArgs(job, correctionThreadRef);
+      } catch {
+        continuationArgs = undefined;
+      }
+      return {
+        role,
+        usesJsonEventStream: args.includes('--json'),
+        usesEphemeralMode: args.includes('--ephemeral'),
+        appliesNativeOutputSchema: args.includes('--output-schema'),
+        terminalPayload: interpreted?.ok ? interpreted.rawOutput : null,
+        threadRef: interpreted?.ok ? interpreted.threadRef ?? null : null,
+        continuationArgs: continuationArgs ?? null,
+      };
+    });
+    assert.deepEqual(correctionRoleObservations, correctionRoles.map(role => ({
+      role,
+      usesJsonEventStream: true,
+      usesEphemeralMode: false,
+      appliesNativeOutputSchema: false,
+      terminalPayload: rolePayload,
+      threadRef: correctionThreadRef,
+      continuationArgs: [
+        '--sandbox', 'workspace-write',
+        'exec', 'resume', '--json',
+        '-m', lock.modelConfigured,
+        '-c', `model_reasoning_effort=${JSON.stringify(lock.reasoningEffort)}`,
+        '--skip-git-repo-check',
+        correctionThreadId,
+        `Continue ${role} in this thread.`,
+      ],
+    })));
+
+    for (const role of correctionRoles) {
+      const job = { ...solutionJob, role };
+      const mismatchedThread = resolved.participant.interpretCompletedOutput?.({
+        job,
+        stdout: codexEventStream,
+        stderr: '',
+        expectedThreadRef: { ...correctionThreadRef, opaqueId: '21234567-89ab-cdef-0123-456789abcdef' },
+      });
+      assert.equal(mismatchedThread?.ok, false);
+      if (mismatchedThread && !mismatchedThread.ok) {
+        assert.equal(mismatchedThread.errorKind, 'continuation');
+        assert.match(mismatchedThread.message, /resumed thread identity mismatch/);
+      }
+      assert.throws(
+        () => resolved.participant.sameThreadContinuation?.buildArgs(job, {
+          provider: 'other-provider',
+          opaqueId: correctionThreadId,
+        }),
+      );
+      assert.throws(
+        () => resolved.participant.sameThreadContinuation?.buildArgs(job, {
+          provider: 'codex-exec',
+          opaqueId: 'not-a-thread-uuid',
+        }),
+      );
+    }
+
+    for (const role of ['feedback', 'hypothesis'] as const) {
+      const job = { ...solutionJob, role };
+      const args = resolved.participant.buildArgs(job);
+      const interpreted = resolved.participant.interpretCompletedOutput?.({
+        job,
+        stdout: codexEventStream,
+        stderr: '',
+      });
+      assert.equal(args.includes('--ephemeral'), true);
+      assert.equal(args.includes('--json'), false);
+      assert.deepEqual(interpreted, { ok: true, rawOutput: codexEventStream });
+      assert.throws(() => resolved.participant.sameThreadContinuation?.buildArgs(job, correctionThreadRef));
+      const unsupportedContinuation = resolved.participant.interpretCompletedOutput?.({
+        job,
+        stdout: codexEventStream,
+        stderr: '',
+        expectedThreadRef: correctionThreadRef,
+      });
+      assert.equal(unsupportedContinuation?.ok, false);
+      if (unsupportedContinuation && !unsupportedContinuation.ok) {
+        assert.equal(unsupportedContinuation.errorKind, 'continuation');
+      }
+    }
+
     const receipt = buildParticipantBindingReceipt(resolved.participant);
     assert.equal(receipt.modelConfigured, 'gpt-6-luna');
     assert.equal(receipt.modelResolution, 'EXPLICIT');

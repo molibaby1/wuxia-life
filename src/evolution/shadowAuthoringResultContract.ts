@@ -78,7 +78,7 @@ export function validateShadowAuthoringExecutionParticipantResult(
   assertObject(value);
   assertExactKeys(value);
   if (value.schemaVersion !== 'shadow-authoring-execution-participant-result-v1') {
-    throw new Error('shadow authoring execution result schemaVersion is invalid');
+    throw new Error('shadow authoring execution result schemaVersion is invalid; expected "shadow-authoring-execution-participant-result-v1"');
   }
   if (value.status !== 'completed' && value.status !== 'failed') {
     throw new Error('shadow authoring execution result status is invalid');

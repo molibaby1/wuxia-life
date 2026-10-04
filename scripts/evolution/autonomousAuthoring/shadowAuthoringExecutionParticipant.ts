@@ -87,6 +87,7 @@ function buildShadowAuthoringPrompt(cards: unknown): string {
     'Do not modify any other file or path.',
     'Do not commit, push, or merge.',
     'Return one bare JSON object with schemaVersion, status, changedFiles, verificationCommandsRun, and deviations.',
+    'schemaVersion must be exactly "shadow-authoring-execution-participant-result-v1".',
     'The changedFiles field is diagnostic only. Host independently derives the canonical changed-file set.',
   ].join('\n');
 }

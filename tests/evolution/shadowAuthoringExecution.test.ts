@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { runShadowAuthoringExecution } from '../../scripts/evolution/autonomousAuthoring/shadowAuthoringExecutionParticipant';
+import { createCodexReferenceParticipant } from '../../scripts/evolution/operator/resolveParticipantBinding';
 import {
   buildDeterministicPromotionPatch,
   compareWorkspaceSnapshots,
@@ -24,6 +25,9 @@ import {
 } from '../../src/evolution/preschoolSharedNeutralAuthoringContract';
 import { validateSolutionReview } from '../../src/evolution/solutionReviewContract';
 import { validateSolutionWork } from '../../src/evolution/solutionWorkContract';
+import { validateShadowAuthoringExecutionParticipantResult } from '../../src/evolution/shadowAuthoringResultContract';
+
+const SHADOW_RESULT_SCHEMA_VERSION = 'shadow-authoring-execution-participant-result-v1';
 
 export function acceptedInputs() {
   const responsibility = {
@@ -226,6 +230,62 @@ function continuationCapableParticipant(
   };
 }
 
+async function createReferenceShadowParticipant(
+  root: string,
+  invocationName: string,
+  failCorrection: boolean,
+): Promise<{ participant: WorkspaceAgentParticipantOptions; callLogPath: string }> {
+  const executablePath = join(root, `${invocationName}-codex`);
+  const callLogPath = join(root, `${invocationName}-calls.jsonl`);
+  const threadId = '31234567-89ab-cdef-0123-456789abcdef';
+  const invalidOutput = JSON.stringify({
+    schemaVersion: 'preschool-shadow-authoring-result-v1',
+    status: 'completed',
+    changedFiles: [],
+    verificationCommandsRun: [],
+    deviations: [],
+  });
+  const validOutput = JSON.stringify({
+    schemaVersion: SHADOW_RESULT_SCHEMA_VERSION,
+    status: 'completed',
+    changedFiles: [],
+    verificationCommandsRun: [],
+    deviations: [],
+  });
+  const script = [
+    '#!/usr/bin/env node',
+    "const fs = require('node:fs');",
+    'const args = process.argv.slice(2);',
+    "const isContinuation = args.includes('resume');",
+    `fs.appendFileSync(${JSON.stringify(callLogPath)}, JSON.stringify(args) + '\\n');`,
+    `const threadId = ${JSON.stringify(threadId)};`,
+    `const invalidOutput = ${JSON.stringify(invalidOutput)};`,
+    `const validOutput = ${JSON.stringify(validOutput)};`,
+    `const payload = isContinuation && ${JSON.stringify(!failCorrection)} ? validOutput : invalidOutput;`,
+    'const events = [',
+    "  { type: 'thread.started', thread_id: threadId },",
+    "  { type: 'turn.started', turn_id: isContinuation ? 'turn-000002' : 'turn-000001' },",
+    "  { type: 'item.completed', item: { type: 'agent_message', text: payload } },",
+    "  { type: 'turn.completed', turn_id: isContinuation ? 'turn-000002' : 'turn-000001' },",
+    "].map(event => JSON.stringify(event)).join('\\n') + '\\n';",
+    'process.stdout.write(events);',
+  ].join('\n');
+  await writeFile(executablePath, script);
+  await chmod(executablePath, 0o755);
+  return {
+    participant: createCodexReferenceParticipant({
+      executable: executablePath,
+      executableVersion: 'codex-reference-test 1',
+      model: 'gpt-6-luna',
+      reasoningEffort: 'max',
+      nativeOutputSchemaPath: join(root, 'solution-only-native-schema.json'),
+      nativeOutputSchemaSha256: 'a'.repeat(64),
+      ambientCodexConfigSha256: 'ABSENT',
+    }),
+    callLogPath,
+  };
+}
+
 async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'shadow-executor-'));
   const repositoryRoot = join(root, 'repository');
@@ -304,6 +364,78 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   assert.equal(
     result.executionTrace.events.filter(event => event.type === 'participant_terminal_validation' && event.attempt === 1).length,
     1,
+  );
+
+  const referenceCorrection = await createReferenceShadowParticipant(root, 'reference-schema-correction', false);
+  const recoveredSchemaFailure = await runShadowAuthoringExecution({
+    repositoryRoot,
+    workspaceDestinationRoot: join(root, 'reference-schema-correction-workspaces'),
+    artifactRoot: join(root, 'reference-schema-correction-artifacts'),
+    invocationRef: 'shadow-authoring-reference-schema-correction-test',
+    solution: accepted.solution,
+    review: accepted.review,
+    admission: accepted.admission,
+    participant: referenceCorrection.participant,
+  });
+  assert.equal(recoveredSchemaFailure.status, 'completed');
+  assert.equal(recoveredSchemaFailure.participantResult?.schemaVersion, SHADOW_RESULT_SCHEMA_VERSION);
+  assert.equal(
+    recoveredSchemaFailure.executionTrace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
+  );
+  const correctedPrompt = await readFile(
+    join(recoveredSchemaFailure.artifactRoot, 'participant-envelope-retransmission-prompt-1.txt'),
+    'utf8',
+  );
+  assert.ok(correctedPrompt.includes(SHADOW_RESULT_SCHEMA_VERSION));
+  const correctionCalls = (await readFile(referenceCorrection.callLogPath, 'utf8'))
+    .trim()
+    .split('\n')
+    .map(line => JSON.parse(line) as string[]);
+  assert.equal(correctionCalls.length, 2);
+  assert.equal(correctionCalls[0]?.includes('--json'), true);
+  assert.equal(correctionCalls[0]?.includes('--ephemeral'), false);
+  assert.equal(correctionCalls[0]?.includes('--output-schema'), false);
+  assert.equal(correctionCalls[1]?.includes('resume'), true);
+  assert.equal(correctionCalls[1]?.includes('31234567-89ab-cdef-0123-456789abcdef'), true);
+  assert.equal(correctionCalls[1]?.includes('-m'), true);
+  assert.equal(correctionCalls[1]?.[correctionCalls[1]!.indexOf('-m') + 1], 'gpt-6-luna');
+  assert.equal(correctionCalls[1]?.includes('model_reasoning_effort="max"'), true);
+  assert.equal(correctionCalls[1]?.includes('--output-schema'), false);
+  assert.match(correctionCalls[0]?.at(-1) ?? '', /schemaVersion must be exactly "shadow-authoring-execution-participant-result-v1"/);
+
+  const repeatedSchemaFailure = await createReferenceShadowParticipant(root, 'reference-schema-failure', true);
+  const terminalSchemaFailure = await runShadowAuthoringExecution({
+    repositoryRoot,
+    workspaceDestinationRoot: join(root, 'reference-schema-failure-workspaces'),
+    artifactRoot: join(root, 'reference-schema-failure-artifacts'),
+    invocationRef: 'shadow-authoring-reference-schema-failure-test',
+    solution: accepted.solution,
+    review: accepted.review,
+    admission: accepted.admission,
+    participant: repeatedSchemaFailure.participant,
+  });
+  assert.equal(terminalSchemaFailure.status, 'failed');
+  assert.equal(terminalSchemaFailure.participantResult, null);
+  assert.match(terminalSchemaFailure.failure ?? '', /shadow-authoring-execution-participant-result-v1/);
+  assert.equal(
+    terminalSchemaFailure.executionTrace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
+  );
+  assert.equal(
+    (await readFile(repeatedSchemaFailure.callLogPath, 'utf8')).trim().split('\n').length,
+    2,
+  );
+
+  assert.throws(
+    () => validateShadowAuthoringExecutionParticipantResult({
+      schemaVersion: 'preschool-shadow-authoring-result-v1',
+      status: 'completed',
+      changedFiles: [],
+      verificationCommandsRun: [],
+      deviations: [],
+    }),
+    /shadow-authoring-execution-participant-result-v1/,
   );
 
   const failedParticipantResult = JSON.stringify({ ...participantResult, status: 'failed' });

@@ -4,6 +4,7 @@ import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { gameEngine } from '../src/core/GameEngineIntegration';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
+import { preparePackedPassiveMemory } from '../src/core/activePlanning/annualPassiveMemory';
 import {
   assertCanonicalGameState,
   CanonicalValidationError,
@@ -41,7 +42,10 @@ function runBrowserPassiveTick(currentTime: { year: number; month: number; day: 
   gameEngine.advanceTime = (() => undefined) as typeof gameEngine.advanceTime;
   try {
     ui.engineState.isPassiveProgressionMode = true;
-    ui.engineState.passiveNarrative = { title: '测试', text: '测试' };
+    const packed = preparePackedPassiveMemory(state, () => 0);
+    assert.ok(packed, 'age 4 should prepare packed passive memory');
+    ui.engineState.annualPassiveMemory = packed;
+    ui.engineState.passiveNarrative = { title: packed.headline, text: packed.body };
     ui.continueProgressionFlow();
   } finally {
     gameEngine.advanceTime = originalAdvanceTime;

@@ -1,5 +1,7 @@
 import { buildChoiceDecision } from '../../src/headless/playability/choiceScoring';
 import { runHeadlessPersona } from '../../src/headless/playability/headlessPersonaRunner';
+import { runDisturbanceAckStep, type RunnerStepContext } from '../../src/headless/playability/runnerSteps';
+import { HeadlessEngineSessionImpl } from '../../src/headless/session/HeadlessEngineSessionImpl';
 import { getP8PersonaById } from '../../src/p8/personas';
 import type { ExperienceTrace } from '../../src/headless/playability/experienceTraceTypes';
 import type { ChoiceScoreDiagnostic } from '../../src/p8/types';
@@ -117,7 +119,6 @@ export async function runExperienceTraceTests(): Promise<void> {
   const disturbanceSteps = getPhaseSteps(trace, 'disturbance_narrative').filter(
     step => step.presentation?.disturbanceNarrative,
   );
-  assert(disturbanceSteps.length > 0, 'disturbance narrative should be captured');
   for (const step of disturbanceSteps) {
     const narrative = step.presentation!.disturbanceNarrative as DisturbanceNarrativeDisplay;
     assert(
@@ -128,11 +129,12 @@ export async function runExperienceTraceTests(): Promise<void> {
   const disturbanceAcknowledgementSteps = trace.steps.filter(
     step => step.acknowledgement?.kind === 'disturbance',
   );
-  assert(disturbanceAcknowledgementSteps.length > 0, 'disturbance acknowledgement should be captured');
-  assert(
-    disturbanceAcknowledgementSteps.every(step => Boolean(step.presentation?.disturbanceNarrative)),
-    'disturbance acknowledgement must not replace the narrative on its trace step',
-  );
+  if (disturbanceAcknowledgementSteps.length > 0) {
+    assert(
+      disturbanceAcknowledgementSteps.every(step => Boolean(step.presentation?.disturbanceNarrative)),
+      'disturbance acknowledgement must not replace the narrative on its trace step',
+    );
+  }
 
   const tieDiagnostic: ChoiceScoreDiagnostic = {
     eventId: 'tie-event',
@@ -188,6 +190,49 @@ export async function runExperienceTraceTests(): Promise<void> {
   );
   assert(isJsonSafe(trace), 'trace should contain only JSON-safe values');
   JSON.stringify(trace);
+
+  const disturbanceSession = HeadlessEngineSessionImpl.create({
+    playerName: 'Trace fixture',
+    gender: 'male',
+    randomSeed: EXPERIENCE_TRACE_SEED,
+    catalogVersion: '1.0.0',
+  });
+  disturbanceSession.getRuntimeState().player.age = 20;
+  const disturbance: DisturbanceNarrativeDisplay = {
+    sourceLabel: '练功受扰',
+    disturbanceId: 'trace-disturbance-fixture',
+    title: '来客打断练功',
+    bodyText: '一位熟人来访，你暂时放下练功招待对方。',
+    sourceActionName: '练习基本功',
+    impactSummary: '本次练功中断，进度有所延后。',
+    returnToPlanHint: '稍后可以继续练功。',
+  };
+  disturbanceSession.applyProgressionVolatileState({
+    ...disturbanceSession.getProgressionVolatileState(),
+    pendingDisturbanceNarrative: disturbance,
+  });
+  const experienceTraceSteps: NonNullable<RunnerStepContext['experienceTraceSteps']> = [];
+  const disturbanceContext: RunnerStepContext = {
+    session: disturbanceSession,
+    persona,
+    records: [],
+    choiceDiagnostics: [],
+    activeActionSelectionReasons: [],
+    experienceTraceSteps,
+  };
+  await runDisturbanceAckStep(disturbanceContext);
+  assert(experienceTraceSteps.length === 1, 'disturbance acknowledgement should record exactly one trace step');
+  const disturbanceTraceStep = experienceTraceSteps[0];
+  assert(disturbanceTraceStep.phaseBefore === 'disturbance_narrative', 'disturbance trace phase');
+  assertDeepEqual(
+    disturbanceTraceStep.presentation?.disturbanceNarrative,
+    disturbance,
+    'disturbance trace should retain the full narrative presentation',
+  );
+  assert(
+    disturbanceTraceStep.acknowledgement?.kind === 'disturbance',
+    'disturbance trace should record the acknowledgement kind',
+  );
 
   console.log('experienceTrace.test.ts: ok');
 }

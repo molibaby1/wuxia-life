@@ -1,7 +1,8 @@
 import { gameEngine } from '../src/core/GameEngineIntegration';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
+import { preparePackedPassiveMemory } from '../src/core/activePlanning/annualPassiveMemory';
 
-function assert(condition: boolean, message: string): void {
+function assert(condition: boolean, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
@@ -14,16 +15,16 @@ function testSinglePathStageCompletesAndAdvancesInOneClick(): void {
     const state = gameEngine.getGameState();
     state.player.age = 5;
     state.flags.origin_id = 'martial';
+    const packed = preparePackedPassiveMemory(state, () => 0);
+    assert(packed !== null, 'age 5 should prepare packed passive memory');
 
     engine.engineState.currentEvent = null;
     engine.engineState.availableChoices = [];
     engine.engineState.availableActiveActions = [];
     engine.engineState.isActiveActionMode = false;
     engine.engineState.isPassiveProgressionMode = true;
-    engine.engineState.passiveNarrative = {
-      title: '初识马步',
-      text: '父亲教你扎马步，你坚持不到半盏茶便腿软。',
-    };
+    engine.engineState.annualPassiveMemory = packed;
+    engine.engineState.passiveNarrative = { title: packed.headline, text: packed.body };
     engine.engineState.pendingPeriodSummary = null;
     engine.engineState.progressionOverlay = null;
 

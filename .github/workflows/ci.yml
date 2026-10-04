@@ -34,6 +34,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Evolution deterministic gate
+        run: npm run test:evolution:deterministic
+
       - name: Event quality gate
         run: npm run validate:event-quality
 

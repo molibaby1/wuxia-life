@@ -43,6 +43,8 @@ assert.equal(
   packageJson.scripts?.['test:evolution:deterministic'],
   'tsx tests/evolution/runDeterministicEvolutionTests.ts',
 );
+const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
+assert.match(ciWorkflow, /^\s*run:\s*npm run test:evolution:deterministic\s*$/m);
 assert.equal(new Set(suiteNames).size, suiteNames.length, 'suite names must be unique');
 assert.equal(new Set(suiteEntries).size, suiteEntries.length, 'suite entry paths must be unique');
 

@@ -117,6 +117,7 @@ function renderAutonomousAuthoringReviewGuidance(
     ] : []),
     ...(solutionWork.options.some(option => option.autonomousAuthoring !== undefined) ? [
       'For an option carrying autonomousAuthoring, independently inspect the current catalog and allowed evidence.',
+      'PD-121 transient-role clarification: TRANSIENT_ROLE permits transient familiar roles such as playmate or familiar adult when the vignette does not require a stable identity. A one-shot passive vignette may include familiarity, conflict, repair, farewell, absence, or changed everyday contact; these alone do not create formal Person/Relationship semantics. Use CONTRACT_CHANGE_REQUIRED if the experience requires stable identity, later/cross-event recognition of the same person, durable person facts, relationship state/progression, a future hook or consumer depending on continuity, or new Person/Relationship Runtime, Schema, registry, score, stage, or abstraction. Do not escalate solely for prior familiarity or a one-shot social transition.',
       'Assess Contract applicability, every responsibility, developmental age reasoning, shared-neutral portability, closest-entry distinction, transient-role boundary, non-filler semantics, and no new durable state.',
       'Use executionAuthorityAssessment=WITHIN_CURRENT_AUTHORITY only when the reusable Contract itself covers shadow execution.',
       'Authoritative repository promotion remains Human-controlled and is not authorized by this review.',

@@ -279,6 +279,9 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.match(referencePrompt, /authoritative repository promotion, which remains Human-controlled/i);
   assert.match(referencePrompt, /This Host protocol fact does not prescribe the Reviewer decision, applicability, or conformance/i);
   assert.doesNotMatch(prompt, /attempt-specific Layer A execution authorization.*already been Host-admitted/i);
+  assert.match(referencePrompt, /TRANSIENT_ROLE permits transient familiar roles such as playmate or familiar adult when the vignette does not require a stable identity/i);
+  assert.match(referencePrompt, /A one-shot passive vignette may include familiarity, conflict, repair, farewell, absence, or changed everyday contact; these alone do not create formal Person\/Relationship semantics/i);
+  assert.match(referencePrompt, /Use CONTRACT_CHANGE_REQUIRED if the experience requires stable identity, later\/cross-event recognition of the same person, durable person facts, relationship state\/progression, a future hook or consumer depending on continuity, or new Person\/Relationship Runtime, Schema, registry, score, stage, or abstraction/i);
   assert.match(referencePrompt, /responsibility evidenceRefs are empty/);
   assert.match(referencePrompt, /developmental age reasoning is independently authored/);
   assert.doesNotMatch(prompt, /Human-approved input for Layer A/);

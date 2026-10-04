@@ -356,12 +356,14 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
         candidateRef: 'candidate-pool-abc/hypothesis-000002',
         hypothesisId: 'hypothesis-000002',
         stage: 'SOLUTION',
-        errorKind: 'invalid_output',
-        cause: 'repoRef does not exist: src/data/identity-year-events.json',
+        failureOrigin: 'OUTPUT_REFERENCE',
+        failureReason: 'MISSING_TARGET',
+        containment: 'CANDIDATE_LOCAL',
+        message: 'repoRef does not exist: src/data/identity-year-events.json',
         evidenceRef: 'artifacts/evolution/sessions/ordinary-run-20260915-000010/source-epochs/source-epoch-000001/candidates/hypothesis-000002/workflow-outcome.json',
       }],
     } as Parameters<typeof formatOrdinaryEvolutionOperatorSummary>[0]);
-    assert.match(failureSummary, /Failure：\ncandidate=candidate-pool-abc\/hypothesis-000002\nstage=SOLUTION\nerrorKind=invalid_output\ncause=repoRef does not exist: src\/data\/identity-year-events\.json\nevidence=artifacts\/evolution\/sessions\/ordinary-run-20260915-000010\/source-epochs\/source-epoch-000001\/candidates\/hypothesis-000002\/workflow-outcome\.json/);
+    assert.match(failureSummary, /Failure：\ncandidate=candidate-pool-abc\/hypothesis-000002\nstage=SOLUTION\nevidence=artifacts\/evolution\/sessions\/ordinary-run-20260915-000010\/source-epochs\/source-epoch-000001\/candidates\/hypothesis-000002\/workflow-outcome\.json\nfailureOrigin=OUTPUT_REFERENCE\nfailureReason=MISSING_TARGET\ncontainment=CANDIDATE_LOCAL\nmessage=repoRef does not exist: src\/data\/identity-year-events\.json/);
     assert.doesNotMatch(formatOrdinaryEvolutionOperatorSummary(started), /Failure：/);
     const resumed = await runOrdinaryEvolution({
       repositoryRoot,

@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { statSync } from 'node:fs';
-import { DETERMINISTIC_EVOLUTION_SUITES } from './runDeterministicEvolutionTests.ts';
+import {
+  DETERMINISTIC_EVOLUTION_SUITES,
+  runDeterministicEvolutionSuites,
+} from './runDeterministicEvolutionTests.ts';
 
 const REQUIRED_CRITICAL_ENTRIES = [
   'tests/evolution/candidatePoolContract.test.ts',
@@ -63,4 +66,31 @@ for (const suite of DETERMINISTIC_EVOLUTION_SUITES) {
   }
 }
 
-process.stdout.write('deterministicEvolutionGate.test.ts: membership ok\n');
+async function testAggregateRunnerInvariants(): Promise<void> {
+  const attemptedEntries: string[] = [];
+  const results = await runDeterministicEvolutionSuites(
+    DETERMINISTIC_EVOLUTION_SUITES,
+    async suite => {
+      attemptedEntries.push(suite.entry);
+      if (attemptedEntries.length === 2) return 7;
+      if (attemptedEntries.length === 3) return null;
+      return 0;
+    },
+  );
+
+  assert.deepEqual(
+    attemptedEntries,
+    DETERMINISTIC_EVOLUTION_SUITES.map(suite => suite.entry),
+    'every suite must be attempted in manifest order after earlier failures',
+  );
+  assert.equal(results.length, DETERMINISTIC_EVOLUTION_SUITES.length);
+  assert.deepEqual(results.slice(0, 3).map(result => result.status), [0, 7, null]);
+  assert.equal(results.filter(result => result.status !== 0).length, 2);
+}
+
+void testAggregateRunnerInvariants()
+  .then(() => process.stdout.write('deterministicEvolutionGate.test.ts: membership and runner invariants ok\n'))
+  .catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+  });

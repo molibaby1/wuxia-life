@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import {
   DETERMINISTIC_EVOLUTION_SUITES,
   runDeterministicEvolutionSuites,
@@ -38,6 +38,11 @@ const REQUIRED_CRITICAL_ENTRIES = [
 
 const suiteNames = DETERMINISTIC_EVOLUTION_SUITES.map(suite => suite.name);
 const suiteEntries = DETERMINISTIC_EVOLUTION_SUITES.map(suite => suite.entry);
+const packageJson = JSON.parse(readFileSync('package.json', 'utf8')) as { scripts?: Record<string, string> };
+assert.equal(
+  packageJson.scripts?.['test:evolution:deterministic'],
+  'tsx tests/evolution/runDeterministicEvolutionTests.ts',
+);
 assert.equal(new Set(suiteNames).size, suiteNames.length, 'suite names must be unique');
 assert.equal(new Set(suiteEntries).size, suiteEntries.length, 'suite entry paths must be unique');
 

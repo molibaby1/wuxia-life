@@ -45,6 +45,11 @@ assert.equal(
 );
 const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
 assert.match(ciWorkflow, /^\s*run:\s*npm run test:evolution:deterministic\s*$/m);
+assert.match(
+  ciWorkflow,
+  /^[ \t]*run:[ \t]*npx tsx tests\/evolution\/deterministicEvolutionGate\.test\.ts[ \t]*$/m,
+  'CI must run the deterministic evolution gate trigger meta-test',
+);
 function extractCiPushBranches(workflow: string): string[] {
   const lines = workflow.split(/\r?\n/);
   const pushIndex = lines.findIndex(line => /^  push:\s*$/.test(line));

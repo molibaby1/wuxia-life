@@ -2342,6 +2342,26 @@ responsibilityProvenance = HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES
 
 当前产品阶段仍为 RUN / OBSERVE；不得为 Layer B 制造样本、强迫 READY、预选必成功 candidate 或 retry until success。Layer A real historical trial 仍需独立 Human authorization；本次治理调和不代表 runtime implementation 或任何 proof layer 已完成。
 
+#### 2026-10-04 Transient Familiar-Role Clarification
+
+**Human accepted：2026-10-04**
+
+本次解释保留 `preschool-shared-neutral-passive-capacity-v1@1` 与 reference responsibility-000004（“Farewell / changing relationships”），不扩展 Contract v1 的语义、权限或实现边界：
+
+1. `TRANSIENT_ROLE` 已允许 `playmate` / `familiar adult` 等临时角色，前提是场景不要求稳定身份。
+2. 紧凑的一次性 passive vignette 可以描写熟悉感、冲突、修复、告别、缺席或日常接触变化。
+3. 这些叙事含义本身不构成正式 Person / Relationship 语义。
+4. 如果体验需要以下任一能力，仍必须判为 `CONTRACT_CHANGE_REQUIRED`：
+   - 承诺稳定身份；
+   - 后续或跨事件识别同一人物；
+   - 持久人物事实；
+   - 关系状态或关系进展；
+   - 依赖连续性的未来钩子或消费者；
+   - 新增 Person / Relationship Runtime、Schema、registry、score、stage 或 abstraction。
+5. 只要 authored Card 遵守以上约束，reference responsibility-000004 可以在 v1 内表达。
+6. 本次解释不改变 `contractId`、版本、authority source bytes、authority SHA、write surface 或 promotion authority。
+7. Reviewer 不得仅因既往熟悉感或一次性社会关系变化推断需要修改 Contract。
+
 ### PD-122：Model-Adaptive Participant Harness v1
 
 **产品决策（Human accepted：2026-10-03）**

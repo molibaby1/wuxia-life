@@ -471,6 +471,33 @@ async function testV2RejectsForbiddenFieldsCardMismatchAndTestPrefixRemoval(): P
 
   const unguarded = await createFixture({ appendedTests: "throw new Error('AUTONOMOUS_AUTHORING_MISSING_ENTRY: preschool_neutral_shared_responsibility');\n" });
   assert.equal((await verifyPreschoolShadowAuthoring(verificationInput(unguarded))).checks.mechanicalConformance, 'FAIL');
+
+  const missingMarker = await createFixture({
+    appendedTests: [
+      "if (process.argv[1]?.endsWith('preschoolPassiveSpineTests.ts')) {",
+      "  throw new Error('UNRELATED_REGRESSION_FAILURE: preschool_neutral_shared_responsibility');",
+      '}',
+      '',
+    ].join('\n'),
+  });
+  const missingMarkerResult = await verifyPreschoolShadowAuthoring(verificationInput(missingMarker));
+  assert.equal(missingMarkerResult.checks.mechanicalConformance, 'FAIL');
+  assert.match(missingMarkerResult.failures.join('\n'), /must throw AUTONOMOUS_AUTHORING_MISSING_ENTRY/);
+
+  const missingAcceptedId = await createFixture({
+    appendedTests: [
+      "if (process.argv[1]?.endsWith('preschoolPassiveSpineTests.ts')) {",
+      "  throw new Error('AUTONOMOUS_AUTHORING_MISSING_ENTRY: preschool_neutral_other');",
+      '}',
+      '',
+    ].join('\n'),
+  });
+  const missingAcceptedIdResult = await verifyPreschoolShadowAuthoring(verificationInput(missingAcceptedId));
+  assert.equal(missingAcceptedIdResult.checks.mechanicalConformance, 'FAIL');
+  assert.match(
+    missingAcceptedIdResult.failures.join('\n'),
+    /does not assert accepted ID preschool_neutral_shared_responsibility/,
+  );
 }
 
 async function testV2RejectsSymlinkedTestPathBeforeRunningCommands(): Promise<void> {

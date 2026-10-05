@@ -31,6 +31,10 @@ import {
   compareWorkspaceSnapshots,
   type CanonicalWorkspaceChange,
 } from './workspaceChangeSet';
+import {
+  assertPreschoolShadowAppendedRegressionBlock,
+  expectedPreschoolShadowMissingEntryErrorLine,
+} from './preschoolShadowRegressionProtocol';
 
 export type ShadowVerificationCheck = 'PASS' | 'FAIL' | 'NOT_RUN';
 
@@ -331,6 +335,7 @@ async function verifyV2(input: VerifyPreschoolShadowAuthoringInput) {
   if (!cards || cards.length === 0 || cards.length > PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES) {
     throw new Error('Accepted Cards must be present and no more than eight.');
   }
+  const acceptedIds = cards.map(card => card.proposedEntry.id);
   const addedEntries = finalEntries.slice(baselineEntries.length);
   if (addedEntries.length !== cards.length) throw new Error('New catalog row count must equal the accepted Card count.');
   for (const [index, card] of cards.entries()) {
@@ -343,22 +348,7 @@ async function verifyV2(input: VerifyPreschoolShadowAuthoringInput) {
       throw new Error(`${path} does not preserve its exact baseline bytes as a prefix.`);
     }
     const appendedBlock = finalBytes.subarray(baselineBytes.length).toString('utf8');
-    const filename = path.split('/').at(-1)!;
-    const hasDirectExecutionGuard = (appendedBlock.includes('import.meta.url')
-      && appendedBlock.includes('process.argv[1]')
-      && appendedBlock.includes('==='))
-      || appendedBlock.includes(`endsWith('${filename}')`)
-      || appendedBlock.includes(`endsWith("${filename}")`);
-    if (!hasDirectExecutionGuard) throw new Error(`${path} appended regression block lacks a direct-execution guard.`);
-    if (!appendedBlock.includes('AUTONOMOUS_AUTHORING_MISSING_ENTRY')
-      || !appendedBlock.includes('throw new Error')) {
-      throw new Error(`${path} appended regression block must throw AUTONOMOUS_AUTHORING_MISSING_ENTRY for a missing accepted ID.`);
-    }
-    for (const card of selectedAcceptedProposal(input.solution, input.review).proposal.contractPayload!.cards) {
-      if (!appendedBlock.includes(card.proposedEntry.id)) {
-        throw new Error(`${path} appended regression block does not assert accepted ID ${card.proposedEntry.id}.`);
-      }
-    }
+    assertPreschoolShadowAppendedRegressionBlock({ appendedBlock, testPath: path, acceptedIds });
   }
   return { changedFiles, baselineEntries, finalEntries, cards };
 }
@@ -503,7 +493,7 @@ async function runV4(
         .split(/\r?\n/)
         .filter(line => /^[A-Za-z]*Error(?: \[[^\]\r\n]+\])?: /.test(line));
       return errorLines.length !== 1
-        || !proposedIds.some(id => errorLines[0] === `Error: AUTONOMOUS_AUTHORING_MISSING_ENTRY: ${id}`);
+        || !proposedIds.some(id => errorLines[0] === expectedPreschoolShadowMissingEntryErrorLine(id));
     });
     if (invalidRedCommand) {
       const reason = invalidRedCommand.exitCode === 0

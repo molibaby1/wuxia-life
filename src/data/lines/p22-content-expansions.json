@@ -27,19 +27,7 @@
       "description": "P22 出身池扩展：边关/贫寒开局"
     },
     "eventType": "auto",
-    "effects": [
-      {
-        "type": "stat_modify",
-        "target": "endurance",
-        "value": 4,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "caution",
-        "value": 3,
-        "operator": "add"
-      },
+    "autoEffects": [
       {
         "type": "flag_set",
         "target": "p22_frontier_orphan_shaped",
@@ -583,7 +571,7 @@
       "description": "P22 终局/历史记忆池扩展：隐逸淡出"
     },
     "eventType": "auto",
-    "effects": [
+    "autoEffects": [
       {
         "type": "flag_set",
         "target": "p22_hermit_memory_forgotten",
@@ -654,7 +642,7 @@
       "description": "P22 早期成长内容波次样板事件"
     },
     "eventType": "auto",
-    "effects": [
+    "autoEffects": [
       {
         "type": "stat_modify",
         "target": "knowledge",
@@ -719,7 +707,7 @@
       "description": "P22 中年后果内容波次样板事件"
     },
     "eventType": "auto",
-    "effects": [
+    "autoEffects": [
       {
         "type": "flag_set",
         "target": "p22_wave_mid_complete",
@@ -788,7 +776,7 @@
       "description": "P22 晚期传承终局内容波次样板事件"
     },
     "eventType": "auto",
-    "effects": [
+    "autoEffects": [
       {
         "type": "flag_set",
         "target": "p22_wave_late_complete",

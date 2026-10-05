@@ -19,8 +19,9 @@ import {
   runLiveOpsTuningComparisonSlice,
   runWaveValidations,
 } from '../src/p22/validationSlices';
-import { gameEngine } from '../src/core/GameEngineIntegration';
-import { getP22ExpansionEventById } from '../src/p22/p22ContentCatalog';
+import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
+import { getP22ExpansionEventById, getP22ExpansionEvents } from '../src/p22/p22ContentCatalog';
+import type { EventDefinition } from '../src/types/eventTypes';
 import {
   applyLiveOpsActivationToState,
   P22_LIVE_OPS_ACTIVE_FLAG,
@@ -57,6 +58,80 @@ function testExpansionEventsLoaded(): void {
   }
   const slices = runExpansionValidations();
   assert(slices.every(s => s.passed), `expansions: ${JSON.stringify(slices)}`);
+}
+
+async function executeP22AutoEvent(id: string) {
+  const engine = new GameEngineIntegration();
+  engine.startNewGame('P22 automatic-event regression', 'male');
+  const before = engine.getGameState();
+  before.player.traits = [];
+
+  const event = getP22ExpansionEventById(id);
+  if (!event) throw new Error(`missing ${id}`);
+  assert(event.eventType === 'auto', `${id} must be an automatic event`);
+
+  const beforeKnowledge = before.player.knowledge;
+  const beforeReputation = before.player.reputation;
+  await engine.executeAutoEvent(event);
+
+  return {
+    event,
+    beforeKnowledge,
+    beforeReputation,
+    state: engine.getGameState(),
+  };
+}
+
+async function testP22AutomaticEffectsExecute(): Promise<void> {
+  const orphan = await executeP22AutoEvent('p22_origin_frontier_orphan');
+  assert(
+    orphan.state.flags.p22_frontier_orphan_shaped === true,
+    'p22_origin_frontier_orphan must set its durable downstream flag',
+  );
+  assert(
+    JSON.stringify(orphan.event.autoEffects) === JSON.stringify([
+      { type: 'flag_set', target: 'p22_frontier_orphan_shaped', value: true },
+    ]),
+    'p22_origin_frontier_orphan must keep only its accepted durable flag write',
+  );
+
+  const hermit = await executeP22AutoEvent('p22_endgame_hermit_memory');
+  assert(hermit.state.flags.p22_hermit_memory_forgotten === true, 'hermit memory flag');
+  assert(hermit.state.flags.p19_historical_memory_tone === 'forgotten', 'historical memory tone');
+
+  const early = await executeP22AutoEvent('p22_wave_early_frontier_growth');
+  assert(
+    early.state.player.knowledge === early.beforeKnowledge + 3,
+    'early frontier event adds three knowledge',
+  );
+  assert(early.state.flags.p22_wave_early_complete === true, 'early wave completion flag');
+
+  const mid = await executeP22AutoEvent('p22_wave_mid_merchant_identity');
+  assert(
+    mid.state.player.reputation === mid.beforeReputation + 4,
+    'mid merchant event adds four reputation',
+  );
+  assert(mid.state.flags.p22_wave_mid_complete === true, 'mid wave completion flag');
+
+  const late = await executeP22AutoEvent('p22_wave_late_fade_closure');
+  assert(late.state.flags.p22_wave_late_complete === true, 'late wave completion flag');
+}
+
+function testP22AutomaticEventAuthoringContract(): void {
+  type InspectableEvent = EventDefinition & { effects?: unknown };
+  const autoEvents = getP22ExpansionEvents().filter(event => event.eventType === 'auto');
+  assert(autoEvents.length > 0, 'P22 automatic events must be present');
+
+  for (const event of autoEvents) {
+    assert(
+      Array.isArray(event.autoEffects) && event.autoEffects.length > 0,
+      `${event.id} must author non-empty autoEffects`,
+    );
+    assert(
+      !Object.prototype.hasOwnProperty.call(event as InspectableEvent, 'effects'),
+      `${event.id} must not author top-level effects`,
+    );
+  }
 }
 
 function testCoverageAndWeakSpots(): void {
@@ -162,9 +237,11 @@ function testLiveOpsSelectionGate(): void {
   );
 }
 
-function main(): void {
+async function main(): Promise<void> {
   testProfileSections();
   testExpansionEventsLoaded();
+  await testP22AutomaticEffectsExecute();
+  testP22AutomaticEventAuthoringContract();
   testCoverageAndWeakSpots();
   testCoverageMatrix();
   testWavesAndTuning();
@@ -175,4 +252,7 @@ function main(): void {
   console.log('✔ p22ContentLibraryTests passed');
 }
 
-main();
+void main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

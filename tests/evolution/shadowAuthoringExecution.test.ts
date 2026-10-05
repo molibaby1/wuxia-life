@@ -344,7 +344,8 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   for (const allowedPath of PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS) {
     assert.ok(observedJob?.prompt.includes(allowedPath), `prompt is missing allowed path ${allowedPath}`);
   }
-  assert.ok(observedJob?.prompt.includes(canonicalJson(accepted.proposal.contractPayload?.cards)));
+  const acceptedCardsJson = canonicalJson(accepted.proposal.contractPayload?.cards);
+  assert.ok(observedJob?.prompt.includes(acceptedCardsJson));
   assert.doesNotMatch(observedJob?.prompt ?? '', /PRIVATE_PHASE0_SENTINEL/);
   assert.match(observedJob?.prompt ?? '', /Do not commit, push, or merge/);
   const observedPrompt = observedJob?.prompt ?? '';
@@ -355,9 +356,11 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
     assert.ok(observedPrompt.includes(testPath.split('/').at(-1)!), `prompt is missing ${testPath}`);
   }
   assert.ok(observedPrompt.includes('preschool_neutral_shared_cooperation'));
+  assert.ok(observedPrompt.includes('AUTONOMOUS_AUTHORING_MISSING_ENTRY: ${acceptedId}'));
   assert.ok(observedPrompt.includes(
-    'AUTONOMOUS_AUTHORING_MISSING_ENTRY: preschool_neutral_shared_cooperation',
+    'Error: AUTONOMOUS_AUTHORING_MISSING_ENTRY: <accepted ID copied exactly from Accepted Cards>',
   ));
+  assert.ok(!observedPrompt.replace(acceptedCardsJson, '').includes('preschool_neutral_shared_cooperation'));
   assert.match(observedPrompt, /Each focused RED command must emit exactly one Error line/);
   assert.match(observedPrompt, /GREEN must pass with the Shadow catalog/);
   assert.equal(result.authoritativeFingerprintBefore, beforeFingerprint);

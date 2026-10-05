@@ -39,13 +39,12 @@ export function assertPreschoolShadowAppendedRegressionBlock(input: {
 }
 
 export function buildPreschoolShadowRegressionParticipantInstructions(acceptedIds: readonly string[]): string[] {
-  const acceptedErrorLines = acceptedIds.map(expectedPreschoolShadowMissingEntryErrorLine);
   return [
     'Keep each focused test file byte-for-byte unchanged as an exact prefix; append only.',
-    ...PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS.map(path => `Append a self-contained regression block at EOF of ${path} and assert every accepted ID.`),
+    ...PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS.map(path => `Append a self-contained regression block at EOF of ${path} and assert all ${acceptedIds.length} accepted IDs exactly as listed in Accepted Cards.`),
     'Guard each appended block for direct execution with import.meta.url + process.argv[1] + ===, or process.argv[1]?.endsWith(<matching test filename>).',
-    ...acceptedIds.map(id => `If accepted ID ${id} is missing, throw new Error('${expectedPreschoolShadowMissingEntryMessage(id)}').`),
-    `Each focused RED command must emit exactly one Error line matching one accepted ID: ${acceptedErrorLines.join(' | ')}.`,
+    'If an accepted ID is missing, throw new Error(`AUTONOMOUS_AUTHORING_MISSING_ENTRY: ${acceptedId}`) using that exact ID from Accepted Cards.',
+    'Each focused RED command must emit exactly one Error line of the form: Error: AUTONOMOUS_AUTHORING_MISSING_ENTRY: <accepted ID copied exactly from Accepted Cards>.',
     'GREEN must pass with the Shadow catalog.',
   ];
 }

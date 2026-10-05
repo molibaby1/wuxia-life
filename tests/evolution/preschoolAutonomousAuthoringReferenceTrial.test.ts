@@ -171,14 +171,14 @@ async function testRetransmissionPromptPersistedBeforeSend(root: string): Promis
   });
   const result = await run(destinationRoot);
   assert.equal(result.ok, true, JSON.stringify(result));
-  assert.equal(continuationBuildCount, 1);
+  assert.equal(continuationBuildCount, 1, 'successful retransmission must build continuation exactly once');
   const actualBytes = await readFile(join(destinationRoot, RETRANSMISSION_PROMPT_ARTIFACT));
   assert.deepEqual(actualBytes, Buffer.from(deliveredPrompt!));
 
   const blockedRoot = join(root, 'retransmission-prompt-create-only-failure');
   await put(blockedRoot, RETRANSMISSION_PROMPT_ARTIFACT, 'pre-existing evidence');
   await assert.rejects(run(blockedRoot), /EEXIST/);
-  assert.equal(continuationBuildCount, 1);
+  assert.equal(continuationBuildCount, 1, 'blocked retransmission prompt persistence must not build a second continuation');
   assert.equal(await readFile(join(blockedRoot, RETRANSMISSION_PROMPT_ARTIFACT), 'utf8'), 'pre-existing evidence');
 }
 
@@ -499,7 +499,7 @@ async function testArtifactBackedSolutionProbeHistoryContainment(root: string, i
     probeInput('terminal-history-allowed', terminalDestination),
     terminalStub.dependencies,
   );
-  assert.equal(terminalStub.calls.count, 1);
+  assert.equal(terminalStub.calls.count, 1, 'artifact-backed probe must invoke Solution exactly once');
   assert.equal(terminalResult.status, 'SUCCEEDED');
   assert.equal(terminalResult.solutionOutcome.status, 'SUCCEEDED');
   assert.equal(terminalResult.governedHistoryUnchanged, true);
@@ -548,7 +548,7 @@ async function testArtifactBackedSolutionProbeHistoryContainment(root: string, i
     probeInput('history-mutation-contained', join(root, 'artifact-backed-probe-history-mutation-output')),
     mutationStub.dependencies,
   );
-  assert.equal(mutationStub.calls.count, 1);
+  assert.equal(mutationStub.calls.count, 1, 'history-mutation probe must invoke Solution exactly once');
   assert.equal(mutationResult.status, 'CONTAINMENT_FAILURE');
   assert.equal(mutationResult.governedHistoryUnchanged, false);
   assert.notEqual(mutationResult.governedHistorySha256Before, mutationResult.governedHistorySha256After);
@@ -564,7 +564,7 @@ async function testArtifactBackedSolutionProbeHistoryContainment(root: string, i
       probeInput('admission-lock-mutation-contained', join(root, 'artifact-backed-probe-admission-lock-mutation-output')),
       lockMutationStub.dependencies,
     );
-    assert.equal(lockMutationStub.calls.count, 1);
+    assert.equal(lockMutationStub.calls.count, 1, 'admission-lock mutation probe must invoke Solution exactly once');
     assert.equal(lockMutationResult.status, 'CONTAINMENT_FAILURE');
     assert.equal(lockMutationResult.governedHistoryUnchanged, true);
     assert.equal(lockMutationResult.admissionLockAbsent, false);
@@ -1290,7 +1290,11 @@ async function assertParticipantPromptProvenanceMatchesDisk(
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
-    assert.equal(provenance.retransmissionPrompts.length, requested ? 1 : 0);
+    assert.equal(
+      provenance.retransmissionPrompts.length,
+      requested ? 1 : 0,
+      'retransmission prompt provenance count must match trace requests',
+    );
   }
 }
 
@@ -1634,7 +1638,7 @@ async function testRetransmissionPromptFinalizationGate(root: string): Promise<v
     await writeFile(tracePath, JSON.stringify(trace));
     const provenance = await readAttemptParticipantPromptProvenance(attempt.outputRoot, 'solution');
     assert.equal(provenance.status, runtimeOutcome === null ? 'CORRUPTED' : 'AVAILABLE');
-    assert.equal(provenance.retransmissionPrompts.length, 1);
+    assert.equal(provenance.retransmissionPrompts.length, 1, 'retransmission finalization must persist exactly one requested prompt');
     attempt.manifest.participantPromptProvenance.solution = provenance;
     await writeAttemptManifest(attempt.manifestPath, attempt.manifest);
     return { attempt, result: await buildLifecycleSuccessResult(attempt), promptPath };
@@ -1644,7 +1648,11 @@ async function testRetransmissionPromptFinalizationGate(root: string): Promise<v
     const { attempt } = await createWithRetransmission(`retransmission-outcome-${runtimeOutcome.toLowerCase()}`, runtimeOutcome);
     const provenance = attempt.manifest.participantPromptProvenance.solution;
     assert.equal(provenance.status, 'AVAILABLE', `${runtimeOutcome} must preserve exact prompt provenance`);
-    assert.equal(provenance.retransmissionPrompts.length, 1);
+    assert.equal(
+      provenance.retransmissionPrompts.length,
+      1,
+      `${runtimeOutcome} retransmission outcome must preserve exactly one persisted prompt`,
+    );
     const bytes = await readFile(join(attempt.outputRoot, 'solution-agent', RETRANSMISSION_PROMPT_ARTIFACT));
     assert.equal(provenance.retransmissionPrompts[0].sha256, sha256Hex(bytes));
     assert.equal(provenance.retransmissionPrompts[0].byteLength, bytes.byteLength);
@@ -2262,15 +2270,23 @@ async function testConcurrentProductionAttemptAdmission(root: string): Promise<v
     },
   })));
 
-  assert.equal(results.filter(result => result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE').length, 1);
-  assert.equal(results.filter(result => result.status === 'REFERENCE_EXECUTION_AUTHORIZATION_UNAVAILABLE').length, 1);
-  assert.equal(participantBindingCalls, 1);
-  assert.equal(artifactBackedBindingCalls, 1);
+  assert.equal(
+    results.filter(result => result.status === 'REFERENCE_EVIDENCE_UNAVAILABLE').length,
+    1,
+    'concurrent admission must produce exactly one evidence-unavailable result',
+  );
+  assert.equal(
+    results.filter(result => result.status === 'REFERENCE_EXECUTION_AUTHORIZATION_UNAVAILABLE').length,
+    1,
+    'concurrent admission must produce exactly one execution-authorization-unavailable result',
+  );
+  assert.equal(participantBindingCalls, 1, 'concurrent admission must invoke downstream binding exactly once');
+  assert.equal(artifactBackedBindingCalls, 1, 'concurrent admission must invoke artifact-backed binding exactly once');
   const afterHistory = await captureReferenceTrialLegacyHistory(trialRoot);
   assert.deepEqual(afterHistory.attempts.slice(0, initialHistory.attempts.length), initialHistory.attempts);
   assert.deepEqual(afterHistory.runLevelMaterial, initialHistory.runLevelMaterial);
   const createdAttempts = afterHistory.attempts.filter(item => !initialHistory.attempts.some(before => before.attemptRef === item.attemptRef));
-  assert.equal(createdAttempts.length, 1);
+  assert.equal(createdAttempts.length, 1, 'concurrent admission must create exactly one attempt');
   assert.equal(createdAttempts[0]!.manifestPresent, true);
   assert.equal(createdAttempts[0]!.manifestState, 'STOPPED');
   const activeAttempts = afterHistory.attempts.filter(item => item.manifestState === 'CREATED' || item.manifestState === 'RUNNING');
@@ -2687,8 +2703,8 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     const storedHypotheses = parseStoredImprovementHypothesisSet(
       await readFile(join(hostInputRoot, 'source/reference-trial/improvement-hypothesis.json'), 'utf8'),
     );
-    assert.equal(storedHypotheses.hypotheses.length, 1);
-    assert.equal(storedHypotheses.hypotheses[0]?.unknowns.length, 1);
+    assert.equal(storedHypotheses.hypotheses.length, 1, 'reference trial must store exactly one hypothesis');
+    assert.equal(storedHypotheses.hypotheses[0]?.unknowns.length, 1, 'stored reference hypothesis must contain exactly one unknown');
     assert.deepEqual(storedHypotheses.hypotheses[0]?.unknowns, trialInputs.problemPackage.problem.unknowns);
     for (const relativePath of trialInputs.artifactRelativePaths) {
       const participantInput = await readFile(join(hostInputRoot, relativePath), 'utf8');
@@ -2960,7 +2976,10 @@ if (process.argv[1]?.endsWith('preschoolAutonomousAuthoringReferenceTrial.test.t
   runPreschoolAutonomousAuthoringReferenceTrialTests().then(() => {
     process.stdout.write('preschoolAutonomousAuthoringReferenceTrial.test.ts: ok\n');
   }).catch(error => {
-    process.stderr.write(`${String(error)}\n`);
+    const diagnostic = error instanceof Error
+      ? (error.stack ?? error.message)
+      : String(error);
+    process.stderr.write(`${diagnostic}\n`);
     process.exitCode = 1;
   });
 }

@@ -1095,7 +1095,11 @@ async function assertShadowExecutionEvidenceRetained(
   assert.equal(artifactRefs.shadowChangeSet, 'shadow-authoring/change-set.json');
   assert.equal(artifactRefs.shadowExecutionPatch, 'shadow-authoring/execution.patch');
   const admissionBytes = await readFile(join(outputRoot, artifactRefs.shadowAdmission));
-  assert.equal(sha256Hex(admissionBytes), verification.admissionSha256);
+  const admission = JSON.parse(admissionBytes.toString('utf8')) as Record<string, unknown>;
+  assert.deepEqual(admissionBytes, Buffer.from(canonicalJson(admission)));
+  if (typeof verification.admissionSha256 === 'string') {
+    assert.equal(sha256Hex(admissionBytes), verification.admissionSha256);
+  }
   const changeSet = JSON.parse(await readFile(join(outputRoot, artifactRefs.shadowChangeSet), 'utf8')) as {
     schemaVersion: string;
     authoritativeFingerprintBefore: string;

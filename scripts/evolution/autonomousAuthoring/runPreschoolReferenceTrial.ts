@@ -1788,9 +1788,8 @@ function removeTrustedCurrentRunPromptFragment(
     + prompt.slice(first + exactSegment.length);
 }
 
-function assertNoParticipantContamination(
-  workspaceRoot: string,
-  prompt = '',
+function assertParticipantPromptNoContamination(
+  prompt: string,
   trustedCurrentRunFragment?: TrustedCurrentRunPromptFragment,
 ): void {
   if (prompt.includes(FORBIDDEN_RESIDUAL_DESIGN_PATH)) {
@@ -1802,7 +1801,9 @@ function assertNoParticipantContamination(
   for (const marker of FORBIDDEN_ANSWER_IDS) {
     if (promptForAnswerScan.includes(marker)) throw new Error(`Participant-visible contamination detected in prompt: ${marker}`);
   }
+}
 
+function assertParticipantWorkspaceNoContamination(workspaceRoot: string): void {
   const root = resolve(workspaceRoot);
   const visited = new Set<string>();
   const inspect = (absolutePath: string, relativePath: string): void => {
@@ -1848,6 +1849,15 @@ function assertNoParticipantContamination(
   inspect(root, '');
 }
 
+function assertNoParticipantContamination(
+  workspaceRoot: string,
+  prompt = '',
+  trustedCurrentRunFragment?: TrustedCurrentRunPromptFragment,
+): void {
+  assertParticipantPromptNoContamination(prompt, trustedCurrentRunFragment);
+  assertParticipantWorkspaceNoContamination(workspaceRoot);
+}
+
 export async function prepareReferenceTrialParticipantWorkspace(input: {
   baselineRoot: string;
   destinationRoot: string;
@@ -1878,16 +1888,19 @@ function withPromptContaminationGuard(
 ): WorkspaceAgentParticipantOptions {
   const buildArgs = participant.buildArgs;
   const sameThreadContinuation = participant.sameThreadContinuation;
-  const assertCleanJob = (input: WorkspaceAgentJobInput): void => {
+  const assertRoleMatchesTrustedFragment = (input: WorkspaceAgentJobInput): void => {
     if (trustedCurrentRunFragment && input.role !== trustedCurrentRunFragment.role) {
       throw new Error('Verified current-run output cannot be applied to a different Participant role.');
     }
+  };
+  const assertCleanInitialJob = (input: WorkspaceAgentJobInput): void => {
+    assertRoleMatchesTrustedFragment(input);
     assertNoParticipantContamination(input.workspaceRoot, input.prompt, trustedCurrentRunFragment);
   };
   return {
     ...participant,
     buildArgs: (input: WorkspaceAgentJobInput) => {
-      assertCleanJob(input);
+      assertCleanInitialJob(input);
       return buildArgs(input);
     },
     ...(sameThreadContinuation === undefined
@@ -1896,7 +1909,12 @@ function withPromptContaminationGuard(
         sameThreadContinuation: {
           ...sameThreadContinuation,
           buildArgs: (input: WorkspaceAgentJobInput, threadRef) => {
-            assertCleanJob(input);
+            assertRoleMatchesTrustedFragment(input);
+            if (trustedCurrentRunFragment === undefined) {
+              assertNoParticipantContamination(input.workspaceRoot, input.prompt);
+            } else {
+              assertParticipantPromptNoContamination(input.prompt);
+            }
             return sameThreadContinuation.buildArgs(input, threadRef);
           },
         },

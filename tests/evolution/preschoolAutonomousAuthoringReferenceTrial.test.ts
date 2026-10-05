@@ -331,13 +331,19 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'shadow-participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'shadow-participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'reviewer-schema-correction' | 'shadow-schema-correction' | 'reviewer-continuation-answer-marker' | 'reviewer-role-crossover' | 'shadow-role-crossover' | 'reviewer-initial-fragment-missing' | 'reviewer-initial-fragment-duplicated' | 'reviewer-initial-fragment-misplaced' | 'shadow-initial-fragment-missing' | 'shadow-initial-fragment-duplicated' | 'shadow-initial-fragment-misplaced' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
   observable: string;
   brief: string;
-}, options: { suffix?: string; reviewerStaticPromptMarker?: string } = {}): Promise<typeof runPreschoolReferenceTrial> {
+}, options: {
+  suffix?: string;
+  reviewerStaticPromptMarker?: string;
+  continuationPromptMarker?: string;
+  reviewerTrustedFragmentFault?: 'missing' | 'duplicated' | 'misplaced';
+  shadowTrustedFragmentFault?: 'missing' | 'duplicated' | 'misplaced';
+} = {}): Promise<typeof runPreschoolReferenceTrial> {
   const sourceRoot = join(root, `synthetic-public-runner-source${options.suffix ? `-${options.suffix}` : ''}`);
   const cloned = spawnSync('git', ['clone', '--quiet', '--shared', process.cwd(), sourceRoot], { encoding: 'utf8' });
   assert.equal(cloned.status, 0, cloned.stderr);
@@ -360,16 +366,51 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   }
   await writeFile(join(sourceRoot, runnerPath), runnerSource);
   await writeFile(join(sourceRoot, verifierPath), await readFile(join(process.cwd(), verifierPath)));
-  await writeFile(join(sourceRoot, shadowAuthoringPath), await readFile(join(process.cwd(), shadowAuthoringPath)));
-  if (options.reviewerStaticPromptMarker) {
-    const reviewerSourcePath = join(process.cwd(), reviewerPath);
-    const promptAnchor = "    'Independently inspect the repository and referenced artifacts before reviewing this result.',";
-    const reviewerSource = await readFile(reviewerSourcePath, 'utf8');
-    assert.equal(reviewerSource.split(promptAnchor).length, 2);
-    await writeFile(join(sourceRoot, reviewerPath), reviewerSource.replace(
-      promptAnchor,
-      `${promptAnchor}\n    ${JSON.stringify(options.reviewerStaticPromptMarker)},`,
+  if (options.continuationPromptMarker) {
+    const retransmissionPath = 'scripts/evolution/problemAgnosticSolution/envelopeRetransmission.ts';
+    const retransmissionSource = await readFile(join(sourceRoot, retransmissionPath), 'utf8');
+    const returnAnchor = '  return [\n';
+    assert.equal(retransmissionSource.split(returnAnchor).length, 2);
+    await writeFile(join(sourceRoot, retransmissionPath), retransmissionSource.replace(
+      returnAnchor,
+      `${returnAnchor}    ${JSON.stringify(options.continuationPromptMarker)},\n`,
     ));
+  }
+  let shadowAuthoringSource = await readFile(join(process.cwd(), shadowAuthoringPath), 'utf8');
+  const shadowTrustedFragment = "    'Accepted Cards:',\n    canonicalJson(cards),";
+  if (options.shadowTrustedFragmentFault) {
+    assert.equal(shadowAuthoringSource.split(shadowTrustedFragment).length, 2);
+    const replacement = options.shadowTrustedFragmentFault === 'missing'
+      ? ''
+      : options.shadowTrustedFragmentFault === 'duplicated'
+        ? `${shadowTrustedFragment}\n    '',\n    'The only allowed write paths are exactly these three paths:',\n${shadowTrustedFragment}`
+        : "    'Accepted Content:',\n    canonicalJson(cards),";
+    shadowAuthoringSource = shadowAuthoringSource.replace(shadowTrustedFragment, replacement);
+  }
+  await writeFile(join(sourceRoot, shadowAuthoringPath), shadowAuthoringSource);
+  if (options.reviewerStaticPromptMarker || options.reviewerTrustedFragmentFault) {
+    const reviewerSourcePath = join(process.cwd(), reviewerPath);
+    const reviewerSource = await readFile(reviewerSourcePath, 'utf8');
+    let patchedReviewerSource = reviewerSource;
+    if (options.reviewerStaticPromptMarker) {
+      const promptAnchor = "    'Independently inspect the repository and referenced artifacts before reviewing this result.',";
+      assert.equal(patchedReviewerSource.split(promptAnchor).length, 2);
+      patchedReviewerSource = patchedReviewerSource.replace(
+        promptAnchor,
+        `${promptAnchor}\n    ${JSON.stringify(options.reviewerStaticPromptMarker)},`,
+      );
+    }
+    const reviewerTrustedFragment = "    'Structured Solution Result:',\n    canonicalJson(solutionWork),";
+    if (options.reviewerTrustedFragmentFault) {
+      assert.equal(patchedReviewerSource.split(reviewerTrustedFragment).length, 2);
+      const replacement = options.reviewerTrustedFragmentFault === 'missing'
+        ? ''
+        : options.reviewerTrustedFragmentFault === 'duplicated'
+          ? `${reviewerTrustedFragment}\n${reviewerTrustedFragment}`
+          : "    'Structured Solution Output:',\n    canonicalJson(solutionWork),";
+      patchedReviewerSource = patchedReviewerSource.replace(reviewerTrustedFragment, replacement);
+    }
+    await writeFile(join(sourceRoot, reviewerPath), patchedReviewerSource);
   }
   const briefSource = await readFile(join(process.cwd(), briefPath), 'utf8');
   assert.equal(briefSource.split(PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256).length, 2);
@@ -615,6 +656,55 @@ function syntheticCapacityEvidence(): Record<string, unknown> {
   };
 }
 
+async function assertTrustedFragmentSchemaCorrection(input: {
+  outputRoot: string;
+  role: 'reviewer' | 'shadowAuthoring';
+  boundaryLabel: 'Structured Solution Result' | 'Accepted Cards';
+  boundaryContent: unknown;
+}): Promise<void> {
+  const directory = input.role === 'reviewer' ? 'reviewer-agent' : 'shadow-authoring';
+  const exactBoundary = `${input.boundaryLabel}:\n${canonicalJson(input.boundaryContent)}`;
+  const initialPrompt = await readFile(join(input.outputRoot, directory, 'participant-prompt.txt'), 'utf8');
+  assert.equal(initialPrompt.split(exactBoundary).length - 1, 1, `${input.role} initial prompt must contain its exact trusted boundary once`);
+
+  const correctionPrompt = await readFile(
+    join(input.outputRoot, directory, 'participant-envelope-retransmission-prompt-1.txt'),
+    'utf8',
+  );
+  assert.equal(correctionPrompt.includes(`${input.boundaryLabel}:`), false, `${input.role} correction prompt must not repeat its initial trusted boundary`);
+
+  const trace = JSON.parse(await readFile(join(input.outputRoot, directory, 'execution-trace.json'), 'utf8')) as {
+    events: Array<{
+      type: string;
+      attempt?: number;
+      schemaValid?: boolean;
+      accepted?: boolean;
+      failureClass?: string;
+      sameThread?: boolean;
+    }>;
+  };
+  const requests = trace.events.filter(event => event.type === 'participant_envelope_retransmission_requested');
+  assert.equal(requests.length, 1, `${input.role} must request exactly one correction`);
+  assert.equal(requests[0]?.failureClass, 'SCHEMA_FAILURE');
+  assert.equal(requests[0]?.sameThread, true);
+  assert.equal(
+    trace.events.some(event => event.type === 'participant_terminal_validation' && event.attempt === 0 && event.schemaValid === false),
+    true,
+    `${input.role} attempt 0 must fail Role-schema validation`,
+  );
+  assert.equal(
+    trace.events.some(event => event.type === 'process_start' && event.attempt === 1),
+    true,
+    `${input.role} correction must start an attempt-1 process`,
+  );
+  assert.equal(
+    trace.events.some(event => event.type === 'participant_terminal_validation'
+      && event.attempt === 1 && event.schemaValid === true && event.accepted === true),
+    true,
+    `${input.role} attempt 1 must pass terminal validation`,
+  );
+}
+
 async function testSyntheticLayerAEndToEnd(root: string, paths: {
   evidence: string;
   observable: string;
@@ -688,6 +778,11 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     entries[0]!.id = 'preschool_neutral_fair_play_result';
     cards[0]!.proposedEntry.id = 'preschool_neutral_fair_play_result';
   }
+  if (scenario === 'shadow-schema-correction') {
+    ids[0] = ANSWER_IDS[0];
+    entries[0]!.id = ANSWER_IDS[0];
+    cards[0]!.proposedEntry.id = ANSWER_IDS[0];
+  }
   const observableRef = 'source/reference-trial/observable-payload.json';
   const briefRef = 'source/reference-trial/reference-responsibility-brief.json';
   const attestationRef = 'source/reference-trial/reference-responsibility-attestation.json';
@@ -713,8 +808,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     recommendedOptionId: 'option-000001', summary: 'Synthetic contract-bound proposal.',
     repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef],
   };
-  if (scenario === 'solution-exact-answer-id') solution.summary = 'preschool_neutral_fair_play';
-  if (scenario === 'reviewer-static-answer-marker') solution.summary = 'preschool_neutral_fair_play';
+  if (scenario === 'solution-exact-answer-id') solution.summary = ANSWER_IDS[0];
+  if (scenario === 'reviewer-static-answer-marker') solution.summary = ANSWER_IDS[0];
+  if (scenario === 'reviewer-schema-correction') solution.summary = ANSWER_IDS[0];
   const schemaInvalidSolution = structuredClone(solution);
   schemaInvalidSolution.options[0]!.autonomousAuthoring.contractPayload.cards[0]!.scopeCheck =
     'The scoped changes preserve the authorized Contract.';
@@ -742,8 +838,16 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     assessment: 'A durable relationship interpretation requires Human product-governance review.',
     repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef, attestationRef], concerns: [],
   } : review;
+  const reviewerInitialResult = scenario === 'reviewer-schema-correction' || scenario === 'reviewer-role-crossover'
+    ? { ...reviewerResult, schemaVersion: 'solution-review-invalid-v1' }
+    : scenario === 'reviewer-continuation-answer-marker'
+      ? { ...reviewerResult, decision: ANSWER_IDS[0] }
+      : reviewerResult;
   const executorResult = {
-    schemaVersion: 'shadow-authoring-execution-participant-result-v1', status: 'completed',
+    schemaVersion: 'shadow-authoring-execution-participant-result-v1',
+    status: scenario === 'shadow-schema-correction' || scenario === 'shadow-role-crossover'
+      ? 'SHADOW_AUTHORING_VERIFIED'
+      : 'completed',
     changedFiles: [catalogRef, 'tests/preschoolPassiveSpineTests.ts', 'tests/annualPassiveMemoryTests.ts'],
     verificationCommandsRun: [], deviations: [],
   };
@@ -762,9 +866,35 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     'process.stdout.write(process.argv[3]);',
   ].join('\n');
   const jobs: string[] = [];
+  let continuationBuildArgsCount = 0;
   const outputRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ATTEMPTS_PATH, 'attempt-000900');
   const participant: WorkspaceAgentParticipantOptions = {
     executable: process.execPath,
+    interpretCompletedOutput: ({ job, stdout, expectedThreadRef }) => {
+      if (expectedThreadRef === undefined && scenario === 'reviewer-role-crossover' && job.role === 'reviewer') {
+        job.role = 'configuration-execution';
+      } else if (expectedThreadRef === undefined && scenario === 'shadow-role-crossover' && job.role === 'configuration-execution') {
+        job.role = 'reviewer';
+      }
+      return {
+        ok: true as const,
+        rawOutput: stdout,
+        threadRef: expectedThreadRef ?? { provider: 'synthetic-provider', opaqueId: job.invocationRef },
+      };
+    },
+    sameThreadContinuation: {
+      provider: 'synthetic-provider',
+      buildArgs: job => {
+        continuationBuildArgsCount += 1;
+        if (job.role === 'reviewer') {
+          return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerResult)];
+        }
+        if (job.role === 'configuration-execution') {
+          return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify({ ...executorResult, status: 'completed' })];
+        }
+        throw new Error(`Unexpected synthetic continuation role: ${job.role}`);
+      },
+    },
     buildArgs: job => {
       jobs.push(job.role);
       if (job.role === 'solution' && scenario === 'participant-failure') {
@@ -802,7 +932,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
           "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
         ].join('\n'), bytes];
       }
-      if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerResult)];
+      if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerInitialResult)];
       return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult), scenario];
     },
   };
@@ -846,7 +976,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   });
   const expectedSuccessfulScenario = scenario === 'success'
     || scenario === 'solution-id-prefix-collision'
-    || scenario === 'solution-exact-answer-id';
+    || scenario === 'solution-exact-answer-id'
+    || scenario === 'reviewer-schema-correction'
+    || scenario === 'shadow-schema-correction';
   if (!expectedSuccessfulScenario) {
     const solutionOnlyFailure = scenario === 'participant-failure'
       || scenario === 'artifact-backed-role-schema-failure'
@@ -861,6 +993,15 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       await assert.rejects(trial, /Solution Participant failed/);
     } else if (scenario === 'reviewer-static-answer-marker') {
       await assert.rejects(trial, /Participant-visible contamination detected in prompt: preschool_neutral_fair_play/);
+    } else if (scenario === 'reviewer-continuation-answer-marker') {
+      await assert.rejects(trial, /Participant-visible contamination detected in prompt: preschool_neutral_fair_play/);
+      assert.equal(continuationBuildArgsCount, 0, 'contaminated trusted-fragment continuation must not invoke its underlying buildArgs');
+    } else if (scenario.startsWith('reviewer-initial-fragment-') || scenario.startsWith('shadow-initial-fragment-')) {
+      await assert.rejects(trial, /Verified current-run output is not present exactly once at its expected prompt boundary\./);
+      assert.equal(continuationBuildArgsCount, 0);
+    } else if (scenario === 'reviewer-role-crossover' || scenario === 'shadow-role-crossover') {
+      await assert.rejects(trial, /Verified current-run output cannot be applied to a different Participant role\./);
+      assert.equal(continuationBuildArgsCount, 0, 'role-crossover continuation must not invoke its underlying buildArgs');
     } else if (scenario === 'omitted-responsibility') {
       await assert.rejects(trial);
     } else if (scenario === 'reviewer-contract-escalation') {
@@ -876,8 +1017,16 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       ? []
       : solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
       ? ['solution']
+      : scenario.startsWith('reviewer-initial-fragment-')
+        ? ['solution']
       : scenario === 'omitted-responsibility' || scenario === 'reviewer-contract-escalation'
         ? ['solution', 'reviewer']
+        : scenario === 'reviewer-continuation-answer-marker' || scenario === 'reviewer-role-crossover'
+          ? ['solution', 'reviewer']
+        : scenario.startsWith('shadow-initial-fragment-')
+          ? ['solution', 'reviewer']
+        : scenario === 'shadow-role-crossover'
+          ? ['solution', 'reviewer', 'configuration-execution']
         : ['solution', 'reviewer', 'configuration-execution']);
     const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
     assert.equal(failedManifest.state, 'FAILED');
@@ -914,7 +1063,11 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       ? ['solution'] as const
       : scenario === 'reviewer-static-answer-marker'
         ? ['solution', 'reviewer'] as const
+      : scenario.startsWith('reviewer-initial-fragment-')
+        ? ['solution', 'reviewer'] as const
       : scenario === 'omitted-responsibility' || scenario === 'reviewer-contract-escalation'
+        ? ['solution', 'reviewer'] as const
+      : scenario === 'reviewer-continuation-answer-marker' || scenario === 'reviewer-role-crossover'
         ? ['solution', 'reviewer'] as const
         : ['solution', 'reviewer', 'shadowAuthoring'] as const;
     await assertParticipantPromptProvenanceMatchesDisk(outputRoot, failedManifest, [...invokedPromptRoles]);
@@ -953,6 +1106,26 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       assert.equal(verification.checks.evidenceBoundedCompletion, 'FAIL');
       assert.match(verification.failures.join(' '), /Structural capacity deficit must decrease from a positive value to zero/);
     }
+    if (scenario === 'reviewer-continuation-answer-marker') {
+      const correctionPrompt = await readFile(join(outputRoot, 'reviewer-agent/participant-envelope-retransmission-prompt-1.txt'), 'utf8');
+      assert.match(correctionPrompt, /preschool_neutral_fair_play/);
+      const trace = JSON.parse(await readFile(join(outputRoot, 'reviewer-agent/execution-trace.json'), 'utf8')) as {
+        events: Array<{ type: string; attempt?: number; failureClass?: string; sameThread?: boolean }>;
+      };
+      assert.equal(trace.events.filter(event => event.type === 'participant_envelope_retransmission_requested').length, 1);
+      assert.equal(trace.events.some(event => event.type === 'process_start' && event.attempt === 1), false);
+    }
+    if (scenario === 'reviewer-role-crossover' || scenario === 'shadow-role-crossover') {
+      const role = scenario === 'reviewer-role-crossover' ? 'reviewer-agent' : 'shadow-authoring';
+      const trace = JSON.parse(await readFile(join(outputRoot, role, 'execution-trace.json'), 'utf8')) as {
+        events: Array<{ type: string; attempt?: number; failureClass?: string; sameThread?: boolean }>;
+      };
+      const requests = trace.events.filter(event => event.type === 'participant_envelope_retransmission_requested');
+      assert.equal(requests.length, 1);
+      assert.equal(requests[0]?.failureClass, 'SCHEMA_FAILURE');
+      assert.equal(requests[0]?.sameThread, true);
+      assert.equal(trace.events.some(event => event.type === 'process_start' && event.attempt === 1), false);
+    }
     if (scenario === 'omitted-responsibility') {
       const submittedSolution = JSON.parse(await readFile(join(outputRoot, 'solution-agent/result.json'), 'utf8')) as typeof solution;
       const submittedBrief = JSON.parse(await readFile(join(outputRoot, 'source/reference-trial/reference-responsibility-brief.json'), 'utf8')) as typeof brief;
@@ -979,6 +1152,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       && scenario !== 'artifact-backed-role-schema-failure'
       && scenario !== 'participant-failure'
       && scenario !== 'reviewer-static-answer-marker'
+      && scenario !== 'reviewer-continuation-answer-marker'
+      && scenario !== 'reviewer-role-crossover'
+      && !scenario.startsWith('reviewer-initial-fragment-')
       && scenario !== 'binding-drift-at-invocation'
       && scenario !== 'history-drift-at-binding') {
       const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
@@ -1017,6 +1193,26 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     'changedFiles', 'commandResults', 'capacityBefore', 'capacityAfter', 'patchSha256', 'promotionPatch',
   ].sort());
   assert.equal(verification.status, 'SHADOW_AUTHORING_VERIFIED');
+  if (scenario === 'reviewer-schema-correction') {
+    assert.equal(continuationBuildArgsCount, 1);
+    assert.equal(canonicalJson(solution).includes(ANSWER_IDS[0]), true);
+    await assertTrustedFragmentSchemaCorrection({
+      outputRoot,
+      role: 'reviewer',
+      boundaryLabel: 'Structured Solution Result',
+      boundaryContent: solution,
+    });
+  } else if (scenario === 'shadow-schema-correction') {
+    assert.equal(continuationBuildArgsCount, 1);
+    await assertTrustedFragmentSchemaCorrection({
+      outputRoot,
+      role: 'shadowAuthoring',
+      boundaryLabel: 'Accepted Cards',
+      boundaryContent: cards,
+    });
+  } else {
+    assert.equal(continuationBuildArgsCount, 0);
+  }
   assert.ok(Object.values(verification.checks).every(check => check === 'PASS'));
   assert.deepEqual(Object.keys(verification.promotionPatch).sort(), ['byteLength', 'sha256']);
   assert.ok(verification.promotionPatch.byteLength > 0);
@@ -2624,6 +2820,49 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       bytes: fullBriefBytes,
       sha256: sha256Hex(fullBriefBytes),
     });
+    for (const scenario of [
+      'reviewer-schema-correction',
+      'shadow-schema-correction',
+      'reviewer-role-crossover',
+      'shadow-role-crossover',
+    ] as const) {
+      await testSyntheticLayerAEndToEnd(root, {
+        evidence: capacityEvidencePath,
+        observable: syntheticPayloadPath,
+        brief: fullBriefPath,
+      }, scenario, syntheticRunner, syntheticAcceptedBriefFixture);
+    }
+    const continuationMarkerRunner = await loadSyntheticPublicRunner(root, {
+      evidence: sha256Hex(capacityEvidenceBytes),
+      observable: sha256Hex(syntheticPayloadBytes),
+      brief: sha256Hex(fullBriefBytes),
+    }, {
+      suffix: 'reviewer-continuation-marker',
+      continuationPromptMarker: ANSWER_IDS[0],
+    });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'reviewer-continuation-answer-marker', continuationMarkerRunner, syntheticAcceptedBriefFixture);
+    for (const role of ['reviewer', 'shadow'] as const) {
+      for (const fault of ['missing', 'duplicated', 'misplaced'] as const) {
+        const scenario = `${role}-initial-fragment-${fault}` as SyntheticLayerAScenario;
+        const suffix = `${role}-initial-fragment-${fault}`;
+        const faultRunner = await loadSyntheticPublicRunner(root, {
+          evidence: sha256Hex(capacityEvidenceBytes),
+          observable: sha256Hex(syntheticPayloadBytes),
+          brief: sha256Hex(fullBriefBytes),
+        }, role === 'reviewer'
+          ? { suffix, reviewerTrustedFragmentFault: fault }
+          : { suffix, shadowTrustedFragmentFault: fault });
+        await testSyntheticLayerAEndToEnd(root, {
+          evidence: capacityEvidencePath,
+          observable: syntheticPayloadPath,
+          brief: fullBriefPath,
+        }, scenario, faultRunner, syntheticAcceptedBriefFixture);
+      }
+    }
     for (const scenario of ['artifact-backed-role-schema-failure', 'artifact-backed-receipt-failure'] as const) {
       await testSyntheticLayerAEndToEnd(root, {
         evidence: capacityEvidencePath,

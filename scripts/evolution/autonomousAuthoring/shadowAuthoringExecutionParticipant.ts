@@ -56,11 +56,11 @@ export interface ShadowAuthoringExecutionRun {
   participantJobs: 1;
 }
 
-async function writeCreateOnly(path: string, content: string): Promise<void> {
+async function writeCreateOnly(path: string, content: string | Uint8Array): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const handle = await open(path, 'wx');
   try {
-    await handle.writeFile(content, 'utf8');
+    await handle.writeFile(content);
   } finally {
     await handle.close();
   }
@@ -162,6 +162,7 @@ export async function runShadowAuthoringExecution(input: {
   const repositoryRoot = resolve(input.repositoryRoot);
   const artifactRoot = resolve(input.artifactRoot);
   const accepted = assertAcceptedAuthoring(input);
+  await writeCreateOnly(join(artifactRoot, 'admission.json'), canonicalJson(input.admission));
   const acceptedIds = accepted.cards.map(card => card.proposedEntry.id);
   const before = await captureWorkspaceSnapshot(repositoryRoot);
   const preparedWorkspace = await prepareAgentWorkspace({
@@ -203,6 +204,15 @@ export async function runShadowAuthoringExecution(input: {
     const promotion = await buildDeterministicPromotionPatch({
       beforeRoot: repositoryRoot,
       afterRoot: preparedWorkspace.workspaceRoot,
+      changes: canonicalChanges,
+    });
+    await writeCreateOnly(join(artifactRoot, 'execution.patch'), promotion.patch);
+    await writeCreateOnlyJson(join(artifactRoot, 'change-set.json'), {
+      schemaVersion: 'shadow-authoring-change-set-v1',
+      authoritativeFingerprintBefore: before.fingerprintSha256,
+      authoritativeFingerprintAfter: after.fingerprintSha256,
+      patchSha256: promotion.patchSha256,
+      patchByteLength: promotion.patch.byteLength,
       changes: canonicalChanges,
     });
     const authoritativeChanged = after.fingerprintSha256 !== before.fingerprintSha256;

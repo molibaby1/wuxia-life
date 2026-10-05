@@ -937,6 +937,12 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.json')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.md')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion.patch')), { code: 'ENOENT' });
+    if (scenario === 'unauthorized-shadow-path' || scenario === 'residual-v5-deficit') {
+      const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
+      await assertShadowExecutionEvidenceRetained(outputRoot, failedManifest, verification);
+      assert.equal(verification.patchSha256, null);
+      assert.equal(verification.promotionPatch, null);
+    }
     if (scenario === 'unauthorized-shadow-path') {
       const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
       assert.equal(verification.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
@@ -1002,6 +1008,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(succeededManifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
   assert.equal(succeededManifest.terminalOutcome.trialResultRef, 'trial-result.json');
   const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
+  const shadowExecutionPatch = await assertShadowExecutionEvidenceRetained(outputRoot, succeededManifest, verification);
   assert.equal(verification.schemaVersion, 'preschool-reference-trial-shadow-verification-v1');
   assert.deepEqual(Object.keys(verification).sort(), [
     'schemaVersion', 'status', 'checks', 'failures', 'candidateBaselineGitSha',
@@ -1073,7 +1080,35 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(packageJson.schemaVersion, 'shadow-authoring-promotion-package-v1');
   assert.equal(packageJson.authoritativeRepositoryUnchanged, true);
   assert.equal(packageJson.naturalPverPerformed, false);
-  assert.ok((await readFile(result.promotionPatchPath)).length > 0);
+  const promotionPatch = await readFile(result.promotionPatchPath);
+  assert.ok(promotionPatch.length > 0);
+  assert.deepEqual(shadowExecutionPatch, promotionPatch);
+}
+
+async function assertShadowExecutionEvidenceRetained(
+  outputRoot: string,
+  manifest: Record<string, any>,
+  verification: Record<string, any>,
+): Promise<Buffer> {
+  const artifactRefs = manifest.artifactRefs as Record<string, string>;
+  assert.equal(artifactRefs.shadowAdmission, 'shadow-authoring/admission.json');
+  assert.equal(artifactRefs.shadowChangeSet, 'shadow-authoring/change-set.json');
+  assert.equal(artifactRefs.shadowExecutionPatch, 'shadow-authoring/execution.patch');
+  const admissionBytes = await readFile(join(outputRoot, artifactRefs.shadowAdmission));
+  assert.equal(sha256Hex(admissionBytes), verification.admissionSha256);
+  const changeSet = JSON.parse(await readFile(join(outputRoot, artifactRefs.shadowChangeSet), 'utf8')) as {
+    schemaVersion: string;
+    authoritativeFingerprintBefore: string;
+    authoritativeFingerprintAfter: string;
+    patchSha256: string;
+    patchByteLength: number;
+    changes: unknown[];
+  };
+  assert.equal(changeSet.schemaVersion, 'shadow-authoring-change-set-v1');
+  const executionPatch = await readFile(join(outputRoot, artifactRefs.shadowExecutionPatch));
+  assert.equal(changeSet.patchSha256, sha256Hex(executionPatch));
+  assert.equal(changeSet.patchByteLength, executionPatch.byteLength);
+  return executionPatch;
 }
 
 function authorizationBody(input: {

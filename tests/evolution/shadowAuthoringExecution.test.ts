@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { mkdtemp } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { chmod, cp, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { runShadowAuthoringExecution } from '../../scripts/evolution/autonomousAuthoring/shadowAuthoringExecutionParticipant';
@@ -295,8 +296,13 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   for (const testPath of PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS) {
     await writeFile(join(repositoryRoot, testPath), 'export const baseline = true;\n');
   }
+  const replayRoot = join(root, 'fresh-baseline');
+  await cp(repositoryRoot, replayRoot, { recursive: true });
   const beforeFingerprint = await captureAuthoritativeFingerprint(repositoryRoot);
   const accepted = acceptedInputs();
+  const artifactRoot = join(root, 'shadow-authoring-artifacts');
+  const admissionPath = join(artifactRoot, 'admission.json');
+  let admissionPresentBeforeParticipant = false;
   let observedJob: WorkspaceAgentJobInput | undefined;
   const participantResult = {
     schemaVersion: 'shadow-authoring-execution-participant-result-v1',
@@ -318,16 +324,30 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   const result = await runShadowAuthoringExecution({
     repositoryRoot,
     workspaceDestinationRoot: join(root, 'isolated-workspaces'),
-    artifactRoot: join(root, 'shadow-authoring-artifacts'),
+    artifactRoot,
     invocationRef: 'shadow-authoring-invocation-test',
     solution: accepted.solution,
     review: accepted.review,
     admission: accepted.admission,
     participant: continuationCapableParticipant(script, output, continuationCalls, {
-      onInitialJob: input => { observedJob = input; },
+      onInitialJob: input => {
+        observedJob = input;
+        admissionPresentBeforeParticipant = existsSync(admissionPath);
+      },
     }),
   });
 
+  assert.deepEqual({
+    admissionPresentBeforeParticipant,
+    admission: existsSync(admissionPath),
+    changeSet: existsSync(join(artifactRoot, 'change-set.json')),
+    executionPatch: existsSync(join(artifactRoot, 'execution.patch')),
+  }, {
+    admissionPresentBeforeParticipant: true,
+    admission: true,
+    changeSet: true,
+    executionPatch: true,
+  });
   assert.equal(result.status, 'completed');
   assert.equal(continuationCalls.count, 1);
   assert.equal(result.participantResult.changedFiles[0], 'participant-claimed-only.txt');
@@ -368,6 +388,45 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   assert.equal(await captureAuthoritativeFingerprint(repositoryRoot), beforeFingerprint);
   assert.equal(result.promotionPatchSha256, sha256Hex(result.promotionPatch));
   assert.match(result.promotionPatch.toString('utf8'), /diff --git a\/src\/undeclared-shadow-change\.txt b\/src\/undeclared-shadow-change\.txt/);
+  const admissionBytes = await readFile(admissionPath);
+  assert.deepEqual(admissionBytes, Buffer.from(canonicalJson(accepted.admission)));
+  assert.equal(sha256Hex(admissionBytes), result.admissionSha256);
+  const changeSet = JSON.parse(await readFile(join(artifactRoot, 'change-set.json'), 'utf8')) as {
+    schemaVersion: string;
+    authoritativeFingerprintBefore: string;
+    authoritativeFingerprintAfter: string;
+    patchSha256: string;
+    patchByteLength: number;
+    changes: typeof result.canonicalChanges;
+  };
+  assert.deepEqual(Object.keys(changeSet).sort(), [
+    'schemaVersion', 'authoritativeFingerprintBefore', 'authoritativeFingerprintAfter',
+    'patchSha256', 'patchByteLength', 'changes',
+  ].sort());
+  assert.equal(changeSet.schemaVersion, 'shadow-authoring-change-set-v1');
+  assert.equal(changeSet.authoritativeFingerprintBefore, result.authoritativeFingerprintBefore);
+  assert.equal(changeSet.authoritativeFingerprintAfter, result.authoritativeFingerprintAfter);
+  assert.deepEqual(changeSet.changes, result.canonicalChanges);
+  const executionPatch = await readFile(join(artifactRoot, 'execution.patch'));
+  assert.deepEqual(executionPatch, result.promotionPatch);
+  assert.equal(changeSet.patchSha256, result.promotionPatchSha256);
+  assert.equal(changeSet.patchSha256, sha256Hex(executionPatch));
+  assert.equal(changeSet.patchByteLength, executionPatch.length);
+
+  const replayBefore = await captureWorkspaceSnapshot(replayRoot);
+  const appliedPatch = spawnSync('git', ['apply', '--'], {
+    cwd: replayRoot,
+    input: executionPatch,
+    encoding: 'utf8',
+  });
+  assert.equal(appliedPatch.status, 0, appliedPatch.stderr);
+  const replayAfter = await captureWorkspaceSnapshot(replayRoot);
+  const replayedChanges = compareWorkspaceSnapshots(replayBefore, replayAfter);
+  assert.deepEqual(replayedChanges, changeSet.changes);
+  for (const change of changeSet.changes) {
+    const replayed = replayAfter.entries.find(entry => entry.path === change.path);
+    assert.equal(replayed?.sha256 ?? null, change.afterSha256, `replayed hash mismatch for ${change.path}`);
+  }
   assert.equal(await readFile(join(result.artifactRoot, 'participant-prompt.txt'), 'utf8'), observedJob?.prompt);
   assert.equal(await readFile(join(result.artifactRoot, 'raw-output.txt'), 'utf8'), output);
   assert.equal(await readFile(join(result.artifactRoot, 'terminal-attempt-0.txt'), 'utf8'), 'not-json');

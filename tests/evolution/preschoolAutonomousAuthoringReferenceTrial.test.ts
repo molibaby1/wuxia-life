@@ -331,7 +331,7 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'shadow-participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'reviewer-schema-correction' | 'shadow-schema-correction' | 'reviewer-continuation-answer-marker' | 'reviewer-role-crossover' | 'shadow-role-crossover' | 'reviewer-initial-fragment-missing' | 'reviewer-initial-fragment-duplicated' | 'reviewer-initial-fragment-misplaced' | 'shadow-initial-fragment-missing' | 'shadow-initial-fragment-duplicated' | 'shadow-initial-fragment-misplaced' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'reviewer-process-failure' | 'shadow-participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'reviewer-schema-correction' | 'shadow-schema-correction' | 'reviewer-continuation-answer-marker' | 'reviewer-role-crossover' | 'shadow-role-crossover' | 'reviewer-initial-fragment-missing' | 'reviewer-initial-fragment-duplicated' | 'reviewer-initial-fragment-misplaced' | 'shadow-initial-fragment-missing' | 'shadow-initial-fragment-duplicated' | 'shadow-initial-fragment-misplaced' | 'binding-drift-at-invocation' | 'history-drift-at-binding' | 'authorization-drift-after-solution' | 'binding-lock-drift-after-reviewer' | 'history-drift-after-shadow' | 'preparation-stale-authority' | 'preflight-observable-unavailable' | 'preflight-brief-missing' | 'preflight-brief-digest-mismatch' | 'preflight-brief-invalid-schema';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
@@ -853,6 +853,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   };
   const executorScript = [
     "const fs = require('node:fs');",
+    "const nodePath = require('node:path');",
     "const path = 'src/data/lines/preschool-passive-spine.json';",
     'const catalog = JSON.parse(fs.readFileSync(path, "utf8"));',
     'catalog.entries.push(...JSON.parse(process.argv[1]));',
@@ -863,11 +864,18 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     '  fs.appendFileSync(`tests/${name}`, block);',
     '}',
     'if (process.argv[4] === "unauthorized-shadow-path") fs.writeFileSync("docs/synthetic-shadow-unauthorized.txt", "outside allowedWritePaths");',
+    'if (process.argv[4] === "history-drift-after-shadow") { fs.mkdirSync(nodePath.dirname(process.argv[5]), { recursive: true }); fs.writeFileSync(process.argv[5], "history drift after Shadow"); }',
     'process.stdout.write(process.argv[3]);',
   ].join('\n');
   const jobs: string[] = [];
   let continuationBuildArgsCount = 0;
   const outputRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ATTEMPTS_PATH, 'attempt-000900');
+  const executionAuthorizationPath = join(root, `synthetic-layer-a-${scenario}-authorization.json`);
+  const downstreamBindingLockPath = join(outputRoot, 'downstream-participant-binding-lock.json');
+  const historyDriftPath = join(liveRepositoryRoot, REFERENCE_TRIAL_ROOT_PATH, 'attempts/attempt-000899/unexpected.txt');
+  if (scenario === 'preparation-stale-authority') {
+    await put(liveRepositoryRoot, 'docs/product/auto-evolution-model.md', '# Stale Auto Evolution authority fixture.\n');
+  }
   const participant: WorkspaceAgentParticipantOptions = {
     executable: process.execPath,
     interpretCompletedOutput: ({ job, stdout, expectedThreadRef }) => {
@@ -900,6 +908,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       if (job.role === 'solution' && scenario === 'participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Participant failure"); process.exitCode = 23'];
       }
+      if (job.role === 'reviewer' && scenario === 'reviewer-process-failure') {
+        return ['-e', 'process.stderr.write("synthetic Reviewer runtime failure"); process.exitCode = 23'];
+      }
       if (job.role === 'configuration-execution' && scenario === 'shadow-participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Shadow Executor failure"); process.exitCode = 23'];
       }
@@ -921,7 +932,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       }
       if (job.role === 'solution') {
         const bytes = JSON.stringify(solution);
-        return ['-e', [
+        const args = ['-e', [
           "const fs = require('node:fs');",
           "const path = require('node:path');",
           "const crypto = require('node:crypto');",
@@ -929,11 +940,25 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
           "const artifactPath = path.resolve('.evolution-participant/final-result.json');",
           'fs.mkdirSync(path.dirname(artifactPath), { recursive: true });',
           'fs.writeFileSync(artifactPath, bytes);',
+          'if (process.argv[2]) { const authorization = JSON.parse(fs.readFileSync(process.argv[2], "utf8")); authorization.authorizationRef += "-drift"; fs.writeFileSync(process.argv[2], JSON.stringify(authorization)); }',
           "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
         ].join('\n'), bytes];
+        if (scenario === 'authorization-drift-after-solution') args.push(executionAuthorizationPath);
+        return args;
       }
-      if (job.role === 'reviewer') return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerInitialResult)];
-      return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult), scenario];
+      if (job.role === 'reviewer') {
+        if (scenario === 'binding-lock-drift-after-reviewer') {
+          return ['-e', [
+            "const fs = require('node:fs');",
+            'const lock = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));',
+            'lock.bindingId = `${lock.bindingId}-drift`;',
+            'fs.writeFileSync(process.argv[2], JSON.stringify(lock));',
+            'process.stdout.write(process.argv[1]);',
+          ].join('\n'), JSON.stringify(reviewerInitialResult), downstreamBindingLockPath];
+        }
+        return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerInitialResult)];
+      }
+      return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult), scenario, historyDriftPath];
     },
   };
   let participantBindingResolutionCount = 0;
@@ -942,7 +967,6 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   const trialRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ROOT_PATH);
   await mkdir(join(trialRoot, 'attempts'), { recursive: true });
   const acknowledgedLegacyHistory = await captureReferenceTrialLegacyHistory(trialRoot);
-  const executionAuthorizationPath = join(root, `synthetic-layer-a-${scenario}-authorization.json`);
   const expectedExecutionAuthorizationSha256 = await writeAuthorization(executionAuthorizationPath, authorizationBody({
     acknowledgedLegacyHistory,
     attemptRef: 'attempt-000900',
@@ -974,6 +998,53 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       return { participant } as never;
     },
   });
+  if (scenario.startsWith('preflight-')) {
+    const result = await trial;
+    const expectedResultStatus = scenario === 'preflight-observable-unavailable'
+      ? 'REFERENCE_OBSERVABLE_PAYLOAD_UNAVAILABLE'
+      : 'REFERENCE_RESPONSIBILITY_BRIEF_UNAVAILABLE';
+    assert.equal(result.status, expectedResultStatus);
+    if (scenario === 'preflight-observable-unavailable') {
+      assert.equal(result.reason, 'Exact sealed player-visible reference payload was not supplied or did not match the accepted digest.');
+    } else {
+      assert.equal(result.reason, scenario === 'preflight-brief-missing'
+        ? 'Reference Responsibility Brief file could not be read.'
+        : scenario === 'preflight-brief-digest-mismatch'
+          ? 'Reference Responsibility Brief digest did not match the accepted digest.'
+          : 'Reference Responsibility Brief schema or runRef is invalid.');
+    }
+    assert.deepEqual(jobs, []);
+    assert.equal(participantBindingResolutionCount, 1, 'only admission-time downstream binding validation may run');
+    assert.equal(artifactBackedBindingResolutionCount, 1, 'only admission-time Solution binding validation may run');
+    const stoppedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
+    assert.equal(stoppedManifest.state, 'STOPPED');
+    assert.equal(stoppedManifest.currentStage, 'PREFLIGHT');
+    assert.equal(stoppedManifest.authorizationRef, `synthetic-human-authorization-${scenario}`);
+    assert.equal(stoppedManifest.authorizationDigest, expectedExecutionAuthorizationSha256);
+    assert.equal(stoppedManifest.expectedAuthorizationDigest, expectedExecutionAuthorizationSha256);
+    assert.deepEqual(stoppedManifest.terminalOutcome, {
+      status: 'REFERENCE_PREFLIGHT_STOPPED',
+      stage: 'PREFLIGHT',
+      resultStatus: result.status,
+      failureMessage: result.reason,
+      stopArtifactRef: 'attempt-stop.json',
+    });
+    assert.deepEqual(JSON.parse(await readFile(join(outputRoot, 'attempt-stop.json'), 'utf8')), {
+      schemaVersion: 'preschool-reference-trial-attempt-stop-v1',
+      result,
+    });
+    for (const role of ['solution', 'reviewer', 'shadowAuthoring'] as const) {
+      assert.equal(stoppedManifest.participantPromptProvenance[role].status, 'NOT_INVOKED');
+      assert.equal(stoppedManifest.invocationRefs[role], null);
+    }
+    for (const artifact of [
+      'solution-agent', 'reviewer-agent', 'shadow-authoring', 'decision.json', 'verification.json',
+      'trial-result.json', 'promotion-package.json', 'promotion-package.md', 'promotion.patch',
+    ]) await assert.rejects(readdir(join(outputRoot, artifact)), { code: 'ENOENT' });
+    assert.equal(await captureAuthoritativeFingerprint(liveRepositoryRoot), before);
+    process.stdout.write(`admitted ${scenario}: STOPPED at PREFLIGHT before Participant jobs; authorization and stop provenance retained\n`);
+    return;
+  }
   const expectedSuccessfulScenario = scenario === 'success'
     || scenario === 'solution-id-prefix-collision'
     || scenario === 'solution-exact-answer-id'
@@ -981,6 +1052,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     || scenario === 'shadow-schema-correction';
   if (!expectedSuccessfulScenario) {
     const solutionOnlyFailure = scenario === 'participant-failure'
+      || scenario === 'authorization-drift-after-solution'
       || scenario === 'artifact-backed-role-schema-failure'
       || scenario === 'artifact-backed-receipt-failure';
     if (scenario === 'binding-drift-at-invocation') {
@@ -990,7 +1062,19 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       await assert.rejects(trial, /Legacy attempt or run-level history changed after authorization admission/);
       assert.equal(artifactBackedBindingResolutionCount, 2);
     } else if (solutionOnlyFailure) {
-      await assert.rejects(trial, /Solution Participant failed/);
+      if (scenario === 'authorization-drift-after-solution') {
+        await assert.rejects(trial, /Execution authorization identity, schema, role-specific binding-lock digest, timestamp, or canonical digest is invalid/);
+      } else {
+        await assert.rejects(trial, /Solution Participant failed/);
+      }
+    } else if (scenario === 'reviewer-process-failure') {
+      await assert.rejects(trial, /Reviewer Participant failed/);
+    } else if (scenario === 'binding-lock-drift-after-reviewer') {
+      await assert.rejects(trial, /Persisted role-specific Participant binding lock changed after attempt admission/);
+    } else if (scenario === 'history-drift-after-shadow') {
+      await assert.rejects(trial, /Legacy attempt or run-level history changed after authorization admission/);
+    } else if (scenario === 'preparation-stale-authority') {
+      await assert.rejects(trial, /Current PD-121 authority overlay is incomplete or stale/);
     } else if (scenario === 'reviewer-static-answer-marker') {
       await assert.rejects(trial, /Participant-visible contamination detected in prompt: preschool_neutral_fair_play/);
     } else if (scenario === 'reviewer-continuation-answer-marker') {
@@ -1013,12 +1097,16 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         ? /Shadow workspace changed paths outside the Contract/
         : /Structural capacity deficit must decrease from a positive value to zero/);
     }
-    assert.deepEqual(jobs, scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding'
+    assert.deepEqual(jobs, scenario === 'binding-drift-at-invocation'
+      || scenario === 'history-drift-at-binding'
+      || scenario === 'preparation-stale-authority'
       ? []
       : solutionOnlyFailure || scenario === 'reviewer-static-answer-marker'
       ? ['solution']
       : scenario.startsWith('reviewer-initial-fragment-')
         ? ['solution']
+      : scenario === 'reviewer-process-failure' || scenario === 'binding-lock-drift-after-reviewer'
+        ? ['solution', 'reviewer']
       : scenario === 'omitted-responsibility' || scenario === 'reviewer-contract-escalation'
         ? ['solution', 'reviewer']
         : scenario === 'reviewer-continuation-answer-marker' || scenario === 'reviewer-role-crossover'
@@ -1041,6 +1129,35 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       assert.equal(failedManifest.terminalOutcome.errorKind, 'process');
       assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'solution-agent/failure.json');
       await assert.rejects(readFile(join(outputRoot, 'verification.json')), { code: 'ENOENT' });
+    } else if (scenario === 'authorization-drift-after-solution') {
+      assert.equal(failedManifest.currentStage, 'SOLUTION');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'RUNTIME_EXCEPTION');
+      assert.match(failedManifest.terminalOutcome.failureMessage, /Execution authorization identity, schema, role-specific binding-lock digest, timestamp, or canonical digest is invalid/);
+    } else if (scenario === 'reviewer-process-failure') {
+      assert.equal(failedManifest.currentStage, 'REVIEWER');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'process');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'reviewer-agent/failure.json');
+      const failure = JSON.parse(await readFile(join(outputRoot, 'reviewer-agent/failure.json'), 'utf8')) as Record<string, unknown>;
+      assert.equal(failure.errorKind, 'process');
+      await readFile(join(outputRoot, 'reviewer-agent/execution-trace.json'));
+      await assert.rejects(readFile(join(outputRoot, 'reviewer-agent/review.json')), { code: 'ENOENT' });
+    } else if (scenario === 'binding-lock-drift-after-reviewer') {
+      assert.equal(failedManifest.currentStage, 'REVIEWER');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'RUNTIME_EXCEPTION');
+      assert.match(failedManifest.terminalOutcome.failureMessage, /Persisted role-specific Participant binding lock changed after attempt admission/);
+    } else if (scenario === 'history-drift-after-shadow') {
+      assert.equal(failedManifest.currentStage, 'SHADOW_AUTHORING');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'RUNTIME_EXCEPTION');
+      assert.match(failedManifest.terminalOutcome.failureMessage, /Legacy attempt or run-level history changed after authorization admission/);
+    } else if (scenario === 'preparation-stale-authority') {
+      assert.equal(failedManifest.currentStage, 'PREPARATION');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'RUNTIME_EXCEPTION');
+      assert.match(failedManifest.terminalOutcome.failureMessage, /Current PD-121 authority overlay is incomplete or stale/);
     } else if (scenario === 'artifact-backed-role-schema-failure' || scenario === 'artifact-backed-receipt-failure') {
       assert.equal(failedManifest.currentStage, 'SOLUTION');
     }
@@ -1057,10 +1174,14 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       assert.equal(failedManifest.terminalOutcome.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
       assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'verification.json');
     }
-    const invokedPromptRoles = scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding'
+    const invokedPromptRoles = scenario === 'binding-drift-at-invocation'
+      || scenario === 'history-drift-at-binding'
+      || scenario === 'preparation-stale-authority'
       ? [] as const
       : solutionOnlyFailure
       ? ['solution'] as const
+      : scenario === 'reviewer-process-failure' || scenario === 'binding-lock-drift-after-reviewer'
+        ? ['solution', 'reviewer'] as const
       : scenario === 'reviewer-static-answer-marker'
         ? ['solution', 'reviewer'] as const
       : scenario.startsWith('reviewer-initial-fragment-')
@@ -1090,6 +1211,19 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.json')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.md')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion.patch')), { code: 'ENOENT' });
+    if (scenario === 'authorization-drift-after-solution'
+      || scenario === 'reviewer-process-failure'
+      || scenario === 'binding-lock-drift-after-reviewer'
+      || scenario === 'history-drift-after-shadow'
+      || scenario === 'preparation-stale-authority') {
+      if (scenario === 'history-drift-after-shadow') {
+        const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
+        assert.equal(decision.route, 'READY_FOR_SHADOW_AUTHORING');
+      } else {
+        await assert.rejects(readFile(join(outputRoot, 'decision.json')), { code: 'ENOENT' });
+      }
+      await assert.rejects(readFile(join(outputRoot, 'verification.json')), { code: 'ENOENT' });
+    }
     if (scenario === 'unauthorized-shadow-path' || scenario === 'residual-v5-deficit') {
       const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
       await assertShadowExecutionEvidenceRetained(outputRoot, failedManifest, verification);
@@ -1156,7 +1290,12 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       && scenario !== 'reviewer-role-crossover'
       && !scenario.startsWith('reviewer-initial-fragment-')
       && scenario !== 'binding-drift-at-invocation'
-      && scenario !== 'history-drift-at-binding') {
+      && scenario !== 'history-drift-at-binding'
+      && scenario !== 'reviewer-process-failure'
+      && scenario !== 'authorization-drift-after-solution'
+      && scenario !== 'binding-lock-drift-after-reviewer'
+      && scenario !== 'history-drift-after-shadow'
+      && scenario !== 'preparation-stale-authority') {
       const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as { route: string };
       assert.equal(decision.route, 'READY_FOR_SHADOW_AUTHORING');
     }
@@ -2785,6 +2924,47 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
     }, 'history-drift-at-binding', syntheticRunner, syntheticAcceptedBriefFixture);
+    for (const scenario of [
+      'reviewer-process-failure',
+      'authorization-drift-after-solution',
+      'binding-lock-drift-after-reviewer',
+      'history-drift-after-shadow',
+      'preparation-stale-authority',
+    ] as const) {
+      await testSyntheticLayerAEndToEnd(root, {
+        evidence: capacityEvidencePath,
+        observable: syntheticPayloadPath,
+        brief: fullBriefPath,
+      }, scenario, syntheticRunner, syntheticAcceptedBriefFixture);
+    }
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: join(root, 'missing-admitted-observable.json'),
+      brief: fullBriefPath,
+    }, 'preflight-observable-unavailable', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: join(root, 'missing-admitted-brief.json'),
+    }, 'preflight-brief-missing', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: syntheticBriefPath,
+    }, 'preflight-brief-digest-mismatch', syntheticRunner, syntheticAcceptedBriefFixture);
+    const invalidBriefSchemaBytes = Buffer.from('{}');
+    const invalidBriefSchemaPath = join(root, 'invalid-admitted-brief-schema.json');
+    await writeFile(invalidBriefSchemaPath, invalidBriefSchemaBytes);
+    const invalidBriefSchemaRunner = await loadSyntheticPublicRunner(root, {
+      evidence: sha256Hex(capacityEvidenceBytes),
+      observable: sha256Hex(syntheticPayloadBytes),
+      brief: sha256Hex(invalidBriefSchemaBytes),
+    }, { suffix: 'invalid-brief-schema' });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: invalidBriefSchemaPath,
+    }, 'preflight-brief-invalid-schema', invalidBriefSchemaRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
@@ -3325,6 +3505,16 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
     assert.throws(() => guardedParticipant.buildArgs(promptInput), /contamination/i);
     assert.equal(buildArgsCalled, false);
     await rm(join(solutionWorkspace.workspaceRoot, RESIDUAL_DESIGN_PATH));
+
+    const externalWorkspaceTarget = join(root, 'external-participant-workspace-target');
+    await mkdir(externalWorkspaceTarget, { recursive: true });
+    await writeFile(join(externalWorkspaceTarget, 'safe-content.txt'), 'safe external target');
+    const externalWorkspaceSymlink = join(solutionWorkspace.workspaceRoot, 'external-participant-target');
+    await symlink(externalWorkspaceTarget, externalWorkspaceSymlink, 'dir');
+    buildArgsCalled = false;
+    assert.throws(() => guardedParticipant.buildArgs(promptInput), /external symlink/i);
+    assert.equal(buildArgsCalled, false, 'an external workspace symlink must be rejected before Participant buildArgs');
+    await rm(externalWorkspaceSymlink);
 
     const shadowSourceMarkerPath = `${ANSWER_IDS[0]}.txt`;
     await put(historicalRoot, shadowSourceMarkerPath, 'forbidden shadow source marker');

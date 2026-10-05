@@ -24,6 +24,7 @@ import {
   type ShadowAuthoringExecutionParticipantResultV1,
 } from '../../../src/evolution/shadowAuthoringResultContract';
 import { buildDeterministicPromotionPatch, compareWorkspaceSnapshots, type CanonicalWorkspaceChange } from './workspaceChangeSet';
+import { buildPreschoolShadowRegressionParticipantInstructions } from './preschoolShadowRegressionProtocol';
 
 export class ShadowAuthoringExecutionError extends Error {
   readonly participantJobs = 1 as const;
@@ -69,7 +70,7 @@ async function writeCreateOnlyJson(path: string, value: unknown): Promise<void> 
   await writeCreateOnly(path, `${canonicalJson(value)}\n`);
 }
 
-function buildShadowAuthoringPrompt(cards: unknown): string {
+function buildShadowAuthoringPrompt(cards: unknown, acceptedIds: readonly string[]): string {
   return [
     'Implement the accepted Preschool Shared-Neutral Authoring Cards exactly in this isolated shadow workspace.',
     'The Cards are accepted product content and are immutable. Do not edit, reinterpret, shorten, or replace any Card field.',
@@ -83,6 +84,7 @@ function buildShadowAuthoringPrompt(cards: unknown): string {
     `Append each Card's proposedEntry exactly to ${PRESCHOOL_SHARED_NEUTRAL_PRODUCTION_PATH}; preserve every existing catalog row and order.`,
     `Append a self-contained focused regression block at EOF of ${PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS[0]} for every proposed ID.`,
     `Append a self-contained focused regression block at EOF of ${PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS[1]} for every proposed ID.`,
+    ...buildPreschoolShadowRegressionParticipantInstructions(acceptedIds),
     'Do not alter any accepted ID, title, text, origin tag, or age value.',
     'Do not modify any other file or path.',
     'Do not commit, push, or merge.',
@@ -160,6 +162,7 @@ export async function runShadowAuthoringExecution(input: {
   const repositoryRoot = resolve(input.repositoryRoot);
   const artifactRoot = resolve(input.artifactRoot);
   const accepted = assertAcceptedAuthoring(input);
+  const acceptedIds = accepted.cards.map(card => card.proposedEntry.id);
   const before = await captureWorkspaceSnapshot(repositoryRoot);
   const preparedWorkspace = await prepareAgentWorkspace({
     authoritativeRoot: repositoryRoot,
@@ -187,7 +190,7 @@ export async function runShadowAuthoringExecution(input: {
       role: 'configuration-execution',
       workspaceRoot: preparedWorkspace.workspaceRoot,
       destinationRoot: artifactRoot,
-      initialPrompt: buildShadowAuthoringPrompt(accepted.cards),
+      initialPrompt: buildShadowAuthoringPrompt(accepted.cards, acceptedIds),
       expectedRoleSchemaName: 'ShadowAuthoringExecutionParticipantResultV1',
       participant: input.participant,
       retransmissionEnabled: true,

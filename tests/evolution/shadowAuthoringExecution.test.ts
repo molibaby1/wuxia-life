@@ -347,6 +347,19 @@ async function testShadowExecutorUsesExactAcceptedCardsAndHostChangeSet(): Promi
   assert.ok(observedJob?.prompt.includes(canonicalJson(accepted.proposal.contractPayload?.cards)));
   assert.doesNotMatch(observedJob?.prompt ?? '', /PRIVATE_PHASE0_SENTINEL/);
   assert.match(observedJob?.prompt ?? '', /Do not commit, push, or merge/);
+  const observedPrompt = observedJob?.prompt ?? '';
+  assert.ok(observedPrompt.includes('AUTONOMOUS_AUTHORING_MISSING_ENTRY'));
+  assert.ok(observedPrompt.includes('process.argv[1]'));
+  assert.ok(observedPrompt.includes('import.meta.url'));
+  for (const testPath of PRESCHOOL_SHARED_NEUTRAL_TEST_PATHS) {
+    assert.ok(observedPrompt.includes(testPath.split('/').at(-1)!), `prompt is missing ${testPath}`);
+  }
+  assert.ok(observedPrompt.includes('preschool_neutral_shared_cooperation'));
+  assert.ok(observedPrompt.includes(
+    'AUTONOMOUS_AUTHORING_MISSING_ENTRY: preschool_neutral_shared_cooperation',
+  ));
+  assert.match(observedPrompt, /Each focused RED command must emit exactly one Error line/);
+  assert.match(observedPrompt, /GREEN must pass with the Shadow catalog/);
   assert.equal(result.authoritativeFingerprintBefore, beforeFingerprint);
   assert.equal(result.authoritativeFingerprintAfter, beforeFingerprint);
   assert.equal(await captureAuthoritativeFingerprint(repositoryRoot), beforeFingerprint);

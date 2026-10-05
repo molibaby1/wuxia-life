@@ -253,7 +253,8 @@ interface AttemptManifestV1 {
   state: 'CREATED' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'STOPPED';
   currentStage: TrialStage;
   terminalOutcome: null | {
-    status: 'SHADOW_AUTHORING_VERIFIED' | 'REFERENCE_EVIDENCE_UNAVAILABLE' | 'REFERENCE_PREFLIGHT_STOPPED' | 'FAILED' | 'CLEANUP_INCOMPLETE';
+    status: 'SHADOW_AUTHORING_VERIFIED' | 'REFERENCE_EVIDENCE_UNAVAILABLE' | 'REFERENCE_PREFLIGHT_STOPPED' | 'FAILED' | 'CLEANUP_INCOMPLETE'
+      | 'SHADOW_AUTHORING_EXECUTION_FAILED' | 'SHADOW_AUTHORING_CONFORMANCE_FAILED' | 'SHADOW_AUTHORING_VERIFICATION_FAILED';
     stage?: TrialStage;
     errorKind?: string;
     failureMessage?: string;
@@ -424,6 +425,24 @@ class TrialInvocationProvenanceFailure extends Error {
 export class TrialParticipantFailure extends Error {
   constructor(readonly errorKind: string, readonly failureArtifactRef: string, message: string) {
     super(message);
+  }
+}
+type ShadowReferenceTrialFailureStatus =
+  | 'SHADOW_AUTHORING_EXECUTION_FAILED'
+  | 'SHADOW_AUTHORING_CONFORMANCE_FAILED'
+  | 'SHADOW_AUTHORING_VERIFICATION_FAILED';
+
+class TrialShadowAuthoringFailure extends Error {
+  readonly errorKind: ShadowReferenceTrialFailureStatus;
+
+  constructor(
+    readonly terminalStatus: ShadowReferenceTrialFailureStatus,
+    readonly failureArtifactRef: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'TrialShadowAuthoringFailure';
+    this.errorKind = terminalStatus;
   }
 }
 
@@ -759,6 +778,7 @@ resolveSolutionBindingFromLock: typeof resolveArtifactBackedReferenceParticipant
         decision: 'decision.json',
         promotionPackage: 'promotion-package.json',
         promotionPatch: 'promotion.patch',
+        shadowVerification: 'verification.json',
         solutionInvocation: 'solution-agent/invocation.json',
         solutionCompletion: 'solution-agent/execution-trace.json',
         solutionPrompt: 'solution-agent/participant-prompt.txt',
@@ -1365,10 +1385,12 @@ export async function finalizeReferenceTrialFailure(
   const participantFailure = error instanceof TrialParticipantFailure;
   const invocationFailure = error instanceof TrialInvocationProvenanceFailure;
   const routedDecision = error instanceof TrialRoutedDecision;
+  const shadowAuthoringFailure = error instanceof TrialShadowAuthoringFailure;
   const failureMetadata = {
-    errorKind: participantFailure || invocationFailure || routedDecision ? error.errorKind : 'RUNTIME_EXCEPTION',
+    terminalStatus: shadowAuthoringFailure ? error.terminalStatus : undefined,
+    errorKind: participantFailure || invocationFailure || routedDecision || shadowAuthoringFailure ? error.errorKind : 'RUNTIME_EXCEPTION',
     message: error instanceof Error ? error.message : String(error),
-    failureArtifactRef: participantFailure || routedDecision ? error.failureArtifactRef : undefined,
+    failureArtifactRef: participantFailure || routedDecision || shadowAuthoringFailure ? error.failureArtifactRef : undefined,
     diagnostics: invocationFailure ? structuredClone(error.diagnostics) : undefined,
   };
   const initialSnapshot = await readAttemptManifestSnapshot(manifestPath, 'failure finalization');
@@ -1488,11 +1510,11 @@ export async function finalizeReferenceTrialFailure(
       }
       workingManifest.state = cleanupIncomplete ? 'STOPPED' : 'FAILED';
       workingManifest.terminalOutcome = {
-        status: cleanupIncomplete ? 'CLEANUP_INCOMPLETE' : 'FAILED',
+        status: cleanupIncomplete ? 'CLEANUP_INCOMPLETE' : shadowAuthoringFailure ? failureMetadata.terminalStatus! : 'FAILED',
         stage: workingManifest.currentStage,
         errorKind: failureMetadata.errorKind,
         failureMessage: failureMetadata.message,
-        ...(participantFailure || routedDecision ? { failureArtifactRef: failureMetadata.failureArtifactRef } : {}),
+        ...(participantFailure || routedDecision || shadowAuthoringFailure ? { failureArtifactRef: failureMetadata.failureArtifactRef } : {}),
         ...(trialResultStatus ? { trialResultRef: 'trial-result.json', trialResultStatus } : {}),
       };
     }

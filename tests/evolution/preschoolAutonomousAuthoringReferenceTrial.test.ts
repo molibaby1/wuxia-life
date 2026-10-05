@@ -331,7 +331,7 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
+type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'shadow-participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'binding-drift-at-invocation' | 'history-drift-at-binding';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
@@ -770,6 +770,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       if (job.role === 'solution' && scenario === 'participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Participant failure"); process.exitCode = 23'];
       }
+      if (job.role === 'configuration-execution' && scenario === 'shadow-participant-failure') {
+        return ['-e', 'process.stderr.write("synthetic Shadow Executor failure"); process.exitCode = 23'];
+      }
       if (job.role === 'solution' && scenario === 'artifact-backed-role-schema-failure') {
         const bytes = JSON.stringify(schemaInvalidSolution);
         return ['-e', [
@@ -862,6 +865,8 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       await assert.rejects(trial);
     } else if (scenario === 'reviewer-contract-escalation') {
       await assert.rejects(trial);
+    } else if (scenario === 'shadow-participant-failure') {
+      await assert.rejects(trial, /Shadow Executor failed:.*synthetic Shadow Executor failure/);
     } else {
       await assert.rejects(trial, scenario === 'unauthorized-shadow-path'
         ? /Shadow workspace changed paths outside the Contract/
@@ -877,6 +882,19 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
     assert.equal(failedManifest.state, 'FAILED');
     if (scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding') assert.equal(failedManifest.currentStage, 'BINDING');
+    if (scenario === 'shadow-participant-failure') {
+      assert.equal(failedManifest.currentStage, 'SHADOW_AUTHORING');
+      assert.equal(failedManifest.terminalOutcome.status, 'SHADOW_AUTHORING_EXECUTION_FAILED');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'shadow-authoring/execution-trace.json');
+    } else if (scenario === 'unauthorized-shadow-path') {
+      assert.equal(failedManifest.currentStage, 'VERIFICATION');
+      assert.equal(failedManifest.terminalOutcome.status, 'SHADOW_AUTHORING_CONFORMANCE_FAILED');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'verification.json');
+    } else if (scenario === 'residual-v5-deficit') {
+      assert.equal(failedManifest.currentStage, 'VERIFICATION');
+      assert.equal(failedManifest.terminalOutcome.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'verification.json');
+    }
     const invokedPromptRoles = scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding'
       ? [] as const
       : solutionOnlyFailure
@@ -906,6 +924,16 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.json')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion-package.md')), { code: 'ENOENT' });
     await assert.rejects(readFile(join(outputRoot, 'promotion.patch')), { code: 'ENOENT' });
+    if (scenario === 'unauthorized-shadow-path') {
+      const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
+      assert.equal(verification.status, 'SHADOW_AUTHORING_VERIFICATION_FAILED');
+      assert.equal(verification.checks.mechanicalConformance, 'FAIL');
+      assert.match(verification.failures.join(' '), /outside the Contract.*docs\/synthetic-shadow-unauthorized\.txt/);
+    } else if (scenario === 'residual-v5-deficit') {
+      const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
+      assert.equal(verification.checks.evidenceBoundedCompletion, 'FAIL');
+      assert.match(verification.failures.join(' '), /Structural capacity deficit must decrease from a positive value to zero/);
+    }
     if (scenario === 'omitted-responsibility') {
       const submittedSolution = JSON.parse(await readFile(join(outputRoot, 'solution-agent/result.json'), 'utf8')) as typeof solution;
       const submittedBrief = JSON.parse(await readFile(join(outputRoot, 'source/reference-trial/reference-responsibility-brief.json'), 'utf8')) as typeof brief;
@@ -960,6 +988,13 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(succeededManifest.state, 'SUCCEEDED');
   assert.equal(succeededManifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
   assert.equal(succeededManifest.terminalOutcome.trialResultRef, 'trial-result.json');
+  const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
+  assert.equal(verification.status, 'SHADOW_AUTHORING_VERIFIED');
+  assert.ok(Object.values(verification.checks).every(check => check === 'PASS'));
+  assert.deepEqual(Object.keys(verification.promotionPatch).sort(), ['byteLength', 'sha256']);
+  assert.ok(verification.promotionPatch.byteLength > 0);
+  assert.equal(verification.promotionPatch.sha256, verification.patchSha256);
+  assert.equal(succeededManifest.artifactRefs.shadowVerification, 'verification.json');
   const artifactBackedValidation = JSON.parse(
     await readFile(join(outputRoot, 'solution-agent/artifact-backed-validation.json'), 'utf8'),
   ) as Record<string, unknown>;
@@ -1400,6 +1435,19 @@ async function testAttemptManifestLifecycle(root: string): Promise<void> {
   assert.equal(savedFailureSnapshot.terminalOutcome.failureMessage, 'original failure message');
   assert.equal(savedFailureSnapshot.terminalOutcome.errorKind, 'process');
   assert.equal(savedFailureSnapshot.terminalOutcome.failureArtifactRef, 'solution-agent/failure.json');
+
+  const genericVerificationFailure = await createLifecycleAttempt(join(root, 'generic-verification-failure'), 'attempt-000037');
+  await moveLifecycleAttemptToRunning(genericVerificationFailure, 'VERIFICATION');
+  await assert.rejects(finalizeReferenceTrialFailure(
+    genericVerificationFailure.manifestPath,
+    genericVerificationFailure.manifest,
+    new Error('synthetic verification infrastructure failure'),
+    createAttemptManifestTransitionToken(genericVerificationFailure.manifest),
+  ), /synthetic verification infrastructure failure/);
+  const genericVerificationManifest = JSON.parse(await readFile(genericVerificationFailure.manifestPath, 'utf8')) as Record<string, any>;
+  assert.equal(genericVerificationManifest.terminalOutcome.status, 'FAILED');
+  assert.equal(genericVerificationManifest.terminalOutcome.errorKind, 'RUNTIME_EXCEPTION');
+  assert.equal(genericVerificationManifest.terminalOutcome.stage, 'VERIFICATION');
 
   const participantFailure = await createLifecycleAttempt(join(root, 'participant-failure-prompt'), 'attempt-000031');
   await moveLifecycleAttemptToRunning(participantFailure, 'SOLUTION');
@@ -2446,7 +2494,17 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
-    }, 'success', syntheticRunner, syntheticAcceptedBriefFixture);
+    }, 'unauthorized-shadow-path', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'residual-v5-deficit', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'shadow-participant-failure', syntheticRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
@@ -2506,6 +2564,11 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
         ...syntheticAcceptedBriefFixture,
       });
     }
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'success', syntheticRunner, syntheticAcceptedBriefFixture);
 
     const currentAuthorityText = [
       '### PD-121：Contract-Constrained Autonomous Authoring v1\n',
@@ -2865,12 +2928,13 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
         observable: acceptedObservableTestPath,
         brief: acceptedBriefTestPath,
       } as { evidence: string; observable: string; brief: string };
-      await testSyntheticLayerAEndToEnd(root, paths, 'success');
       await testSyntheticLayerAEndToEnd(root, paths, 'unauthorized-shadow-path');
       await testSyntheticLayerAEndToEnd(root, paths, 'residual-v5-deficit');
       await testSyntheticLayerAEndToEnd(root, paths, 'participant-failure');
+      await testSyntheticLayerAEndToEnd(root, paths, 'shadow-participant-failure');
       await testSyntheticLayerAEndToEnd(root, paths, 'binding-drift-at-invocation');
       await testSyntheticLayerAEndToEnd(root, paths, 'history-drift-at-binding');
+      await testSyntheticLayerAEndToEnd(root, paths, 'success');
     }
     if (acceptedEvidenceTestPath && acceptedObservableTestPath) {
       for (const [responsibilityBriefPath, reason] of [

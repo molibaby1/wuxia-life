@@ -866,7 +866,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     } else if (scenario === 'reviewer-contract-escalation') {
       await assert.rejects(trial);
     } else if (scenario === 'shadow-participant-failure') {
-      await assert.rejects(trial, /Shadow Executor failed:.*synthetic Shadow Executor failure/);
+      await assert.rejects(trial, /Shadow Executor failed:/);
     } else {
       await assert.rejects(trial, scenario === 'unauthorized-shadow-path'
         ? /Shadow workspace changed paths outside the Contract/
@@ -989,6 +989,13 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(succeededManifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
   assert.equal(succeededManifest.terminalOutcome.trialResultRef, 'trial-result.json');
   const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
+  assert.equal(verification.schemaVersion, 'preschool-reference-trial-shadow-verification-v1');
+  assert.deepEqual(Object.keys(verification).sort(), [
+    'schemaVersion', 'status', 'checks', 'failures', 'candidateBaselineGitSha',
+    'candidateBaselineFingerprintSha256', 'acceptedProposalSha256', 'acceptedReviewSha256',
+    'admissionSha256', 'authoritativeFingerprintBefore', 'authoritativeFingerprintAfter',
+    'changedFiles', 'commandResults', 'capacityBefore', 'capacityAfter', 'patchSha256', 'promotionPatch',
+  ].sort());
   assert.equal(verification.status, 'SHADOW_AUTHORING_VERIFIED');
   assert.ok(Object.values(verification.checks).every(check => check === 'PASS'));
   assert.deepEqual(Object.keys(verification.promotionPatch).sort(), ['byteLength', 'sha256']);

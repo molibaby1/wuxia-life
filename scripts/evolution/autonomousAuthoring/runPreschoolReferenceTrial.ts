@@ -61,6 +61,7 @@ import { assertAcceptedAuthoring, runShadowAuthoringExecution } from './shadowAu
 import {
   resolveHostNodeModulesRoot,
   verifyPreschoolShadowAuthoring,
+  type PreschoolShadowAuthoringVerificationResultV1,
 } from './verifyPreschoolShadowAuthoring';
 import { buildPromotionPackage } from './buildPromotionPackage';
 import {
@@ -2164,6 +2165,43 @@ function acceptedAuthoringOption(solution: SolutionAgentRunResult, reviewer: Sol
   return selected;
 }
 
+function buildReferenceTrialVerificationArtifact(verification: PreschoolShadowAuthoringVerificationResultV1) {
+  return {
+    schemaVersion: 'preschool-reference-trial-shadow-verification-v1',
+    status: verification.status,
+    checks: verification.checks,
+    failures: verification.failures,
+    candidateBaselineGitSha: verification.candidateBaselineGitSha,
+    candidateBaselineFingerprintSha256: verification.candidateBaselineFingerprintSha256,
+    acceptedProposalSha256: verification.acceptedProposalSha256,
+    acceptedReviewSha256: verification.acceptedReviewSha256,
+    admissionSha256: verification.admissionSha256,
+    authoritativeFingerprintBefore: verification.authoritativeFingerprintBefore,
+    authoritativeFingerprintAfter: verification.authoritativeFingerprintAfter,
+    changedFiles: verification.changedFiles,
+    commandResults: verification.commandResults,
+    capacityBefore: verification.capacityBefore,
+    capacityAfter: verification.capacityAfter,
+    patchSha256: verification.patchSha256,
+    promotionPatch: verification.promotionPatch === null
+      ? null
+      : {
+        byteLength: verification.promotionPatch.byteLength,
+        sha256: verification.patchSha256,
+      },
+  };
+}
+
+function classifyShadowVerificationFailure(
+  verification: PreschoolShadowAuthoringVerificationResultV1,
+): ShadowReferenceTrialFailureStatus {
+  if (verification.checks.mechanicalConformance === 'FAIL'
+    || verification.checks.semanticConformance === 'FAIL') {
+    return 'SHADOW_AUTHORING_CONFORMANCE_FAILED';
+  }
+  return 'SHADOW_AUTHORING_VERIFICATION_FAILED';
+}
+
 async function runVerifiedHistoricalTrial(input: {
   liveRepositoryRoot: string;
   evidence: PreschoolCapacityEvidenceV1;
@@ -2435,7 +2473,11 @@ async function runVerifiedHistoricalTrial(input: {
       throw new TrialInvocationProvenanceFailure([`shadowAuthoring: ${input.manifest.invocationRefs.shadowAuthoring.diagnostic}`]);
     }
     if (execution.status !== 'completed' || execution.failure !== null) {
-      throw new TrialParticipantFailure('process', 'shadow-authoring/execution-trace.json', `Shadow Executor failed: ${execution.failure ?? 'unknown failure'}`);
+      throw new TrialShadowAuthoringFailure(
+        'SHADOW_AUTHORING_EXECUTION_FAILED',
+        'shadow-authoring/execution-trace.json',
+        `Shadow Executor failed: ${execution.failure ?? 'unknown failure'}`,
+      );
     }
     await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
     if (execution.authoritativeFingerprintBefore !== baselineFingerprint
@@ -2458,11 +2500,34 @@ async function runVerifiedHistoricalTrial(input: {
       review: reviewer.review,
       admission,
     });
-    if (verification.status !== 'SHADOW_AUTHORING_VERIFIED'
-      || !verification.promotionPatch
-      || !verification.promotionPatch.equals(execution.promotionPatch)
-      || verification.patchSha256 !== execution.promotionPatchSha256) {
-      throw new Error(`Host V1–V5 verification failed: ${verification.failures.join('; ') || verification.status}`);
+    await writeCreateOnlyJson(join(outputRoot, 'verification.json'), buildReferenceTrialVerificationArtifact(verification));
+    if (verification.status !== 'SHADOW_AUTHORING_VERIFIED') {
+      throw new TrialShadowAuthoringFailure(
+        classifyShadowVerificationFailure(verification),
+        'verification.json',
+        `Host V1–V5 verification failed: ${verification.failures.join('; ') || verification.status}`,
+      );
+    }
+    if (!verification.promotionPatch) {
+      throw new TrialShadowAuthoringFailure(
+        'SHADOW_AUTHORING_VERIFICATION_FAILED',
+        'verification.json',
+        'Host verification patch consistency failed: promotion patch is missing.',
+      );
+    }
+    if (!verification.promotionPatch.equals(execution.promotionPatch)) {
+      throw new TrialShadowAuthoringFailure(
+        'SHADOW_AUTHORING_VERIFICATION_FAILED',
+        'verification.json',
+        'Host verification patch consistency failed: promotion patch bytes differ from the Shadow Executor patch.',
+      );
+    }
+    if (verification.patchSha256 !== execution.promotionPatchSha256) {
+      throw new TrialShadowAuthoringFailure(
+        'SHADOW_AUTHORING_VERIFICATION_FAILED',
+        'verification.json',
+        'Host verification patch consistency failed: patch SHA-256 differs from the Shadow Executor digest.',
+      );
     }
     input.manifest.currentStage = 'PROMOTION';
     await writeAttemptManifest(input.manifestPath, input.manifest);

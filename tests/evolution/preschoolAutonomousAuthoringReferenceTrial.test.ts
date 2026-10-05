@@ -881,7 +881,20 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         : ['solution', 'reviewer', 'configuration-execution']);
     const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
     assert.equal(failedManifest.state, 'FAILED');
-    if (scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding') assert.equal(failedManifest.currentStage, 'BINDING');
+    if (scenario === 'binding-drift-at-invocation' || scenario === 'history-drift-at-binding') {
+      assert.equal(failedManifest.currentStage, 'BINDING');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'RUNTIME_EXCEPTION');
+    }
+    if (scenario === 'participant-failure') {
+      assert.equal(failedManifest.currentStage, 'SOLUTION');
+      assert.equal(failedManifest.terminalOutcome.status, 'FAILED');
+      assert.equal(failedManifest.terminalOutcome.errorKind, 'process');
+      assert.equal(failedManifest.terminalOutcome.failureArtifactRef, 'solution-agent/failure.json');
+      await assert.rejects(readFile(join(outputRoot, 'verification.json')), { code: 'ENOENT' });
+    } else if (scenario === 'artifact-backed-role-schema-failure' || scenario === 'artifact-backed-receipt-failure') {
+      assert.equal(failedManifest.currentStage, 'SOLUTION');
+    }
     if (scenario === 'shadow-participant-failure') {
       assert.equal(failedManifest.currentStage, 'SHADOW_AUTHORING');
       assert.equal(failedManifest.terminalOutcome.status, 'SHADOW_AUTHORING_EXECUTION_FAILED');
@@ -2516,6 +2529,11 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
+    }, 'participant-failure', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
     }, 'omitted-responsibility', syntheticRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
@@ -2527,6 +2545,11 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       observable: syntheticPayloadPath,
       brief: fullBriefPath,
     }, 'binding-drift-at-invocation', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'history-drift-at-binding', syntheticRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,

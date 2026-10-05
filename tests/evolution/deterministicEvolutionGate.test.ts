@@ -44,6 +44,46 @@ assert.equal(
   'tsx tests/evolution/runDeterministicEvolutionTests.ts',
 );
 const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
+function extractCiCheckoutStep(workflow: string): string[] {
+  const lines = workflow.split(/\r?\n/);
+  const stepStart = lines.findIndex(line => /^\s*-\s*name:\s*Checkout\s*$/.test(line));
+  if (stepStart === -1) return [];
+
+  const stepIndent = lines[stepStart].search(/\S/);
+  const stepEnd = lines.findIndex((line, index) =>
+    index > stepStart
+    && line.trim() !== ''
+    && line.search(/\S/) === stepIndent
+    && /^-\s+name:/.test(line.slice(stepIndent)),
+  );
+  return lines.slice(stepStart, stepEnd === -1 ? lines.length : stepEnd);
+}
+const checkoutStep = extractCiCheckoutStep(ciWorkflow);
+assert.ok(
+  checkoutStep.some(line => /^\s+uses:\s*actions\/checkout@v4\s*$/.test(line)),
+  'CI must contain a Checkout step using actions/checkout@v4',
+);
+const checkoutWithIndex = checkoutStep.findIndex(line => /^\s+with:\s*$/.test(line));
+const checkoutWithIndent = checkoutWithIndex === -1
+  ? -1
+  : checkoutStep[checkoutWithIndex].search(/\S/);
+const checkoutWithEnd = checkoutWithIndex === -1
+  ? -1
+  : checkoutStep.findIndex((line, index) =>
+    index > checkoutWithIndex
+    && line.trim() !== ''
+    && line.search(/\S/) <= checkoutWithIndent,
+  );
+const checkoutWithBlock = checkoutWithIndex === -1
+  ? []
+  : checkoutStep.slice(checkoutWithIndex + 1, checkoutWithEnd === -1 ? checkoutStep.length : checkoutWithEnd);
+assert.ok(
+  checkoutWithBlock.some(line => {
+    const indent = line.search(/\S/);
+    return indent === checkoutWithIndent + 2 && /^fetch-depth:\s*0\s*$/.test(line.slice(indent));
+  }),
+  'CI Checkout must fetch full git history for pinned historical baseline tests',
+);
 assert.match(ciWorkflow, /^\s*run:\s*npm run test:evolution:deterministic\s*$/m);
 assert.match(
   ciWorkflow,

@@ -3,7 +3,8 @@
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
 > 最后更新：2026-10-06。attempt-000019 已归档：`SUCCEEDED / CLEANUP`、`SHADOW_AUTHORING_VERIFIED`；execution authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费，`reviewContinuation=null`，V1–V5 六项均 PASS，且不需要 PD-117 continuation。归档后 canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`，共 18 次 attempt，最新 #19 成功且无活动 attempt；authoritative repo fingerprint 前后相同。
-> Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。exact patch SHA `88c4e5ed16709d5d33efd2d34b179cb2069b5d60304ca26d3b7f92a32d2e48f3` 的 Human promotion outcome 为 `REJECT`：authoritative dev 已有后续等价 residual preschool shared-capacity 内容（commit `6a46b2749c301b002420f3f77190ea3439d783bb`），故未应用该 historical patch。没有执行 Natural PVER；Layer B / Layer C 均未建立。历史 Layer A tuning 结束，返回 ordinary `RUN / OBSERVE`。
+> Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。exact patch SHA `88c4e5ed16709d5d33efd2d34b179cb2069b5d60304ca26d3b7f92a32d2e48f3` 的 Human promotion outcome 为 `REJECT`：authoritative dev 已有后续等价 residual preschool shared-capacity 内容（commit `6a46b2749c301b002420f3f77190ea3439d783bb`），故未应用该 historical patch。没有执行 Natural PVER；Layer B / Layer C 均未建立。历史 Layer A tuning 结束，总体返回 `RUN / OBSERVE`。
+> 2026-10-06 Human direction：当前 immediate priority 不是 fresh ordinary AE discovery，而是验证 Contract-driven authoring 能否从单一 preschool reference case 发展为可复用、可依赖的内容生成能力。先从已有 historical unresolved AE evidence 中筛选代表性内容丰富化案例；在相关历史证据仍足够时，不为了“发现更多问题”启动 fresh AE。
 
 ## 当前导航
 
@@ -13,7 +14,9 @@
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
 - **Latest governed attempt：**`attempt-000019 = SUCCEEDED / CLEANUP`，terminal result=`SHADOW_AUTHORING_VERIFIED`，validation layer=`HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM`，responsibility provenance=`HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES`。Authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费；`reviewContinuation=null`，authority integrity、mechanical conformance、semantic conformance、red-green regression、adjacent regression 与 evidence-bounded completion 均 PASS，`failures=[]`。不需要 PD-117 continuation。Canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`；共 18 次 attempt，最新 #19 `SUCCEEDED`，无活动 attempt。
 - **Human promotion outcome：**exact patch SHA `88c4e5ed16709d5d33efd2d34b179cb2069b5d60304ca26d3b7f92a32d2e48f3` = `REJECT`。authoritative dev 已包含后续等价 residual preschool shared-capacity 内容（commit `6a46b2749c301b002420f3f77190ea3439d783bb`），因此没有应用 historical patch。该 `REJECT` 不改变 Layer A PASS；authoritative repo fingerprint 在 #19 前后相同。
-- **Current return point：**Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`，历史 tuning 已结束，返回 ordinary `RUN / OBSERVE`。#19 未验证 Contract v1 fully validated、Natural autonomous semantic derivation 或 natural effectiveness。没有执行 Natural PVER；Layer B=`NOT ESTABLISHED`，等待自然 candidate 且不得制造样本；Layer C / Natural Effectiveness=`NOT ESTABLISHED`，只有未来某个 exact patch 经 Human promotion 后，才能由 subsequent Natural PVER 判断。
+- **Current Human-prioritized milestone：**Contract reuse / content-generator usability validation。目标不是继续 preschool historical tuning，也不是立即 fresh AE discovery；而是用已有历史内容丰富化问题验证同一类 Contract / generator-family 结构能否跨 materially different cases 复用，并识别真正需要保留的 family-specific / case-specific 语义。
+- **Current evidence limit：**当前唯一激活的 autonomous reference Contract 仍是 `preschool-shared-neutral-passive-capacity-v1@1`；PD-121 明确未开放 generic Event / Person / Milestone authoring。Layer A PASS 只证明受控 historical downstream mechanism，不证明 Contract 已可复用、可依赖或可跨内容域泛化。
+- **Current return point：**总体 operating mode 仍是 `RUN / OBSERVE`，但 immediate work 先使用 historical unresolved AE evidence 进行 Contract reuse investigation。#19 未验证 Contract v1 fully validated、Natural autonomous semantic derivation 或 natural effectiveness。该 investigation 本身不计作 Layer B proof；Layer B=`NOT ESTABLISHED`，自然 proof 仍必须等待 genuine natural candidate 且不得制造样本；Layer C / Natural Effectiveness=`NOT ESTABLISHED`，只有未来某个 exact patch 经 Human promotion 后，才能由 subsequent Natural PVER 判断。
 - **attempt-000014：**the pre-upgrade authorization became stale after Participant binding drift and was not reused. A fresh one-time authorization admitted #14, which terminally failed at `SHADOW_AUTHORING`; that authorization is consumed. Detailed Host-verified outcome is recorded below.
 - **Historical binding diagnostics：**under the tested binding, Matrix A passed 3/3. Matrix B timed out on its first large terminal Solution-like payload; this is diagnostic evidence for that workload and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix C and later artifact/probe steps were not run.
 - **Layer A overall proof：**`ESTABLISHED / PASS`，仅限 historical controlled downstream mechanism；不表示 Contract v1 fully validated，也不表示 Natural PVER 或 natural effectiveness 已通过。
@@ -158,16 +161,26 @@ attempt-000019 = `SUCCEEDED / CLEANUP`，`SHADOW_AUTHORING_VERIFIED`；Layer A =
 
 - Artifact-backed 首次 communication reopening gate 已 `REESTABLISHED`；Probe #1 / #2 均已成功完成。此历史 gate 不因 binding drift 自动重跑。
 - 当前 Layer A 状态 = `ESTABLISHED / PASS`，仅限 historical controlled downstream mechanism；PD-121 Contract v1 的自主责任推导与自然效果不因此视为验证完成。Human 对 #19 exact patch 的 `REJECT` 保持独立，不改变 Layer A 结论。
-- 当前返回点：#18 的历史终态与路由保持原样；首次 RMW 暴露的 Reference continuation integration/coverage gap 已按 2026-10-06 clarification 修复并通过 deterministic tests。#19 已完成且未回写、未 replay；历史 Layer A tuning 结束，返回 ordinary `RUN / OBSERVE`。
+- 当前返回点：#18 的历史终态与路由保持原样；首次 RMW 暴露的 Reference continuation integration/coverage gap 已按 2026-10-06 clarification 修复并通过 deterministic tests。#19 已完成且未回写、未 replay；历史 Layer A tuning 结束，总体 operating mode 回到 `RUN / OBSERVE`，但 immediate priority 按下述 Contract reuse investigation 执行，不立即启动 fresh ordinary AE sampling。
 - #14 的 pre-upgrade authorization 因 binding drift 失效且未复用；新的 #14 一次性 authorization 已消费。#14 在 `SHADOW_AUTHORING` 因错误 `schemaVersion` terminal 失败，未尝试 correction（`CAPABILITY_UNAVAILABLE`），未产生 promotion。
 - under the new binding，Matrix A passed 3/3。Matrix B timed out on the first large terminal Solution-like payload; this is diagnostic only and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix B will not rerun automatically; neither Matrix C nor an artifact-probe campaign is an automatic prerequisite. Use synthetic diagnostics only when a concrete real-path communication failure needs isolation.
 - attempt-000013 至 #19 的一次性 governed Human authorizations 均已消费；#16 bounded replay 使用的独立 authorization 也已消费。#18 与 #19 的历史 artifacts 均已归档；当前没有新 governed attempt 的准备或授权，不创建 #20。
 - 历史 #18 的 Participant outputs 均通过 transport / envelope / schema validation，无 correction；Reviewer 合法返回 `REQUEST_MORE_WORK`，原 attempt 以 `DEFER_MORE_WORK_REQUESTED` 终止。该历史结果暴露的 Reference runner PD-117 first-RMW integration/coverage gap 已 deterministic 修复。#18 不回写、不 replay。
 - Layer A overall proof = `ESTABLISHED / PASS`；Reference continuation deterministic coverage 与本地 repository gates 已通过。当前不要求 Matrix/probe campaign。
 - 当前 3 个 Human Follow-up active items 是保留的 operational work，non-blocking，不构成当前 Contract validation 的同步 gate。
-- ordinary AE 返回 RUN / OBSERVE；Human Follow-up Loop v1 与现有 active items 继续 non-blocking。Layer B natural semantic derivation 与 Layer C natural effectiveness 均未建立。
-- Layer A historical tuning 已结束；不得为 Layer B 制造自然样本。Layer C 仍须在未来 exact patch 经 Human promotion 后通过 subsequent Natural PVER 判断。
+- 总体 operating mode 仍为 RUN / OBSERVE；当前不立即启动 fresh ordinary AE sampling。先从已有 historical unresolved AE evidence 中筛选适合的内容丰富化案例，用作 Contract reuse / content-generator usability investigation。Human Follow-up Loop v1 与现有 active items 继续 non-blocking。Layer B natural semantic derivation 与 Layer C natural effectiveness 均未建立。
+- Layer A historical tuning 已结束；当前复用调查不得伪装成 Layer B natural proof，也不得为 Layer B 制造自然样本。Layer C 仍须在未来 exact patch 经 Human promotion 后通过 subsequent Natural PVER 判断。
+
 - **PD-117 Bounded More-Work Continuation v1：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED / INITIAL NATURAL EFFECTIVENESS SUPPORTED ACROSS MULTIPLE INDEPENDENT CASES；GLOBAL / LONG-RUN EFFECTIVENESS NOT YET ESTABLISHED；** 首个符合条件的 Reviewer `REQUEST_MORE_WORK` 在单次 session 内最多触发一次 Host continuation、最多增加两个 Participant jobs；base Decision、PD-100 HFL trigger、PD-111 evidence scope 与 full P3 boundary 保持不变。自然 evidence anchor：ordinary-run-20260913-000001（continuation 后再次 `REQUEST_MORE_WORK`）与 ordinary-run-20260913-000006（continuation 后 `ACCEPT_OPTION` → disposable workspace 配置执行 → modified rerun B → Round 2 以 `DEFER_MORE_WORK_REQUESTED` 终止，`authoritativeRootChanged = false`）；Batch #3 early-stop sampling 不用于 activation-rate 统计；不宣称 global effectiveness / 成功率 / READY 率提升。
+
+### 当前 Contract 复用验证方向
+
+- **长期目标：**把 contract-governed content authoring 发展为可复用的内容生成能力，而不是每遇到一个具体内容缺口都重新手工发明一份彼此无关的 Contract。
+- **当前验证对象：**preschool Contract 只作为 reference case，不预设其结构已经通用。下一步从历史 AE 已暴露但未闭环的问题中选择少量代表性内容丰富化案例，至少包含一个与 preschool materially different 的场景。
+- **验证问题：**先判断哪些 Contract 结构真正可共享，哪些字段、类型、语义和约束必须留在 generator family 或 case 层；再以最小改动验证下一条 reuse hypothesis。
+- **负面证据：**如果每个代表性案例都必须重新设计一份无共享结构的一次性 Contract，应视为当前抽象尚不可复用，而不是把多个 bespoke contracts 当作“通用能力已建立”。
+- **fresh-run boundary：**只要 historical evidence 已足以提供代表性 candidate，就不运行 fresh AE 仅用于发现更多同类问题。只有现有证据不足、过期，或必须观察真实 integration / natural activation 时，才回到 fresh natural execution。
+- **abstraction guard：**当前不预建 generic Contract registry、DSL、executor plugin framework 或 universal Event / Person / Milestone schema；是否需要新的 generator family、Contract / Schema 或 runtime change，必须由代表性案例的实际差异驱动。
 
 ### Engineering convenience（非 Product Decision）
 
@@ -351,4 +364,4 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**
 21. PD-118 multi-candidate semantics？→ **HUMAN ACCEPTED / ENGINEERING DELIVERED / DEFAULT ORDINARY PATH ACTIVE / DETERMINISTIC ACCEPTANCE VERIFIED**
 22. 当前 default ordinary path 是否仍使用 legacy `selectFirstHypothesis` winner selection？→ **NO；legacy Selection 仅保留历史兼容**
-23. 当前 immediate prerequisite？→ **无新的 Layer A prerequisite。attempt-000019 已 `SUCCEEDED / CLEANUP`，结果为 `SHADOW_AUTHORING_VERIFIED`；Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。Human exact-patch promotion outcome = `REJECT`，patch 未应用。历史 tuning 关闭，返回 ordinary `RUN / OBSERVE`；未执行 Natural PVER，Layer B / Layer C 均 `NOT ESTABLISHED`，不创建 #20。**
+23. 当前 immediate prerequisite？→ **无新的 Layer A prerequisite。attempt-000019 已 `SUCCEEDED / CLEANUP`，Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`；Human exact-patch promotion outcome = `REJECT`，patch 未应用。当前 immediate priority 是从已有 historical unresolved AE evidence 中筛选代表性内容丰富化案例，验证 Contract reuse / content-generator usability；不为了发现新问题启动 fresh AE，不创建 #20。该工作不等于 Layer B / Layer C proof；Natural PVER 未执行，Layer B / Layer C 均 `NOT ESTABLISHED`。**

@@ -2362,6 +2362,16 @@ responsibilityProvenance = HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES
 6. 本次解释不改变 `contractId`、版本、authority source bytes、authority SHA、write surface 或 promotion authority。
 7. Reviewer 不得仅因既往熟悉感或一次性社会关系变化推断需要修改 Contract。
 
+#### 2026-10-06 Layer A Bounded More-Work Continuation Clarification
+
+**Human accepted：2026-10-06**
+
+PD-117 Bounded More-Work Continuation v1 适用于 Layer A — Historical Controlled Downstream Mechanism Proof。首次已完成 Reviewer 合法返回 `REQUEST_MORE_WORK`，且所要求工作可使用同一 governed attempt 已有 evidence、repository baseline、当前 Contract authority 和已批准 Participant bindings 完成时，Host 最多允许一次 bounded continuation：一次 fresh Solution revision；仅当 revision 返回 `OPTIONS` 时，再执行一次 fresh independent Reviewer re-review。
+
+Base Decision 是不可变 evidence。Continuation 必须产生独立 Decision，并以 continuation Decision 作为 effective route。第二次 `REQUEST_MORE_WORK` 必须 terminal 为 `DEFER_MORE_WORK_REQUESTED`。ordinary semantic retry 仍为 `0`；不得引入通用 Solution↔Reviewer loop。
+
+该 clarification 不授权获取新 evidence 或 gameplay sample，不增加 Participant binding、Contract authority、Responsibility Brief、promotion authority 或 continuation 次数。Human exact-patch promotion 保持不变；PD-122 的 exact binding 与 exact-SHA attempt authorization 保持不变。历史 attempt-000018 不回写、不重放；Layer A proof split 与 `NOT ESTABLISHED` 结论保持不变。
+
 ### PD-122：Model-Adaptive Participant Harness v1
 
 **产品决策（Human accepted：2026-10-03）**

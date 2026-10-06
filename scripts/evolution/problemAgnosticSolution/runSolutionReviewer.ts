@@ -47,6 +47,7 @@ export interface RunSolutionReviewerInput {
   participant: WorkspaceAgentParticipantOptions;
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1;
   referenceResponsibilityContext?: PreschoolReferenceResponsibilityContextV1;
+  structuredResultDelivery?: { kind: 'TERMINAL_JSON' };
 }
 
 export interface RunSolutionReReviewerInput extends RunSolutionReviewerInput {
@@ -253,6 +254,7 @@ async function runSolutionReviewerWithPrompt(
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'reviewer',
+    ...(input.structuredResultDelivery === undefined ? {} : { structuredResultDelivery: input.structuredResultDelivery }),
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',
@@ -364,6 +366,7 @@ async function skillDeliveryFailure(
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'reviewer',
+    ...(input.structuredResultDelivery === undefined ? {} : { structuredResultDelivery: input.structuredResultDelivery }),
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',
@@ -413,6 +416,7 @@ async function inputIdentityFailure(
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'reviewer',
+    ...(input.structuredResultDelivery === undefined ? {} : { structuredResultDelivery: input.structuredResultDelivery }),
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',

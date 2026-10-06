@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -289,6 +289,7 @@ function testQualifiedLayerAResult(): void {
       authorizedAt: '2026-09-29T00:00:00.000Z',
     },
     invocationRefs,
+    reviewContinuation: null,
     responsibilityMappings: [{
       referenceResponsibilityRef: 'reference-responsibility-000001',
       proposalResponsibilityId: 'responsibility-000001',
@@ -305,7 +306,7 @@ function testQualifiedLayerAResult(): void {
     },
   });
   assert.deepEqual(result, {
-    schemaVersion: 'preschool-reference-trial-result-v2',
+    schemaVersion: 'preschool-reference-trial-result-v3',
     status: 'SHADOW_AUTHORING_VERIFIED',
     validationLayer: 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM',
     responsibilityProvenance: 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES',
@@ -322,6 +323,7 @@ function testQualifiedLayerAResult(): void {
       authorizedAt: '2026-09-29T00:00:00.000Z',
     },
     invocationRefs,
+    reviewContinuation: null,
     newEntryCount: 1,
     changedFiles: ['src/data/lines/preschool-passive-spine.json'],
     promotionPackagePath: '/tmp/synthetic-promotion-package.json',
@@ -331,7 +333,53 @@ function testQualifiedLayerAResult(): void {
   });
 }
 
-type SyntheticLayerAScenario = 'success' | 'omitted-responsibility' | 'reviewer-contract-escalation' | 'unauthorized-shadow-path' | 'residual-v5-deficit' | 'participant-failure' | 'reviewer-process-failure' | 'shadow-participant-failure' | 'artifact-backed-role-schema-failure' | 'artifact-backed-receipt-failure' | 'solution-id-prefix-collision' | 'solution-exact-answer-id' | 'reviewer-static-answer-marker' | 'reviewer-schema-correction' | 'shadow-schema-correction' | 'reviewer-continuation-answer-marker' | 'reviewer-role-crossover' | 'shadow-role-crossover' | 'reviewer-initial-fragment-missing' | 'reviewer-initial-fragment-duplicated' | 'reviewer-initial-fragment-misplaced' | 'shadow-initial-fragment-missing' | 'shadow-initial-fragment-duplicated' | 'shadow-initial-fragment-misplaced' | 'binding-drift-at-invocation' | 'history-drift-at-binding' | 'authorization-drift-after-solution' | 'binding-lock-drift-after-reviewer' | 'history-drift-after-shadow' | 'preparation-stale-authority' | 'preflight-observable-unavailable' | 'preflight-brief-missing' | 'preflight-brief-digest-mismatch' | 'preflight-brief-invalid-schema';
+type SyntheticLayerAScenario =
+  | 'success'
+  | 'reviewer-request-more-work-continuation'
+  | 'reviewer-second-request-more-work-terminal'
+  | 'revision-insufficient-evidence-terminal'
+  | 'revision-escalate-terminal'
+  | 'revision-participant-failure'
+  | 'rereview-participant-failure'
+  | 'continuation-create-only-collision'
+  | 'continuation-authorization-drift'
+  | 'continuation-history-drift'
+  | 'revision-prompt-contamination'
+  | 'reviewer-reject'
+  | 'reviewer-defer'
+  | 'omitted-responsibility'
+  | 'reviewer-contract-escalation'
+  | 'unauthorized-shadow-path'
+  | 'residual-v5-deficit'
+  | 'participant-failure'
+  | 'reviewer-process-failure'
+  | 'shadow-participant-failure'
+  | 'artifact-backed-role-schema-failure'
+  | 'artifact-backed-receipt-failure'
+  | 'solution-id-prefix-collision'
+  | 'solution-exact-answer-id'
+  | 'reviewer-static-answer-marker'
+  | 'reviewer-schema-correction'
+  | 'shadow-schema-correction'
+  | 'reviewer-continuation-answer-marker'
+  | 'reviewer-role-crossover'
+  | 'shadow-role-crossover'
+  | 'reviewer-initial-fragment-missing'
+  | 'reviewer-initial-fragment-duplicated'
+  | 'reviewer-initial-fragment-misplaced'
+  | 'shadow-initial-fragment-missing'
+  | 'shadow-initial-fragment-duplicated'
+  | 'shadow-initial-fragment-misplaced'
+  | 'binding-drift-at-invocation'
+  | 'history-drift-at-binding'
+  | 'authorization-drift-after-solution'
+  | 'binding-lock-drift-after-reviewer'
+  | 'history-drift-after-shadow'
+  | 'preparation-stale-authority'
+  | 'preflight-observable-unavailable'
+  | 'preflight-brief-missing'
+  | 'preflight-brief-digest-mismatch'
+  | 'preflight-brief-invalid-schema';
 
 async function loadSyntheticPublicRunner(root: string, inputSha256: {
   evidence: string;
@@ -340,6 +388,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
 }, options: {
   suffix?: string;
   reviewerStaticPromptMarker?: string;
+  solutionRevisionStaticPromptMarker?: string;
   continuationPromptMarker?: string;
   reviewerTrustedFragmentFault?: 'missing' | 'duplicated' | 'misplaced';
   shadowTrustedFragmentFault?: 'missing' | 'duplicated' | 'misplaced';
@@ -353,6 +402,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   const shadowAuthoringPath = 'scripts/evolution/autonomousAuthoring/shadowAuthoringExecutionParticipant.ts';
   const verifierPath = 'scripts/evolution/autonomousAuthoring/verifyPreschoolShadowAuthoring.ts';
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
+  const solutionAgentPath = 'scripts/evolution/problemAgnosticSolution/runSolutionAgent.ts';
   const reviewerPath = 'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts';
   const structuredPath = 'scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution.ts';
   const retransmissionPath = 'scripts/evolution/problemAgnosticSolution/envelopeRetransmission.ts';
@@ -366,6 +416,17 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   }
   await writeFile(join(sourceRoot, runnerPath), runnerSource);
   await writeFile(join(sourceRoot, verifierPath), await readFile(join(process.cwd(), verifierPath)));
+  await writeFile(join(sourceRoot, solutionAgentPath), await readFile(join(process.cwd(), solutionAgentPath)));
+  await writeFile(join(sourceRoot, reviewerPath), await readFile(join(process.cwd(), reviewerPath)));
+  if (options.solutionRevisionStaticPromptMarker) {
+    const solutionAgentSource = await readFile(join(sourceRoot, solutionAgentPath), 'utf8');
+    const promptAnchor = "    'You are a fresh Solution Participant performing one bounded revision in a separate disposable workspace.',";
+    assert.equal(solutionAgentSource.split(promptAnchor).length, 2);
+    await writeFile(join(sourceRoot, solutionAgentPath), solutionAgentSource.replace(
+      promptAnchor,
+      `${promptAnchor}\n    ${JSON.stringify(options.solutionRevisionStaticPromptMarker)},`,
+    ));
+  }
   if (options.continuationPromptMarker) {
     const retransmissionPath = 'scripts/evolution/problemAgnosticSolution/envelopeRetransmission.ts';
     const retransmissionSource = await readFile(join(sourceRoot, retransmissionPath), 'utf8');
@@ -437,7 +498,12 @@ async function loadSyntheticArtifactBackedSolutionProbeRunner(root: string, inpu
   await loadSyntheticPublicRunner(root, inputSha256, { suffix });
   const runnerPath = 'scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts';
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
-  const staged = spawnSync('git', ['-C', repositoryRoot, 'add', '--', runnerPath, briefPath], { encoding: 'utf8' });
+  const staged = spawnSync('git', ['-C', repositoryRoot, 'add', '--',
+    runnerPath,
+    briefPath,
+    'scripts/evolution/problemAgnosticSolution/runSolutionAgent.ts',
+    'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts',
+  ], { encoding: 'utf8' });
   assert.equal(staged.status, 0, staged.stderr);
   const committed = spawnSync('git', [
     '-C', repositoryRoot,
@@ -811,6 +877,19 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   if (scenario === 'solution-exact-answer-id') solution.summary = ANSWER_IDS[0];
   if (scenario === 'reviewer-static-answer-marker') solution.summary = ANSWER_IDS[0];
   if (scenario === 'reviewer-schema-correction') solution.summary = ANSWER_IDS[0];
+  const revisedSolution = structuredClone(solution);
+  revisedSolution.summary = 'Fresh bounded revision of the synthetic Solution.';
+  revisedSolution.options[0]!.autonomousAuthoring.contractPayload.cards[0]!.existingContentDistinction.specificDistinction =
+    'The bounded revision states a sharper life-function distinction grounded in the same supplied responsibility.';
+  const revisionNonOption = {
+    schemaVersion: 'solution-work-v1',
+    status: scenario === 'revision-escalate-terminal' ? 'ESCALATE' : 'INSUFFICIENT_EVIDENCE',
+    problemId,
+    options: [],
+    summary: 'The bounded revision cannot proceed without additional evidence or authority.',
+    repoRefs: [catalogRef],
+    artifactRefs: [observableRef, briefRef],
+  };
   const schemaInvalidSolution = structuredClone(solution);
   schemaInvalidSolution.options[0]!.autonomousAuthoring.contractPayload.cards[0]!.scopeCheck =
     'The scoped changes preserve the authorized Contract.';
@@ -826,7 +905,25 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     assessment: 'Synthetic Layer A review.', repoRefs: [catalogRef],
     artifactRefs: [observableRef, briefRef, attestationRef], concerns: [],
   };
-  const reviewerResult = scenario === 'reviewer-contract-escalation' ? {
+  const reviewerResult = scenario === 'reviewer-reject' || scenario === 'reviewer-defer' ? {
+    schemaVersion: 'solution-review-v1', problemId,
+    decision: scenario === 'reviewer-reject' ? 'REJECT' : 'DEFER',
+    assessment: 'Synthetic no-continuation Reviewer decision.',
+    repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef, attestationRef], concerns: [],
+  } : scenario === 'reviewer-request-more-work-continuation'
+    || scenario === 'reviewer-second-request-more-work-terminal'
+    || scenario === 'continuation-create-only-collision'
+    || scenario === 'continuation-authorization-drift'
+    || scenario === 'continuation-history-drift'
+    || scenario === 'revision-prompt-contamination'
+    || scenario === 'revision-insufficient-evidence-terminal'
+    || scenario === 'revision-escalate-terminal'
+    || scenario === 'revision-participant-failure'
+    || scenario === 'rereview-participant-failure' ? {
+    schemaVersion: 'solution-review-v1', problemId, decision: 'REQUEST_MORE_WORK',
+    assessment: 'A bounded local semantic revision can resolve the review concern.',
+    repoRefs: [catalogRef], artifactRefs: [observableRef, briefRef, attestationRef], concerns: ['Clarify the scoped semantic distinction using the supplied context.'],
+  } : scenario === 'reviewer-contract-escalation' ? {
     schemaVersion: 'solution-review-v1', problemId, decision: 'ESCALATE',
     autonomousAuthoringAssessment: {
       schemaVersion: 'autonomous-authoring-review-assessment-v1',
@@ -868,6 +965,17 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     'process.stdout.write(process.argv[3]);',
   ].join('\n');
   const jobs: string[] = [];
+  let solutionInvocationCount = 0;
+  let reviewerInvocationCount = 0;
+  let baseDecisionBytesAtRevision: Buffer | undefined;
+  let baseSolutionWorkspaceRoot: string | undefined;
+  let revisionWorkspaceRoot: string | undefined;
+  let baseReviewerWorkspaceRoot: string | undefined;
+  let rereviewWorkspaceRoot: string | undefined;
+  let solutionBindingLockBytesAtRevision: Buffer | undefined;
+  let downstreamBindingLockBytesAtRevision: Buffer | undefined;
+  let artifactBackedBindingResolutionCountAtRevision: number | undefined;
+  let participantBindingResolutionCountAtRevision: number | undefined;
   let continuationBuildArgsCount = 0;
   const outputRoot = join(liveRepositoryRoot, REFERENCE_TRIAL_ATTEMPTS_PATH, 'attempt-000900');
   const executionAuthorizationPath = join(root, `synthetic-layer-a-${scenario}-authorization.json`);
@@ -879,6 +987,13 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   const participant: WorkspaceAgentParticipantOptions = {
     executable: process.execPath,
     interpretCompletedOutput: ({ job, stdout, expectedThreadRef }) => {
+      if (job.role === 'reviewer'
+        && scenario === 'continuation-create-only-collision'
+        && reviewerInvocationCount === 1) {
+        const continuationRoot = join(outputRoot, 'review-continuation-000001');
+        mkdirSync(continuationRoot, { recursive: true });
+        writeFileSync(join(continuationRoot, 'revision-request.json'), 'pre-existing continuation evidence\n');
+      }
       if (expectedThreadRef === undefined && scenario === 'reviewer-role-crossover' && job.role === 'reviewer') {
         job.role = 'configuration-execution';
       } else if (expectedThreadRef === undefined && scenario === 'shadow-role-crossover' && job.role === 'configuration-execution') {
@@ -905,11 +1020,49 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
     },
     buildArgs: job => {
       jobs.push(job.role);
+      if (job.role === 'solution') {
+        solutionInvocationCount += 1;
+        if (solutionInvocationCount === 1) baseSolutionWorkspaceRoot = job.workspaceRoot;
+        if ((scenario === 'reviewer-request-more-work-continuation'
+          || scenario === 'reviewer-second-request-more-work-terminal'
+          || scenario === 'revision-insufficient-evidence-terminal'
+          || scenario === 'revision-escalate-terminal'
+          || scenario === 'revision-participant-failure'
+          || scenario === 'rereview-participant-failure'
+          || scenario === 'revision-prompt-contamination'
+          || scenario === 'continuation-authorization-drift'
+          || scenario === 'continuation-history-drift') && solutionInvocationCount === 2) {
+          revisionWorkspaceRoot = job.workspaceRoot;
+          baseDecisionBytesAtRevision = readFileSync(join(outputRoot, 'decision.json'));
+          solutionBindingLockBytesAtRevision = readFileSync(join(outputRoot, 'solution-participant-binding-lock.json'));
+          downstreamBindingLockBytesAtRevision = readFileSync(join(outputRoot, 'downstream-participant-binding-lock.json'));
+          artifactBackedBindingResolutionCountAtRevision = artifactBackedBindingResolutionCount;
+          participantBindingResolutionCountAtRevision = participantBindingResolutionCount;
+          assert.equal(reviewerInvocationCount, 1, 're-review must wait until after the revision result exists');
+          assert.match(job.prompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES/);
+          assert.match(job.prompt, /Clarify the scoped semantic distinction/);
+          assert.match(job.prompt, /Artifact-Backed Structured Final Result Receipt V1/);
+        }
+      } else if (job.role === 'reviewer') {
+        reviewerInvocationCount += 1;
+        if (reviewerInvocationCount === 1) baseReviewerWorkspaceRoot = job.workspaceRoot;
+        if (reviewerInvocationCount === 2) rereviewWorkspaceRoot = job.workspaceRoot;
+        if (scenario === 'reviewer-request-more-work-continuation' && reviewerInvocationCount === 2) {
+          assert.equal(existsSync(join(outputRoot, 'review-continuation-000001/solution-revision/result.json')), true,
+            'fresh Reviewer re-review must not start until the revision result is persisted');
+        }
+      }
       if (job.role === 'solution' && scenario === 'participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Participant failure"); process.exitCode = 23'];
       }
+      if (job.role === 'solution' && scenario === 'revision-participant-failure' && solutionInvocationCount === 2) {
+        return ['-e', 'process.stderr.write("synthetic revision Participant failure"); process.exitCode = 23'];
+      }
       if (job.role === 'reviewer' && scenario === 'reviewer-process-failure') {
         return ['-e', 'process.stderr.write("synthetic Reviewer runtime failure"); process.exitCode = 23'];
+      }
+      if (job.role === 'reviewer' && scenario === 'rereview-participant-failure' && reviewerInvocationCount === 2) {
+        return ['-e', 'process.stderr.write("synthetic independent re-review Participant failure"); process.exitCode = 23'];
       }
       if (job.role === 'configuration-execution' && scenario === 'shadow-participant-failure') {
         return ['-e', 'process.stderr.write("synthetic Shadow Executor failure"); process.exitCode = 23'];
@@ -931,7 +1084,22 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
         return ['-e', 'process.stdout.write("invalid structured terminal envelope")'];
       }
       if (job.role === 'solution') {
-        const bytes = JSON.stringify(solution);
+        const isRevisionInvocation = solutionInvocationCount === 2 && (
+          scenario === 'reviewer-request-more-work-continuation'
+          || scenario === 'reviewer-second-request-more-work-terminal'
+          || scenario === 'revision-insufficient-evidence-terminal'
+          || scenario === 'revision-escalate-terminal'
+          || scenario === 'revision-participant-failure'
+          || scenario === 'rereview-participant-failure'
+          || scenario === 'revision-prompt-contamination'
+          || scenario === 'continuation-authorization-drift'
+          || scenario === 'continuation-history-drift'
+        );
+        const participantResult = isRevisionInvocation
+          ? scenario === 'revision-insufficient-evidence-terminal' || scenario === 'revision-escalate-terminal'
+            ? revisionNonOption : revisedSolution
+          : solution;
+        const bytes = JSON.stringify(participantResult);
         const args = ['-e', [
           "const fs = require('node:fs');",
           "const path = require('node:path');",
@@ -940,10 +1108,17 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
           "const artifactPath = path.resolve('.evolution-participant/final-result.json');",
           'fs.mkdirSync(path.dirname(artifactPath), { recursive: true });',
           'fs.writeFileSync(artifactPath, bytes);',
-          'if (process.argv[2]) { const authorization = JSON.parse(fs.readFileSync(process.argv[2], "utf8")); authorization.authorizationRef += "-drift"; fs.writeFileSync(process.argv[2], JSON.stringify(authorization)); }',
+          'if (process.argv[2] && process.argv[2] !== "-") { const authorization = JSON.parse(fs.readFileSync(process.argv[2], "utf8")); authorization.authorizationRef += "-drift"; fs.writeFileSync(process.argv[2], JSON.stringify(authorization)); }',
+          'if (process.argv[3] && process.argv[3] !== "-") { fs.mkdirSync(path.dirname(process.argv[3]), { recursive: true }); fs.writeFileSync(process.argv[3], "history drift during bounded continuation"); }',
           "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
         ].join('\n'), bytes];
-        if (scenario === 'authorization-drift-after-solution') args.push(executionAuthorizationPath);
+        if (scenario === 'authorization-drift-after-solution'
+          || (scenario === 'continuation-authorization-drift' && solutionInvocationCount === 2)) {
+          args.push(executionAuthorizationPath);
+        }
+        if (scenario === 'continuation-history-drift' && solutionInvocationCount === 2) {
+          args.push('-', historyDriftPath);
+        }
         return args;
       }
       if (job.role === 'reviewer') {
@@ -956,7 +1131,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
             'process.stdout.write(process.argv[1]);',
           ].join('\n'), JSON.stringify(reviewerInitialResult), downstreamBindingLockPath];
         }
-        return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(reviewerInitialResult)];
+        const participantReview = scenario === 'reviewer-request-more-work-continuation' && reviewerInvocationCount > 1
+          ? review : reviewerInitialResult;
+        return ['-e', 'process.stdout.write(process.argv[1])', JSON.stringify(participantReview)];
       }
       return ['-e', executorScript, JSON.stringify(entries), JSON.stringify(ids), JSON.stringify(executorResult), scenario, historyDriftPath];
     },
@@ -998,6 +1175,222 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
       return { participant } as never;
     },
   });
+  if (scenario === 'reviewer-request-more-work-continuation') {
+    await assert.doesNotReject(trial, 'the first eligible Reviewer REQUEST_MORE_WORK must enter bounded continuation instead of becoming terminal');
+    assert.deepEqual(jobs, ['solution', 'reviewer', 'solution', 'reviewer', 'configuration-execution']);
+    assert.ok(baseDecisionBytesAtRevision, 'the create-only base Decision must exist before revision invocation');
+    const baseDecisionBytes = await readFile(join(outputRoot, 'decision.json'));
+    assert.deepEqual(baseDecisionBytes, baseDecisionBytesAtRevision);
+    const continuationRoot = join(outputRoot, 'review-continuation-000001');
+    const continuation = JSON.parse(await readFile(join(continuationRoot, 'continuation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(continuation.continuationOrdinal, 1);
+    assert.deepEqual(continuation.baseDecision, {
+      ref: 'decision.json',
+      sha256: sha256Hex(baseDecisionBytes),
+    });
+    assert.equal(continuation.revisionStatus, 'OPTIONS');
+    assert.equal(continuation.reReviewStatus, 'ACCEPT_OPTION');
+    assert.equal(continuation.participantJobCount, 2);
+    assert.equal(continuation.effectiveRoute, 'READY_FOR_SHADOW_AUTHORING');
+    const continuationDecision = JSON.parse(await readFile(join(continuationRoot, 'decision.json'), 'utf8')) as Record<string, any>;
+    assert.deepEqual(continuation.continuationDecision, {
+      ref: 'review-continuation-000001/decision.json',
+      sha256: sha256Hex(await readFile(join(continuationRoot, 'decision.json'))),
+    });
+    assert.equal(continuationDecision.route, continuation.effectiveRoute);
+    const revisionBytes = await readFile(join(continuationRoot, 'solution-revision/result.json'));
+    const savedRevision = JSON.parse(revisionBytes.toString('utf8')) as typeof revisedSolution;
+    assert.deepEqual(savedRevision, revisedSolution);
+    const revisionInvocation = JSON.parse(await readFile(join(continuationRoot, 'solution-revision/invocation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(revisionInvocation.jobNumber, 3);
+    assert.ok(baseSolutionWorkspaceRoot && revisionWorkspaceRoot);
+    assert.notEqual(revisionWorkspaceRoot, baseSolutionWorkspaceRoot, 'revision must use a fresh disposable Reference workspace');
+    assert.match(revisionWorkspaceRoot, /solution-revision/);
+    assert.equal(artifactBackedBindingResolutionCount, artifactBackedBindingResolutionCountAtRevision,
+      'revision must reuse the admitted exact Solution binding without re-resolution');
+    assert.equal(participantBindingResolutionCount, participantBindingResolutionCountAtRevision,
+      're-review must reuse the admitted exact downstream binding without re-resolution');
+    assert.deepEqual(
+      await readFile(join(outputRoot, 'solution-participant-binding-lock.json')),
+      solutionBindingLockBytesAtRevision,
+    );
+    assert.deepEqual(
+      await readFile(join(outputRoot, 'downstream-participant-binding-lock.json')),
+      downstreamBindingLockBytesAtRevision,
+    );
+    assert.equal(revisionInvocation.structuredResultDelivery.kind, 'WORKSPACE_ARTIFACT_RECEIPT_V1');
+    const rereviewPrompt = await readFile(join(continuationRoot, 'reviewer-agent/participant-prompt.txt'), 'utf8');
+    assert.ok(rereviewPrompt.includes(canonicalJson(revisedSolution)), 'fresh Reviewer must receive the revised Solution');
+    assert.ok(rereviewPrompt.includes('Reference Responsibility Brief'));
+    assert.ok(rereviewPrompt.includes('reference-responsibility-000001'));
+    const rereviewInvocation = JSON.parse(await readFile(join(continuationRoot, 'reviewer-agent/invocation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(rereviewInvocation.jobNumber, 4);
+    assert.notEqual(rereviewInvocation.invocationRef, JSON.parse(await readFile(join(outputRoot, 'reviewer-agent/invocation.json'), 'utf8')).invocationRef);
+    assert.ok(baseReviewerWorkspaceRoot && rereviewWorkspaceRoot);
+    assert.notEqual(rereviewWorkspaceRoot, baseReviewerWorkspaceRoot, 're-review must use a fresh independent Reviewer workspace');
+    assert.equal(rereviewInvocation.structuredResultDelivery.kind, 'TERMINAL_JSON');
+    assert.equal(await readFile(join(continuationRoot, 'solution-revision/raw-output.txt'), 'utf8').then(value => value.includes('artifact-backed-structured-final-result-receipt-v1')), true);
+    const admission = JSON.parse(await readFile(join(outputRoot, 'shadow-authoring/admission.json'), 'utf8')) as Record<string, any>;
+    assert.equal(
+      admission.proposalSha256,
+      sha256Hex(canonicalJson(revisedSolution.options[0]!.autonomousAuthoring)),
+      'Admission must consume the revised Solution proposal',
+    );
+    assert.equal(admission.reviewSha256, sha256Hex(canonicalJson(review)), 'Admission must consume the independent re-review');
+    assert.notEqual(admission.reviewSha256, sha256Hex(canonicalJson(reviewerResult)), 'Admission must not consume the base REQUEST_MORE_WORK review');
+    const shadowPrompt = await readFile(join(outputRoot, 'shadow-authoring/participant-prompt.txt'), 'utf8');
+    assert.ok(shadowPrompt.includes(canonicalJson(revisedSolution.options[0]!.autonomousAuthoring.contractPayload.cards)),
+      'Shadow must receive Cards from the revised Solution');
+    const continuationBytes = await readFile(join(continuationRoot, 'continuation.json'));
+    const finalManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
+    const finalResult = JSON.parse(await readFile(join(outputRoot, 'trial-result.json'), 'utf8')) as Record<string, any>;
+    assert.equal(finalManifest.reviewContinuation.status, 'AVAILABLE');
+    assert.equal(finalManifest.reviewContinuation.sha256, sha256Hex(continuationBytes));
+    assert.deepEqual(finalResult.reviewContinuation, {
+      artifactRef: 'review-continuation-000001/continuation.json',
+      sha256: sha256Hex(continuationBytes),
+    });
+    assert.equal(finalResult.invocationRefs.solution.invocationRef,
+      JSON.parse(await readFile(join(outputRoot, 'solution-agent/invocation.json'), 'utf8')).invocationRef,
+      'result base Solution provenance remains in its original role slot');
+    assert.equal(finalResult.invocationRefs.reviewer.invocationRef,
+      JSON.parse(await readFile(join(outputRoot, 'reviewer-agent/invocation.json'), 'utf8')).invocationRef,
+      'result base Reviewer provenance remains in its original role slot');
+    assert.equal(continuation.effectiveSolution.artifactRef, 'review-continuation-000001/solution-revision/result.json');
+    assert.equal(continuation.effectiveReview.artifactRef, 'review-continuation-000001/reviewer-agent/review.json');
+    return;
+  }
+  if (scenario === 'reviewer-second-request-more-work-terminal') {
+    await assert.rejects(trial);
+    assert.deepEqual(jobs, ['solution', 'reviewer', 'solution', 'reviewer']);
+    assert.ok(baseDecisionBytesAtRevision);
+    const baseDecisionBytes = await readFile(join(outputRoot, 'decision.json'));
+    assert.deepEqual(baseDecisionBytes, baseDecisionBytesAtRevision);
+    const continuationRoot = join(outputRoot, 'review-continuation-000001');
+    const continuation = JSON.parse(await readFile(join(continuationRoot, 'continuation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(continuation.continuationOrdinal, 1);
+    assert.deepEqual(continuation.baseDecision, { ref: 'decision.json', sha256: sha256Hex(baseDecisionBytes) });
+    assert.equal(continuation.revisionStatus, 'OPTIONS');
+    assert.equal(continuation.reReviewStatus, 'REQUEST_MORE_WORK');
+    assert.equal(continuation.participantJobCount, 2);
+    assert.equal(continuation.effectiveRoute, 'DEFER_MORE_WORK_REQUESTED');
+    await assert.rejects(readdir(join(outputRoot, 'review-continuation-000002')),
+      { code: 'ENOENT' });
+    return;
+  }
+  if (scenario === 'revision-insufficient-evidence-terminal' || scenario === 'revision-escalate-terminal') {
+    await assert.rejects(trial);
+    assert.deepEqual(jobs, ['solution', 'reviewer', 'solution']);
+    const continuationRoot = join(outputRoot, 'review-continuation-000001');
+    const expectedRoute = scenario === 'revision-escalate-terminal' ? 'ESCALATE_HUMAN' : 'DEFER';
+    const expectedRevisionStatus = scenario === 'revision-escalate-terminal' ? 'ESCALATE' : 'INSUFFICIENT_EVIDENCE';
+    const continuation = JSON.parse(await readFile(join(continuationRoot, 'continuation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(continuation.continuationOrdinal, 1);
+    assert.equal(continuation.revisionStatus, expectedRevisionStatus);
+    assert.equal(continuation.reReviewStatus, 'NOT_RUN');
+    assert.equal(continuation.participantJobCount, 1);
+    assert.equal(continuation.effectiveRoute, expectedRoute);
+    const decision = JSON.parse(await readFile(join(continuationRoot, 'decision.json'), 'utf8')) as Record<string, any>;
+    assert.equal(decision.route, expectedRoute);
+    await assert.rejects(readdir(join(continuationRoot, 'reviewer-agent')), { code: 'ENOENT' });
+    return;
+  }
+  if (scenario === 'revision-participant-failure' || scenario === 'rereview-participant-failure') {
+    await assert.rejects(trial);
+    const expectedJobs = scenario === 'revision-participant-failure'
+      ? ['solution', 'reviewer', 'solution']
+      : ['solution', 'reviewer', 'solution', 'reviewer'];
+    assert.deepEqual(jobs, expectedJobs);
+    const continuationRoot = join(outputRoot, 'review-continuation-000001');
+    const continuation = JSON.parse(await readFile(join(continuationRoot, 'continuation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(continuation.continuationOrdinal, 1);
+    assert.equal(continuation.participantJobCount, expectedJobs.length - 2);
+    assert.ok(continuation.participantFailure, `Participant failure classification must be retained in continuation provenance: ${JSON.stringify(continuation)}`);
+    assert.equal(continuation.participantFailure.role, scenario === 'revision-participant-failure' ? 'solution-revision' : 'reviewer-rereview');
+    assert.equal(continuation.participantFailure.errorKind, 'process');
+    const failedRoleRoot = scenario === 'revision-participant-failure' ? 'solution-revision' : 'reviewer-agent';
+    const failure = JSON.parse(await readFile(join(continuationRoot, failedRoleRoot, 'failure.json'), 'utf8')) as Record<string, any>;
+    assert.equal(failure.schemaVersion, scenario === 'revision-participant-failure'
+      ? 'solution-agent-failure-v1' : 'solution-reviewer-failure-v1');
+    assert.equal(failure.errorKind, 'process');
+    assert.match(failure.message, /exited with code 23/);
+    const failedManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
+    assert.equal(failedManifest.state, 'FAILED');
+    assert.equal(failedManifest.reviewContinuation.status, 'AVAILABLE', 'failure finalization must validate and retain continuation provenance');
+    assert.equal(failedManifest.reviewContinuation.sha256,
+      sha256Hex(await readFile(join(continuationRoot, 'continuation.json'))));
+    assert.equal(failedManifest.terminalOutcome.errorKind, 'process');
+    return;
+  }
+  if (scenario === 'reviewer-reject' || scenario === 'reviewer-defer') {
+    await assert.rejects(trial);
+    assert.deepEqual(jobs, ['solution', 'reviewer']);
+    await assert.rejects(readdir(join(outputRoot, 'review-continuation-000001')), { code: 'ENOENT' });
+    const decision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as Record<string, any>;
+    assert.equal(decision.inputs.reviewerDecision, scenario === 'reviewer-reject' ? 'REJECT' : 'DEFER');
+    assert.equal(decision.route, scenario === 'reviewer-reject' ? 'SKIP' : 'DEFER');
+    const terminalManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
+    assert.equal(terminalManifest.reviewContinuation, null);
+    return;
+  }
+  if (scenario === 'continuation-create-only-collision') {
+    await assert.rejects(trial);
+    assert.deepEqual(jobs, ['solution', 'reviewer'], 'a continuation collision must fail before revision or downstream Participant work');
+    const collidedRef = join(outputRoot, 'review-continuation-000001/revision-request.json');
+    assert.equal(await readFile(collidedRef, 'utf8'), 'pre-existing continuation evidence\n');
+    const baseDecision = JSON.parse(await readFile(join(outputRoot, 'decision.json'), 'utf8')) as Record<string, any>;
+    assert.equal(baseDecision.route, 'DEFER_MORE_WORK_REQUESTED');
+    await assert.rejects(readFile(join(outputRoot, 'review-continuation-000001/continuation.json')), { code: 'ENOENT' });
+    const terminalManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
+    assert.equal(terminalManifest.state, 'FAILED');
+    assert.equal(terminalManifest.reviewContinuation.status, 'CORRUPTED');
+    assert.match(terminalManifest.reviewContinuation.diagnostic, /create-only collision/i);
+    return;
+  }
+  if (scenario === 'continuation-authorization-drift' || scenario === 'continuation-history-drift') {
+    await assert.rejects(trial);
+    assert.deepEqual(jobs, ['solution', 'reviewer', 'solution'], 'drift must stop before fresh Reviewer re-review or downstream admission');
+    assert.ok(baseDecisionBytesAtRevision);
+    assert.deepEqual(await readFile(join(outputRoot, 'decision.json')), baseDecisionBytesAtRevision);
+    const continuationRoot = join(outputRoot, 'review-continuation-000001');
+    await assert.rejects(readdir(join(continuationRoot, 'reviewer-agent')), { code: 'ENOENT' });
+    await assert.rejects(readdir(join(outputRoot, 'shadow-authoring')), { code: 'ENOENT' });
+    const continuation = JSON.parse(await readFile(join(continuationRoot, 'continuation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(continuation.status, 'HOST_INTEGRITY_FAILURE', scenario);
+    assert.equal(continuation.revisionStatus, 'OPTIONS');
+    assert.equal(continuation.reReviewStatus, 'NOT_RUN');
+    assert.equal(continuation.participantJobCount, 1);
+    assert.equal(continuation.continuationDecision, null);
+    assert.equal(continuation.effectiveRoute, null);
+    assert.match(continuation.hostFailure.message,
+      scenario === 'continuation-authorization-drift' ? /Execution authorization/ : /history changed/);
+    const terminalManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
+    assert.equal(terminalManifest.state, 'FAILED');
+    assert.equal(terminalManifest.reviewContinuation.status, 'AVAILABLE', 'failure finalization must validate drift-failure continuation evidence');
+    assert.equal(terminalManifest.reviewContinuation.sha256,
+      sha256Hex(await readFile(join(continuationRoot, 'continuation.json'))));
+    return;
+  }
+  if (scenario === 'revision-prompt-contamination') {
+    await assert.rejects(trial);
+    assert.deepEqual(jobs, ['solution', 'reviewer'], 'contaminated revision prompt must be rejected before Participant process start');
+    const continuationRoot = join(outputRoot, 'review-continuation-000001');
+    const continuation = JSON.parse(await readFile(join(continuationRoot, 'continuation.json'), 'utf8')) as Record<string, any>;
+    assert.equal(continuation.status, 'PARTICIPANT_FAILURE');
+    assert.equal(continuation.participantJobCount, 1);
+    assert.equal(continuation.participantFailure.role, 'solution-revision');
+    const revisionPrompt = await readFile(join(continuationRoot, 'solution-revision/participant-prompt.txt'), 'utf8');
+    assert.ok(revisionPrompt.includes(ANSWER_IDS[0]));
+    const trace = JSON.parse(await readFile(join(continuationRoot, 'solution-revision/execution-trace.json'), 'utf8')) as {
+      events: Array<{ type: string }>;
+      terminal: { outcome: string };
+    };
+    assert.equal(trace.terminal.outcome, 'process_error');
+    assert.equal(trace.events.some(event => event.type === 'process_start'), false,
+      'the contaminated prompt must be stopped before the Participant process starts');
+    await assert.rejects(readdir(join(continuationRoot, 'reviewer-agent')), { code: 'ENOENT' });
+    return;
+  }
   if (scenario.startsWith('preflight-')) {
     const result = await trial;
     const expectedResultStatus = scenario === 'preflight-observable-unavailable'
@@ -1320,7 +1713,7 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.equal(result.newEntryCount, brief.responsibilities.length);
   const succeededManifest = JSON.parse(await readFile(join(outputRoot, 'attempt-manifest.json'), 'utf8')) as Record<string, any>;
   assert.equal(succeededManifest.state, 'SUCCEEDED');
-  assert.equal(succeededManifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
+  assert.equal(succeededManifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v3');
   assert.equal(succeededManifest.terminalOutcome.trialResultRef, 'trial-result.json');
   const verification = JSON.parse(await readFile(join(outputRoot, 'verification.json'), 'utf8')) as Record<string, any>;
   const shadowExecutionPatch = await assertShadowExecutionEvidenceRetained(outputRoot, succeededManifest, verification);
@@ -1401,9 +1794,10 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   assert.doesNotMatch(reviewerPrompt, /WORKSPACE_ARTIFACT_RECEIPT_V1|Artifact-Backed Receipt/i);
   const shadowPrompt = await readFile(join(outputRoot, 'shadow-authoring/participant-prompt.txt'), 'utf8');
   assert.doesNotMatch(shadowPrompt, /WORKSPACE_ARTIFACT_RECEIPT_V1|Artifact-Backed Receipt/i);
-  assert.equal(result.schemaVersion, 'preschool-reference-trial-result-v2');
+  assert.equal(result.schemaVersion, 'preschool-reference-trial-result-v3');
   const savedResult = JSON.parse(await readFile(join(outputRoot, 'trial-result.json'), 'utf8')) as Record<string, any>;
-  assert.equal(savedResult.schemaVersion, 'preschool-reference-trial-result-v2');
+  assert.equal(savedResult.schemaVersion, 'preschool-reference-trial-result-v3');
+  assert.equal(savedResult.reviewContinuation, null);
   assert.equal(savedResult.status, 'SHADOW_AUTHORING_VERIFIED');
   assert.equal(savedResult.attemptRef, succeededManifest.attemptRef);
   assert.equal(savedResult.executionAuthorization.authorizationDigest, succeededManifest.authorizationDigest);
@@ -1750,6 +2144,7 @@ async function buildLifecycleSuccessResult(attempt: { outputRoot: string; manife
       reviewer: { status: 'AVAILABLE', invocationRef: 'reviewer', artifactRef: 'reviewer-agent/invocation.json', artifactSha256: 'a'.repeat(64), completionEvidence: { artifactRef: 'reviewer-agent/execution-trace.json', sha256: 'b'.repeat(64), outcome: 'completed' } },
       shadowAuthoring: { status: 'AVAILABLE', invocationRef: 'shadow', artifactRef: 'shadow-authoring/invocation.json', artifactSha256: 'a'.repeat(64), completionEvidence: { artifactRef: 'shadow-authoring/execution-trace.json', sha256: 'b'.repeat(64), outcome: 'completed' } },
     },
+    reviewContinuation: null,
     responsibilityMappings: [{ referenceResponsibilityRef: 'reference-responsibility-000001', proposalResponsibilityId: 'responsibility-000001' }],
     downstream: {
       status: 'SHADOW_AUTHORING_VERIFIED',
@@ -2042,7 +2437,7 @@ async function testAttemptManifestLifecycle(root: string): Promise<void> {
   assert.ok(['SUCCEEDED', 'FAILED'].includes(raceManifest.state));
   if (raceManifest.state === 'SUCCEEDED') {
     assert.equal(raceOutcomes[0]!.status, 'fulfilled');
-    assert.equal(JSON.parse(await readFile(join(race.outputRoot, 'trial-result.json'), 'utf8')).schemaVersion, 'preschool-reference-trial-result-v2');
+    assert.equal(JSON.parse(await readFile(join(race.outputRoot, 'trial-result.json'), 'utf8')).schemaVersion, 'preschool-reference-trial-result-v3');
   } else {
     assert.equal(raceOutcomes[1]!.status, 'rejected');
     await assert.rejects(readFile(join(race.outputRoot, 'trial-result.json')), { code: 'ENOENT' });
@@ -2412,7 +2807,7 @@ async function testExecutionAuthorizationAdmission(root: string): Promise<void> 
   assert.match(admitted.manifest.authorizationDigest, /^[a-f0-9]{64}$/);
   assert.equal(admitted.manifest.authorizationDigest, admitted.manifest.expectedAuthorizationDigest);
   assert.equal(admitted.manifest.authorizationArtifactPath, authorizationPath);
-  assert.equal(admitted.manifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v2');
+  assert.equal(admitted.manifest.schemaVersion, 'preschool-reference-trial-attempt-manifest-v3');
   assert.equal(
     admitted.manifest.roleSpecificParticipantBindings.solution.lockSha256,
     TEST_SOLUTION_PARTICIPANT_BINDING_LOCK_SHA256,
@@ -2884,6 +3279,59 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       bytes: fullBriefBytes,
       sha256: sha256Hex(fullBriefBytes),
     };
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'revision-participant-failure', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'rereview-participant-failure', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'revision-insufficient-evidence-terminal', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'revision-escalate-terminal', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'reviewer-second-request-more-work-terminal', syntheticRunner, syntheticAcceptedBriefFixture);
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'reviewer-request-more-work-continuation', syntheticRunner, syntheticAcceptedBriefFixture);
+    for (const scenario of [
+      'continuation-create-only-collision',
+      'continuation-authorization-drift',
+      'continuation-history-drift',
+      'reviewer-reject',
+      'reviewer-defer',
+    ] as const) {
+      await testSyntheticLayerAEndToEnd(root, {
+        evidence: capacityEvidencePath,
+        observable: syntheticPayloadPath,
+        brief: fullBriefPath,
+      }, scenario, syntheticRunner, syntheticAcceptedBriefFixture);
+    }
+    const revisionPromptContaminatedRunner = await loadSyntheticPublicRunner(root, {
+      evidence: sha256Hex(capacityEvidenceBytes),
+      observable: sha256Hex(syntheticPayloadBytes),
+      brief: sha256Hex(fullBriefBytes),
+    }, { suffix: 'revision-prompt-contamination', solutionRevisionStaticPromptMarker: ANSWER_IDS[0] });
+    await testSyntheticLayerAEndToEnd(root, {
+      evidence: capacityEvidencePath,
+      observable: syntheticPayloadPath,
+      brief: fullBriefPath,
+    }, 'revision-prompt-contamination', revisionPromptContaminatedRunner, syntheticAcceptedBriefFixture);
     await testSyntheticLayerAEndToEnd(root, {
       evidence: capacityEvidencePath,
       observable: syntheticPayloadPath,

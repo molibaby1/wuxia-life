@@ -673,6 +673,21 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.equal(artifactValidation.accepted, true);
 
   const originalSolutionWork = solutionResult as SolutionWorkV1;
+  const revisionReferenceContext: PreschoolReferenceResponsibilityContextV1 = {
+    validationLayer: 'HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM',
+    responsibilityProvenance: 'HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES',
+    briefRef: 'source/reference-trial/reference-responsibility-brief.json',
+    attestationRef: 'source/reference-trial/reference-responsibility-attestation.json',
+    brief: {
+      schemaVersion: 'preschool-reference-responsibility-brief-v1',
+      runRef: 'preschool-pver-20260922231805-71297571',
+      responsibilities: [{
+        responsibilityRef: 'reference-responsibility-000001',
+        primaryLifeFunction: 'Shared play',
+        playerVisibleNeed: 'A child needs a shared play experience.',
+      }],
+    },
+  };
   const revisionPrompt = buildSolutionRevisionPrompt(
     problemPackage,
     originalSolutionWork,
@@ -693,6 +708,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(revisionPrompt, /unavailable evidence.*INSUFFICIENT_EVIDENCE/i);
   assert.match(revisionPrompt, /Human authority.*ESCALATE/i);
   assert.doesNotMatch(revisionPrompt, /new gameplay sample/i);
+  assert.doesNotMatch(revisionPrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES|A child needs a shared play experience/);
   assert.match(revisionPrompt, new RegExp(escapeRegex(packetJson)));
   assertSolutionWorkSchemaGuidance(revisionPrompt);
 
@@ -720,28 +736,79 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   );
 
   let revisionInvocationRef = '';
+  let deliveredRevisionPrompt = '';
+  const revisionWorkspaceRoot = join(root, 'revision-workspace');
+  await mkdir(join(revisionWorkspaceRoot, 'skills/repository-grounded-investigation'), { recursive: true });
+  await mkdir(join(revisionWorkspaceRoot, 'src'), { recursive: true });
+  await writeFile(join(revisionWorkspaceRoot, 'src/example.ts'), 'export const example = true;');
+  await writeFile(join(revisionWorkspaceRoot, canonicalSkillPath), canonicalSkillContent);
   const revisionRun = await runSolutionRevisionAgent({
     problemPackage,
     problemPackagePath: packagePath,
-    workspaceRoot,
+    workspaceRoot: revisionWorkspaceRoot,
     artifactRoot,
     workspaceBaselineFingerprintSha256: 'b'.repeat(64),
     invocationRef: 'solution-revision-000001',
     jobNumber: 1,
     destinationRoot: join(root, 'solution-revision'),
     skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    structuredResultDelivery: artifactDelivery,
     participant: {
       executable: process.execPath,
       buildArgs: input => {
         revisionInvocationRef = input.invocationRef;
+        deliveredRevisionPrompt = input.prompt;
+        return ['-e', [
+          "const fs = require('node:fs');",
+          "const path = require('node:path');",
+          "const crypto = require('node:crypto');",
+          'const bytes = Buffer.from(process.argv[1]);',
+          `const artifactPath = path.resolve(${JSON.stringify(ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH)});`,
+          'fs.mkdirSync(path.dirname(artifactPath), { recursive: true });',
+          'fs.writeFileSync(artifactPath, bytes);',
+          "process.stdout.write(JSON.stringify({ schemaVersion: 'artifact-backed-structured-final-result-receipt-v1', bytes: bytes.byteLength, sha256: crypto.createHash('sha256').update(bytes).digest('hex') }));",
+        ].join(' '), JSON.stringify(solutionResult)];
+      },
+    },
+    originalSolutionWork,
+    originalReview,
+    referenceResponsibilityContext: revisionReferenceContext,
+    autonomousAuthoringContractPacket,
+  });
+  assert.equal(revisionRun.ok, true, JSON.stringify(revisionRun));
+  assert.equal(revisionInvocationRef, 'solution-revision-000001');
+  assert.match(deliveredRevisionPrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES/);
+  assert.match(deliveredRevisionPrompt, /A child needs a shared play experience/);
+  assert.match(deliveredRevisionPrompt, /Artifact-Backed Structured Final Result Receipt V1/);
+  assert.match(deliveredRevisionPrompt, new RegExp(escapeRegex(ARTIFACT_BACKED_STRUCTURED_RESULT_RELATIVE_PATH)));
+  const ordinaryRevisionWorkspaceRoot = join(root, 'ordinary-revision-workspace');
+  await mkdir(join(ordinaryRevisionWorkspaceRoot, 'skills/repository-grounded-investigation'), { recursive: true });
+  await mkdir(join(ordinaryRevisionWorkspaceRoot, 'src'), { recursive: true });
+  await writeFile(join(ordinaryRevisionWorkspaceRoot, 'src/example.ts'), 'export const example = true;');
+  await writeFile(join(ordinaryRevisionWorkspaceRoot, canonicalSkillPath), canonicalSkillContent);
+  let ordinaryRevisionPrompt = '';
+  const ordinaryRevisionRun = await runSolutionRevisionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot: ordinaryRevisionWorkspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'ordinary-solution-revision-000001',
+    jobNumber: 1,
+    destinationRoot: join(root, 'ordinary-solution-revision'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: input => {
+        ordinaryRevisionPrompt = input.prompt;
         return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))})`];
       },
     },
     originalSolutionWork,
     originalReview,
   });
-  assert.equal(revisionRun.ok, true);
-  assert.equal(revisionInvocationRef, 'solution-revision-000001');
+  assert.equal(ordinaryRevisionRun.ok, true, JSON.stringify(ordinaryRevisionRun));
+  assert.doesNotMatch(ordinaryRevisionPrompt, /HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES|A child needs a shared play experience/);
   const revisionTrace = JSON.parse(await readFile(join(root, 'solution-revision/execution-trace.json'), 'utf8'));
   assert.equal(revisionTrace.invocation.timeoutMs, 2_700_000);
   assert.deepEqual(revisionTrace.invocation.timeoutPolicy, {

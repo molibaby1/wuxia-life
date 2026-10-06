@@ -27,14 +27,18 @@ import {
 } from '../problemAgnosticSolution/agentWorkspace';
 import {
   runSolutionAgent,
+  runSolutionRevisionAgent,
   type RunSolutionAgentInput,
   type SolutionAgentRunResult,
 } from '../problemAgnosticSolution/runSolutionAgent';
 import {
+  runSolutionReReviewer,
   runSolutionReviewer,
   type SolutionReviewerRunResult,
 } from '../problemAgnosticSolution/runSolutionReviewer';
-import { validateSolutionWork } from '../../../src/evolution/solutionWorkContract';
+import { validateSolutionWork, type SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
+import { validateSolutionReview, type SolutionReviewV1 } from '../../../src/evolution/solutionReviewContract';
+import { validateSolutionDecision } from '../../../src/evolution/solutionDecisionContract';
 import { routeSolutionDecision } from '../problemAgnosticSolution/routeSolutionDecision';
 import {
   REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
@@ -268,7 +272,7 @@ interface AttemptManifestV1 {
   };
 }
 
-interface AttemptManifest extends Omit<AttemptManifestV1,
+interface AttemptManifestV2 extends Omit<AttemptManifestV1,
   'schemaVersion' | 'participantBindingLock' | 'participantBindingLockSha256'> {
   schemaVersion: 'preschool-reference-trial-attempt-manifest-v2';
   roleSpecificParticipantBindings: {
@@ -283,6 +287,89 @@ interface AttemptManifest extends Omit<AttemptManifestV1,
       lockSha256: string;
     };
   };
+}
+
+interface ReferenceReviewContinuationManifestProvenanceV1 {
+  status: 'RUNNING' | 'AVAILABLE' | 'CORRUPTED';
+  continuationRef: 'review-continuation-000001';
+  directoryRef: 'review-continuation-000001';
+  artifactRef: 'review-continuation-000001/continuation.json';
+  sha256?: string;
+  diagnostic?: string;
+}
+
+interface AttemptManifest extends Omit<AttemptManifestV2, 'schemaVersion'> {
+  schemaVersion: 'preschool-reference-trial-attempt-manifest-v3';
+  reviewContinuation: ReferenceReviewContinuationManifestProvenanceV1 | null;
+}
+
+interface ReferenceContinuationFileEvidenceV1 {
+  artifactRef: string;
+  sha256: string;
+}
+
+interface ReferenceContinuationInvocationEvidenceV1 {
+  role: 'solution' | 'reviewer';
+  jobNumber: 3 | 4;
+  invocationRef: string;
+  workspaceBaselineFingerprintSha256: string;
+  structuredResultDelivery: { kind: 'WORKSPACE_ARTIFACT_RECEIPT_V1' | 'TERMINAL_JSON' };
+  artifacts: ReferenceContinuationFileEvidenceV1[];
+}
+
+interface PreschoolReferenceReviewContinuationRequestV1 {
+  schemaVersion: 'preschool-reference-trial-review-continuation-request-v1';
+  attemptRef: string;
+  continuationOrdinal: 1;
+  semanticRetryCount: 0;
+  baseDecision: { ref: 'decision.json'; sha256: string };
+  originalSolution: { ref: 'solution-agent/result.json'; sha256: string };
+  originalReview: { ref: 'reviewer-agent/review.json'; sha256: string };
+  problemPackage: { ref: 'problem-package.json'; sha256: string };
+  contractPacket: { ref: 'source/reference-trial/autonomous-authoring-contract-packet.json'; sha256: string };
+  responsibilityBrief: { ref: 'source/reference-trial/reference-responsibility-brief.json'; sha256: string };
+  reviewerRequest: { decision: 'REQUEST_MORE_WORK'; concerns: string[] };
+}
+
+interface PreschoolReferenceReviewContinuationV1 {
+  schemaVersion: 'preschool-reference-trial-review-continuation-v1';
+  continuationOrdinal: 1;
+  continuationRef: 'review-continuation-000001';
+  status: 'COMPLETED' | 'PARTICIPANT_FAILURE' | 'HOST_INTEGRITY_FAILURE';
+  semanticRetryCount: 0;
+  revisionRequest: ReferenceContinuationFileEvidenceV1;
+  baseDecision: { ref: 'decision.json'; sha256: string };
+  baseDecisionIdentity: { problemId: string; route: string; reasonCode: string };
+  revisionStatus: SolutionWorkV1['status'] | 'NOT_RUN' | 'PARTICIPANT_FAILURE';
+  reReviewStatus: SolutionReviewV1['decision'] | 'NOT_RUN' | 'PARTICIPANT_FAILURE';
+  participantJobCount: 0 | 1 | 2;
+  revisionInvocation: ReferenceContinuationInvocationEvidenceV1 | null;
+  reReviewInvocation: ReferenceContinuationInvocationEvidenceV1 | null;
+  continuationDecision: null | { ref: 'review-continuation-000001/decision.json'; sha256: string };
+  continuationDecisionIdentity: null | { problemId: string; route: string; reasonCode: string };
+  effectiveRoute: string | null;
+  effectiveSolution: ReferenceContinuationFileEvidenceV1 | null;
+  effectiveReview: ReferenceContinuationFileEvidenceV1 | null;
+  participantFailure: null | {
+    role: 'solution-revision' | 'reviewer-rereview';
+    errorKind: string;
+    failureArtifactRef: string;
+    message: string;
+  };
+  hostFailure: null | { failureArtifactRef: string | null; message: string };
+}
+
+interface PendingReferenceReviewContinuationV1 {
+  revision: Extract<SolutionAgentRunResult, { ok: true }>;
+  reviewer: Extract<SolutionReviewerRunResult, { ok: true }>;
+  revisionProvenance: AvailableInvocationProvenanceV1;
+  reviewerProvenance: AvailableInvocationProvenanceV1;
+  revisionInvocation: ReferenceContinuationInvocationEvidenceV1;
+  reReviewInvocation: ReferenceContinuationInvocationEvidenceV1;
+  revisionRequest: ReferenceContinuationFileEvidenceV1;
+  baseDecision: ReturnType<typeof routeSolutionDecision>;
+  baseDecisionSha256: string;
+  participantJobCount: 2;
 }
 
 const REFERENCE_PARTICIPANT_BINDING_CORE_FIELDS = [
@@ -336,12 +423,20 @@ export interface PreschoolReferenceTrialVerifiedV2 {
   liveRepositoryFingerprintAfter: string;
 }
 
+export interface PreschoolReferenceTrialVerifiedV3 extends Omit<PreschoolReferenceTrialVerifiedV2, 'schemaVersion'> {
+  schemaVersion: 'preschool-reference-trial-result-v3';
+  reviewContinuation: null | {
+    artifactRef: 'review-continuation-000001/continuation.json';
+    sha256: string;
+  };
+}
+
 export type PreschoolReferenceTrialResult =
   | PreschoolReferenceTrialStopV1
   | PreschoolReferenceTrialObservablePayloadStopV1
   | PreschoolReferenceTrialResponsibilityBriefStopV1
   | PreschoolReferenceTrialAuthorizationStopV1
-  | PreschoolReferenceTrialVerifiedV2;
+  | PreschoolReferenceTrialVerifiedV3;
 
 export function buildPreschoolReferenceTrialVerifiedResult(input: {
   briefSha256: string;
@@ -350,15 +445,16 @@ export function buildPreschoolReferenceTrialVerifiedResult(input: {
   attemptManifestRef: string;
   executionAuthorization: { authorizationRef: string; authorizationDigest: string; authorizedAt: string };
   invocationRefs: Record<InvocationRole, Exclude<InvocationProvenance, null>>;
+  reviewContinuation: PreschoolReferenceTrialVerifiedV3['reviewContinuation'];
   downstream: Pick<PreschoolReferenceTrialVerifiedV2,
     'status' | 'runRef' | 'newEntryCount' | 'changedFiles' | 'promotionPackagePath'
     | 'promotionPatchPath' | 'liveRepositoryFingerprintBefore' | 'liveRepositoryFingerprintAfter'>;
-}): PreschoolReferenceTrialVerifiedV2 {
+}): PreschoolReferenceTrialVerifiedV3 {
   if (input.briefSha256 !== PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_RESPONSIBILITY_BRIEF_SHA256) {
     throw new Error('Reference Responsibility Brief digest is not the accepted trust anchor.');
   }
   return {
-    schemaVersion: 'preschool-reference-trial-result-v2',
+    schemaVersion: 'preschool-reference-trial-result-v3',
     validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
     responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
     referenceResponsibilityBriefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
@@ -369,6 +465,7 @@ export function buildPreschoolReferenceTrialVerifiedResult(input: {
     attemptManifestRef: input.attemptManifestRef,
     executionAuthorization: input.executionAuthorization,
     invocationRefs: input.invocationRefs,
+    reviewContinuation: input.reviewContinuation,
     ...input.downstream,
   };
 }
@@ -410,10 +507,11 @@ class TrialAdmissionStop extends Error {}
 class TrialPreflightStop extends Error {}
 class TrialRoutedDecision extends Error {
   readonly errorKind = 'ROUTED_DECISION';
-  readonly failureArtifactRef = 'decision.json';
+  readonly failureArtifactRef: string;
 
-  constructor(decision: ReturnType<typeof routeSolutionDecision>) {
+  constructor(decision: ReturnType<typeof routeSolutionDecision>, failureArtifactRef = 'decision.json') {
     super(`Reference trial routed ${decision.route}/${decision.reasonCode}.`);
+    this.failureArtifactRef = failureArtifactRef;
   }
 }
 class TrialInvocationProvenanceFailure extends Error {
@@ -478,7 +576,8 @@ function readAttemptManifestState(manifestPath: string, attemptRef: string): Att
     }
     const manifest = parsed as Record<string, unknown>;
     if (!(manifest.schemaVersion === 'preschool-reference-trial-attempt-manifest-v1'
-      || manifest.schemaVersion === 'preschool-reference-trial-attempt-manifest-v2')
+      || manifest.schemaVersion === 'preschool-reference-trial-attempt-manifest-v2'
+      || manifest.schemaVersion === 'preschool-reference-trial-attempt-manifest-v3')
       || manifest.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
       || manifest.attemptRef !== attemptRef
       || !['CREATED', 'RUNNING', 'SUCCEEDED', 'FAILED', 'STOPPED'].includes(String(manifest.state))) {
@@ -739,7 +838,7 @@ resolveSolutionBindingFromLock: typeof resolveArtifactBackedReferenceParticipant
     );
     const createdAt = new Date().toISOString();
     const manifest: AttemptManifest = {
-      schemaVersion: 'preschool-reference-trial-attempt-manifest-v2',
+      schemaVersion: 'preschool-reference-trial-attempt-manifest-v3',
       runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,
       attemptRef,
       createdAt,
@@ -806,6 +905,7 @@ resolveSolutionBindingFromLock: typeof resolveArtifactBackedReferenceParticipant
         shadowAuthoring: { role: 'shadowAuthoring', status: 'NOT_INVOKED' },
       },
       invocationRefs: { solution: null, reviewer: null, shadowAuthoring: null },
+      reviewContinuation: null,
       state: 'CREATED',
       currentStage: 'PREFLIGHT',
       terminalOutcome: null,
@@ -962,6 +1062,497 @@ async function readInvocationProvenance(
   };
 }
 
+function collectReferenceContinuationFiles(
+  outputRoot: string,
+  directoryRef: string,
+): ReferenceContinuationFileEvidenceV1[] {
+  const directoryPath = join(outputRoot, directoryRef);
+  const rootStat = lstatSync(directoryPath);
+  if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) {
+    throw new Error(`Reference continuation evidence directory is not a regular directory: ${directoryRef}`);
+  }
+  const files: ReferenceContinuationFileEvidenceV1[] = [];
+  const visit = (currentPath: string): void => {
+    for (const entry of readdirSync(currentPath, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      const absolutePath = join(currentPath, entry.name);
+      const stat = lstatSync(absolutePath);
+      if (stat.isSymbolicLink()) throw new Error(`Reference continuation evidence contains a symlink: ${absolutePath}`);
+      if (stat.isDirectory()) {
+        visit(absolutePath);
+      } else if (stat.isFile()) {
+        files.push({
+          artifactRef: relative(outputRoot, absolutePath).split(sep).join('/'),
+          sha256: sha256Hex(readFileSync(absolutePath)),
+        });
+      } else {
+        throw new Error(`Reference continuation evidence contains an unsupported filesystem entry: ${absolutePath}`);
+      }
+    }
+  };
+  visit(directoryPath);
+  return files.sort((a, b) => a.artifactRef.localeCompare(b.artifactRef));
+}
+
+function assertReferenceContinuationFilesMatch(
+  outputRoot: string,
+  directoryRef: string,
+  expected: ReferenceContinuationFileEvidenceV1[],
+): void {
+  const actual = collectReferenceContinuationFiles(outputRoot, directoryRef);
+  if (canonicalAttemptManifestJson(actual) !== canonicalAttemptManifestJson(expected)) {
+    throw new Error(`Reference continuation evidence files changed under ${directoryRef}.`);
+  }
+}
+
+async function createReferenceContinuationInvocationEvidence(input: {
+  outputRoot: string;
+  directoryRef: 'review-continuation-000001/solution-revision' | 'review-continuation-000001/reviewer-agent';
+  role: 'solution' | 'reviewer';
+  jobNumber: 3 | 4;
+  invocationRef: string;
+  workspaceBaselineFingerprintSha256: string;
+  deliveryKind: 'WORKSPACE_ARTIFACT_RECEIPT_V1' | 'TERMINAL_JSON';
+}): Promise<ReferenceContinuationInvocationEvidenceV1> {
+  const invocationArtifactRef = `${input.directoryRef}/invocation.json`;
+  const invocationPath = join(input.outputRoot, invocationArtifactRef);
+  const provenance = await readInvocationProvenance(
+    invocationPath,
+    invocationArtifactRef,
+    input.invocationRef,
+    input.role,
+  );
+  if (provenance.status !== 'AVAILABLE') throw new TrialInvocationProvenanceFailure([provenance.diagnostic]);
+  const invocation = JSON.parse((await readFile(invocationPath)).toString('utf8')) as unknown;
+  if (!isRecord(invocation)
+    || invocation.role !== input.role
+    || invocation.jobNumber !== input.jobNumber
+    || invocation.workspaceBaselineFingerprintSha256 !== input.workspaceBaselineFingerprintSha256
+    || !isRecord(invocation.structuredResultDelivery)
+    || invocation.structuredResultDelivery.kind !== input.deliveryKind) {
+    throw new TrialInvocationProvenanceFailure([`${input.role} continuation invocation identity, workspace, job number, or transport is invalid: ${JSON.stringify({ role: invocation.role, jobNumber: invocation.jobNumber, invocationRef: invocation.invocationRef, workspaceBaselineFingerprintSha256: invocation.workspaceBaselineFingerprintSha256, structuredResultDelivery: invocation.structuredResultDelivery })}`]);
+  }
+  const artifacts = collectReferenceContinuationFiles(input.outputRoot, input.directoryRef);
+  for (const required of ['participant-prompt.txt', 'invocation.json', 'execution-trace.json']) {
+    if (!artifacts.some(item => item.artifactRef === `${input.directoryRef}/${required}`)) {
+      throw new TrialInvocationProvenanceFailure([`${input.role} continuation is missing ${required}.`]);
+    }
+  }
+  if (input.role === 'solution') {
+    if (!artifacts.some(item => item.artifactRef === `${input.directoryRef}/artifact-backed-validation.json`)
+      || !artifacts.some(item => item.artifactRef === `${input.directoryRef}/result.json`)
+        && !artifacts.some(item => item.artifactRef === `${input.directoryRef}/failure.json`)) {
+      throw new TrialInvocationProvenanceFailure(['Solution continuation is missing Artifact-Backed validation or result/failure evidence.']);
+    }
+  } else if (!artifacts.some(item => item.artifactRef === `${input.directoryRef}/review.json`)
+      && !artifacts.some(item => item.artifactRef === `${input.directoryRef}/failure.json`)) {
+    throw new TrialInvocationProvenanceFailure(['Reviewer continuation is missing review/failure evidence.']);
+  }
+  return {
+    role: input.role,
+    jobNumber: input.jobNumber,
+    invocationRef: input.invocationRef,
+    workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
+    structuredResultDelivery: { kind: input.deliveryKind },
+    artifacts,
+  };
+}
+
+function continuationFileEvidence(
+  invocation: ReferenceContinuationInvocationEvidenceV1 | null,
+  artifactRef: string,
+): ReferenceContinuationFileEvidenceV1 | null {
+  return invocation?.artifacts.find(item => item.artifactRef === artifactRef) ?? null;
+}
+
+function availableContinuationInvocationProvenance(
+  evidence: ReferenceContinuationInvocationEvidenceV1,
+): AvailableInvocationProvenanceV1 {
+  const directoryRef = evidence.role === 'solution'
+    ? 'review-continuation-000001/solution-revision'
+    : 'review-continuation-000001/reviewer-agent';
+  const invocation = continuationFileEvidence(evidence, `${directoryRef}/invocation.json`);
+  const trace = continuationFileEvidence(evidence, `${directoryRef}/execution-trace.json`);
+  if (!invocation || !trace) throw new Error('Continuation invocation provenance is incomplete.');
+  return {
+    status: 'AVAILABLE',
+    invocationRef: evidence.invocationRef,
+    artifactRef: invocation.artifactRef,
+    artifactSha256: invocation.sha256,
+    completionEvidence: { artifactRef: trace.artifactRef, sha256: trace.sha256, outcome: 'completed' },
+  };
+}
+
+async function persistReferenceReviewContinuation(input: {
+  outputRoot: string;
+  manifestPath: string;
+  manifest: AttemptManifest;
+  revisionRequest: ReferenceContinuationFileEvidenceV1;
+  baseDecision: ReturnType<typeof routeSolutionDecision>;
+  baseDecisionSha256: string;
+  revisionStatus: PreschoolReferenceReviewContinuationV1['revisionStatus'];
+  reReviewStatus: PreschoolReferenceReviewContinuationV1['reReviewStatus'];
+  participantJobCount: PreschoolReferenceReviewContinuationV1['participantJobCount'];
+  revisionInvocation: ReferenceContinuationInvocationEvidenceV1 | null;
+  reReviewInvocation: ReferenceContinuationInvocationEvidenceV1 | null;
+  decision?: ReturnType<typeof routeSolutionDecision>;
+  effectiveSolution: ReferenceContinuationFileEvidenceV1 | null;
+  effectiveReview: ReferenceContinuationFileEvidenceV1 | null;
+  participantFailure?: NonNullable<PreschoolReferenceReviewContinuationV1['participantFailure']>;
+  hostFailure?: NonNullable<PreschoolReferenceReviewContinuationV1['hostFailure']>;
+  status: PreschoolReferenceReviewContinuationV1['status'];
+}): Promise<PreschoolReferenceTrialVerifiedV3['reviewContinuation']> {
+  const continuationRoot = join(input.outputRoot, 'review-continuation-000001');
+  let continuationDecision: PreschoolReferenceReviewContinuationV1['continuationDecision'] = null;
+  let continuationDecisionIdentity: PreschoolReferenceReviewContinuationV1['continuationDecisionIdentity'] = null;
+  let effectiveRoute: string | null = null;
+  if (input.decision) {
+    const decisionPath = join(continuationRoot, 'decision.json');
+    const decisionBytes = await readFile(decisionPath);
+    const persistedDecision = validateSolutionDecision(JSON.parse(decisionBytes.toString('utf8')) as unknown);
+    if (canonicalAttemptManifestJson(persistedDecision) !== canonicalAttemptManifestJson(input.decision)) {
+      throw new Error('Persisted Reference continuation Decision does not match the routed Decision.');
+    }
+    continuationDecision = {
+      ref: 'review-continuation-000001/decision.json',
+      sha256: sha256Hex(decisionBytes),
+    };
+    continuationDecisionIdentity = {
+      problemId: persistedDecision.problemId,
+      route: persistedDecision.route,
+      reasonCode: persistedDecision.reasonCode,
+    };
+    effectiveRoute = persistedDecision.route;
+  }
+  const continuation: PreschoolReferenceReviewContinuationV1 = {
+    schemaVersion: 'preschool-reference-trial-review-continuation-v1',
+    continuationOrdinal: 1,
+    continuationRef: 'review-continuation-000001',
+    status: input.status,
+    semanticRetryCount: 0,
+    revisionRequest: input.revisionRequest,
+    baseDecision: { ref: 'decision.json', sha256: input.baseDecisionSha256 },
+    baseDecisionIdentity: {
+      problemId: input.baseDecision.problemId,
+      route: input.baseDecision.route,
+      reasonCode: input.baseDecision.reasonCode,
+    },
+    revisionStatus: input.revisionStatus,
+    reReviewStatus: input.reReviewStatus,
+    participantJobCount: input.participantJobCount,
+    revisionInvocation: input.revisionInvocation,
+    reReviewInvocation: input.reReviewInvocation,
+    continuationDecision,
+    continuationDecisionIdentity,
+    effectiveRoute,
+    effectiveSolution: input.effectiveSolution,
+    effectiveReview: input.effectiveReview,
+    participantFailure: input.participantFailure ?? null,
+    hostFailure: input.hostFailure ?? null,
+  };
+  await writeCreateOnlyJson(join(continuationRoot, 'continuation.json'), continuation);
+  const bytes = await readFile(join(continuationRoot, 'continuation.json'));
+  input.manifest.reviewContinuation = {
+    status: 'AVAILABLE',
+    continuationRef: 'review-continuation-000001',
+    directoryRef: 'review-continuation-000001',
+    artifactRef: 'review-continuation-000001/continuation.json',
+    sha256: sha256Hex(bytes),
+  };
+  await writeAttemptManifest(input.manifestPath, input.manifest);
+  return { artifactRef: 'review-continuation-000001/continuation.json', sha256: sha256Hex(bytes) };
+}
+
+async function verifyReferenceReviewContinuationArtifacts(
+  outputRoot: string,
+  manifest: AttemptManifest,
+): Promise<{ continuation: PreschoolReferenceReviewContinuationV1 | null; sha256: string | null }> {
+  const continuationRef = 'review-continuation-000001';
+  const continuationDirectory = join(outputRoot, continuationRef);
+  const summaryPath = join(continuationDirectory, 'continuation.json');
+  const provenance = manifest.reviewContinuation;
+  if (!provenance) {
+    try {
+      lstatSync(continuationDirectory);
+      throw new Error('Reference continuation directory exists without manifest provenance.');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return { continuation: null, sha256: null };
+      throw error;
+    }
+  }
+  if (provenance.status === 'CORRUPTED') {
+    throw new Error(provenance.diagnostic ?? 'Reference continuation manifest provenance is marked corrupted.');
+  }
+  if (provenance.continuationRef !== continuationRef
+    || provenance.directoryRef !== continuationRef
+    || provenance.artifactRef !== `${continuationRef}/continuation.json`) {
+    throw new Error('Reference continuation manifest provenance has an unexpected artifact identity.');
+  }
+  const continuationStat = lstatSync(continuationDirectory);
+  const summaryStat = lstatSync(summaryPath);
+  if (!continuationStat.isDirectory() || continuationStat.isSymbolicLink()
+    || !summaryStat.isFile() || summaryStat.isSymbolicLink()) {
+    throw new Error('Reference continuation summary or directory is not a regular artifact.');
+  }
+  const summaryBytes = await readFile(summaryPath);
+  const summarySha256 = sha256Hex(summaryBytes);
+  if (provenance.status === 'AVAILABLE' && provenance.sha256 !== summarySha256) {
+    throw new Error('Reference continuation summary hash does not match its manifest provenance.');
+  }
+  if (provenance.sha256 !== undefined && provenance.sha256 !== summarySha256) {
+    throw new Error('Reference continuation summary hash changed after it was recorded.');
+  }
+  const rawContinuation = JSON.parse(summaryBytes.toString('utf8')) as unknown;
+  if (!isRecord(rawContinuation)) throw new Error('Reference continuation summary is malformed.');
+  const continuation = rawContinuation as unknown as PreschoolReferenceReviewContinuationV1;
+  if (continuation.schemaVersion !== 'preschool-reference-trial-review-continuation-v1'
+    || continuation.continuationOrdinal !== 1
+    || continuation.continuationRef !== continuationRef
+    || !['COMPLETED', 'PARTICIPANT_FAILURE', 'HOST_INTEGRITY_FAILURE'].includes(continuation.status)
+    || continuation.semanticRetryCount !== 0
+    || ![0, 1, 2].includes(continuation.participantJobCount)) {
+    throw new Error('Reference continuation summary identity, status, retry, or job count is invalid.');
+  }
+
+  const baseDecisionBytes = await readFile(join(outputRoot, 'decision.json'));
+  const baseDecision = validateSolutionDecision(JSON.parse(baseDecisionBytes.toString('utf8')) as unknown);
+  if (continuation.baseDecision.ref !== 'decision.json'
+    || continuation.baseDecision.sha256 !== sha256Hex(baseDecisionBytes)
+    || baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED'
+    || baseDecision.reasonCode !== 'REVIEW_REQUEST_MORE_WORK'
+    || canonicalAttemptManifestJson(continuation.baseDecisionIdentity) !== canonicalAttemptManifestJson({
+      problemId: baseDecision.problemId,
+      route: baseDecision.route,
+      reasonCode: baseDecision.reasonCode,
+    })) {
+    throw new Error('Reference continuation does not preserve the immutable base REQUEST_MORE_WORK Decision.');
+  }
+  try {
+    lstatSync(join(outputRoot, `${continuationRef.replace('000001', '000002')}`));
+    throw new Error('A second Reference review continuation directory exists.');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+
+  const request = continuation.revisionRequest;
+  if (!request || request.artifactRef !== `${continuationRef}/revision-request.json` || !/^[a-f0-9]{64}$/.test(request.sha256)) {
+    throw new Error('Reference continuation revision request provenance is malformed.');
+  }
+  const requestBytes = await readFile(join(outputRoot, request.artifactRef));
+  if (sha256Hex(requestBytes) !== request.sha256) throw new Error('Reference continuation revision request hash changed.');
+  const rawRequest = JSON.parse(requestBytes.toString('utf8')) as unknown;
+  if (!isRecord(rawRequest)) throw new Error('Reference continuation revision request is malformed.');
+  const revisionRequest = rawRequest as unknown as PreschoolReferenceReviewContinuationRequestV1;
+  if (revisionRequest.schemaVersion !== 'preschool-reference-trial-review-continuation-request-v1'
+    || revisionRequest.attemptRef !== manifest.attemptRef
+    || revisionRequest.continuationOrdinal !== 1
+    || revisionRequest.semanticRetryCount !== 0
+    || revisionRequest.baseDecision.ref !== 'decision.json'
+    || revisionRequest.baseDecision.sha256 !== continuation.baseDecision.sha256
+    || revisionRequest.originalSolution.ref !== 'solution-agent/result.json'
+    || revisionRequest.originalReview.ref !== 'reviewer-agent/review.json'
+    || revisionRequest.problemPackage.ref !== 'problem-package.json'
+    || revisionRequest.contractPacket.ref !== CONTRACT_PACKET_PATH
+    || revisionRequest.responsibilityBrief.ref !== REFERENCE_RESPONSIBILITY_BRIEF_PATH
+    || revisionRequest.reviewerRequest.decision !== 'REQUEST_MORE_WORK') {
+    throw new Error('Reference continuation revision request identity or approved input boundary is invalid.');
+  }
+  for (const ref of [
+    revisionRequest.originalSolution.ref,
+    revisionRequest.originalReview.ref,
+    revisionRequest.problemPackage.ref,
+    revisionRequest.contractPacket.ref,
+    revisionRequest.responsibilityBrief.ref,
+  ]) {
+    if (!/^[a-f0-9]{64}$/.test(({
+      [revisionRequest.originalSolution.ref]: revisionRequest.originalSolution.sha256,
+      [revisionRequest.originalReview.ref]: revisionRequest.originalReview.sha256,
+      [revisionRequest.problemPackage.ref]: revisionRequest.problemPackage.sha256,
+      [revisionRequest.contractPacket.ref]: revisionRequest.contractPacket.sha256,
+      [revisionRequest.responsibilityBrief.ref]: revisionRequest.responsibilityBrief.sha256,
+    } as Record<string, string>)[ref] ?? '')) throw new Error(`Reference continuation request hash is invalid for ${ref}.`);
+    if (sha256Hex(await readFile(join(outputRoot, ref))) !== ({
+      [revisionRequest.originalSolution.ref]: revisionRequest.originalSolution.sha256,
+      [revisionRequest.originalReview.ref]: revisionRequest.originalReview.sha256,
+      [revisionRequest.problemPackage.ref]: revisionRequest.problemPackage.sha256,
+      [revisionRequest.contractPacket.ref]: revisionRequest.contractPacket.sha256,
+      [revisionRequest.responsibilityBrief.ref]: revisionRequest.responsibilityBrief.sha256,
+    } as Record<string, string>)[ref]) throw new Error(`Reference continuation request input changed for ${ref}.`);
+  }
+  const originalSolution = validateSolutionWork(await readFile(join(outputRoot, 'solution-agent/result.json'), 'utf8').then(value => JSON.parse(value) as unknown));
+  const originalReview = validateSolutionReview(await readFile(join(outputRoot, 'reviewer-agent/review.json'), 'utf8').then(value => JSON.parse(value) as unknown));
+  if (canonicalAttemptManifestJson(revisionRequest.reviewerRequest.concerns) !== canonicalAttemptManifestJson(originalReview.concerns)
+    || originalSolution.problemId !== baseDecision.problemId
+    || originalReview.problemId !== baseDecision.problemId) {
+    throw new Error('Reference continuation request does not match the original Solution and Reviewer evidence.');
+  }
+
+  const verifyInvocation = async (
+    evidence: ReferenceContinuationInvocationEvidenceV1,
+    role: 'solution' | 'reviewer',
+  ): Promise<{ status: 'completed' | 'failed'; solution?: SolutionWorkV1; review?: SolutionReviewV1 }> => {
+    const directoryRef = role === 'solution'
+      ? `${continuationRef}/solution-revision`
+      : `${continuationRef}/reviewer-agent`;
+    const jobNumber = role === 'solution' ? 3 : 4;
+    const invocationRef = referenceTrialContinuationInvocationRef(
+      manifest.attemptRef,
+      role === 'solution' ? 'solution-revision' : 'reviewer-rereview',
+    );
+    const deliveryKind = role === 'solution' ? 'WORKSPACE_ARTIFACT_RECEIPT_V1' : 'TERMINAL_JSON';
+    if (evidence.role !== role
+      || evidence.jobNumber !== jobNumber
+      || evidence.invocationRef !== invocationRef
+      || !/^[a-f0-9]{64}$/.test(evidence.workspaceBaselineFingerprintSha256)
+      || evidence.structuredResultDelivery.kind !== deliveryKind
+      || !Array.isArray(evidence.artifacts)) {
+      throw new Error(`${role} continuation provenance has an invalid role, job number, transport, or workspace baseline.`);
+    }
+    assertReferenceContinuationFilesMatch(outputRoot, directoryRef, evidence.artifacts);
+    const artifact = (name: string): ReferenceContinuationFileEvidenceV1 | undefined =>
+      evidence.artifacts.find(item => item.artifactRef === `${directoryRef}/${name}`);
+    const invocationFile = artifact('invocation.json');
+    const traceFile = artifact('execution-trace.json');
+    const promptFile = artifact('participant-prompt.txt');
+    if (!invocationFile || !traceFile || !promptFile) throw new Error(`${role} continuation prompt or invocation provenance is missing.`);
+    const invocationPath = join(outputRoot, invocationFile.artifactRef);
+    const provenanceResult = await readInvocationProvenance(invocationPath, invocationFile.artifactRef, invocationRef, role);
+    if (provenanceResult.status !== 'AVAILABLE'
+      || provenanceResult.artifactSha256 !== invocationFile.sha256
+      || provenanceResult.completionEvidence.sha256 !== traceFile.sha256) {
+      throw new Error(`${role} continuation invocation or execution trace failed provenance validation.`);
+    }
+    const invocation = JSON.parse((await readFile(invocationPath)).toString('utf8')) as unknown;
+    if (!isRecord(invocation)
+      || invocation.role !== role
+      || invocation.jobNumber !== jobNumber
+      || invocation.workspaceBaselineFingerprintSha256 !== evidence.workspaceBaselineFingerprintSha256
+      || !isRecord(invocation.structuredResultDelivery)
+      || invocation.structuredResultDelivery.kind !== deliveryKind) {
+      throw new Error(`${role} continuation invocation identity does not match its manifest provenance.`);
+    }
+    const isCompleted = invocation.status === 'completed';
+    const resultFile = artifact(role === 'solution' ? 'result.json' : 'review.json');
+    const failureFile = artifact('failure.json');
+    if (isCompleted && (!resultFile || failureFile) || !isCompleted && (invocation.status !== 'failed' || !failureFile || resultFile)) {
+      throw new Error(`${role} continuation completion status contradicts its result/failure artifacts.`);
+    }
+    if (role === 'solution') {
+      const validationFile = artifact('artifact-backed-validation.json');
+      if (!validationFile) throw new Error('Solution continuation Artifact-Backed validation evidence is missing.');
+      const validation = JSON.parse((await readFile(join(outputRoot, validationFile.artifactRef))).toString('utf8')) as unknown;
+      if (!isRecord(validation)
+        || validation.schemaVersion !== 'artifact-backed-validation-v1'
+        || validation.deliveryMode !== 'WORKSPACE_ARTIFACT_RECEIPT_V1'
+        || validation.fixedResultRef !== '.evolution-participant/final-result.json') {
+        throw new Error('Solution continuation Artifact-Backed validation evidence is invalid.');
+      }
+      if (isCompleted) {
+        const solution = validateSolutionWork(JSON.parse((await readFile(join(outputRoot, resultFile!.artifactRef))).toString('utf8')) as unknown);
+        if (validation.accepted !== true || validation.artifactIntegrityValid !== true || validation.roleSchemaValid !== true) {
+          throw new Error('Completed Solution continuation lacks accepted Artifact-Backed validation evidence.');
+        }
+        return { status: 'completed', solution };
+      }
+    } else if (isCompleted) {
+      const review = validateSolutionReview(JSON.parse((await readFile(join(outputRoot, resultFile!.artifactRef))).toString('utf8')) as unknown);
+      return { status: 'completed', review };
+    }
+    return { status: 'failed' };
+  };
+
+  let revisionResult: Awaited<ReturnType<typeof verifyInvocation>> | null = null;
+  if (continuation.revisionInvocation) revisionResult = await verifyInvocation(continuation.revisionInvocation, 'solution');
+  let reviewResult: Awaited<ReturnType<typeof verifyInvocation>> | null = null;
+  if (continuation.reReviewInvocation) reviewResult = await verifyInvocation(continuation.reReviewInvocation, 'reviewer');
+  if (continuation.participantJobCount !== Number(continuation.revisionInvocation !== null)
+    + Number(continuation.reReviewInvocation !== null)) {
+    throw new Error('Reference continuation Participant job count does not match its invocation evidence.');
+  }
+  if (continuation.revisionStatus === 'NOT_RUN' && continuation.revisionInvocation !== null
+    || continuation.revisionStatus === 'PARTICIPANT_FAILURE' && revisionResult?.status !== 'failed'
+    || continuation.revisionStatus !== 'NOT_RUN' && continuation.revisionStatus !== 'PARTICIPANT_FAILURE'
+      && (revisionResult?.status !== 'completed' || revisionResult.solution?.status !== continuation.revisionStatus)) {
+    throw new Error('Reference continuation revision status does not match its invocation result.');
+  }
+  if (continuation.revisionStatus === 'OPTIONS' && continuation.status === 'COMPLETED' && !continuation.reReviewInvocation) {
+    throw new Error('OPTIONS revision completed without its fresh independent Reviewer re-review.');
+  }
+  if (continuation.revisionStatus !== 'OPTIONS' && continuation.reReviewInvocation !== null) {
+    throw new Error('Reference continuation ran a Reviewer when the revised Solution was not OPTIONS.');
+  }
+  if (continuation.reReviewStatus === 'NOT_RUN' && continuation.reReviewInvocation !== null
+    || continuation.reReviewStatus === 'PARTICIPANT_FAILURE' && reviewResult?.status !== 'failed'
+    || continuation.reReviewStatus !== 'NOT_RUN' && continuation.reReviewStatus !== 'PARTICIPANT_FAILURE'
+      && (reviewResult?.status !== 'completed' || reviewResult.review?.decision !== continuation.reReviewStatus)) {
+    throw new Error('Reference continuation re-review status does not match its invocation result.');
+  }
+
+  const expectedSolutionRef = revisionResult?.solution
+    ? `${continuationRef}/solution-revision/result.json` : null;
+  const expectedReviewRef = reviewResult?.review
+    ? `${continuationRef}/reviewer-agent/review.json` : null;
+  const assertEffective = async (
+    recorded: ReferenceContinuationFileEvidenceV1 | null,
+    expectedRef: string | null,
+    label: string,
+  ): Promise<void> => {
+    if (recorded === null && expectedRef === null) return;
+    if (!recorded || recorded.artifactRef !== expectedRef || !/^[a-f0-9]{64}$/.test(recorded.sha256)
+      || sha256Hex(await readFile(join(outputRoot, recorded.artifactRef))) !== recorded.sha256) {
+      throw new Error(`Reference continuation ${label} does not match its validated result artifact.`);
+    }
+  };
+  await assertEffective(continuation.effectiveSolution, expectedSolutionRef, 'effective Solution');
+  await assertEffective(continuation.effectiveReview, expectedReviewRef, 'effective Review');
+
+  if (continuation.continuationDecision === null) {
+    if (continuation.continuationDecisionIdentity !== null || continuation.effectiveRoute !== null) {
+      throw new Error('Reference continuation route exists without an independent continuation Decision.');
+    }
+    if (continuation.status === 'COMPLETED') throw new Error('Completed Reference continuation is missing its independent Decision.');
+  } else {
+    if (continuation.continuationDecision.ref !== `${continuationRef}/decision.json`
+      || !/^[a-f0-9]{64}$/.test(continuation.continuationDecision.sha256)) {
+      throw new Error('Reference continuation Decision provenance is malformed.');
+    }
+    const decisionBytes = await readFile(join(outputRoot, continuation.continuationDecision.ref));
+    const decision = validateSolutionDecision(JSON.parse(decisionBytes.toString('utf8')) as unknown);
+    if (sha256Hex(decisionBytes) !== continuation.continuationDecision.sha256
+      || canonicalAttemptManifestJson(continuation.continuationDecisionIdentity) !== canonicalAttemptManifestJson({
+        problemId: decision.problemId,
+        route: decision.route,
+        reasonCode: decision.reasonCode,
+      })
+      || decision.problemId !== baseDecision.problemId
+      || continuation.effectiveRoute !== decision.route
+      || decision.inputs.budget.actualParticipantJobs !== 2 + continuation.participantJobCount
+      || decision.inputs.budget.retryCount !== 0) {
+      throw new Error('Reference continuation Decision identity, effective route, or bounded job budget is invalid.');
+    }
+  }
+  if (continuation.status === 'PARTICIPANT_FAILURE') {
+    if (!continuation.participantFailure || continuation.hostFailure !== null
+      || continuation.continuationDecision !== null || continuation.participantJobCount < 1) {
+      throw new Error('Reference continuation Participant failure classification is incomplete.');
+    }
+    const expectedFailureRef = continuation.participantFailure.role === 'solution-revision'
+      ? `${continuationRef}/solution-revision/failure.json`
+      : `${continuationRef}/reviewer-agent/failure.json`;
+    if (continuation.participantFailure.failureArtifactRef !== expectedFailureRef
+      || !(continuation.participantFailure.role === 'solution-revision' ? revisionResult : reviewResult)?.status
+      || (continuation.participantFailure.role === 'solution-revision' ? revisionResult : reviewResult)?.status !== 'failed') {
+      throw new Error('Reference continuation Participant failure does not match its failure evidence.');
+    }
+  } else if (continuation.status === 'HOST_INTEGRITY_FAILURE') {
+    if (!continuation.hostFailure || continuation.participantFailure !== null || continuation.effectiveRoute !== null) {
+      throw new Error('Reference continuation Host integrity failure classification is incomplete.');
+    }
+  } else if (continuation.status === 'COMPLETED' && continuation.participantFailure !== null) {
+    throw new Error('Completed Reference continuation cannot contain a Participant failure.');
+  }
+  return { continuation, sha256: summarySha256 };
+}
+
 async function withAttemptManifestLock<T>(manifestPath: string, action: () => Promise<T>): Promise<T> {
   const lockPath = `${manifestPath}.lock`;
   try {
@@ -994,7 +1585,7 @@ async function readAttemptManifestSnapshot(path: string, context: string): Promi
   }
   if (!isRecord(parsed)) throw new Error(`Cannot ${context} because the current attempt manifest is malformed.`);
   const manifest = parsed as unknown as AttemptManifest;
-  if (manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v2'
+  if (manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v3'
     || manifest.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
     || typeof manifest.attemptRef !== 'string'
     || !['CREATED', 'RUNNING', 'SUCCEEDED', 'FAILED', 'STOPPED'].includes(manifest.state)
@@ -1005,7 +1596,7 @@ async function readAttemptManifestSnapshot(path: string, context: string): Promi
 }
 
 function assertAttemptManifestIdentity(snapshot: AttemptManifestSnapshot, expected: AttemptManifest): void {
-  if (snapshot.manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v2'
+  if (snapshot.manifest.schemaVersion !== 'preschool-reference-trial-attempt-manifest-v3'
     || snapshot.manifest.runRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF
     || snapshot.manifest.runRef !== expected.runRef
     || snapshot.manifest.attemptRef !== expected.attemptRef) {
@@ -1309,7 +1900,7 @@ async function assertParticipantPromptProvenanceMatchesDisk(
 export async function finalizeReferenceTrialSuccess(
   manifestPath: string,
   suppliedManifest: AttemptManifest,
-  suppliedResult: PreschoolReferenceTrialVerifiedV2,
+  suppliedResult: PreschoolReferenceTrialVerifiedV3,
   expectedManifestToken: string,
 ): Promise<void> {
   const manifest = structuredClone(suppliedManifest);
@@ -1325,13 +1916,15 @@ export async function finalizeReferenceTrialSuccess(
   assertAttemptManifestTransitionToken(initialSnapshot, expectedManifestToken);
   if (manifest.state !== 'RUNNING') throw new Error(`Cannot finalize a successful reference trial from attempt state ${manifest.state}.`);
   if (manifest.currentStage !== 'CLEANUP') throw new Error('Cannot finalize success before the attempt reaches the CLEANUP stage.');
-  if (result.schemaVersion !== 'preschool-reference-trial-result-v2'
+  if (result.schemaVersion !== 'preschool-reference-trial-result-v3'
     || result.status !== 'SHADOW_AUTHORING_VERIFIED'
     || result.runRef !== manifest.runRef
     || result.attemptRef !== manifest.attemptRef
     || result.executionAuthorization.authorizationRef !== manifest.authorizationRef
     || result.executionAuthorization.authorizationDigest !== manifest.authorizationDigest
-    || result.referenceResponsibilityBriefSha256 !== manifest.inputSet.responsibilityBrief.sha256) {
+    || result.referenceResponsibilityBriefSha256 !== manifest.inputSet.responsibilityBrief.sha256
+    || (result.reviewContinuation?.sha256 ?? null) !== (manifest.reviewContinuation?.sha256 ?? null)
+    || (result.reviewContinuation?.artifactRef ?? null) !== (manifest.reviewContinuation?.artifactRef ?? null)) {
     throw new Error('Successful reference trial result identity or provenance does not match its attempt manifest.');
   }
 
@@ -1340,6 +1933,19 @@ export async function finalizeReferenceTrialSuccess(
     assertAttemptManifestSnapshotUnchanged(lockedSnapshot, initialSnapshot);
     const outputRoot = dirname(manifestPath);
     await assertParticipantPromptProvenanceMatchesDisk(outputRoot, manifest);
+    const continuationEvidence = await verifyReferenceReviewContinuationArtifacts(outputRoot, manifest);
+    if (continuationEvidence.continuation) {
+      if (continuationEvidence.continuation.status !== 'COMPLETED'
+        || continuationEvidence.continuation.effectiveRoute !== 'READY_FOR_SHADOW_AUTHORING'
+        || continuationEvidence.continuation.revisionStatus !== 'OPTIONS'
+        || continuationEvidence.continuation.reReviewStatus !== 'ACCEPT_OPTION'
+        || continuationEvidence.continuation.participantJobCount !== 2
+        || continuationEvidence.sha256 !== result.reviewContinuation?.sha256) {
+        throw new Error('Successful result does not carry the completed Reference continuation proof chain.');
+      }
+    } else if (result.reviewContinuation !== null) {
+      throw new Error('Successful result references Reference continuation evidence that is absent from its attempt.');
+    }
     const invocationRefs = { ...manifest.invocationRefs };
     const provenanceFailures: string[] = [];
     for (const role of ['solution', 'reviewer', 'shadowAuthoring'] as const) {
@@ -1418,6 +2024,31 @@ export async function finalizeReferenceTrialFailure(
       invocationRefs: { ...manifest.invocationRefs },
     };
     const diagnosticFailures = await refreshInputSet(outputRoot, workingManifest);
+    try {
+      const continuationEvidence = await verifyReferenceReviewContinuationArtifacts(outputRoot, workingManifest);
+      if (workingManifest.reviewContinuation?.status === 'RUNNING' && continuationEvidence.continuation) {
+        workingManifest.reviewContinuation = {
+          status: 'AVAILABLE',
+          continuationRef: 'review-continuation-000001',
+          directoryRef: 'review-continuation-000001',
+          artifactRef: 'review-continuation-000001/continuation.json',
+          sha256: continuationEvidence.sha256!,
+        };
+      }
+    } catch (continuationError) {
+      const diagnostic = continuationError instanceof Error ? continuationError.message : String(continuationError);
+      if (!diagnosticFailures.includes(`reviewContinuation: ${diagnostic}`)) {
+        diagnosticFailures.push(`reviewContinuation: ${diagnostic}`);
+      }
+      workingManifest.reviewContinuation = {
+        status: 'CORRUPTED',
+        continuationRef: 'review-continuation-000001',
+        directoryRef: 'review-continuation-000001',
+        artifactRef: 'review-continuation-000001/continuation.json',
+        ...(workingManifest.reviewContinuation?.sha256 === undefined ? {} : { sha256: workingManifest.reviewContinuation.sha256 }),
+        diagnostic,
+      };
+    }
     for (const role of ['solution', 'reviewer', 'shadowAuthoring'] as const) {
       const artifact = invocationArtifact(role);
       if (TRIAL_STAGE_ORDER.indexOf(workingManifest.currentStage) < TRIAL_STAGE_ORDER.indexOf(artifact.stage)) {
@@ -1628,6 +2259,38 @@ async function assertAuthorizationAndHistoryUnchanged(
   if (activeOtherAttempt) throw new TrialPreflightStop(`Another manifest-based attempt ${activeOtherAttempt.attemptRef} is active.`);
 }
 
+async function assertReferenceContinuationCheckpoint(input: {
+  liveRoot: string;
+  authorizationPath: string;
+  manifest: AttemptManifest;
+  outputRoot: string;
+  trialBaselineRoot: string;
+  baselineFingerprint: string;
+  liveRepositoryFingerprint: string;
+}): Promise<void> {
+  await assertAuthorizationAndHistoryUnchanged(input.liveRoot, input.authorizationPath, input.manifest);
+  if (await captureAuthoritativeFingerprint(input.liveRoot) !== input.liveRepositoryFingerprint) {
+    throw new TrialPreflightStop('The authoritative repository changed during Reference continuation.');
+  }
+  if (await captureAuthoritativeFingerprint(input.trialBaselineRoot) !== input.baselineFingerprint) {
+    throw new TrialPreflightStop('The historical baseline or current authority overlay changed during Reference continuation.');
+  }
+  const fixedInputKeys: ManifestInputKey[] = [
+    'acceptedEvidence', 'observablePayload', 'observableSummary', 'responsibilityBrief',
+    'responsibilityAttestation', 'sourceAttestation', 'capacitySummary', 'externalFeedback',
+    'improvementHypothesis', 'contractPacket', 'problemPackage', 'solutionResult', 'reviewerResult',
+  ];
+  for (const key of fixedInputKeys) {
+    const expected = input.manifest.inputSet[key];
+    const actual = await inspectInputArtifact(input.outputRoot, INPUT_PROVENANCE_SPECS[key]);
+    if (expected.artifactRef !== actual.artifactRef
+      || expected.sha256 !== actual.sha256
+      || expected.availability !== actual.availability) {
+      throw new TrialPreflightStop(`Reference continuation input ${key} changed after base review.`);
+    }
+  }
+}
+
 export function validateReferenceTrialAttemptRef(value: string): string {
   if (!/^attempt-[0-9]{6}$/.test(value)) {
     throw new Error(`Invalid reference trial attemptRef: ${JSON.stringify(value)}`);
@@ -1665,6 +2328,14 @@ export function referenceTrialInvocationRef(
   return stage === 'shadow-authoring'
     ? `${attemptBase}/shadow-authoring`
     : `${attemptBase}/${stage}-000001`;
+}
+
+function referenceTrialContinuationInvocationRef(
+  attemptRef: string,
+  stage: 'solution-revision' | 'reviewer-rereview',
+): string {
+  return `${PRESCHOOL_REFERENCE_TRIAL_RUN_REF}/${validateReferenceTrialAttemptRef(attemptRef)}`
+    + `/review-continuation-000001/${stage}-000001`;
 }
 
 const EVIDENCE_UNAVAILABLE: PreschoolReferenceTrialStopV1 = {
@@ -1926,13 +2597,17 @@ function assertAvailableCurrentRunInvocation(input: {
   provenance: AvailableInvocationProvenanceV1;
   attemptRef: string;
   role: 'solution' | 'reviewer';
+  expectedInvocationRef?: string;
+  artifactRef?: string;
+  completionArtifactRef?: string;
 }): void {
-  const expectedArtifactRef = input.role === 'solution'
+  const expectedArtifactRef = input.artifactRef ?? (input.role === 'solution'
     ? 'solution-agent/invocation.json'
-    : 'reviewer-agent/invocation.json';
-  const expectedCompletionArtifactRef = expectedArtifactRef.replace('invocation.json', 'execution-trace.json');
+    : 'reviewer-agent/invocation.json');
+  const expectedCompletionArtifactRef = input.completionArtifactRef
+    ?? expectedArtifactRef.replace('invocation.json', 'execution-trace.json');
   if (input.provenance.status !== 'AVAILABLE'
-    || input.provenance.invocationRef !== expectedInvocationRef(input.attemptRef, input.role)
+    || input.provenance.invocationRef !== (input.expectedInvocationRef ?? expectedInvocationRef(input.attemptRef, input.role))
     || input.provenance.artifactRef !== expectedArtifactRef
     || !/^[a-f0-9]{64}$/.test(input.provenance.artifactSha256)
     || input.provenance.completionEvidence.artifactRef !== expectedCompletionArtifactRef
@@ -1970,13 +2645,33 @@ function withVerifiedAcceptedCardsContaminationGuard(
     reviewer: SolutionReviewerRunResult;
     reviewerProvenance: AvailableInvocationProvenanceV1;
     admission: AutonomousAuthoringAdmissionV1;
+    solutionExpectedInvocationRef?: string;
+    reviewerExpectedInvocationRef?: string;
   },
 ): WorkspaceAgentParticipantOptions {
   if (!input.solution.ok || !input.reviewer.ok) {
     throw new Error('Current-run accepted Cards exemption requires completed Solution and Reviewer results.');
   }
-  assertAvailableCurrentRunInvocation({ provenance: input.solutionProvenance, attemptRef: input.attemptRef, role: 'solution' });
-  assertAvailableCurrentRunInvocation({ provenance: input.reviewerProvenance, attemptRef: input.attemptRef, role: 'reviewer' });
+  assertAvailableCurrentRunInvocation({
+    provenance: input.solutionProvenance,
+    attemptRef: input.attemptRef,
+    role: 'solution',
+    ...(input.solutionExpectedInvocationRef === undefined ? {} : {
+      expectedInvocationRef: input.solutionExpectedInvocationRef,
+      artifactRef: input.solutionProvenance.artifactRef,
+      completionArtifactRef: input.solutionProvenance.completionEvidence.artifactRef,
+    }),
+  });
+  assertAvailableCurrentRunInvocation({
+    provenance: input.reviewerProvenance,
+    attemptRef: input.attemptRef,
+    role: 'reviewer',
+    ...(input.reviewerExpectedInvocationRef === undefined ? {} : {
+      expectedInvocationRef: input.reviewerExpectedInvocationRef,
+      artifactRef: input.reviewerProvenance.artifactRef,
+      completionArtifactRef: input.reviewerProvenance.completionEvidence.artifactRef,
+    }),
+  });
   if (input.admission.sourceRunRef !== PRESCHOOL_REFERENCE_TRIAL_RUN_REF) {
     throw new Error('Current-run accepted Cards exemption requires Host admission for the reference trial source.');
   }
@@ -2223,6 +2918,361 @@ function classifyShadowVerificationFailure(
   return 'SHADOW_AUTHORING_VERIFICATION_FAILED';
 }
 
+async function runReferenceReviewContinuation(input: {
+  liveRoot: string;
+  liveRepositoryFingerprint: string;
+  trialBaselineRoot: string;
+  baselineFingerprint: string;
+  outputRoot: string;
+  manifestPath: string;
+  manifest: AttemptManifest;
+  executionAuthorizationPath: string;
+  attemptRef: string;
+  trialInputs: Awaited<ReturnType<typeof writePreschoolReferenceTrialInputs>>;
+  workspaceDestinationRoot: string;
+  responsibilityContext: PreschoolReferenceResponsibilityContextV1;
+  baseSolution: Extract<SolutionAgentRunResult, { ok: true }>;
+  baseReviewer: Extract<SolutionReviewerRunResult, { ok: true }>;
+  baseDecision: ReturnType<typeof routeSolutionDecision>;
+  solutionParticipant: WorkspaceAgentParticipantOptions;
+  downstreamParticipant: WorkspaceAgentParticipantOptions;
+}): Promise<PendingReferenceReviewContinuationV1> {
+  const continuationRootRef = 'review-continuation-000001';
+  const continuationRoot = join(input.outputRoot, continuationRootRef);
+  const baseDecisionBytes = await readFile(join(input.outputRoot, 'decision.json'));
+  const baseDecisionSha256 = sha256Hex(baseDecisionBytes);
+  if (input.baseReviewer.review.decision !== 'REQUEST_MORE_WORK'
+    || input.baseSolution.result.status !== 'OPTIONS'
+    || input.baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED'
+    || input.baseDecision.reasonCode !== 'REVIEW_REQUEST_MORE_WORK') {
+    throw new Error('Reference continuation requires an eligible base REQUEST_MORE_WORK Decision.');
+  }
+
+  let continuationRootCreated = false;
+  let summaryPersisted = false;
+  let revisionRequest: ReferenceContinuationFileEvidenceV1 | null = null;
+  let revision: SolutionAgentRunResult | null = null;
+  let reviewer: SolutionReviewerRunResult | null = null;
+  let revisionInvocation: ReferenceContinuationInvocationEvidenceV1 | null = null;
+  let reReviewInvocation: ReferenceContinuationInvocationEvidenceV1 | null = null;
+  let revisionStatus: PreschoolReferenceReviewContinuationV1['revisionStatus'] = 'NOT_RUN';
+  let reReviewStatus: PreschoolReferenceReviewContinuationV1['reReviewStatus'] = 'NOT_RUN';
+  let participantJobCount: PreschoolReferenceReviewContinuationV1['participantJobCount'] = 0;
+
+  const persistSummary = async (inputSummary: {
+    status: PreschoolReferenceReviewContinuationV1['status'];
+    decision?: ReturnType<typeof routeSolutionDecision>;
+    effectiveSolution?: ReferenceContinuationFileEvidenceV1 | null;
+    effectiveReview?: ReferenceContinuationFileEvidenceV1 | null;
+    participantFailure?: NonNullable<PreschoolReferenceReviewContinuationV1['participantFailure']>;
+    hostFailure?: NonNullable<PreschoolReferenceReviewContinuationV1['hostFailure']>;
+  }): Promise<void> => {
+    if (!revisionRequest) throw new Error('Reference continuation request evidence is unavailable.');
+    await persistReferenceReviewContinuation({
+      outputRoot: input.outputRoot,
+      manifestPath: input.manifestPath,
+      manifest: input.manifest,
+      revisionRequest,
+      baseDecision: input.baseDecision,
+      baseDecisionSha256,
+      revisionStatus,
+      reReviewStatus,
+      participantJobCount,
+      revisionInvocation,
+      reReviewInvocation,
+      ...(inputSummary.decision === undefined ? {} : { decision: inputSummary.decision }),
+      effectiveSolution: inputSummary.effectiveSolution ?? null,
+      effectiveReview: inputSummary.effectiveReview ?? null,
+      ...(inputSummary.participantFailure === undefined ? {} : { participantFailure: inputSummary.participantFailure }),
+      ...(inputSummary.hostFailure === undefined ? {} : { hostFailure: inputSummary.hostFailure }),
+      status: inputSummary.status,
+    });
+    summaryPersisted = true;
+  };
+
+  input.manifest.reviewContinuation = {
+    status: 'RUNNING',
+    continuationRef: continuationRootRef,
+    directoryRef: continuationRootRef,
+    artifactRef: `${continuationRootRef}/continuation.json`,
+  };
+  await writeAttemptManifest(input.manifestPath, input.manifest);
+  try {
+    await mkdir(continuationRoot);
+    continuationRootCreated = true;
+  } catch (error) {
+    input.manifest.reviewContinuation = {
+      status: 'CORRUPTED',
+      continuationRef: continuationRootRef,
+      directoryRef: continuationRootRef,
+      artifactRef: `${continuationRootRef}/continuation.json`,
+      diagnostic: `Continuation directory create-only collision: ${String(error)}`,
+    };
+    await writeAttemptManifest(input.manifestPath, input.manifest);
+    throw error;
+  }
+
+  try {
+    const request: PreschoolReferenceReviewContinuationRequestV1 = {
+      schemaVersion: 'preschool-reference-trial-review-continuation-request-v1',
+      attemptRef: input.attemptRef,
+      continuationOrdinal: 1,
+      semanticRetryCount: 0,
+      baseDecision: { ref: 'decision.json', sha256: baseDecisionSha256 },
+      originalSolution: {
+        ref: 'solution-agent/result.json',
+        sha256: sha256Hex(await readFile(join(input.outputRoot, 'solution-agent/result.json'))),
+      },
+      originalReview: {
+        ref: 'reviewer-agent/review.json',
+        sha256: sha256Hex(await readFile(join(input.outputRoot, 'reviewer-agent/review.json'))),
+      },
+      problemPackage: {
+        ref: 'problem-package.json',
+        sha256: sha256Hex(await readFile(join(input.outputRoot, 'problem-package.json'))),
+      },
+      contractPacket: {
+        ref: CONTRACT_PACKET_PATH,
+        sha256: sha256Hex(await readFile(join(input.outputRoot, CONTRACT_PACKET_PATH))),
+      },
+      responsibilityBrief: {
+        ref: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+        sha256: sha256Hex(await readFile(join(input.outputRoot, REFERENCE_RESPONSIBILITY_BRIEF_PATH))),
+      },
+      reviewerRequest: { decision: 'REQUEST_MORE_WORK', concerns: [...input.baseReviewer.review.concerns] },
+    };
+    await writeCreateOnlyJson(join(continuationRoot, 'revision-request.json'), request);
+    revisionRequest = {
+      artifactRef: `${continuationRootRef}/revision-request.json`,
+      sha256: sha256Hex(await readFile(join(continuationRoot, 'revision-request.json'))),
+    };
+    await assertReferenceContinuationCheckpoint({
+      liveRoot: input.liveRoot,
+      authorizationPath: input.executionAuthorizationPath,
+      manifest: input.manifest,
+      outputRoot: input.outputRoot,
+      trialBaselineRoot: input.trialBaselineRoot,
+      baselineFingerprint: input.baselineFingerprint,
+      liveRepositoryFingerprint: input.liveRepositoryFingerprint,
+    });
+
+    const revisionWorkspace = await prepareReferenceTrialParticipantWorkspace({
+      baselineRoot: input.trialBaselineRoot,
+      destinationRoot: join(input.workspaceDestinationRoot, continuationRootRef, 'solution-revision'),
+      jobKind: 'solution',
+      artifactSourceRoot: input.outputRoot,
+      artifactRelativePaths: input.trialInputs.artifactRelativePaths,
+    });
+    const revisionInvocationRef = referenceTrialContinuationInvocationRef(input.attemptRef, 'solution-revision');
+    participantJobCount = 1;
+    revision = await runSolutionRevisionAgent({
+      problemPackage: input.trialInputs.problemPackage,
+      problemPackagePath: input.trialInputs.problemPackagePath,
+      originalSolutionWork: input.baseSolution.result,
+      originalReview: input.baseReviewer.review,
+      workspaceRoot: revisionWorkspace.workspaceRoot,
+      repositoryRoot: input.trialBaselineRoot,
+      artifactRoot: input.outputRoot,
+      workspaceBaselineFingerprintSha256: revisionWorkspace.workspaceBaselineFingerprintSha256,
+      invocationRef: revisionInvocationRef,
+      jobNumber: 3,
+      destinationRoot: join(continuationRoot, 'solution-revision'),
+      skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+      participant: input.solutionParticipant,
+      autonomousAuthoringContractPacket: input.trialInputs.contractPacket,
+      referenceResponsibilityContext: input.responsibilityContext,
+      structuredResultDelivery: {
+        kind: 'WORKSPACE_ARTIFACT_RECEIPT_V1',
+        resultRelativePath: '.evolution-participant/final-result.json',
+      },
+    });
+    revisionInvocation = await createReferenceContinuationInvocationEvidence({
+      outputRoot: input.outputRoot,
+      directoryRef: `${continuationRootRef}/solution-revision`,
+      role: 'solution',
+      jobNumber: 3,
+      invocationRef: revisionInvocationRef,
+      workspaceBaselineFingerprintSha256: revisionWorkspace.workspaceBaselineFingerprintSha256,
+      deliveryKind: 'WORKSPACE_ARTIFACT_RECEIPT_V1',
+    });
+    revisionStatus = revision.ok ? revision.result.status : 'PARTICIPANT_FAILURE';
+    await assertReferenceContinuationCheckpoint({
+      liveRoot: input.liveRoot,
+      authorizationPath: input.executionAuthorizationPath,
+      manifest: input.manifest,
+      outputRoot: input.outputRoot,
+      trialBaselineRoot: input.trialBaselineRoot,
+      baselineFingerprint: input.baselineFingerprint,
+      liveRepositoryFingerprint: input.liveRepositoryFingerprint,
+    });
+
+    if (!revision.ok) {
+      const participantFailure = {
+        role: 'solution-revision' as const,
+        errorKind: revision.errorKind,
+        failureArtifactRef: `${continuationRootRef}/solution-revision/failure.json`,
+        message: revision.message,
+      };
+      await persistSummary({ status: 'PARTICIPANT_FAILURE', participantFailure });
+      throw new TrialParticipantFailure(revision.errorKind, participantFailure.failureArtifactRef, revision.message);
+    }
+
+    const revisionEvidence = continuationFileEvidence(revisionInvocation, `${continuationRootRef}/solution-revision/result.json`);
+    if (!revisionEvidence) throw new TrialInvocationProvenanceFailure(['Solution continuation result evidence is missing.']);
+    const revisionProvenance = availableContinuationInvocationProvenance(revisionInvocation);
+    if (revision.result.status !== 'OPTIONS') {
+      const decision = routeSolutionDecision({
+        problemId: input.trialInputs.problemPackage.problemId,
+        solutionStatus: revision.result.status,
+        reviewerDecision: null,
+        solutionScope: null,
+        reviewScope: null,
+        executionAuthorityAssessment: null,
+        permissions: input.trialInputs.problemPackage.permissions,
+        budget: { actualParticipantJobs: 3, maxParticipantJobs: 4, retryCount: 0 },
+      });
+      await writeCreateOnlyJson(join(continuationRoot, 'decision.json'), decision);
+      await persistSummary({ status: 'COMPLETED', decision, effectiveSolution: revisionEvidence });
+      throw new TrialRoutedDecision(decision, `${continuationRootRef}/decision.json`);
+    }
+
+    const reviewerWorkspace = await prepareReferenceTrialParticipantWorkspace({
+      baselineRoot: input.trialBaselineRoot,
+      destinationRoot: join(input.workspaceDestinationRoot, continuationRootRef, 'reviewer-agent'),
+      jobKind: 'reviewer',
+      artifactSourceRoot: input.outputRoot,
+      artifactRelativePaths: input.trialInputs.artifactRelativePaths,
+    });
+    await assertReferenceContinuationCheckpoint({
+      liveRoot: input.liveRoot,
+      authorizationPath: input.executionAuthorizationPath,
+      manifest: input.manifest,
+      outputRoot: input.outputRoot,
+      trialBaselineRoot: input.trialBaselineRoot,
+      baselineFingerprint: input.baselineFingerprint,
+      liveRepositoryFingerprint: input.liveRepositoryFingerprint,
+    });
+    const reReviewInvocationRef = referenceTrialContinuationInvocationRef(input.attemptRef, 'reviewer-rereview');
+    participantJobCount = 2;
+    reviewer = await runSolutionReReviewer({
+      problemPackage: input.trialInputs.problemPackage,
+      problemPackagePath: input.trialInputs.problemPackagePath,
+      solutionWork: revision.result,
+      originalSolutionWork: input.baseSolution.result,
+      originalReview: input.baseReviewer.review,
+      workspaceRoot: reviewerWorkspace.workspaceRoot,
+      repositoryRoot: input.trialBaselineRoot,
+      artifactRoot: input.outputRoot,
+      workspaceBaselineFingerprintSha256: reviewerWorkspace.workspaceBaselineFingerprintSha256,
+      invocationRef: reReviewInvocationRef,
+      jobNumber: 4,
+      destinationRoot: join(continuationRoot, 'reviewer-agent'),
+      skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+      participant: withParticipantContaminationGuard(input.downstreamParticipant),
+      autonomousAuthoringContractPacket: input.trialInputs.contractPacket,
+      referenceResponsibilityContext: input.responsibilityContext,
+      structuredResultDelivery: { kind: 'TERMINAL_JSON' },
+    });
+    reReviewInvocation = await createReferenceContinuationInvocationEvidence({
+      outputRoot: input.outputRoot,
+      directoryRef: `${continuationRootRef}/reviewer-agent`,
+      role: 'reviewer',
+      jobNumber: 4,
+      invocationRef: reReviewInvocationRef,
+      workspaceBaselineFingerprintSha256: reviewerWorkspace.workspaceBaselineFingerprintSha256,
+      deliveryKind: 'TERMINAL_JSON',
+    });
+    reReviewStatus = reviewer.ok ? reviewer.review.decision : 'PARTICIPANT_FAILURE';
+    await assertReferenceContinuationCheckpoint({
+      liveRoot: input.liveRoot,
+      authorizationPath: input.executionAuthorizationPath,
+      manifest: input.manifest,
+      outputRoot: input.outputRoot,
+      trialBaselineRoot: input.trialBaselineRoot,
+      baselineFingerprint: input.baselineFingerprint,
+      liveRepositoryFingerprint: input.liveRepositoryFingerprint,
+    });
+
+    if (!reviewer.ok) {
+      const participantFailure = {
+        role: 'reviewer-rereview' as const,
+        errorKind: reviewer.errorKind,
+        failureArtifactRef: `${continuationRootRef}/reviewer-agent/failure.json`,
+        message: reviewer.message,
+      };
+      await persistSummary({
+        status: 'PARTICIPANT_FAILURE',
+        effectiveSolution: revisionEvidence,
+        participantFailure,
+      });
+      throw new TrialParticipantFailure(reviewer.errorKind, participantFailure.failureArtifactRef, reviewer.message);
+    }
+
+    const reviewEvidence = continuationFileEvidence(reReviewInvocation, `${continuationRootRef}/reviewer-agent/review.json`);
+    if (!reviewEvidence) throw new TrialInvocationProvenanceFailure(['Reviewer continuation review evidence is missing.']);
+    if (reviewer.review.decision !== 'ACCEPT_OPTION') {
+      const decision = routeSolutionDecision({
+        problemId: input.trialInputs.problemPackage.problemId,
+        solutionStatus: revision.result.status,
+        reviewerDecision: reviewer.review.decision,
+        solutionScope: null,
+        reviewScope: null,
+        executionAuthorityAssessment: null,
+        permissions: input.trialInputs.problemPackage.permissions,
+        budget: { actualParticipantJobs: 4, maxParticipantJobs: 4, retryCount: 0 },
+      });
+      await writeCreateOnlyJson(join(continuationRoot, 'decision.json'), decision);
+      await persistSummary({
+        status: 'COMPLETED',
+        decision,
+        effectiveSolution: revisionEvidence,
+        effectiveReview: reviewEvidence,
+      });
+      throw new TrialRoutedDecision(decision, `${continuationRootRef}/decision.json`);
+    }
+
+    return {
+      revision,
+      reviewer,
+      revisionProvenance,
+      reviewerProvenance: availableContinuationInvocationProvenance(reReviewInvocation),
+      revisionInvocation,
+      reReviewInvocation,
+      revisionRequest,
+      baseDecision: input.baseDecision,
+      baseDecisionSha256,
+      participantJobCount: 2,
+    };
+  } catch (error) {
+    if (!summaryPersisted && continuationRootCreated && revisionRequest) {
+      try {
+        const revisionEvidence = revision?.ok
+          ? continuationFileEvidence(revisionInvocation, `${continuationRootRef}/solution-revision/result.json`)
+          : null;
+        const reviewEvidence = reviewer?.ok
+          ? continuationFileEvidence(reReviewInvocation, `${continuationRootRef}/reviewer-agent/review.json`)
+          : null;
+        await persistSummary({
+          status: 'HOST_INTEGRITY_FAILURE',
+          effectiveSolution: revisionEvidence,
+          effectiveReview: reviewEvidence,
+          hostFailure: { failureArtifactRef: null, message: error instanceof Error ? error.message : String(error) },
+        });
+      } catch (persistError) {
+        input.manifest.reviewContinuation = {
+          status: 'CORRUPTED',
+          continuationRef: continuationRootRef,
+          directoryRef: continuationRootRef,
+          artifactRef: `${continuationRootRef}/continuation.json`,
+          diagnostic: `Continuation evidence could not be completed create-only: ${String(persistError)}`,
+        };
+        await writeAttemptManifest(input.manifestPath, input.manifest);
+      }
+    }
+    throw error;
+  }
+}
+
 async function runVerifiedHistoricalTrial(input: {
   liveRepositoryRoot: string;
   evidence: PreschoolCapacityEvidenceV1;
@@ -2235,7 +3285,7 @@ async function runVerifiedHistoricalTrial(input: {
   executionAuthorizationPath: string;
   resolveSolutionParticipantBinding: typeof resolveArtifactBackedReferenceParticipantBindingFromLock;
   resolveDownstreamParticipantBinding: typeof resolveReferenceParticipantBindingFromLock;
-}): Promise<PreschoolReferenceTrialVerifiedV2> {
+}): Promise<PreschoolReferenceTrialVerifiedV3> {
   const liveRoot = resolve(input.liveRepositoryRoot);
   const liveRepositoryFingerprintBefore = await captureAuthoritativeFingerprint(liveRoot);
   const outputRoot = input.outputRoot;
@@ -2257,6 +3307,13 @@ async function runVerifiedHistoricalTrial(input: {
       observablePayloadBytes: input.observablePayloadBytes,
       responsibilityBrief: input.responsibilityBrief,
     });
+    const responsibilityContext: PreschoolReferenceResponsibilityContextV1 = {
+      validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
+      responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
+      briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+      attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+      brief: input.responsibilityBrief.brief,
+    };
     await refreshInputSet(outputRoot, input.manifest);
     await writeAttemptManifest(input.manifestPath, input.manifest);
     await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
@@ -2304,13 +3361,7 @@ async function runVerifiedHistoricalTrial(input: {
           skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
           participant: solutionParticipant,
           autonomousAuthoringContractPacket: trialInputs.contractPacket,
-          referenceResponsibilityContext: {
-            validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
-            responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
-            briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
-            attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
-            brief: input.responsibilityBrief.brief,
-          } satisfies PreschoolReferenceResponsibilityContextV1,
+          referenceResponsibilityContext: responsibilityContext,
         },
       })).solution,
     });
@@ -2366,13 +3417,7 @@ async function runVerifiedHistoricalTrial(input: {
         skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
         participant: reviewerParticipant,
         autonomousAuthoringContractPacket: trialInputs.contractPacket,
-        referenceResponsibilityContext: {
-          validationLayer: PRESCHOOL_REFERENCE_VALIDATION_LAYER,
-          responsibilityProvenance: PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
-          briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
-          attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
-          brief: input.responsibilityBrief.brief,
-        },
+        referenceResponsibilityContext: responsibilityContext,
       }),
     });
     input.manifest.invocationRefs.reviewer = await readInvocationProvenance(
@@ -2394,6 +3439,11 @@ async function runVerifiedHistoricalTrial(input: {
     }
 
     await assertAuthorizationAndHistoryUnchanged(liveRoot, input.executionAuthorizationPath, input.manifest);
+    let effectiveSolution = solution;
+    let effectiveSolutionProvenance = solutionProvenance;
+    let effectiveReviewer = reviewer;
+    let effectiveReviewerProvenance = reviewerProvenance;
+    let continuationContext: PendingReferenceReviewContinuationV1 | null = null;
     if (reviewer.review.decision !== 'ACCEPT_OPTION') {
       const decision = routeSolutionDecision({
         problemId: trialInputs.problemPackage.problemId,
@@ -2409,41 +3459,127 @@ async function runVerifiedHistoricalTrial(input: {
       if (decision.route === 'READY_FOR_CONFIG_EXECUTION' || decision.route === 'READY_FOR_SHADOW_AUTHORING') {
         throw new Error(`Non-accepting Reviewer decision unexpectedly routed to ${decision.route}.`);
       }
-      throw new TrialRoutedDecision(decision);
+      if (reviewer.review.decision !== 'REQUEST_MORE_WORK'
+        || solution.result.status !== 'OPTIONS'
+        || decision.route !== 'DEFER_MORE_WORK_REQUESTED'
+        || decision.reasonCode !== 'REVIEW_REQUEST_MORE_WORK') {
+        throw new TrialRoutedDecision(decision);
+      }
+      continuationContext = await runReferenceReviewContinuation({
+        liveRoot,
+        liveRepositoryFingerprint: liveRepositoryFingerprintBefore,
+        trialBaselineRoot,
+        baselineFingerprint,
+        outputRoot,
+        manifestPath: input.manifestPath,
+        manifest: input.manifest,
+        executionAuthorizationPath: input.executionAuthorizationPath,
+        attemptRef: input.attemptRef,
+        trialInputs,
+        workspaceDestinationRoot,
+        responsibilityContext,
+        baseSolution: solution,
+        baseReviewer: reviewer,
+        baseDecision: decision,
+        solutionParticipant,
+        downstreamParticipant,
+      });
+      effectiveSolution = continuationContext.revision;
+      effectiveSolutionProvenance = continuationContext.revisionProvenance;
+      effectiveReviewer = continuationContext.reviewer;
+      effectiveReviewerProvenance = continuationContext.reviewerProvenance;
     }
-    const selectedOption = acceptedAuthoringOption(solution, reviewer);
+    const selectedOption = acceptedAuthoringOption(effectiveSolution, effectiveReviewer);
     input.manifest.currentStage = 'ADMISSION';
     await writeAttemptManifest(input.manifestPath, input.manifest);
-    const admission = await evaluatePreschoolAutonomousAuthoringAdmission({
-      repositoryRoot: hostAuthorityRoot,
-      sourceRoot: trialBaselineRoot,
-      sourceRunRef: input.evidence.runRef,
-      selectedOption,
-      review: reviewer.review,
-      proposalSha256: sha256Hex(canonicalJson(selectedOption.autonomousAuthoring)),
-      reviewSha256: sha256Hex(canonicalJson(reviewer.review)),
-      fixedCapacityEvidence: input.evidence,
-      referenceResponsibilityContext: {
-        brief: input.responsibilityBrief.brief,
-        briefSha256: input.responsibilityBrief.sha256,
-        briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
-        attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
-      },
-    });
+    let admission: AutonomousAuthoringAdmissionV1;
+    try {
+      admission = await evaluatePreschoolAutonomousAuthoringAdmission({
+        repositoryRoot: hostAuthorityRoot,
+        sourceRoot: trialBaselineRoot,
+        sourceRunRef: input.evidence.runRef,
+        selectedOption,
+        review: effectiveReviewer.review,
+        proposalSha256: sha256Hex(canonicalJson(selectedOption.autonomousAuthoring)),
+        reviewSha256: sha256Hex(canonicalJson(effectiveReviewer.review)),
+        fixedCapacityEvidence: input.evidence,
+        referenceResponsibilityContext: {
+          brief: input.responsibilityBrief.brief,
+          briefSha256: input.responsibilityBrief.sha256,
+          briefRef: REFERENCE_RESPONSIBILITY_BRIEF_PATH,
+          attestationRef: REFERENCE_RESPONSIBILITY_ATTESTATION_PATH,
+        },
+      });
+    } catch (error) {
+      if (continuationContext) {
+        await persistReferenceReviewContinuation({
+          outputRoot,
+          manifestPath: input.manifestPath,
+          manifest: input.manifest,
+          revisionRequest: continuationContext.revisionRequest,
+          baseDecision: continuationContext.baseDecision,
+          baseDecisionSha256: continuationContext.baseDecisionSha256,
+          revisionStatus: continuationContext.revision.result.status,
+          reReviewStatus: continuationContext.reviewer.review.decision,
+          participantJobCount: continuationContext.participantJobCount,
+          revisionInvocation: continuationContext.revisionInvocation,
+          reReviewInvocation: continuationContext.reReviewInvocation,
+          effectiveSolution: continuationFileEvidence(
+            continuationContext.revisionInvocation,
+            'review-continuation-000001/solution-revision/result.json',
+          ),
+          effectiveReview: continuationFileEvidence(
+            continuationContext.reReviewInvocation,
+            'review-continuation-000001/reviewer-agent/review.json',
+          ),
+          hostFailure: { failureArtifactRef: null, message: error instanceof Error ? error.message : String(error) },
+          status: 'HOST_INTEGRITY_FAILURE',
+        });
+      }
+      throw error;
+    }
     const decision = routeSolutionDecision({
       problemId: trialInputs.problemPackage.problemId,
-      solutionStatus: solution.result.status,
-      reviewerDecision: reviewer.review.decision,
+      solutionStatus: effectiveSolution.result.status,
+      reviewerDecision: effectiveReviewer.review.decision,
       solutionScope: selectedOption.changeScope,
-      reviewScope: reviewer.review.scopeAssessment ?? null,
-      executionAuthorityAssessment: reviewer.review.executionAuthorityAssessment ?? null,
+      reviewScope: effectiveReviewer.review.scopeAssessment ?? null,
+      executionAuthorityAssessment: effectiveReviewer.review.executionAuthorityAssessment ?? null,
       autonomousAuthoringRequested: true,
       autonomousAuthoringAdmissionStatus: admission.status,
       permissions: trialInputs.problemPackage.permissions,
-      budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
+      budget: { actualParticipantJobs: continuationContext ? 4 : 2, maxParticipantJobs: 4, retryCount: 0 },
     });
-    await writeCreateOnlyJson(join(outputRoot, 'decision.json'), decision);
-    if (decision.route !== 'READY_FOR_SHADOW_AUTHORING') throw new TrialRoutedDecision(decision);
+    const decisionRef = continuationContext ? 'review-continuation-000001/decision.json' : 'decision.json';
+    await writeCreateOnlyJson(join(outputRoot, decisionRef), decision);
+    if (continuationContext) {
+      await persistReferenceReviewContinuation({
+        outputRoot,
+        manifestPath: input.manifestPath,
+        manifest: input.manifest,
+        revisionRequest: continuationContext.revisionRequest,
+        baseDecision: continuationContext.baseDecision,
+        baseDecisionSha256: continuationContext.baseDecisionSha256,
+        revisionStatus: continuationContext.revision.result.status,
+        reReviewStatus: continuationContext.reviewer.review.decision,
+        participantJobCount: continuationContext.participantJobCount,
+        revisionInvocation: continuationContext.revisionInvocation,
+        reReviewInvocation: continuationContext.reReviewInvocation,
+        decision,
+        effectiveSolution: continuationFileEvidence(
+          continuationContext.revisionInvocation,
+          'review-continuation-000001/solution-revision/result.json',
+        ),
+        effectiveReview: continuationFileEvidence(
+          continuationContext.reReviewInvocation,
+          'review-continuation-000001/reviewer-agent/review.json',
+        ),
+        status: 'COMPLETED',
+      });
+    }
+    if (decision.route !== 'READY_FOR_SHADOW_AUTHORING') {
+      throw new TrialRoutedDecision(decision, decisionRef);
+    }
 
     let responsibilityMappings: PreschoolReferenceResponsibilityMappingV1[];
     try {
@@ -2457,11 +3593,15 @@ async function runVerifiedHistoricalTrial(input: {
 
     const shadowParticipant = withVerifiedAcceptedCardsContaminationGuard(downstreamParticipant, {
       attemptRef: input.attemptRef,
-      solution,
-      solutionProvenance,
-      reviewer,
-      reviewerProvenance,
+      solution: effectiveSolution,
+      solutionProvenance: effectiveSolutionProvenance,
+      reviewer: effectiveReviewer,
+      reviewerProvenance: effectiveReviewerProvenance,
       admission,
+      ...(continuationContext ? {
+        solutionExpectedInvocationRef: continuationContext.revisionProvenance.invocationRef,
+        reviewerExpectedInvocationRef: continuationContext.reviewerProvenance.invocationRef,
+      } : {}),
     });
 
     input.manifest.currentStage = 'SHADOW_AUTHORING';
@@ -2476,8 +3616,8 @@ async function runVerifiedHistoricalTrial(input: {
         workspaceDestinationRoot: join(temporaryRoot, 'shadow-workspace'),
         artifactRoot: join(outputRoot, 'shadow-authoring'),
         invocationRef: referenceTrialInvocationRef(input.attemptRef, 'shadow-authoring'),
-        solution: solution.result,
-        review: reviewer.review,
+        solution: effectiveSolution.result,
+        review: effectiveReviewer.review,
         admission,
         participant: shadowParticipant,
       }),
@@ -2517,8 +3657,8 @@ async function runVerifiedHistoricalTrial(input: {
       candidateBaselineGitSha: PRESCHOOL_REFERENCE_TRIAL_BASELINE_SHA,
       candidateBaselineFingerprintSha256: baselineFingerprint,
       authoritativeFingerprintBefore: execution.authoritativeFingerprintBefore,
-      solution: solution.result,
-      review: reviewer.review,
+      solution: effectiveSolution.result,
+      review: effectiveReviewer.review,
       admission,
     });
     await writeCreateOnlyJson(join(outputRoot, 'verification.json'), buildReferenceTrialVerificationArtifact(verification));
@@ -2554,8 +3694,8 @@ async function runVerifiedHistoricalTrial(input: {
     await writeAttemptManifest(input.manifestPath, input.manifest);
     const promotionPackage = buildPromotionPackage({
       verification,
-      solution: solution.result,
-      review: reviewer.review,
+      solution: effectiveSolution.result,
+      review: effectiveReviewer.review,
       admission,
     });
     const newEntryCount = promotionPackage.packageJson.acceptedCards.length;
@@ -2589,6 +3729,9 @@ async function runVerifiedHistoricalTrial(input: {
         authorizedAt: input.manifest.authorizedAt,
       },
       invocationRefs: invocationRefs as Record<InvocationRole, Exclude<InvocationProvenance, null>>,
+      reviewContinuation: input.manifest.reviewContinuation?.status === 'AVAILABLE'
+        ? { artifactRef: input.manifest.reviewContinuation.artifactRef, sha256: input.manifest.reviewContinuation.sha256! }
+        : null,
       downstream: {
       status: 'SHADOW_AUTHORING_VERIFIED',
       runRef: PRESCHOOL_REFERENCE_TRIAL_RUN_REF,

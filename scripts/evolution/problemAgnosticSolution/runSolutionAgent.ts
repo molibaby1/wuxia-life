@@ -289,6 +289,7 @@ export function buildSolutionRevisionPrompt(
   assignedSkills: DeliveredParticipantSkill[],
   autonomousAuthoringContractPacket?: PreschoolAutonomousAuthoringContractPacketV1,
   structuredResultDelivery?: StructuredResultDeliveryMode,
+  referenceResponsibilityContext?: PreschoolReferenceResponsibilityContextV1,
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
     `Skill: ${skill.identity}`,
@@ -315,7 +316,7 @@ export function buildSolutionRevisionPrompt(
       : renderStructuredFinalOutputContractV1({ roleSchemaName: 'SolutionWorkV1' }),
     renderSolutionWorkSchemaGuidance(),
     '',
-    ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket),
+    ...renderAutonomousAuthoringPacket(autonomousAuthoringContractPacket, referenceResponsibilityContext),
     ...(autonomousAuthoringContractPacket ? [''] : []),
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,
@@ -361,6 +362,7 @@ async function runSolutionAgentWithPrompt(
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'solution',
+    ...(input.structuredResultDelivery === undefined ? {} : { structuredResultDelivery: input.structuredResultDelivery }),
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',
@@ -445,6 +447,7 @@ async function skillDeliveryFailure(
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'solution',
+    ...(input.structuredResultDelivery === undefined ? {} : { structuredResultDelivery: input.structuredResultDelivery }),
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',
@@ -494,6 +497,7 @@ async function inputIdentityFailure(
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'solution',
+    ...(input.structuredResultDelivery === undefined ? {} : { structuredResultDelivery: input.structuredResultDelivery }),
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',
@@ -580,6 +584,7 @@ export async function runSolutionRevisionAgent(
       assignedSkills,
       input.autonomousAuthoringContractPacket,
       input.structuredResultDelivery,
+      input.referenceResponsibilityContext,
     ),
   );
 }

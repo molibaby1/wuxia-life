@@ -1,10 +1,10 @@
-# Content Authoring Workflow Contract v3
+# Content Authoring Workflow Contract v4
 
-**状态：** 当前权威规范（Human accepted：2026-09-24；PD-121）
+**状态：** 当前权威规范（Human accepted：2026-10-07；PD-124）
 
-**历史：** PD-106（2026-09-01）保留为历史 Human Accepted 决策；PD-120（2026-09-19）保留为默认 Content Authoring Workflow authority。v2 修复“内容容量不足无法被正式诊断”的过严边界，并明确 Auto Evolution 在 Human Approval 之前的 proposal 权限；不取消内容质量门槛。v3 仅增加 PD-121 规定的 Human-approved Contract shadow-only delegated-authority 例外。
+**历史：** PD-106（2026-09-01）保留为历史 Human Accepted 决策；PD-120（2026-09-19）保留问题驱动 Content Authoring 的 Gap Diagnosis authority；PD-121（2026-09-24）保留 Human-approved Contract shadow-only delegated-authority 基线。v4 增加 Authoring Requirement 入口解耦：问题驱动内容仍必须先证明 CONTENT_GAP；Human 可以直接建立明确的产品内容需求而无需伪造 Gap。两条路径在 Authoring Requirement 后汇合。v4 同时纳入 PD-124 批准的第二个 bounded Contract family。
 
-**目的：** 统一以后人工、ChatGPT、Codex 与 Auto Evolution 发现内容缺口、设计人物/事件、实现和验证内容的流程，防止“看到指标不好就堆事件”、自由扩写和系统性过度设计。
+**目的：** 统一以后人工、ChatGPT、Codex 与 Auto Evolution 从问题或直接产品意图形成内容需求、设计人物/事件、实现和验证内容的流程，防止“看到指标不好就堆事件”、把 Human 正向需求伪装成 Gap、自由扩写和系统性过度设计。
 
 ---
 
@@ -80,33 +80,55 @@ Content Proposal 可以提议一组具有真实因果关系的内容，但这不
 
 Future Hook 可以明确为“无”，但不能无意识地生成孤立填充内容。
 
-### 1.5 内容不足必须先证明是 Content Gap
+### 1.5 问题驱动新增内容必须先证明是 Content Gap
 
 异常、测试失败、低覆盖、路线空白，都不能直接等于“需要新事件”。
 
-新增 Person / Event 之前必须完成 Gap Diagnosis。
+当新增内容的来源是一个被发现的问题时，必须先完成 Gap Diagnosis；只有 `CONTENT_GAP` 才能形成问题驱动的 Authoring Requirement。
+
+Human 也可以直接提出并明确批准一个正向产品内容需求，例如“我希望增加某类人生事件”。这种需求不需要伪造为 Gap，也不要求先由 Auto Evolution、玩家反馈或测试发现问题。
+
+两条路径在 Authoring Requirement 后汇合：
+
+~~~text
+Problem signal → Gap Diagnosis → CONTENT_GAP → Authoring Requirement
+Human direct product intent              → Authoring Requirement
+~~~
+
+Authoring Requirement 只是合法需求输入，不等于 Autonomous execution authority、shadow authoring admission 或 authoritative implementation approval。
 
 ---
 
 ## 2. 标准工作流
 
-标准流程：
+入口先解耦，再汇合：
 
-```text
-Gap Diagnosis
+~~~text
+Problem-driven:
+Problem signal
+→ Gap Diagnosis
+→ only CONTENT_GAP
 → Content Proposal
-→ Draft Authoring Contract
+→ accepted Authoring Requirement
+
+Human-directed:
+Human product intent
+→ accepted Authoring Requirement
+
+Shared downstream:
+Authoring Requirement
+→ Draft / select domain Authoring Contract
 → Does a Human-approved Autonomous Authoring Contract apply?
    ├─ no / unknown / contract-changing
-   │    → existing Human Approval boundary
+   │    → existing Human Approval + implementation boundary
    └─ yes, Host-proven APPLICABLE
         → bounded shadow authoring
         → semantic + mechanical verification
         → SHADOW_AUTHORING_VERIFIED
         → Human exact-patch promotion boundary
-```
+~~~
 
-默认路径继续遵循 PD-120：Human Approval 在 authoritative implementation 之前。只有 Human-approved Contract 明确覆盖、当前 case 经 Host 证明 APPLICABLE、独立语义审查通过且 Host mechanical admission 合格时，才可在 isolated workspace 中执行 shadow authoring。
+默认路径继续保留 Human 对产品语义与 authoritative implementation 的控制。Human-direct Requirement 表示产品意图已经由 Human 建立，但不自动批准 agent 自行扩大 scope，也不自动授权 shadow execution 或 authoritative repository mutation。只有 Human-approved Contract 明确覆盖、当前 case 经 Host 证明 APPLICABLE、独立语义审查通过且 Host mechanical admission 合格时，才可在 isolated workspace 中执行 shadow authoring。
 
 Shadow authoring never equals authoritative implementation.
 A Natural Player-visible Experience Review still occurs only after a Human-authorized authoritative promotion.
@@ -207,20 +229,49 @@ scheduler 没合理利用已有内容
 
 共同证明结构性容量不足。
 
-### 3.3 Hard Gate
+### 3.3 Problem-driven Hard Gate
 
-如果无法证明 `CONTENT_GAP`：
+如果一个被发现的问题无法证明为 `CONTENT_GAP`：
 
-```text
+~~~text
 STOP
-不得新增 Person / Event
-```
+不得把该问题转换为新增 Person / Event 的 Authoring Requirement
+~~~
+
+这条 Hard Gate 不适用于 Human 直接建立的正向产品需求；Human-direct Requirement 不得反过来被解释为“已经证明存在 Content Gap”。
+
+### 3.4 Authoring Requirement
+
+Authoring Requirement 是 discovery / diagnosis 与 downstream authoring capability 之间的稳定需求边界。
+
+最小语义包括：
+
+~~~text
+requirementId
+source
+  kind: HUMAN_DIRECT | DIAGNOSED_PROBLEM
+  refs[]
+authorityRefs[]
+target
+intent
+requiredContext[]
+desiredPlayerExperience
+scopeConstraints[]
+~~~
+
+规则：
+
+- `source.refs[]` 只记录 provenance，不创建产品 authority；
+- `DIAGNOSED_PROBLEM` 必须能够追溯到已完成的 Gap Diagnosis 与 Content Proposal；
+- `HUMAN_DIRECT` 由 Human 直接建立，不要求伪造 Gap；
+- Requirement 描述“要完成什么需求”，不包含具体 JSON、精确 effect 数值或未经 Contract 约束的 implementation 方案；
+- Requirement 的存在不等于某个 Autonomous Authoring Contract 已适用，也不等于允许执行或 promotion。
 
 ---
 
-## 4. Stage 2：Content Proposal
+## 4. Stage 2：Content Proposal / Requirement Formation
 
-确认 `CONTENT_GAP` 后，先提交最小 proposal，不写正式正文和 JSON。
+问题驱动路径在确认 `CONTENT_GAP` 后，先提交最小 proposal，不写正式正文和 JSON；Human-direct 路径可以由 Human 产品意图直接形成 Authoring Requirement，而不经过 Content Gap Proposal。
 
 必须包括：
 
@@ -348,10 +399,13 @@ Human 审批的是产品语义，而不是每个技术变量。
 
 Human 主要判断：
 
-- 这个 Gap 值不值得解决？
+- 若为问题驱动：这个 Gap 值不值得解决？
+- 若为 Human-direct：这个新增内容需求是不是产品想要的？
 - 这个人生变化/人物是不是产品想要的？
 - 最小范围是否合理？
 - 是否出现明显过度设计？
+
+Human-direct Requirement 本身可以完成“需求是否成立”的产品裁决，但不等于批准某个尚未看到的 exact patch，也不扩大已批准 Contract 的 delegated freedom。
 
 默认以中文呈现审批材料。
 
@@ -510,7 +564,12 @@ Player-visible signal
 - 主动研究缺的是人物、事件、长期 payoff、有因果连接的内容序列、Milestone，或某个领域的 authored variety；
 - 形成完整的 Content Proposal 与 Draft Authoring Contract，作为 Human approval material。
 
-在 PD-121 唯一启用的 `preschool-shared-neutral-passive-capacity-v1@1` Contract 范围内，且 Host 证明当前 case APPLICABLE、独立语义审查与 Host mechanical admission 均通过时，AE 还可 author、implement、verify isolated shadow patch；产物只进入 Human exact-patch promotion review。
+在 Human-approved Autonomous Authoring Contract 范围内，且 Host 证明当前 Requirement APPLICABLE、独立语义审查与 Host mechanical admission 均通过时，可 author、implement、verify isolated shadow patch；产物只进入 Human exact-patch promotion review。
+
+当前治理批准的 bounded Contract families 为：
+
+- `preschool-shared-neutral-passive-capacity-v1@1`；
+- `bounded-formal-event-authoring-v1@1`（PD-124；在对应 runtime / Host implementation 未落地前 execution unavailable）。
 
 不能：
 
@@ -569,7 +628,8 @@ AE 在既有 Contract 内自动 author + implement
 
 本 Contract 是内容生产治理层，不替代具体领域 authority，也不依赖已退休的体验度量实验。
 
-```text
+~~~text
+Problem-driven:
 Human / Auto Evolution / tests / traces
         ↓
 发现 signal
@@ -578,12 +638,22 @@ PD-120 Gap Diagnosis
         ↓
 如果确认 CONTENT_GAP
         ↓
+Authoring Requirement
+
+Human-directed:
+Human product intent
+        ↓
+Authoring Requirement
+
+Authoring Requirement
+        ↓
 具体领域 Contract
 ├─ PD-101 / Person Domain Authoring Contract（Character / Relationship）
 ├─ PD-102 Parenthood / Family Life
 ├─ PD-103 Sex-Variant Person Archetype
-└─ PD-104 Generic Relationship Legacy Quarantine
-```
+├─ PD-104 Generic Relationship Legacy Quarantine
+└─ PD-124 Bounded Formal Event Authoring Contract v1
+~~~
 
 例如：
 
@@ -606,24 +676,32 @@ RUN / OBSERVE
 
 推荐闭环：
 
-```text
+~~~text
 Auto Evolution / tests / traces 发现 signal
 ↓
 PD-120 Gap Diagnosis
 ↓
 如果 CONTENT_GAP
 ↓
-AE 形成受约束的 Content Proposal / Draft Authoring Contract
+Content Proposal
+↓
+Authoring Requirement
 ↓
 领域 Contract（如需要）
 ↓
-Human Approval (default)
+Human Approval / delegated Contract boundary
 ├─ authoritative implementation → Semantic Verification → Natural Player-visible Experience Review
-└─ if PD-121 Contract applies → isolated shadow authoring / verification
-                              → Human exact-patch promotion
-                              → Semantic Verification
-                              → Natural Player-visible Experience Review
-```
+└─ if an approved Autonomous Authoring Contract applies
+   → isolated shadow authoring / verification
+   → Human exact-patch promotion
+   → Semantic Verification
+   → Natural Player-visible Experience Review
+
+另一路径：
+Human direct product intent
+→ Authoring Requirement
+→ 同一个 downstream Contract / verification flow
+~~~
 
 禁止：
 
@@ -646,9 +724,9 @@ READY_FOR_FORMAL_TASK / Agent recommendation / metric failure
 
 内容生成继续遵循三阶段接口；authoritative implementation 默认需要 instance-level Human Approval。PD-121 Contract case 可额外在 isolated workspace 产出 shadow patch，等待 Human exact-patch promotion：
 
-### 13.1 Content Gap Proposal
+### 13.1 Problem-driven Content Gap Proposal
 
-模型先回答：
+问题驱动时，模型先回答：
 
 - 当前缺什么？
 - 为什么缺？
@@ -657,6 +735,12 @@ READY_FOR_FORMAL_TASK / Agent recommendation / metric failure
 - 若主张 `CONTENT_CAPACITY_GAP`，为什么不是 Scheduling / Access / Causality / Presentation？
 
 不写正式事件。
+
+### 13.1.1 Human-direct Authoring Requirement
+
+Human 可以直接提出正向产品内容意图。系统应把该意图整理为 bounded Authoring Requirement，而不是要求 Human 先构造一个“问题”或虚假的 `CONTENT_GAP`。
+
+Human-direct Requirement 仍必须明确 target、intent、required context、desired player experience 与 scope constraints；若语义不足以形成安全边界，应向 Human 暴露缺口，而不是自行补决策。
 
 ### 13.2 Authoring Cards
 
@@ -686,7 +770,9 @@ Contract 获批后才生成：
 
 出现以下任一情况必须 STOP：
 
-- 无法证明是 `CONTENT_GAP`；
+- 问题驱动路径无法证明是 `CONTENT_GAP`，却试图进入新增内容；
+- Human-direct 路径没有明确 Human 产品意图，却试图把 agent 猜测当成 Requirement；
+- 为了验证某个 Contract 而制造、夸大或错误重分类一个 Gap；
 - 为解决一个缺口同时需要新人物系统、家庭系统、继承系统、关系系统；
 - 大量新增事件只是增加篇幅；
 - 新人物必须依赖固定通用剧情模板才能成立；
@@ -702,22 +788,23 @@ Contract 获批后才生成：
 
 ---
 
-## 15. v3 Acceptance
+## 15. v4 Acceptance
 
-Content Authoring Workflow Contract v3 成功意味着：
+Content Authoring Workflow Contract v4 成功意味着：
 
-1. 新内容必须先有 Gap Diagnosis。
-2. 只有 `CONTENT_GAP` 可以进入 Authoring；顶层 taxonomy 仍只有七类。
-3. `CONTENT_CAPACITY_GAP` 可作为 `CONTENT_GAP` 正式子类型被诊断，但不得绕过 Access / Causality / Scheduling / Presentation 审查。
-4. Scheduling 与 Capacity 有明确边界；不设机械 natural-sample 阈值。
-5. Person 与 Event 有清晰、轻量的 Authoring Card；Person 必须过 Person Necessity Gate；Minimum Event Set 由语义证明。
-6. Event 明确是人生意义单位，不是日常日志；不得为了篇幅堆事件。
-7. Story continuity 优先由真实 history 构成；不因此授权 generic TaskLine / StoryArc runtime。
-8. Human 在产品语义层审批，默认看到中文材料；除 PD-121 shadow-only Contract 例外外，Human Approval 之前禁止 authoritative implementation。
-9. AE 可自动完成 Gap Diagnosis → Content Proposal → Draft Authoring Contract；只有已批准且 Host-proven applicable 的 PD-121 Contract case 才可进行 shadow authoring / implementation / verification，且不得自动 promotion。
-10. Codex 不得在 Implementation 阶段自行扩大 scope。
-11. Semantic Verification 在 Player-visible Experience Review 之前。
-12. Player-visible Experience Review failure 必须重新归因，不能自动加内容。
-13. Auto Evolution 保持 `RUN / OBSERVE`，不获得自动扩张 catalog 的权力。
+1. discovery / diagnosis 与 authoring capability 解耦；问题驱动与 Human-direct 两类入口都能形成明确的 Authoring Requirement。
+2. 问题驱动新增内容仍只有 `CONTENT_GAP` 可以进入 Authoring；顶层 Gap taxonomy 仍只有七类。Human-direct Requirement 不需要也不得伪造 Gap。
+3. Authoring Requirement 是需求输入，不是 autonomous execution、shadow admission 或 authoritative implementation authority。
+4. `CONTENT_CAPACITY_GAP` 可作为 `CONTENT_GAP` 正式子类型被诊断，但不得绕过 Access / Causality / Scheduling / Presentation 审查。
+5. Scheduling 与 Capacity 有明确边界；不设机械 natural-sample 阈值。
+6. Person 与 Event 有清晰、轻量的 Authoring Card；Person 必须过 Person Necessity Gate；Minimum Event Set 由语义证明。
+7. Event 明确是人生意义单位，不是日常日志；不得为了篇幅堆事件。
+8. Story continuity 优先由真实 history 构成；不因此授权 generic TaskLine / StoryArc runtime。
+9. Human 在产品语义层审批，默认看到中文材料；只有 Human-approved Contract + APPLICABLE + independent review + Host admission 才允许 isolated shadow authoring，且不得自动 promotion。
+10. 当前 bounded Autonomous Authoring families 包含 preschool v1 与 PD-124 Bounded Formal Event v1；各 family 的 semantic envelope、payload、evidence、write surface、verification 与 STOP 继续 family-specific。
+11. Codex 不得在 Implementation 阶段自行扩大 scope。
+12. Semantic Verification 在 Player-visible Experience Review 之前。
+13. Player-visible Experience Review failure 必须重新归因，不能自动加内容。
+14. Auto Evolution 保持 `RUN / OBSERVE`，不获得自动扩张 authoritative catalog 的权力。
 
-该 Contract 不要求立即生成新人物或新事件；它首先是内容生产的一致治理边界。v2 的其余 acceptance criteria 与 PD-120 默认规则继续有效。
+该 Contract 不要求立即生成新人物或新事件；它首先是内容生产的一致治理边界。PD-120 / PD-121 未被本次明确 supersede 的其余边界继续有效。

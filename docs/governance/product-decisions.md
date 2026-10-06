@@ -2419,3 +2419,93 @@ Wuxia-Life 允许出现低频、强记忆点的异常人生事件，包括现实
 - 不把“低频”解释为需要新增一套概率或幸运机制；
 - 不绕过现有 Gap Diagnosis、Event authoring 与 Human authority 边界。
 
+
+
+### PD-124：Authoring Requirement 解耦与 Bounded Formal Event Authoring Contract v1
+
+**产品决策（Human accepted：2026-10-07）**
+
+Content Authoring 的需求来源与 downstream authoring capability 正式解耦。
+
+新增统一的 Authoring Requirement 语义边界。合法来源只有：
+
+~~~text
+HUMAN_DIRECT
+DIAGNOSED_PROBLEM
+~~~
+
+- `DIAGNOSED_PROBLEM` 继续遵守 PD-120：被发现的问题必须先经过 Gap Diagnosis，只有 `CONTENT_GAP` 才能转换为问题驱动的 Authoring Requirement。
+- `HUMAN_DIRECT` 表示 Human 直接建立一个正向产品内容需求，不要求先证明产品存在缺陷，也不得为了进入 authoring 而伪造或重分类为 `CONTENT_GAP`。
+- Auto Evolution、tests、traces、玩家反馈等仍是 discovery / evidence 渠道，不拥有 authoring authority；它们可以通过诊断路径形成 Requirement，但不是 downstream capability 的必需前置。
+- Authoring Requirement 只描述已接受的产品需求与边界，不等于 Contract applicability、autonomous execution authority、shadow admission、exact-patch approval 或 authoritative repository mutation。
+
+`docs/product/content-authoring-workflow-contract-design.md` 升级为 **Content Authoring Workflow Contract v4**。问题驱动路径与 Human-direct 路径在 Authoring Requirement 后进入同一 downstream Contract / verification / promotion 流程。
+
+同时批准第二个 Autonomous Authoring Contract family：
+
+~~~text
+contractId: bounded-formal-event-authoring-v1
+version: 1
+domain: one bounded Formal Event per accepted Authoring Requirement
+~~~
+
+完整语义由：
+
+~~~text
+docs/superpowers/specs/2026-10-07-authoring-requirement-bounded-formal-event-v1-design.md
+~~~
+
+定义。
+
+该 Contract 在治理上已批准；在对应 Host / Contract implementation、deterministic verification 与 admission 路径实际落地前，execution unavailable，不得声称 runtime 已启用。
+
+v1 只授权 isolated shadow authoring，并保留 PD-121 的：
+
+~~~text
+Human-approved Contract
++ APPLICABLE Requirement
++ independent semantic conformance
++ Host mechanical admission
+→ bounded shadow authoring / implementation / verification
+→ Human exact-patch promotion boundary
+~~~
+
+Authoritative commit / push / merge 仍不授权。
+
+Bounded Formal Event v1 的核心边界：
+
+- 每个 Requirement 最多 author **1 个**现有 Formal Event；若一个 Event 不足则 STOP；
+- Event 必须是人生意义单位，真实消费既有 canonical past，并解释 Past → Present → Future；
+- 可以 author 具体情境、标题正文、choice/auto 形式、choice 文案、合理年龄与现有 prerequisite，以及 Contract allowlist 内的现有 effects；
+- 第一执行面固定为 `src/data/lines/p22-content-expansions.json` 与 focused test path；
+- v1 不授权新 Person、Relationship progression、新 state/stat/fact/flag semantic、新 Runtime、Schema、scheduler、generic Story/Task abstraction、random/special/ending/faction 等高权限 mutation；
+- Future Hook 在 v1 固定为 `NONE`；ordinary Event history 与 allowlist 内现有状态结果仍可存在；
+- 第一个 validation Requirement 为 Human-direct 的“持续修行经历 × 持续经商经历在同一个人生 Event 中发生真实交汇”；具体剧情、精确门槛与数值不在本决策中预写。
+
+Shared abstraction 只允许覆盖稳定的 authoring lifecycle envelope，例如 Requirement reference、Contract identity、applicability/conformance status、review/admission/result provenance。Semantic Envelope、Freedom Matrix、payload/Card、evidence、write surface、execution budget、verification/completion 与 STOP 继续由各 family 自己定义。
+
+现有 preschool v1 与历史/reference proof 不迁移、不重写。不得为架构整齐原地泛化 `autonomous-authoring-proposal-v1`、`autonomous-authoring-admission-v1`、`shadow-authoring-result-v1` 或 `runPreschoolReferenceTrial.ts`。第二 family 应优先新增 bounded v2 path，并使用显式 `contractId + version` routing；本决策不授权 generic Contract registry、DSL、plugin framework 或 generic runner。
+
+**与既有 authority 的调和**
+
+- **PD-120**：问题驱动 Gap taxonomy、`CONTENT_CAPACITY_GAP` 边界、防滥写和 Gap Diagnosis 规则保持有效；本条 supersede 的只是“所有新增内容都必须先由 Gap Diagnosis 产生”的入口耦合。
+- **PD-121**：shadow-only delegated authority、independent review、Host admission、Human exact-patch promotion、repository integrity 与 existing preschool family 保持有效；本条增加一个新的 bounded Contract family，不修改 preschool v1 authority bytes 或历史 proof 语义。
+- **PD-123**：低频异常事件仍遵守普通 Event authoring / authority 边界；本条不自动把异常事件纳入当前 Formal Event pilot，也不新增异常事件专属机制。
+
+**明确不做**
+
+- 不把 Human-direct Requirement 解释为“产品存在 Gap”；
+- 不允许 AE 无 diagnosis 把自身想法升级为 `HUMAN_DIRECT`；
+- 不开放多 Event autonomous story generation；
+- 不开放 autonomous authoritative commit / push / merge；
+- 不迁移或重写 preschool v1 historical/reference evidence；
+- 不新增 generic Contract registry / DSL / executor plugin framework；
+- 不为验证第二 Contract family 跑完整 AE 或制造新的 Gap。
+
+**重新讨论条件**
+
+- 一个真实 Requirement 稳定需要多 Event Minimum Event Set；
+- Formal Event v1 的 effect / persistence allowlist 无法表达合理内容；
+- 第二个以上新 authoring family 证明显式 routing 产生实质重复，需要重新评估 shared abstraction；
+- 需要 persistent Person / Relationship、new Runtime / Schema、scheduler semantics 或 generic Story/Task abstraction；
+- 实际 shadow trial 证明当前 Requirement → Contract → verification 边界不足以安全委托。

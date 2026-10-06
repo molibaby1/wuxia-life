@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-10-03
+> 最后更新：2026-10-07
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -2392,3 +2392,30 @@ For each attempted correction, retain the original Participant prompt and raw te
 After deterministic verification, the real governed workload remains the primary evidence path. No synthetic recertification campaign is restored.
 
 本决策不生成新的 `attempt-000014` authorization candidate，也不授权执行 `attempt-000014`。binding drift 后仍必须取得 fresh exact binding 与 fresh exact-digest Human authorization。
+
+### PD-123：Low-Frequency Exceptional Life Events（低频异常人生事件）
+
+**产品决策（Human accepted：2026-10-07）**
+
+Wuxia-Life 允许出现低频、强记忆点的异常人生事件，包括现实中罕见、夸张、超自然或带有传奇色彩的经历。此类内容用于增加人生差异、趣味性与叙事记忆点；严格现实主义不是产品硬约束。
+
+异常事件仍必须遵守游戏内部因果。事件可以在发生时，通过当前已经存在的 canonical state / effect 机制，对人物造成正面、负面或混合的实际影响。具体影响哪些现有属性、影响幅度，以及是否存在纯叙事型异常，由具体内容实例根据其语义决定，不在本决策中预先穷举。
+
+异常事件不拥有绕过正常人生演化规则、直接修改远期命运的特殊权限。一次异常事件结算完成后，人物继续按照正常的状态、选择、事件、条件和因果关系发展。早期文案中的预言、评价、奉承或传说不自动构成系统必须兑现的未来结果。
+
+后续内容可以消费异常事件真实留下的 event history、fact 或状态变化；后期总结和结局表现也可以回看早期预言最终是否实现、落空或以其他方式得到印证。但这种回看只能解释已经实际发生的人生，不得为了“兑现预言”反向改写人物状态、选择结果或结局。
+
+如果异常事件的正文明确声称人物获得了实际禀赋、损伤或其他机械性改变，应优先用已有 canonical state / effect 表达真实影响，避免仅通过文案暗示一个实际上不存在的机械收益。
+
+本决策不授权新增幸运值、命运值、隐藏概率修正、异常事件专属随机系统、新 Schema 或新 Runtime。未来如果产品确实需要长期概率型影响，应另行进行产品与模型裁决。
+
+本决策也不要求每一个异常事件都必须拥有长期后续 Event。是否需要后续消费，取决于事件实际留下的状态、内容责任和具体人生语义，而不是因为文案“听起来像伏笔”就自动产生长期 payoff 义务。
+
+**明确不做**
+
+- 不在本决策中决定 `birth_with_phenomenon` 的具体属性、数值或效果；
+- 不因为异常事件存在而新增通用“异常事件系统”；
+- 不因为早期预言存在而强制生成后续兑现事件；
+- 不把“低频”解释为需要新增一套概率或幸运机制；
+- 不绕过现有 Gap Diagnosis、Event authoring 与 Human authority 边界。
+

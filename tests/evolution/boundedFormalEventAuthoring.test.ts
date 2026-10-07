@@ -43,9 +43,8 @@ import {
   readBoundedFormalEventParticipantEvidence,
 } from '../../scripts/evolution/autonomousAuthoring/boundedFormalEventParticipantEvidence';
 import {
-  buildBoundedFormalEventTrialAuthorizationCandidate,
+  buildBoundedFormalEventTrialExecutionManifest,
   captureBoundedFormalEventRepositorySnapshot,
-  validateFreshBoundedFormalEventAuthorizationCandidate,
 } from '../../scripts/evolution/autonomousAuthoring/boundedFormalEventTrialAuthorization';
 import {
   buildBoundedFormalEventParticipantGenerationManifest,
@@ -652,7 +651,6 @@ async function testParticipantGenerationPreflightAdapters(): Promise<void> {
     assert.equal(author.generationManifestSha256, built.canonicalSha256);
     assert.equal(author.generationManifestConsumptionRef,
       `bounded-formal-event-generation-manifest-consumed-${built.canonicalSha256}-proposal.json`);
-    assert.equal('generationHumanAuthorizationRef' in author, false);
     assert.equal('humanAuthorizationRef' in author, false);
     assert.equal(proposalJobs, 1);
     const proposalFiles = await readdir(join(root, 'proposal-observability-valid-4'));
@@ -690,7 +688,6 @@ async function testParticipantGenerationPreflightAdapters(): Promise<void> {
     assert.equal(reviewer.generationManifestSha256, built.canonicalSha256);
     assert.equal(reviewer.generationManifestConsumptionRef,
       `bounded-formal-event-generation-manifest-consumed-${built.canonicalSha256}-reviewer.json`);
-    assert.equal('generationHumanAuthorizationRef' in reviewer, false);
     assert.notEqual(author.participantRef, reviewer.participantRef);
     assert.notEqual(author.invocationRef, reviewer.invocationRef);
     assert.notEqual(validProposalWorkspaceRoot, validReviewerWorkspaceRoot);
@@ -924,45 +921,204 @@ async function testVerifierRejectsDuplicateEventId(): Promise<void> {
   }
 }
 
-async function testShadowTrialRequiresSeparateHumanAuthorization(): Promise<void> {
+async function testShadowTrialRequiresExecutionManifest(): Promise<void> {
   const fixture = await createShadowFixture();
   try {
+    const shadowFingerprintBefore = await captureAuthoritativeFingerprint(fixture.shadowRoot);
     await assert.rejects(() => runBoundedFormalEventShadowTrial({
-      authoritativeRoot: fixture.authoritativeRoot,
-      shadowRoot: fixture.shadowRoot,
-      artifactRoot: join(fixture.shadowRoot, 'trial-artifacts'),
-      proposal: fixture.proposal,
-      review: fixture.review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-    }), /outside the shadow workspace/i);
-
-    const result = await runBoundedFormalEventShadowTrial({
       authoritativeRoot: fixture.authoritativeRoot,
       shadowRoot: fixture.shadowRoot,
       artifactRoot: join(fixture.root, 'trial-artifacts'),
       proposal: fixture.proposal,
       review: fixture.review,
       observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-    });
-    assert.equal(result.result.terminalStatus, 'EXECUTION_AUTHORIZATION_REQUIRED');
-    assert.equal(result.result.participantJobs, 0);
-    assert.equal(result.focusedTest, null);
-    assert.equal(result.verification, null);
-    await assert.rejects(
-      readFile(join(fixture.root, 'trial-artifacts/result.json')),
-      error => (error as NodeJS.ErrnoException).code === 'ENOENT',
+    } as never), /execution manifest/i);
+    assert.equal(
+      await captureAuthoritativeFingerprint(fixture.shadowRoot),
+      shadowFingerprintBefore,
+      'missing machine manifest must fail before changing the shadow workspace',
     );
-    await assert.rejects(() => runBoundedFormalEventShadowTrial({
-      authoritativeRoot: fixture.authoritativeRoot,
-      shadowRoot: fixture.shadowRoot,
-      artifactRoot: join(fixture.root, 'trial-artifacts'),
-      proposal: fixture.proposal,
-      review: fixture.review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-      humanAuthorizationArtifactPath: join(fixture.root, 'authorization.json'),
-    }), /must be supplied together/i);
+    await assert.rejects(
+      readdir(join(fixture.root, 'trial-artifacts')),
+      error => (error as NodeJS.ErrnoException).code === 'ENOENT',
+      'missing machine manifest must fail before creating trial artifacts',
+    );
   } finally {
     await rm(fixture.root, { recursive: true, force: true });
+  }
+}
+
+async function createExecutionManifestFixture(root: string) {
+  const repositoryRoot = process.cwd();
+  const proposal = {
+    ...validProposal(uniqueCandidatePayload()),
+    proposedBy: 'participant:execution-manifest-author',
+  };
+  const review = {
+    ...validReview(proposal),
+    reviewerRef: 'participant:execution-manifest-reviewer',
+  };
+  const proposalBindingLock = testBindingLock('execution-manifest-proposal');
+  const reviewerBindingLock = testBindingLock('execution-manifest-reviewer');
+  const generationManifestSha256 = '4'.repeat(64);
+  const proposalParticipant = {
+    ok: true,
+    participantRef: proposal.proposedBy,
+    invocationRef: 'execution-manifest-author-v1',
+    bindingLock: proposalBindingLock,
+    bindingLockSha256: referenceParticipantBindingLockSha256(proposalBindingLock),
+    generationManifestSha256,
+    generationManifestConsumptionRef: `bounded-formal-event-generation-manifest-consumed-${generationManifestSha256}-proposal.json`,
+    promptSha256: sha256Hex('formal-event proposal prompt'),
+    proposal,
+    execution: {
+      ok: true,
+      rawOutput: canonicalJson(proposal),
+      acceptedAttempt: 0,
+      recovery: { status: 'NONE' },
+      executionTrace: { schemaVersion: 'participant-execution-trace-v1' },
+    },
+  } as never;
+  const reviewerParticipant = {
+    ok: true,
+    participantRef: review.reviewerRef,
+    invocationRef: 'execution-manifest-reviewer-v1',
+    bindingLock: reviewerBindingLock,
+    bindingLockSha256: referenceParticipantBindingLockSha256(reviewerBindingLock),
+    generationManifestSha256,
+    generationManifestConsumptionRef: `bounded-formal-event-generation-manifest-consumed-${generationManifestSha256}-reviewer.json`,
+    promptSha256: sha256Hex('formal-event reviewer prompt'),
+    requirementSha256: sha256Hex(canonicalJson(proposal.requirement)),
+    proposalSha256: sha256Hex(canonicalJson(proposal)),
+    review,
+    execution: {
+      ok: true,
+      rawOutput: canonicalJson(review),
+      acceptedAttempt: 0,
+      recovery: { status: 'NONE' },
+      executionTrace: { schemaVersion: 'participant-execution-trace-v1' },
+    },
+  } as never;
+  const participantEvidence = await readBoundedFormalEventParticipantEvidence(repositoryRoot);
+  const repository = await captureBoundedFormalEventRepositorySnapshot(repositoryRoot);
+  const observedLifeStates = { trainingHabit: 2, businessHabit: 2 };
+  const built = await buildBoundedFormalEventTrialExecutionManifest({
+    repositoryRoot,
+    preparedAgainst: repository,
+    participantEvidence,
+    proposalParticipant,
+    reviewerParticipant,
+    observedLifeStates,
+    executionManifestPath: join(root, 'execution-manifest.json'),
+  }, {
+    resolveProposalBindingFromLock: fakeBindingResolver({}),
+    resolveReviewerBindingFromLock: fakeBindingResolver({}),
+  });
+  return {
+    repositoryRoot,
+    participantEvidence,
+    repository,
+    observedLifeStates,
+    proposal,
+    review,
+    built,
+  };
+}
+
+async function testExecutionManifestGatesShadowTrialBeforeMutation(): Promise<void> {
+  const root = await mkdtemp(join(tmpdir(), 'bounded-formal-event-execution-manifest-'));
+  try {
+    const fixture = await createExecutionManifestFixture(root);
+    const manifestRef = fixture.built.manifestRef;
+    const common = {
+      authoritativeRoot: fixture.repositoryRoot,
+      proposal: fixture.proposal,
+      review: fixture.review,
+      observedLifeStates: fixture.observedLifeStates,
+      executionManifestPath: manifestRef.executionManifestPath,
+      executionManifestSha256: manifestRef.executionManifestSha256,
+    };
+    const manifestDependencies = {
+      resolveProposalBindingFromLock: fakeBindingResolver({}),
+      resolveReviewerBindingFromLock: fakeBindingResolver({}),
+    };
+    const run = (label: string, overrides: Record<string, unknown> = {}, dependencies = manifestDependencies) => {
+      const trialRoot = join(root, label);
+      return runBoundedFormalEventShadowTrial({
+        ...common,
+        shadowRoot: join(trialRoot, 'shadow'),
+        artifactRoot: join(trialRoot, 'artifacts'),
+        ...overrides,
+      } as never, { executionManifestDependencies: dependencies } as never);
+    };
+    const assertNoWorkspaceMutation = async (label: string) => {
+      await assert.rejects(readdir(join(root, label, 'shadow')), error => (error as NodeJS.ErrnoException).code === 'ENOENT');
+      await assert.rejects(readdir(join(root, label, 'artifacts')), error => (error as NodeJS.ErrnoException).code === 'ENOENT');
+    };
+
+    const originalManifestBytes = await readFile(manifestRef.executionManifestPath);
+    await writeFile(manifestRef.executionManifestPath, Buffer.concat([originalManifestBytes, Buffer.from(' ')]));
+    await assert.rejects(() => run('tampered'), /execution manifest.*digest|digest.*execution manifest/i);
+    await assertNoWorkspaceMutation('tampered');
+    await writeFile(manifestRef.executionManifestPath, originalManifestBytes);
+
+    await assert.rejects(() => run('repo-drift', {}, {
+      ...manifestDependencies,
+      captureRepositorySnapshot: async () => ({
+        ...fixture.repository,
+        authoritativeFingerprintSha256: 'a'.repeat(64),
+      }),
+    } as never), /stale|repository.*changed/i);
+    await assertNoWorkspaceMutation('repo-drift');
+
+    await assert.rejects(() => run('evidence-drift', {}, {
+      ...manifestDependencies,
+      readParticipantEvidence: async () => ({
+        ...fixture.participantEvidence,
+        currentEventIds: [...fixture.participantEvidence.currentEventIds, 'drifted_event'],
+      }),
+    } as never), /evidence|Participant evidence/i);
+    await assertNoWorkspaceMutation('evidence-drift');
+
+    await assert.rejects(() => run('binding-drift', {}, {
+      ...manifestDependencies,
+      resolveProposalBindingFromLock: async () => { throw new Error('fresh Proposal binding drift'); },
+    } as never), /fresh Proposal binding drift/i);
+    await assertNoWorkspaceMutation('binding-drift');
+
+    await assert.rejects(() => run('proposal-drift', {
+      proposal: { ...fixture.proposal, proposedBy: 'participant:drifted-author' },
+    }), /proposal.*changed|proposal.*stale/i);
+    await assertNoWorkspaceMutation('proposal-drift');
+
+    await assert.rejects(() => run('review-drift', {
+      review: { ...fixture.review, assessment: 'changed after review' },
+    }), /proposal.*review|review.*changed/i);
+    await assertNoWorkspaceMutation('review-drift');
+
+    await assert.rejects(() => run('admission-drift', {}, {
+      ...manifestDependencies,
+      evaluateAdmission: async () => ({ ...fixture.built.admission, status: 'CONTRACT_CHANGE_REQUIRED' }),
+    } as never), /admission|ELIGIBLE/i);
+    await assertNoWorkspaceMutation('admission-drift');
+
+    const verified = await run('valid');
+    assert.equal(verified.result.terminalStatus, 'SHADOW_AUTHORING_VERIFIED');
+    assert.equal(verified.result.executionManifestRef, manifestRef.executionManifestPath);
+    assert.equal(verified.result.executionManifestSha256, manifestRef.executionManifestSha256);
+    assert.equal('humanAuthorizationRef' in verified.result, false);
+    assert.equal('humanAuthorizationSha256' in verified.result, false);
+    assert.deepEqual(verified.result.canonicalChangedFileRefs, [...BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS]);
+    assert.equal(verified.verification?.terminalStatus, 'SHADOW_AUTHORING_VERIFIED');
+    assert.ok(verified.execution);
+    assert.ok(verified.focusedTest);
+    const artifactFiles = await readdir(join(root, 'valid', 'artifacts'));
+    assert.deepEqual(artifactFiles.sort(), ['focused-test.log', 'result.json', 'verification.json']);
+    const resultArtifact = JSON.parse(await readFile(join(root, 'valid', 'artifacts', 'result.json'), 'utf8')) as Record<string, unknown>;
+    assert.equal(resultArtifact.executionManifestRef, manifestRef.executionManifestPath);
+    assert.equal(resultArtifact.executionManifestSha256, manifestRef.executionManifestSha256);
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 }
 
@@ -1301,15 +1457,15 @@ function testExplicitRouting(): void {
   const fingerprint = 'a'.repeat(64);
   const result = validateBoundedFormalEventShadowResultV2({
     schemaVersion: 'shadow-authoring-result-v2',
-    terminalStatus: 'EXECUTION_AUTHORIZATION_REQUIRED',
+    terminalStatus: 'SHADOW_AUTHORING_CONFORMANCE_FAILED',
     contractId: BOUNDED_FORMAL_EVENT_CONTRACT_ID,
     contractVersion: BOUNDED_FORMAL_EVENT_CONTRACT_VERSION,
     requirementSha256: null,
     proposalSha256: null,
     reviewSha256: null,
     admissionSha256: null,
-    humanAuthorizationRef: null,
-    humanAuthorizationSha256: null,
+    executionManifestRef: 'execution-manifest.json',
+    executionManifestSha256: fingerprint,
     eventId: null,
     canonicalChangedFileRefs: [],
     verificationArtifactRef: null,
@@ -1329,8 +1485,8 @@ function testExplicitRouting(): void {
     proposalSha256: fingerprint,
     reviewSha256: fingerprint,
     admissionSha256: fingerprint,
-    humanAuthorizationRef: 'human-auth:formal-event-v1',
-    humanAuthorizationSha256: fingerprint,
+    executionManifestRef: 'execution-manifest.json',
+    executionManifestSha256: fingerprint,
     eventId: 'verified_formal_event',
     canonicalChangedFileRefs: [...BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS],
     verificationArtifactRef: 'verification.json',
@@ -1341,6 +1497,10 @@ function testExplicitRouting(): void {
     ...verifiedResult,
     canonicalChangedFileRefs: ['src/core/EventLoader.ts'],
   }), /exact bounded Formal Event write surface/i);
+  assert.throws(() => validateBoundedFormalEventShadowResultV2({
+    ...verifiedResult,
+    humanAuthorizationRef: 'human-auth:formal-event-v1',
+  }), /unknown field/i);
 }
 
 async function testFormalEventParticipantAdapters(): Promise<void> {
@@ -1629,8 +1789,6 @@ async function testFakeParticipantPreparationBuildsPreflightManifest(): Promise<
     assert.equal(sha256Hex(manifestBytes), preparation.proposal.generationManifestSha256);
     assert.equal(preparation.reviewer.generationManifestSha256, preparation.proposal.generationManifestSha256);
     assert.equal('approvalState' in manifest, false);
-    assert.equal('generationHumanAuthorizationRef' in preparation.proposal, false);
-    assert.equal('generationHumanAuthorizationRef' in preparation.reviewer, false);
     assert.equal('authorizationCandidate' in preparation, false);
     assert.equal(await readFile(preflightManifestPath, 'utf8'), canonicalJson(manifest));
     assert.equal(await readFile(executionManifestPath).then(() => true).catch(() => false), false);
@@ -1708,7 +1866,10 @@ if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
 await testShadowVerificationUsesAuthoritativeBaseline();
 await testShadowVerificationRejectsForbiddenChangedFile();
 await testVerifierRejectsDuplicateEventId();
-await testShadowTrialRequiresSeparateHumanAuthorization();
+await testShadowTrialRequiresExecutionManifest();
+if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
+  await testExecutionManifestGatesShadowTrialBeforeMutation();
+}
 if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testFakeParticipantPreparationBuildsPreflightManifest();
 }

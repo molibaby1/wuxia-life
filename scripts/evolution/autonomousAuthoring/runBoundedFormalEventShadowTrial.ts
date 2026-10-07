@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   BOUNDED_FORMAL_EVENT_CONTRACT_ID,
@@ -16,7 +16,10 @@ import {
 import type { BoundedFormalEventShadowExecutionV1 } from '../../../src/evolution/boundedFormalEventShadowExecutionContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import { captureAuthoritativeFingerprint } from '../problemAgnosticSolution/agentWorkspace';
-import { validateFreshBoundedFormalEventAuthorizationCandidate } from './boundedFormalEventTrialAuthorization';
+import {
+  validateFreshBoundedFormalEventTrialExecutionManifest,
+  type BoundedFormalEventTrialExecutionManifestV1,
+} from './boundedFormalEventTrialAuthorization';
 
 export interface BoundedFormalEventShadowTrialInput {
   authoritativeRoot: string;
@@ -25,9 +28,8 @@ export interface BoundedFormalEventShadowTrialInput {
   proposal: unknown;
   review: unknown;
   observedLifeStates: { trainingHabit?: unknown; businessHabit?: unknown } | null;
-  humanAuthorizationArtifactPath?: string;
-  humanAuthorizationRef?: string;
-  expectedHumanAuthorizationSha256?: string;
+  executionManifestPath: string;
+  executionManifestSha256: string;
   participantJobs?: 0 | 1;
 }
 
@@ -44,29 +46,11 @@ function isWithin(parentRoot: string, candidatePath: string): boolean {
   return path === '' || (path !== '..' && !path.startsWith(`..${sep}`) && !isAbsolute(path));
 }
 
-function authorizationRequiredResult(fingerprint: string) {
-  return validateBoundedFormalEventShadowResultV2({
-    schemaVersion: 'shadow-authoring-result-v2',
-    terminalStatus: 'EXECUTION_AUTHORIZATION_REQUIRED',
-    contractId: BOUNDED_FORMAL_EVENT_CONTRACT_ID,
-    contractVersion: BOUNDED_FORMAL_EVENT_CONTRACT_VERSION,
-    requirementSha256: null,
-    proposalSha256: null,
-    reviewSha256: null,
-    admissionSha256: null,
-    humanAuthorizationRef: null,
-    humanAuthorizationSha256: null,
-    eventId: null,
-    canonicalChangedFileRefs: [],
-    verificationArtifactRef: null,
-    authoritativeFingerprintBefore: fingerprint,
-    authoritativeFingerprintAfter: fingerprint,
-    participantJobs: 0,
-  });
-}
-
 export async function runBoundedFormalEventShadowTrial(
   input: BoundedFormalEventShadowTrialInput,
+  dependencies: {
+    executionManifestDependencies?: Parameters<typeof validateFreshBoundedFormalEventTrialExecutionManifest>[1];
+  } = {},
 ): Promise<BoundedFormalEventShadowTrialRun> {
   const authoritativeRoot = resolve(input.authoritativeRoot);
   const shadowRoot = resolve(input.shadowRoot);
@@ -84,49 +68,18 @@ export async function runBoundedFormalEventShadowTrial(
     }
   }
   const initialFingerprint = await captureAuthoritativeFingerprint(authoritativeRoot);
-  const authorizationFields = [
-    input.humanAuthorizationArtifactPath,
-    input.humanAuthorizationRef,
-    input.expectedHumanAuthorizationSha256,
-  ];
-  if (authorizationFields.every(value => value === undefined)) {
-    return {
-      result: authorizationRequiredResult(initialFingerprint),
-      verification: null,
-      execution: null,
-      shadowRoot: null,
-      focusedTest: null,
-    };
-  }
-  if (authorizationFields.some(value => value === undefined)) {
-    throw new Error('Human authorization artifact path, reference, and accepted SHA-256 must be supplied together');
-  }
-  if (input.humanAuthorizationRef!.trim().length === 0) throw new Error('Human authorization reference must be non-empty');
-
-  const expectedAuthorizationSha256 = input.expectedHumanAuthorizationSha256!;
-  if (!/^[a-f0-9]{64}$/.test(expectedAuthorizationSha256)) {
-    throw new Error('Human authorization SHA-256 must be a lowercase 64-character digest');
-  }
-  const authorizationArtifactPath = resolve(input.humanAuthorizationArtifactPath!);
-  const authorizationStat = await lstat(authorizationArtifactPath);
-  if (authorizationStat.isSymbolicLink() || !authorizationStat.isFile()) {
-    throw new Error('Human authorization artifact must be an existing regular file');
-  }
-  const authorizationBytes = await readFile(authorizationArtifactPath);
-  const actualAuthorizationSha256 = sha256Hex(authorizationBytes);
-  // The external Human/PD-122 gate supplies the accepted digest; this family runner only pins those bytes.
-  if (actualAuthorizationSha256 !== expectedAuthorizationSha256) {
-    throw new Error('Human authorization artifact does not match the separately supplied accepted SHA-256');
-  }
-  await validateFreshBoundedFormalEventAuthorizationCandidate({
+  const executionManifest: BoundedFormalEventTrialExecutionManifestV1 = await validateFreshBoundedFormalEventTrialExecutionManifest({
     repositoryRoot: authoritativeRoot,
-    authorizationArtifactPath,
-    expectedCanonicalSha256: expectedAuthorizationSha256,
+    executionManifestPath: input.executionManifestPath,
+    executionManifestSha256: input.executionManifestSha256,
     proposal: input.proposal,
     review: input.review,
     observedLifeStates: input.observedLifeStates,
     participantJobs: input.participantJobs ?? 0,
-  });
+  }, dependencies.executionManifestDependencies);
+  if (executionManifest.repository.authoritativeFingerprintSha256 !== initialFingerprint) {
+    throw new Error('Execution manifest became stale before shadow execution');
+  }
 
   const admission = await evaluateBoundedFormalEventAdmission({
     repositoryRoot: authoritativeRoot,
@@ -147,8 +100,8 @@ export async function runBoundedFormalEventShadowTrial(
         proposalSha256: admission.proposalSha256,
         reviewSha256: admission.reviewSha256,
         admissionSha256: sha256Hex(canonicalJson(admission)),
-        humanAuthorizationRef: input.humanAuthorizationRef!,
-        humanAuthorizationSha256: actualAuthorizationSha256,
+        executionManifestRef: input.executionManifestPath,
+        executionManifestSha256: input.executionManifestSha256,
         eventId: null,
         canonicalChangedFileRefs: [],
         verificationArtifactRef: null,
@@ -192,8 +145,8 @@ export async function runBoundedFormalEventShadowTrial(
     proposalSha256: admission.proposalSha256,
     reviewSha256: admission.reviewSha256,
     admissionSha256: sha256Hex(canonicalJson(admission)),
-    humanAuthorizationRef: input.humanAuthorizationRef!,
-    humanAuthorizationSha256: actualAuthorizationSha256,
+    executionManifestRef: input.executionManifestPath,
+    executionManifestSha256: input.executionManifestSha256,
     eventId: verification.eventId,
     canonicalChangedFileRefs: verification.canonicalChanges.map(change => change.path),
     verificationArtifactRef: 'verification.json',
@@ -235,10 +188,13 @@ export async function runBoundedFormalEventShadowTrialCli(argv = process.argv.sl
   const args = parseArgs(argv);
   const allowed = new Set([
     '--shadow-root', '--proposal', '--review', '--observed-life-states', '--artifact-root',
-    '--human-authorization', '--human-authorization-ref', '--human-authorization-sha256', '--participant-jobs',
+    '--execution-manifest', '--execution-manifest-sha256', '--participant-jobs',
   ]);
   for (const key of args.keys()) if (!allowed.has(key)) throw new Error(`Unknown argument ${key}`);
-  const required = ['--shadow-root', '--proposal', '--review', '--observed-life-states', '--artifact-root'];
+  const required = [
+    '--shadow-root', '--proposal', '--review', '--observed-life-states', '--artifact-root',
+    '--execution-manifest', '--execution-manifest-sha256',
+  ];
   for (const key of required) if (!args.has(key)) throw new Error(`Missing required argument ${key}`);
   const participantJobsValue = args.get('--participant-jobs') ?? '0';
   if (participantJobsValue !== '0' && participantJobsValue !== '1') {
@@ -251,15 +207,10 @@ export async function runBoundedFormalEventShadowTrialCli(argv = process.argv.sl
     proposal: await readJson(args.get('--proposal')!),
     review: await readJson(args.get('--review')!),
     observedLifeStates: await readJson(args.get('--observed-life-states')!) as { trainingHabit?: unknown; businessHabit?: unknown } | null,
-    humanAuthorizationArtifactPath: args.get('--human-authorization'),
-    humanAuthorizationRef: args.get('--human-authorization-ref'),
-    expectedHumanAuthorizationSha256: args.get('--human-authorization-sha256'),
+    executionManifestPath: args.get('--execution-manifest')!,
+    executionManifestSha256: args.get('--execution-manifest-sha256')!,
     participantJobs: Number(participantJobsValue) as 0 | 1,
   });
-  if (output.result.terminalStatus === 'EXECUTION_AUTHORIZATION_REQUIRED') {
-    process.stdout.write(`${canonicalJson(output.result)}\n`);
-    return;
-  }
   process.stdout.write(`${canonicalJson(output.result)}\n`);
 }
 

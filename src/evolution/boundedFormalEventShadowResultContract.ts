@@ -9,7 +9,6 @@ export type BoundedFormalEventShadowTerminalStatusV2 =
   | 'SHADOW_AUTHORING_EXECUTION_FAILED'
   | 'SHADOW_AUTHORING_CONFORMANCE_FAILED'
   | 'SHADOW_AUTHORING_VERIFICATION_FAILED'
-  | 'EXECUTION_AUTHORIZATION_REQUIRED'
   | 'EXECUTION_ENVELOPE_EXCEEDED';
 
 export interface BoundedFormalEventShadowResultV2 {
@@ -21,8 +20,8 @@ export interface BoundedFormalEventShadowResultV2 {
   proposalSha256: string | null;
   reviewSha256: string | null;
   admissionSha256: string | null;
-  humanAuthorizationRef: string | null;
-  humanAuthorizationSha256: string | null;
+  executionManifestRef: string | null;
+  executionManifestSha256: string | null;
   eventId: string | null;
   canonicalChangedFileRefs: string[];
   verificationArtifactRef: string | null;
@@ -72,14 +71,14 @@ export function validateBoundedFormalEventShadowResultV2(value: unknown): Bounde
   assertObject(value);
   exactKeys(value, [
     'schemaVersion', 'terminalStatus', 'contractId', 'contractVersion', 'requirementSha256', 'proposalSha256',
-    'reviewSha256', 'admissionSha256', 'humanAuthorizationRef', 'humanAuthorizationSha256', 'eventId',
+    'reviewSha256', 'admissionSha256', 'executionManifestRef', 'executionManifestSha256', 'eventId',
     'canonicalChangedFileRefs', 'verificationArtifactRef',
     'authoritativeFingerprintBefore', 'authoritativeFingerprintAfter', 'participantJobs',
   ]);
   if (value.schemaVersion !== 'shadow-authoring-result-v2') throw new Error('bounded Formal Event shadow result schemaVersion is invalid');
   const terminalStatuses: readonly BoundedFormalEventShadowTerminalStatusV2[] = [
     'SHADOW_AUTHORING_VERIFIED', 'SHADOW_AUTHORING_EXECUTION_FAILED', 'SHADOW_AUTHORING_CONFORMANCE_FAILED',
-    'SHADOW_AUTHORING_VERIFICATION_FAILED', 'EXECUTION_AUTHORIZATION_REQUIRED', 'EXECUTION_ENVELOPE_EXCEEDED',
+    'SHADOW_AUTHORING_VERIFICATION_FAILED', 'EXECUTION_ENVELOPE_EXCEEDED',
   ];
   if (typeof value.terminalStatus !== 'string' || !terminalStatuses.includes(value.terminalStatus as BoundedFormalEventShadowTerminalStatusV2)) {
     throw new Error('bounded Formal Event shadow result terminalStatus is invalid');
@@ -97,10 +96,10 @@ export function validateBoundedFormalEventShadowResultV2(value: unknown): Bounde
     proposalSha256: value.proposalSha256 === null ? null : hash(value.proposalSha256, 'shadow result.proposalSha256'),
     reviewSha256: value.reviewSha256 === null ? null : hash(value.reviewSha256, 'shadow result.reviewSha256'),
     admissionSha256: value.admissionSha256 === null ? null : hash(value.admissionSha256, 'shadow result.admissionSha256'),
-    humanAuthorizationRef: nullableString(value.humanAuthorizationRef, 'shadow result.humanAuthorizationRef'),
-    humanAuthorizationSha256: value.humanAuthorizationSha256 === null
+    executionManifestRef: nullableString(value.executionManifestRef, 'shadow result.executionManifestRef'),
+    executionManifestSha256: value.executionManifestSha256 === null
       ? null
-      : hash(value.humanAuthorizationSha256, 'shadow result.humanAuthorizationSha256'),
+      : hash(value.executionManifestSha256, 'shadow result.executionManifestSha256'),
     eventId: nullableString(value.eventId, 'shadow result.eventId'),
     canonicalChangedFileRefs: stringArray(value.canonicalChangedFileRefs, 'shadow result.canonicalChangedFileRefs'),
     verificationArtifactRef: nullableString(value.verificationArtifactRef, 'shadow result.verificationArtifactRef'),
@@ -111,8 +110,8 @@ export function validateBoundedFormalEventShadowResultV2(value: unknown): Bounde
   if (result.terminalStatus === 'SHADOW_AUTHORING_VERIFIED') {
     if (
       result.requirementSha256 === null || result.proposalSha256 === null || result.reviewSha256 === null
-      || result.admissionSha256 === null || result.humanAuthorizationRef === null
-      || result.humanAuthorizationSha256 === null || result.eventId === null || result.verificationArtifactRef === null
+      || result.admissionSha256 === null || result.executionManifestRef === null
+      || result.executionManifestSha256 === null || result.eventId === null || result.verificationArtifactRef === null
       || result.authoritativeFingerprintBefore !== result.authoritativeFingerprintAfter
     ) throw new Error('verified shadow result requires all provenance and unchanged authoritative fingerprints');
     const expectedPaths = [...BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS].sort();

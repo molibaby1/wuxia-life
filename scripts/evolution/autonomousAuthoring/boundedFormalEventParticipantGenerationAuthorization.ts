@@ -28,6 +28,7 @@ import type { BoundedFormalEventProposalParticipantOutput } from './runBoundedFo
 
 export const BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME = 'bounded-formal-event-participant-generation-input-v1.json' as const;
 export const BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_CANDIDATE_SCHEMA = 'bounded-formal-event-participant-generation-authorization-candidate-v1' as const;
+export const BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_MANIFEST_SCHEMA = 'bounded-formal-event-participant-generation-preflight-manifest-v1' as const;
 
 export interface BoundedFormalEventParticipantGenerationInputV1 {
   schemaVersion: 'bounded-formal-event-participant-generation-input-v1';
@@ -90,6 +91,44 @@ export interface BuildBoundedFormalEventParticipantGenerationAuthorizationCandid
 
 export interface BuildBoundedFormalEventParticipantGenerationAuthorizationCandidateResult {
   candidate: BoundedFormalEventParticipantGenerationAuthorizationCandidateV1;
+  canonicalBytes: Buffer;
+  canonicalSha256: string;
+  generationInputPath: string;
+  generationInputSha256: string;
+}
+
+export interface BoundedFormalEventParticipantGenerationManifestRefV1 {
+  manifestPath: string;
+  manifestSha256: string;
+}
+
+export interface BoundedFormalEventParticipantGenerationManifestV1 {
+  schemaVersion: typeof BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_MANIFEST_SCHEMA;
+  generationInputRef: typeof BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME;
+  generationInputSha256: string;
+  repository: BoundedFormalEventRepositorySnapshotV1;
+  requirementSha256: string;
+  contract: { contractId: typeof BOUNDED_FORMAL_EVENT_CONTRACT_ID; contractVersion: typeof BOUNDED_FORMAL_EVENT_CONTRACT_VERSION };
+  participantBindingLockSha256: { proposal: string; reviewer: string };
+  proposalInvocationRef: string;
+  proposalPromptSha256: string;
+  reviewerInvocationRef: string;
+  reviewerPromptTemplateSha256: string;
+  budget: BoundedFormalEventParticipantGenerationInputV1['budget'];
+}
+
+export interface BuildBoundedFormalEventParticipantGenerationManifestInput {
+  repositoryRoot: string;
+  proposalInvocationRef: string;
+  proposalBindingLock: ReferenceParticipantBindingLockV1;
+  reviewerInvocationRef: string;
+  reviewerBindingLock: ReferenceParticipantBindingLockV1;
+  manifestPath: string;
+}
+
+export interface BuildBoundedFormalEventParticipantGenerationManifestResult {
+  manifest: BoundedFormalEventParticipantGenerationManifestV1;
+  manifestRef: BoundedFormalEventParticipantGenerationManifestRefV1;
   canonicalBytes: Buffer;
   canonicalSha256: string;
   generationInputPath: string;
@@ -172,7 +211,7 @@ function generationInput(input: {
         invocationRef: input.reviewerInvocationRef,
         evidence: input.evidence,
       })),
-      proposalInputRule: 'exact validated ProposalV2 from the authorized proposal invocation',
+      proposalInputRule: 'exact validated ProposalV2 from the same preflight-manifest proposal invocation',
     },
     budget: { allowedParticipantJobs: 4, proposalMaximumJobs: 2, reviewerMaximumJobs: 2 },
   };
@@ -185,6 +224,29 @@ function buildCandidate(
   return {
     schemaVersion: BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_CANDIDATE_SCHEMA,
     approvalState: 'AWAITING_HUMAN_EXACT_SHA256_APPROVAL',
+    generationInputRef: BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME,
+    generationInputSha256,
+    repository: input.repository,
+    requirementSha256: input.requirementSha256,
+    contract: input.contract,
+    participantBindingLockSha256: {
+      proposal: input.proposalParticipant.bindingLockSha256,
+      reviewer: input.reviewerParticipant.bindingLockSha256,
+    },
+    proposalInvocationRef: input.proposalParticipant.invocationRef,
+    proposalPromptSha256: input.proposalParticipant.promptSha256,
+    reviewerInvocationRef: input.reviewerParticipant.invocationRef,
+    reviewerPromptTemplateSha256: input.reviewerParticipant.promptTemplateSha256,
+    budget: input.budget,
+  };
+}
+
+function buildManifest(
+  input: BoundedFormalEventParticipantGenerationInputV1,
+  generationInputSha256: string,
+): BoundedFormalEventParticipantGenerationManifestV1 {
+  return {
+    schemaVersion: BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_MANIFEST_SCHEMA,
     generationInputRef: BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME,
     generationInputSha256,
     repository: input.repository,
@@ -319,7 +381,7 @@ function validateGenerationInput(value: unknown): BoundedFormalEventParticipantG
     || value.proposalParticipant.expectedRoleSchemaName !== 'bounded-formal-event-proposal-v2'
     || value.reviewerParticipant.transportRole !== 'reviewer'
     || value.reviewerParticipant.expectedRoleSchemaName !== 'bounded-formal-event-review-assessment-v2'
-    || value.reviewerParticipant.proposalInputRule !== 'exact validated ProposalV2 from the authorized proposal invocation'
+    || value.reviewerParticipant.proposalInputRule !== 'exact validated ProposalV2 from the same preflight-manifest proposal invocation'
     || !isRecord(value.proposalParticipant.bindingLock)
     || !isRecord(value.reviewerParticipant.bindingLock)) {
     throw new Error('Gate A role identity or output Contract is invalid');
@@ -512,6 +574,280 @@ export async function consumeBoundedFormalEventParticipantGenerationAuthorizatio
       invocationRef: input.invocationRef,
       bindingLockSha256: input.bindingLockSha256,
       maximumParticipantJobs: 2,
+    }));
+  } finally {
+    await markerHandle.close();
+  }
+  return markerFilename;
+}
+
+function validateParticipantGenerationManifest(value: unknown): BoundedFormalEventParticipantGenerationManifestV1 {
+  if (!isRecord(value)) throw new Error('Gate A preflight manifest must be an object');
+  assertExactKeys(value, [
+    'schemaVersion', 'generationInputRef', 'generationInputSha256', 'repository', 'requirementSha256', 'contract',
+    'participantBindingLockSha256', 'proposalInvocationRef', 'proposalPromptSha256', 'reviewerInvocationRef',
+    'reviewerPromptTemplateSha256', 'budget',
+  ], 'Gate A preflight manifest');
+  if (value.schemaVersion !== BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_MANIFEST_SCHEMA
+    || value.generationInputRef !== BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME) {
+    throw new Error('Gate A preflight manifest identity is invalid');
+  }
+  assertSha256(value.generationInputSha256, 'Gate A generation input digest');
+  assertSha256(value.requirementSha256, 'Gate A Requirement digest');
+  assertSha256(value.proposalPromptSha256, 'Gate A Proposal prompt digest');
+  assertSha256(value.reviewerPromptTemplateSha256, 'Gate A Reviewer prompt-template digest');
+  if (!isRecord(value.repository)
+    || value.repository.branch !== 'dev'
+    || typeof value.repository.commitSha !== 'string'
+    || !/^[a-f0-9]{40,64}$/.test(value.repository.commitSha)) {
+    throw new Error('Gate A preflight manifest repository snapshot must identify a dev commit');
+  }
+  assertSha256(value.repository.authoritativeFingerprintSha256, 'Gate A repository fingerprint');
+  const expectedContract = { contractId: BOUNDED_FORMAL_EVENT_CONTRACT_ID, contractVersion: BOUNDED_FORMAL_EVENT_CONTRACT_VERSION };
+  if (canonicalJson(value.contract) !== canonicalJson(expectedContract)) {
+    throw new Error('Gate A preflight manifest Contract identity is invalid');
+  }
+  if (!isRecord(value.participantBindingLockSha256)) {
+    throw new Error('Gate A preflight manifest Participant binding digests are invalid');
+  }
+  assertExactKeys(value.participantBindingLockSha256, ['proposal', 'reviewer'], 'Gate A Participant binding digests');
+  assertSha256(value.participantBindingLockSha256.proposal, 'Gate A Proposal binding lock digest');
+  assertSha256(value.participantBindingLockSha256.reviewer, 'Gate A Reviewer binding lock digest');
+  validateInvocationRef(String(value.proposalInvocationRef), 'Gate A Proposal invocationRef');
+  validateInvocationRef(String(value.reviewerInvocationRef), 'Gate A Reviewer invocationRef');
+  if (value.proposalInvocationRef === value.reviewerInvocationRef) {
+    throw new Error('Gate A Proposal and Reviewer invocationRef values must differ');
+  }
+  const expectedBudget = { allowedParticipantJobs: 4, proposalMaximumJobs: 2, reviewerMaximumJobs: 2 };
+  if (canonicalJson(value.budget) !== canonicalJson(expectedBudget)) {
+    throw new Error('Gate A Participant job budget is invalid');
+  }
+  return value as unknown as BoundedFormalEventParticipantGenerationManifestV1;
+}
+
+export async function buildBoundedFormalEventParticipantGenerationManifest(
+  input: BuildBoundedFormalEventParticipantGenerationManifestInput,
+  dependencies: {
+    captureRepositorySnapshot?: typeof captureBoundedFormalEventRepositorySnapshot;
+    readParticipantEvidence?: typeof readBoundedFormalEventParticipantEvidence;
+    resolveProposalBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+    resolveReviewerBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+  } = {},
+): Promise<BuildBoundedFormalEventParticipantGenerationManifestResult> {
+  const repositoryRoot = resolve(input.repositoryRoot);
+  const proposalInvocationRef = validateInvocationRef(input.proposalInvocationRef, 'Formal Event Proposal invocationRef');
+  const reviewerInvocationRef = validateInvocationRef(input.reviewerInvocationRef, 'Formal Event Reviewer invocationRef');
+  if (proposalInvocationRef === reviewerInvocationRef) {
+    throw new Error('Formal Event Proposal and Reviewer invocationRef values must differ');
+  }
+  const manifestPath = assertBoundedFormalEventAuthorizationArtifactPath(
+    repositoryRoot,
+    input.manifestPath,
+    'Formal Event Gate A preflight manifest',
+  );
+  const generationInputPath = join(dirname(manifestPath), BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME);
+  if (basename(manifestPath) === BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME) {
+    throw new Error('Gate A preflight manifest path must differ from its generation input packet path');
+  }
+
+  const captureSnapshot = dependencies.captureRepositorySnapshot ?? captureBoundedFormalEventRepositorySnapshot;
+  const repository = await captureSnapshot(repositoryRoot);
+  const evidence = await (dependencies.readParticipantEvidence ?? readBoundedFormalEventParticipantEvidence)(repositoryRoot);
+  if (canonicalJson(await captureSnapshot(repositoryRoot)) !== canonicalJson(repository)) {
+    throw new Error('Authoritative repository changed while Gate A Participant inputs were captured');
+  }
+  const generation = generationInput({
+    repository,
+    evidence,
+    proposalInvocationRef,
+    proposalBindingLock: input.proposalBindingLock,
+    reviewerInvocationRef,
+    reviewerBindingLock: input.reviewerBindingLock,
+  });
+  await (dependencies.resolveProposalBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
+    repositoryRoot,
+    lock: input.proposalBindingLock,
+  });
+  await (dependencies.resolveReviewerBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
+    repositoryRoot,
+    lock: input.reviewerBindingLock,
+  });
+  if (canonicalJson(await captureSnapshot(repositoryRoot)) !== canonicalJson(repository)) {
+    throw new Error('Authoritative repository changed while Gate A binding locks were resolved');
+  }
+
+  const generationBytes = Buffer.from(canonicalJson(generation), 'utf8');
+  const generationInputSha256 = sha256Hex(generationBytes);
+  const manifest = buildManifest(generation, generationInputSha256);
+  const canonicalBytes = Buffer.from(canonicalJson(manifest), 'utf8');
+  const canonicalSha256 = sha256Hex(canonicalBytes);
+  await mkdir(dirname(generationInputPath), { recursive: true });
+  await writeFile(generationInputPath, generationBytes, { flag: 'wx' });
+  await writeFile(manifestPath, canonicalBytes, { flag: 'wx' });
+  return {
+    manifest,
+    manifestRef: { manifestPath, manifestSha256: canonicalSha256 },
+    canonicalBytes,
+    canonicalSha256,
+    generationInputPath,
+    generationInputSha256,
+  };
+}
+
+export async function validateFreshBoundedFormalEventParticipantGenerationManifest(input: {
+  repositoryRoot: string;
+  manifestRef: BoundedFormalEventParticipantGenerationManifestRefV1;
+  role: 'proposal' | 'reviewer';
+  invocationRef: string;
+  bindingLock: ReferenceParticipantBindingLockV1;
+  evidence: BoundedFormalEventParticipantEvidenceV1;
+  proposalParticipant?: unknown;
+}, dependencies: {
+  captureRepositorySnapshot?: typeof captureBoundedFormalEventRepositorySnapshot;
+  readParticipantEvidence?: typeof readBoundedFormalEventParticipantEvidence;
+  resolveProposalBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+  resolveReviewerBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
+} = {}): Promise<BoundedFormalEventParticipantGenerationManifestV1> {
+  assertSha256(input.manifestRef?.manifestSha256, 'Gate A preflight manifest SHA-256');
+  const manifestPath = assertBoundedFormalEventAuthorizationArtifactPath(
+    input.repositoryRoot,
+    input.manifestRef.manifestPath,
+    'Formal Event Gate A preflight manifest',
+  );
+  const manifestBytes = await readCanonicalRegularFile(manifestPath, 'Gate A preflight manifest');
+  if (sha256Hex(manifestBytes) !== input.manifestRef.manifestSha256) {
+    throw new Error('Gate A preflight manifest SHA-256 does not match its canonical bytes');
+  }
+  const manifestValue = JSON.parse(manifestBytes.toString('utf8')) as unknown;
+  if (manifestBytes.toString('utf8') !== canonicalJson(manifestValue)) {
+    throw new Error('Gate A preflight manifest must use canonical JSON bytes');
+  }
+  const manifest = validateParticipantGenerationManifest(manifestValue);
+  const inputPath = join(dirname(manifestPath), BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME);
+  const inputBytes = await readCanonicalRegularFile(inputPath, 'Gate A generation input');
+  if (sha256Hex(inputBytes) !== manifest.generationInputSha256) {
+    throw new Error('Gate A generation input does not match its preflight manifest digest');
+  }
+  const generationValue = JSON.parse(inputBytes.toString('utf8')) as unknown;
+  if (inputBytes.toString('utf8') !== canonicalJson(generationValue)) {
+    throw new Error('Gate A generation input must use canonical JSON bytes');
+  }
+  const generation = validateGenerationInput(generationValue);
+  if (canonicalJson(buildManifest(generation, manifest.generationInputSha256)) !== manifestBytes.toString('utf8')) {
+    throw new Error('Gate A preflight manifest fields do not match its generation input');
+  }
+
+  const roleInput = input.role === 'proposal' ? generation.proposalParticipant : generation.reviewerParticipant;
+  if (input.invocationRef !== roleInput.invocationRef
+    || referenceParticipantBindingLockSha256(input.bindingLock) !== roleInput.bindingLockSha256
+    || canonicalJson(input.evidence) !== canonicalJson(generation.participantEvidence)) {
+    throw new Error(`Gate A ${input.role} invocation is not the exact preflight-manifest Participant input`);
+  }
+  const currentPromptSha256 = input.role === 'proposal'
+    ? sha256Hex(renderBoundedFormalEventProposalPrompt({ invocationRef: input.invocationRef, evidence: input.evidence }))
+    : sha256Hex(renderBoundedFormalEventReviewPromptTemplate({ invocationRef: input.invocationRef, evidence: input.evidence }));
+  const expectedPromptSha256 = input.role === 'proposal'
+    ? generation.proposalParticipant.promptSha256
+    : generation.reviewerParticipant.promptTemplateSha256;
+  if (currentPromptSha256 !== expectedPromptSha256) {
+    throw new Error(`Gate A ${input.role} prompt changed after preflight manifest creation`);
+  }
+  if (input.role === 'reviewer') {
+    const proposalParticipant = input.proposalParticipant;
+    if (!isRecord(proposalParticipant)
+      || proposalParticipant.ok !== true
+      || !isRecord(proposalParticipant.proposal)
+      || proposalParticipant.invocationRef !== generation.proposalParticipant.invocationRef
+      || proposalParticipant.participantRef !== generation.proposalParticipant.participantRef
+      || proposalParticipant.bindingLockSha256 !== generation.proposalParticipant.bindingLockSha256
+      || proposalParticipant.generationManifestSha256 !== input.manifestRef.manifestSha256
+      || proposalParticipant.generationManifestConsumptionRef
+        !== `bounded-formal-event-generation-manifest-consumed-${input.manifestRef.manifestSha256}-proposal.json`) {
+      throw new Error('Gate A Reviewer input must be the validated Proposal from this preflight manifest invocation');
+    }
+    const proposal = validateBoundedFormalEventProposalV2(
+      proposalParticipant.proposal,
+      generation.participantEvidence.currentEventIds,
+    );
+    if (proposal.proposedBy !== generation.proposalParticipant.participantRef) {
+      throw new Error('Gate A Reviewer input Proposal identity does not match its preflight invocation');
+    }
+  }
+
+  const captureSnapshot = dependencies.captureRepositorySnapshot ?? captureBoundedFormalEventRepositorySnapshot;
+  const currentRepository = await captureSnapshot(input.repositoryRoot);
+  if (canonicalJson(currentRepository) !== canonicalJson(generation.repository)) {
+    throw new Error('Gate A preflight manifest is stale because the dev commit or authoritative repository fingerprint changed');
+  }
+  const currentEvidence = await (dependencies.readParticipantEvidence ?? readBoundedFormalEventParticipantEvidence)(resolve(input.repositoryRoot));
+  if (canonicalJson(currentEvidence) !== canonicalJson(generation.participantEvidence)) {
+    throw new Error('Gate A preflight manifest is stale because canonical Event or schema evidence changed');
+  }
+  await (dependencies.resolveProposalBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
+    repositoryRoot: resolve(input.repositoryRoot),
+    lock: generation.proposalParticipant.bindingLock,
+  });
+  await (dependencies.resolveReviewerBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
+    repositoryRoot: resolve(input.repositoryRoot),
+    lock: generation.reviewerParticipant.bindingLock,
+  });
+  const repositoryAfterBindingResolution = await captureSnapshot(input.repositoryRoot);
+  if (canonicalJson(repositoryAfterBindingResolution) !== canonicalJson(generation.repository)) {
+    throw new Error('Gate A preflight manifest became stale during fresh binding resolution');
+  }
+  return manifest;
+}
+
+export async function consumeBoundedFormalEventParticipantGenerationManifest(input: {
+  repositoryRoot: string;
+  manifestRef: BoundedFormalEventParticipantGenerationManifestRefV1;
+  consumptionRoot?: string;
+  role: 'proposal' | 'reviewer';
+  invocationRef: string;
+  bindingLockSha256: string;
+}): Promise<string> {
+  assertSha256(input.manifestRef?.manifestSha256, 'Gate A preflight manifest digest');
+  assertSha256(input.bindingLockSha256, 'Gate A binding lock digest');
+  const manifestPath = assertBoundedFormalEventAuthorizationArtifactPath(
+    input.repositoryRoot,
+    input.manifestRef.manifestPath,
+    'Formal Event Gate A preflight manifest',
+  );
+  const manifestBytes = await readCanonicalRegularFile(manifestPath, 'Gate A preflight manifest');
+  if (sha256Hex(manifestBytes) !== input.manifestRef.manifestSha256
+    || manifestBytes.toString('utf8') !== canonicalJson(JSON.parse(manifestBytes.toString('utf8')) as unknown)) {
+    throw new Error('Gate A preflight manifest digest or canonical bytes are invalid');
+  }
+  const manifest = validateParticipantGenerationManifest(JSON.parse(manifestBytes.toString('utf8')) as unknown);
+  const expectedInvocationRef = input.role === 'proposal' ? manifest.proposalInvocationRef : manifest.reviewerInvocationRef;
+  const expectedBindingLockSha256 = manifest.participantBindingLockSha256[input.role];
+  if (input.invocationRef !== expectedInvocationRef || input.bindingLockSha256 !== expectedBindingLockSha256) {
+    throw new Error(`Gate A ${input.role} consumption does not match its preflight manifest role identity`);
+  }
+  const markerFilename = `bounded-formal-event-generation-manifest-consumed-${input.manifestRef.manifestSha256}-${input.role}.json`;
+  const consumptionRoot = resolve(input.consumptionRoot
+    ?? join(resolve(input.repositoryRoot), '.tmp', 'evolution', 'bounded-formal-event-participant-generation-consumption'));
+  await mkdir(consumptionRoot, { recursive: true });
+  const markerPath = join(consumptionRoot, markerFilename);
+  let markerHandle: Awaited<ReturnType<typeof open>>;
+  try {
+    markerHandle = await open(markerPath, 'wx', 0o600);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+      throw new Error(`Gate A ${input.role} Participant manifest has already been consumed`);
+    }
+    throw error;
+  }
+  try {
+    await markerHandle.writeFile(canonicalJson({
+      schemaVersion: 'bounded-formal-event-participant-generation-manifest-consumption-v1',
+      generationManifestSha256: input.manifestRef.manifestSha256,
+      role: input.role,
+      invocationRef: input.invocationRef,
+      bindingLockSha256: input.bindingLockSha256,
+      maximumParticipantJobs: input.role === 'proposal'
+        ? manifest.budget.proposalMaximumJobs
+        : manifest.budget.reviewerMaximumJobs,
     }));
   } finally {
     await markerHandle.close();

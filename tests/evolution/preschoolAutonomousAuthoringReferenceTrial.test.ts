@@ -66,6 +66,11 @@ const AUTHORITY_PATHS = [
   'docs/product/content-authoring-workflow-contract-design.md',
   'docs/product/auto-evolution-model.md',
 ] as const;
+const HISTORICAL_PRESCHOOL_AUTHORITY_FIXTURE = [
+  '### PD-121：Contract-Constrained Autonomous Authoring v1\n',
+  '# Content Authoring Workflow Contract v3\nPD-121 shadow authoring exception\nHuman exact-patch promotion\n',
+  'Auto Evolution current authority includes PD-121.\n',
+] as const;
 
 const RESIDUAL_DESIGN_PATH = 'docs/superpowers/specs/2026-09-23-preschool-residual-content-capacity-authoring-design.md';
 const ACCEPTED_DESIGN_PATH = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
@@ -401,6 +406,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   const runnerPath = 'scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts';
   const shadowAuthoringPath = 'scripts/evolution/autonomousAuthoring/shadowAuthoringExecutionParticipant.ts';
   const verifierPath = 'scripts/evolution/autonomousAuthoring/verifyPreschoolShadowAuthoring.ts';
+  const authorityRecognitionPath = 'scripts/evolution/autonomousAuthoring/preschoolAuthorityRecognition.ts';
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
   const solutionAgentPath = 'scripts/evolution/problemAgnosticSolution/runSolutionAgent.ts';
   const reviewerPath = 'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts';
@@ -416,6 +422,7 @@ async function loadSyntheticPublicRunner(root: string, inputSha256: {
   }
   await writeFile(join(sourceRoot, runnerPath), runnerSource);
   await writeFile(join(sourceRoot, verifierPath), await readFile(join(process.cwd(), verifierPath)));
+  await writeFile(join(sourceRoot, authorityRecognitionPath), await readFile(join(process.cwd(), authorityRecognitionPath)));
   await writeFile(join(sourceRoot, solutionAgentPath), await readFile(join(process.cwd(), solutionAgentPath)));
   await writeFile(join(sourceRoot, reviewerPath), await readFile(join(process.cwd(), reviewerPath)));
   if (options.solutionRevisionStaticPromptMarker) {
@@ -497,12 +504,20 @@ async function loadSyntheticArtifactBackedSolutionProbeRunner(root: string, inpu
   const repositoryRoot = join(root, `synthetic-public-runner-source-${suffix}`);
   await loadSyntheticPublicRunner(root, inputSha256, { suffix });
   const runnerPath = 'scripts/evolution/autonomousAuthoring/runPreschoolReferenceTrial.ts';
+  const verifierPath = 'scripts/evolution/autonomousAuthoring/verifyPreschoolShadowAuthoring.ts';
   const briefPath = 'scripts/evolution/autonomousAuthoring/preschoolReferenceResponsibilityBrief.ts';
+  const authorityRecognitionPath = 'scripts/evolution/autonomousAuthoring/preschoolAuthorityRecognition.ts';
+  for (const [index, path] of AUTHORITY_PATHS.entries()) {
+    await writeFile(join(repositoryRoot, path), HISTORICAL_PRESCHOOL_AUTHORITY_FIXTURE[index]!);
+  }
   const staged = spawnSync('git', ['-C', repositoryRoot, 'add', '--',
     runnerPath,
+    verifierPath,
     briefPath,
+    authorityRecognitionPath,
     'scripts/evolution/problemAgnosticSolution/runSolutionAgent.ts',
     'scripts/evolution/problemAgnosticSolution/runSolutionReviewer.ts',
+    ...AUTHORITY_PATHS,
   ], { encoding: 'utf8' });
   assert.equal(staged.status, 0, staged.stderr);
   const committed = spawnSync('git', [
@@ -783,6 +798,9 @@ async function testSyntheticLayerAEndToEnd(root: string, paths: {
   const liveRepositoryRoot = join(root, `synthetic-layer-a-${scenario}-git-clone`);
   const cloned = spawnSync('git', ['clone', '--quiet', '--shared', process.cwd(), liveRepositoryRoot], { encoding: 'utf8' });
   assert.equal(cloned.status, 0, cloned.stderr);
+  for (const [index, path] of AUTHORITY_PATHS.entries()) {
+    await writeFile(join(liveRepositoryRoot, path), HISTORICAL_PRESCHOOL_AUTHORITY_FIXTURE[index]!);
+  }
   const nodeModules = join(process.cwd(), 'node_modules');
   const linked = spawnSync('ln', ['-s', nodeModules, join(liveRepositoryRoot, 'node_modules')], { encoding: 'utf8' });
   assert.equal(linked.status, 0, linked.stderr);
@@ -3134,6 +3152,30 @@ async function testConcurrentProductionAttemptAdmission(root: string): Promise<v
   );
 }
 
+async function testCurrentV4AuthorityOverlay(): Promise<void> {
+  const root = await mkdtemp(join(tmpdir(), 'preschool-current-v4-overlay-'));
+  const liveRoot = join(root, 'live');
+  const baselineRoot = join(root, 'baseline');
+  try {
+    await mkdir(liveRoot, { recursive: true });
+    await mkdir(baselineRoot, { recursive: true });
+    for (const path of [...AUTHORITY_PATHS, ACCEPTED_DESIGN_PATH]) {
+      await put(liveRoot, path, await readFile(join(process.cwd(), path), 'utf8'));
+    }
+
+    await overlayReferenceTrialAuthority(liveRoot, baselineRoot);
+    for (const path of AUTHORITY_PATHS) {
+      assert.equal(
+        await readFile(join(baselineRoot, path), 'utf8'),
+        await readFile(join(liveRoot, path), 'utf8'),
+        `the reference overlay should accept and preserve current v4 authority file ${path}`,
+      );
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+
 export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Promise<void> {
   const strictIntegrationRequired = process.env.PRESCHOOL_REFERENCE_TRIAL_INTEGRATION_REQUIRED === '1';
   const acceptedEvidenceTestPath = strictIntegrationRequired
@@ -3148,6 +3190,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
   testReferenceResponsibilityBriefContract();
   testReferenceResponsibilityPreservation();
   testQualifiedLayerAResult();
+  await testCurrentV4AuthorityOverlay();
   assert.equal(
     PRESCHOOL_REFERENCE_TRIAL_ACCEPTED_EVIDENCE_SHA256,
     'b7adb3af9c32c7476186dadd592b82410b08ac9f0784df11495b5c4ebd3d74d3',
@@ -3506,11 +3549,7 @@ export async function runPreschoolAutonomousAuthoringReferenceTrialTests(): Prom
       brief: fullBriefPath,
     }, 'success', syntheticRunner, syntheticAcceptedBriefFixture);
 
-    const currentAuthorityText = [
-      '### PD-121：Contract-Constrained Autonomous Authoring v1\n',
-      '# Content Authoring Workflow Contract v3\nPD-121\nHuman exact-patch promotion\n',
-      'Auto Evolution current authority includes PD-121.\n',
-    ];
+    const currentAuthorityText = HISTORICAL_PRESCHOOL_AUTHORITY_FIXTURE;
     for (const [index, path] of AUTHORITY_PATHS.entries()) {
       await put(currentRoot, path, `${currentAuthorityText[index]}\nPD-121 current authority\n`);
       await put(historicalRoot, path, `${path}\nhistorical authority\n`);

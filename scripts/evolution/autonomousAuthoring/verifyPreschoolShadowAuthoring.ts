@@ -6,7 +6,6 @@ import type { PassiveNarrativeEntry } from '../../../src/data/passiveNarrativeTy
 import { composePreschoolPassiveCatalog, isPreschoolPassiveEligible } from '../../../src/data/preschoolPassiveSpine';
 import {
   PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS,
-  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
   PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES,
@@ -25,6 +24,7 @@ import {
 import { validateSolutionReview, type SolutionReviewV1 } from '../../../src/evolution/solutionReviewContract';
 import { validateSolutionWork, type SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
+import { recognizesPreschoolAuthorityContext } from './preschoolAuthorityRecognition';
 import { captureAuthoritativeFingerprint, captureWorkspaceSnapshot } from '../problemAgnosticSolution/agentWorkspace';
 import {
   buildDeterministicPromotionPatch,
@@ -180,20 +180,12 @@ async function assertAuthorityFiles(root: string): Promise<void> {
     readFile(join(root, AUTHORITY_PATHS[1]), 'utf8'),
     readFile(join(root, AUTHORITY_PATHS[2])),
   ]);
-  if (!decisions.includes('### PD-121：Contract-Constrained Autonomous Authoring v1')) {
-    throw new Error('PD-121 is missing from the current product decisions.');
-  }
-  if (!workflow.startsWith('# Content Authoring Workflow Contract v3')
-    || !workflow.includes('PD-121')
-    || !workflow.includes('shadow authoring')
-    || !workflow.includes('Human exact-patch promotion')) {
-    throw new Error('The canonical Content Authoring Workflow does not identify the PD-121 shadow exception.');
-  }
-  if (!spec.toString('utf8').includes('**HUMAN ACCEPTED — 2026-09-24**')) {
-    throw new Error('The accepted autonomous authoring design is missing or no longer accepted.');
-  }
-  if (sha256Hex(spec) !== PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256) {
-    throw new Error('The accepted autonomous authoring design bytes do not match the immutable v1 authority identity.');
+  if (!recognizesPreschoolAuthorityContext({
+    productDecisions: decisions,
+    contentWorkflow: workflow,
+    acceptedDesignBytes: spec,
+  })) {
+    throw new Error('PD-121 historical or PD-124 current preschool authority context is missing or stale.');
   }
 }
 

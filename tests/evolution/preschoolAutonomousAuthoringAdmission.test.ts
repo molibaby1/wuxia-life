@@ -171,6 +171,7 @@ function review(input: {
 
 async function createRepositoryFixture(parent: string, options: {
   authority?: boolean;
+  currentV4Authority?: boolean;
   entries?: ReturnType<typeof catalogEntries>;
   mutateAcceptedAuthority?: boolean;
 } = {}): Promise<string> {
@@ -190,6 +191,11 @@ async function createRepositoryFixture(parent: string, options: {
       const target = join(root, ref);
       await mkdir(join(target, '..'), { recursive: true });
       await copyFile(join(process.cwd(), ref), target);
+    }
+    if (!options.currentV4Authority) {
+      await writeFile(join(root, 'docs/governance/product-decisions.md'), '# Decisions\n\n### PD-121：Contract-Constrained Autonomous Authoring v1\n');
+      // Keep this fixture as the historical PD-121 / Workflow v3 authority context.
+      await writeFile(join(root, 'docs/product/content-authoring-workflow-contract-design.md'), '# Content Authoring Workflow Contract v3\n\nPD-121 shadow authoring\nHuman exact-patch promotion\n');
     }
     if (options.mutateAcceptedAuthority) {
       const path = join(root, SOURCE_AUTHORITY);
@@ -315,10 +321,64 @@ async function testExactAuthorityPacketAndAdmissionIdentity(): Promise<void> {
   }
 }
 
+async function testCurrentV4AuthorityRecognitionAndStaleVariants(): Promise<void> {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-current-v4-authority-'));
+  try {
+    const sourceRoot = join(temporaryRoot, 'source');
+    await mkdir(sourceRoot, { recursive: true });
+    const repositoryRoot = await createRepositoryFixture(temporaryRoot, { currentV4Authority: true });
+    const decisionsPath = join(repositoryRoot, 'docs/governance/product-decisions.md');
+    const workflowPath = join(repositoryRoot, 'docs/product/content-authoring-workflow-contract-design.md');
+    const designPath = join(repositoryRoot, SOURCE_AUTHORITY);
+    const acceptedDecisions = await readFile(decisionsPath, 'utf8');
+    const acceptedWorkflow = await readFile(workflowPath, 'utf8');
+    const acceptedDesign = await readFile(designPath, 'utf8');
+    const evaluate = () => evaluatePreschoolAutonomousAuthoringAdmission({
+      ...input(repositoryRoot, sourceRoot),
+      fixedCapacityEvidence: structuralEvidence(),
+    });
+
+    assert.equal((await evaluate()).status, 'ELIGIBLE', 'the real PD-124 / Workflow v4 authority must admit preschool v1');
+
+    await writeFile(workflowPath, acceptedWorkflow.replace(
+      '# Content Authoring Workflow Contract v4',
+      '# Content Authoring Workflow Contract v3',
+    ));
+    assert.equal((await evaluate()).status, 'AUTHORITY_STALE', 'PD-124 with a v3 workflow is an invalid mixed context');
+
+    await writeFile(workflowPath, acceptedWorkflow);
+    await writeFile(decisionsPath, acceptedDecisions.replace(
+      '### PD-121：Contract-Constrained Autonomous Authoring v1',
+      '### Retired PD-121：Contract-Constrained Autonomous Authoring v1',
+    ));
+    assert.equal((await evaluate()).status, 'AUTHORITY_STALE', 'current authority still requires the PD-121 identity');
+
+    await writeFile(decisionsPath, acceptedDecisions.replace(
+      'existing preschool family 保持有效',
+      'existing preschool family no longer applies',
+    ));
+    assert.equal((await evaluate()).status, 'AUTHORITY_STALE', 'PD-124 must explicitly preserve the existing preschool family');
+
+    await writeFile(decisionsPath, acceptedDecisions);
+    await writeFile(workflowPath, acceptedWorkflow.replace(
+      '- `preschool-shared-neutral-passive-capacity-v1@1`；',
+      '- `some-other-contract-v1@1`；',
+    ));
+    assert.equal((await evaluate()).status, 'AUTHORITY_STALE', 'Workflow v4 must name the preserved preschool family');
+
+    await writeFile(workflowPath, acceptedWorkflow);
+    await writeFile(designPath, `${acceptedDesign}\n`);
+    assert.equal((await evaluate()).status, 'AUTHORITY_STALE', 'the immutable 2026-09-24 authority source SHA must remain exact');
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+}
+
 export async function runPreschoolAutonomousAuthoringAdmissionTests(): Promise<void> {
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'preschool-authoring-admission-'));
   try {
     const repositoryRoot = await createRepositoryFixture(temporaryRoot);
+    await testCurrentV4AuthorityRecognitionAndStaleVariants();
     const sourceRoot = join(temporaryRoot, 'source');
     await mkdir(sourceRoot, { recursive: true });
 

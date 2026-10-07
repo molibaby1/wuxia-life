@@ -10,7 +10,6 @@ import {
 } from '../../../src/evolution/autonomousAuthoringContract';
 import {
   PRESCHOOL_SHARED_NEUTRAL_ALLOWED_WRITE_PATHS,
-  PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_ID,
   PRESCHOOL_SHARED_NEUTRAL_CONTRACT_VERSION,
   PRESCHOOL_SHARED_NEUTRAL_MAX_NEW_ENTRIES,
@@ -29,6 +28,7 @@ import {
   type PreschoolReferenceResponsibilityBriefV1,
   validatePreschoolReferenceResponsibilityBrief,
 } from './preschoolReferenceResponsibilityBrief';
+import { recognizesPreschoolAuthorityContext } from './preschoolAuthorityRecognition';
 
 const AUTHORITY_REFS = [
   'docs/governance/product-decisions.md',
@@ -135,11 +135,11 @@ async function hasCurrentAuthority(repositoryRoot: string): Promise<boolean> {
     readFile(join(repositoryRoot, AUTHORITY_REFS[1]), 'utf8').catch(() => ''),
     readFile(join(repositoryRoot, AUTHORITY_REFS[2])).catch(() => Buffer.alloc(0)),
   ]);
-  return decisions.includes('### PD-121：Contract-Constrained Autonomous Authoring v1')
-    && workflow.startsWith('# Content Authoring Workflow Contract v3')
-    && workflow.includes('PD-121')
-    && spec.toString('utf8').includes('**HUMAN ACCEPTED — 2026-09-24**')
-    && sha256Hex(spec) === PRESCHOOL_SHARED_NEUTRAL_CONTRACT_AUTHORITY_SHA256;
+  return recognizesPreschoolAuthorityContext({
+    productDecisions: decisions,
+    contentWorkflow: workflow,
+    acceptedDesignBytes: spec,
+  });
 }
 
 function participantVisibleEvidenceRef(ref: string): boolean {

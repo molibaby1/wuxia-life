@@ -227,6 +227,7 @@ async function createFixture(options: {
   baselineEntries?: typeof INITIAL_CATALOG.entries;
   evidenceMode?: PreschoolCapacityEvidenceV1['evidenceMode'];
   historicalCandidate?: boolean;
+  currentV4Authority?: boolean;
   appendedTests?: string;
   appendInvalidSyntax?: boolean;
   appendBothTests?: boolean;
@@ -246,6 +247,14 @@ async function createFixture(options: {
   }));
   await writeFileAt(repositoryRoot, 'docs/governance/product-decisions.md', '# Decisions\n\n### PD-121：Contract-Constrained Autonomous Authoring v1\n');
   await writeFileAt(repositoryRoot, 'docs/product/content-authoring-workflow-contract-design.md', '# Content Authoring Workflow Contract v3\n\nPD-121 includes bounded shadow authoring and Human exact-patch promotion.\n');
+  if (options.currentV4Authority) {
+    for (const authorityPath of [
+      'docs/governance/product-decisions.md',
+      'docs/product/content-authoring-workflow-contract-design.md',
+    ]) {
+      await writeFileAt(repositoryRoot, authorityPath, await readFile(join(process.cwd(), authorityPath), 'utf8'));
+    }
+  }
   if (!options.historicalCandidate) {
     const authorityPath = 'docs/superpowers/specs/2026-09-24-contract-constrained-autonomous-authoring-v1-design.md';
     await writeFileAt(repositoryRoot, authorityPath, await readFile(join(process.cwd(), authorityPath), 'utf8'));
@@ -430,6 +439,13 @@ async function testV1SupportsHistoricalArchiveWithSeparateAuthorityRoot(): Promi
   assert.equal(result.status, 'SHADOW_AUTHORING_VERIFIED');
   assert.equal(result.candidateBaselineGitSha, 'e80eecc868a6ca99f4a53ff5d2493a13b4c0a8bf');
   assert.equal(result.authoritativeFingerprintAfter, fixture.authoritativeFingerprintBefore);
+}
+
+async function testV1AcceptsCurrentV4PreschoolAuthority(): Promise<void> {
+  const fixture = await createFixture({ currentV4Authority: true });
+  const result = await verifyPreschoolShadowAuthoring(verificationInput(fixture));
+  assert.equal(result.status, 'SHADOW_AUTHORING_VERIFIED');
+  assert.equal(result.checks.authorityIntegrity, 'PASS');
 }
 
 async function testV2RejectsOutOfScopeChangeAndChangedBaselineCatalogRow(): Promise<void> {
@@ -908,6 +924,7 @@ export async function runPreschoolShadowAuthoringVerificationTests(): Promise<vo
     await testV1RejectsCandidateBaselineShaAndFingerprintMismatch();
     await testV1RejectsMutatedAcceptedAuthorityBytes();
     await testV1SupportsHistoricalArchiveWithSeparateAuthorityRoot();
+    await testV1AcceptsCurrentV4PreschoolAuthority();
     await testV2RejectsOutOfScopeChangeAndChangedBaselineCatalogRow();
     await testV2RejectsForbiddenFieldsCardMismatchAndTestPrefixRemoval();
     await testV2RejectsSymlinkedTestPathBeforeRunningCommands();

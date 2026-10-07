@@ -68,6 +68,7 @@ import {
   type PreschoolShadowAuthoringVerificationResultV1,
 } from './verifyPreschoolShadowAuthoring';
 import { buildPromotionPackage } from './buildPromotionPackage';
+import { recognizesPreschoolAuthorityContext } from './preschoolAuthorityRecognition';
 import {
   PRESCHOOL_REFERENCE_RESPONSIBILITY_PROVENANCE,
   PRESCHOOL_REFERENCE_VALIDATION_LAYER,
@@ -2408,14 +2409,17 @@ export async function readExactReferenceObservablePayload(
 }
 
 async function assertCurrentAuthorityDocuments(repositoryRoot: string): Promise<void> {
-  const [decisions, workflow, autoEvolution] = await Promise.all(
-    PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS.map(path => readFile(join(repositoryRoot, path), 'utf8')),
-  );
-  if (!decisions.includes('### PD-121：Contract-Constrained Autonomous Authoring v1')
-    || !workflow.startsWith('# Content Authoring Workflow Contract v3')
-    || !workflow.includes('PD-121')
-    || !workflow.includes('Human exact-patch promotion')
-    || !autoEvolution.includes('PD-121')) {
+  const [decisions, workflow, autoEvolution, acceptedDesign] = await Promise.all([
+    readFile(join(repositoryRoot, PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS[0]), 'utf8'),
+    readFile(join(repositoryRoot, PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS[1]), 'utf8'),
+    readFile(join(repositoryRoot, PRESCHOOL_REFERENCE_TRIAL_AUTHORITY_PATHS[2]), 'utf8'),
+    readFile(join(repositoryRoot, ACCEPTED_DESIGN_PATH)),
+  ]);
+  if (!recognizesPreschoolAuthorityContext({
+    productDecisions: decisions,
+    contentWorkflow: workflow,
+    acceptedDesignBytes: acceptedDesign,
+  }) || !autoEvolution.includes('PD-121')) {
     throw new Error('Current PD-121 authority overlay is incomplete or stale.');
   }
 }

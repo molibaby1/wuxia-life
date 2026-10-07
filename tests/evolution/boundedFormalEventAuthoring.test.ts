@@ -2150,3 +2150,67 @@ if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testDeterministicShadowExecutionPipeline();
 }
 console.log('boundedFormalEventAuthoring.test.ts: ok');
+
+// Deterministic bounded Formal Event shadow regression: p42_training_business_river_delivery
+{
+  const shadowRequirement = {"schemaVersion":"authoring-requirement-v1","requirementId":"human-direct-formal-event-training-business-coordination-v1","source":{"kind":"HUMAN_DIRECT","refs":["human-direct:formal-event-training-business-reference"]},"authorityRefs":["PD-124","docs/product/content-authoring-workflow-contract-design.md","docs/superpowers/specs/2026-10-07-authoring-requirement-bounded-formal-event-v1-design.md"],"target":"FORMAL_EVENT","intent":"Author one Formal Event that places sustained training and business practice in one concrete situation where the directions coordinate, conflict, or require a trade-off.","requiredContext":["The person has already formed a sustained training practice.","The person has already formed a sustained business practice."],"desiredPlayerExperience":"The player recognizes both real life directions in the same situation and understands how the present choice or outcome affects what follows.","scopeConstraints":["Author exactly one Formal Event.","The event must have meaningful Past-to-Present-to-Future continuity.","Future Hook must be NONE.","Do not introduce a new flag, fact, state, stat, scheduler rule, or runtime semantic."]};
+  const shadowPayload = {"events":[{"id":"p42_training_business_river_delivery","version":"1.0.0","category":"side_quest","priority":2,"weight":36,"ageRange":{"min":22,"max":28},"triggers":[{"type":"age_reach","value":22}],"conditions":[{"type":"expression","expression":"lifeStates.trainingHabit >= 2 && lifeStates.businessHabit >= 2"}],"content":{"title":"雨后渡口","text":"这些年，你天亮先练一套步法，收势后便开账点货，练功与营生早已成了两条并行的日常。暴雨冲坏官道，三篓急送药材必须在午时前过河；你盘过水脚与绕行时辰，也看出石阶窄路能赶上渡船，却要亲自背货走完。你可以把晨练步法用在押送上，或先练足一套、再雇脚夫绕远路。前者赶上交货，也能让同行见识你的本事，却会透支体力；后者守住练功节律，但货会误期，损了商誉。","description":"持续练功与营生在一趟急送中相遇"},"eventType":"choice","choices":[{"id":"carry_the_river_road","text":"用晨练步法亲自背货走石阶，赶上午渡","effects":[{"type":"stat_modify","target":"martialPower","value":2,"operator":"add"},{"type":"stat_modify","target":"connections","value":2,"operator":"add"},{"type":"status_add","status":"fatigued"}]},{"id":"keep_the_full_drill","text":"先练足一套，再雇脚夫绕行，接受误期","effects":[{"type":"stat_modify","target":"martialPower","value":3,"operator":"add"},{"type":"stat_modify","target":"reputation","value":2,"operator":"subtract"}]}]}],"narrativeContinuity":{"pastEvidenceRefs":["human-direct:formal-event-training-business-reference"],"presentRequiredContextIndexes":[0,1],"presentNarrativePath":"content.text","futureOutcomeRefs":[{"kind":"choice_effect","choiceId":"carry_the_river_road","effectIndex":0},{"kind":"choice_effect","choiceId":"carry_the_river_road","effectIndex":1},{"kind":"choice_effect","choiceId":"carry_the_river_road","effectIndex":2},{"kind":"choice_effect","choiceId":"keep_the_full_drill","effectIndex":0},{"kind":"choice_effect","choiceId":"keep_the_full_drill","effectIndex":1}],"futureHook":"NONE"}};
+  const validatedShadowPayload = validateBoundedFormalEventPayload(shadowPayload, shadowRequirement);
+  const materializedShadowEvent = EventLoader.getInstance().getAllEvents().find(event => event.id === "p42_training_business_river_delivery");
+  assert.ok(materializedShadowEvent, 'the exact proposal Event must load from the shadow catalog');
+  assert.deepEqual(materializedShadowEvent, validatedShadowPayload.events[0]);
+  const predicateEvent = materializedShadowEvent as unknown as Parameters<typeof eventConditionsPassForHabitState>[0];
+  assert.equal(eventConditionsPassForHabitState(predicateEvent, { trainingHabit: 2, businessHabit: 2 }), true);
+  assert.equal(eventConditionsPassForHabitState(predicateEvent, { trainingHabit: 2, businessHabit: 0 }), false);
+  assert.equal(eventConditionsPassForHabitState(predicateEvent, { trainingHabit: 0, businessHabit: 2 }), false);
+  const executionEvent = materializedShadowEvent;
+  const configuredTriggerAge = executionEvent.triggers?.find(trigger => trigger.type === 'age_reach')?.value;
+  const executionAge = typeof configuredTriggerAge === 'number' ? configuredTriggerAge : executionEvent.ageRange.min;
+  const initialEventState = () => {
+    const engine = new GameEngineIntegration();
+    engine.setPlayerAttributes({ age: executionAge, martialPower: 10, connections: 10, reputation: 10, statuses: [], traits: [], lifeStates: { trainingHabit: 2, studyHabit: 0, businessHabit: 2 } });
+    return engine;
+  };
+  const assertNoUndeclaredPublicDelta = (before: Record<string, unknown>, after: Record<string, unknown>, effects: Array<{ type: string; target?: string }>) => {
+    const allowedFields = new Set(effects.flatMap(effect => effect.type === 'stat_modify' && effect.target ? [effect.target] : effect.type === 'life_state_change' ? ['lifeStates'] : effect.type === 'status_add' || effect.type === 'status_remove' ? ['statuses'] : []));
+    for (const [field, value] of Object.entries(before)) if (!allowedFields.has(field)) assert.deepEqual(after[field], value, 'event execution must not change an undeclared public player field');
+  };
+  const assertHistory = (execution: { gameState: { eventHistory: Array<{ eventId: string; age?: number }> } }) => {
+    const matchingHistory = execution.gameState.eventHistory.filter(record => record.eventId === executionEvent.id);
+    assert.equal(matchingHistory.length, 1, 'canonical Event execution must append history exactly once');
+    assert.equal(matchingHistory[0]?.age, executionAge, 'canonical Event history must preserve the trigger age');
+  };
+  if (executionEvent.eventType === 'choice') {
+    const executionChoices = executionEvent.choices ?? [];
+    assert.ok(executionChoices.length > 0, 'the materialized choice Event must expose at least one choice');
+    if (executionEvent.id === 'p42_training_business_river_delivery') assert.deepEqual(executionChoices.map(choice => choice.id).sort(), ['carry_the_river_road', 'keep_the_full_drill'].sort(), 'the accepted Formal Event must retain both reviewed choices');
+    let isolatedInitialPlayer: Record<string, unknown> | undefined;
+    for (const choice of executionChoices) {
+      const engine = initialEventState();
+      const beforePlayer = JSON.parse(JSON.stringify(engine.getGameState().player)) as Record<string, unknown>;
+      if (isolatedInitialPlayer === undefined) isolatedInitialPlayer = beforePlayer;
+      else assert.deepEqual(beforePlayer, isolatedInitialPlayer, 'each choice must use an isolated identical initial state');
+      const expectedPlayerAfter = JSON.parse(JSON.stringify(beforePlayer)) as Record<string, unknown>;
+      if (executionEvent.id === 'p42_training_business_river_delivery') {
+        if (choice.id === 'carry_the_river_road') Object.assign(expectedPlayerAfter, { martialPower: 12, connections: 12, statuses: ['fatigued'] });
+        else if (choice.id === 'keep_the_full_drill') Object.assign(expectedPlayerAfter, { martialPower: 13, reputation: 8 });
+        else assert.fail('the accepted Formal Event must retain its reviewed choice IDs');
+      }
+      const execution = await engine.executeChoiceEffects(choice.effects, executionEvent.id, choice.id);
+      const afterPlayer = execution.gameState.player as unknown as Record<string, unknown>;
+      if (executionEvent.id === 'p42_training_business_river_delivery') assert.deepEqual(afterPlayer, expectedPlayerAfter, 'the accepted choice must apply exactly its declared public state delta');
+      else assertNoUndeclaredPublicDelta(beforePlayer, afterPlayer, choice.effects);
+      assertHistory(execution);
+    }
+  } else {
+    const effects = executionEvent.autoEffects ?? [];
+    const engine = initialEventState();
+    const beforePlayer = JSON.parse(JSON.stringify(engine.getGameState().player)) as Record<string, unknown>;
+    const execution = await engine.executeAutoEvent(executionEvent);
+    assertNoUndeclaredPublicDelta(beforePlayer, execution.gameState.player as unknown as Record<string, unknown>, effects);
+    assertHistory(execution);
+  }
+  console.log("bounded-formal-event-shadow-regression:p42_training_business_river_delivery:choiceEffectExecution:PASS");
+  console.log("bounded-formal-event-shadow-regression:p42_training_business_river_delivery:eventHistory:PASS");
+  console.log("bounded-formal-event-shadow-regression:p42_training_business_river_delivery:ok");
+}

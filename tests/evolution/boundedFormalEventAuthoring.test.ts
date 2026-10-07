@@ -76,6 +76,7 @@ import {
 } from '../../scripts/evolution/autonomousAuthoring/executeBoundedFormalEventShadowAuthoring';
 import { captureAuthoritativeFingerprint } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 import { EventLoader } from '../../src/core/EventLoader';
+import { GameEngineIntegration } from '../../src/core/GameEngineIntegration';
 import { eventConditionsPassForHabitState } from '../../src/evolution/boundedFormalEventAuthoringContract';
 
 function validChoicePayload() {
@@ -879,8 +880,55 @@ async function testShadowVerificationUsesAuthoritativeBaseline(): Promise<void> 
     assert.equal(result.checks.eventLoaderShape, 'PASS');
     assert.equal(result.checks.conditionEvaluator, 'PASS');
     assert.equal(result.checks.effectAllowlist, 'PASS');
+    assert.equal((result.checks as Record<string, string>).choiceEffectExecution, 'PASS');
+    assert.equal((result.checks as Record<string, string>).eventHistory, 'PASS');
   } finally {
     await rm(fixture.root, { recursive: true, force: true });
+  }
+}
+
+async function testVerifierRequiresChoiceEffectAndHistoryEvidence(): Promise<void> {
+  for (const missingEvidence of ['choice-effect', 'event-history'] as const) {
+    const fixture = await createShadowFixture();
+    const method = GameEngineIntegration.prototype;
+    const originalDescriptor = Object.getOwnPropertyDescriptor(method, 'executeChoiceEffects');
+    assert.ok(originalDescriptor?.value);
+    const originalExecute = originalDescriptor.value as GameEngineIntegration['executeChoiceEffects'];
+    try {
+      await appendCandidateToShadow(fixture);
+      Object.defineProperty(method, 'executeChoiceEffects', {
+        ...originalDescriptor,
+        value: async function (
+          this: GameEngineIntegration,
+          effects: Parameters<GameEngineIntegration['executeChoiceEffects']>[0],
+          eventId?: string,
+          choiceId?: string,
+        ) {
+          const knowledgeBefore = this.getGameState().player.knowledge;
+          const result = await originalExecute.call(this, effects, eventId, choiceId);
+          if (missingEvidence === 'choice-effect') this.setPlayerAttributes({ knowledge: knowledgeBefore });
+          if (missingEvidence === 'event-history') {
+            result.gameState.eventHistory = result.gameState.eventHistory.filter(record => record.eventId !== eventId);
+          }
+          return result;
+        },
+      });
+      await assert.rejects(() => verifyBoundedFormalEventShadowAuthoring({
+        authoritativeRoot: fixture.authoritativeRoot,
+        shadowRoot: fixture.shadowRoot,
+        requirement: HUMAN_DIRECT_FORMAL_EVENT_REFERENCE_REQUIREMENT,
+        proposal: fixture.proposal,
+        review: fixture.review,
+        admission: fixture.admission,
+        focusedTestExitCode: 0,
+        existingEventIds: [],
+      }), missingEvidence === 'choice-effect'
+        ? /did not apply declared stat effect knowledge/
+        : /did not append canonical Event history/);
+    } finally {
+      if (originalDescriptor) Object.defineProperty(method, 'executeChoiceEffects', originalDescriptor);
+      await rm(fixture.root, { recursive: true, force: true });
+    }
   }
 }
 
@@ -1216,6 +1264,8 @@ async function testDeterministicShadowExecutionPipeline(): Promise<void> {
     assert.equal(output.execution.participantJobs, 0);
     assert.equal(output.focusedTest.exitCode, 0);
     assert.ok(output.focusedTest.output.includes(`bounded-formal-event-shadow-regression:${proposalPayload.events[0]!.id}:ok`));
+    assert.ok(output.focusedTest.output.includes(`bounded-formal-event-shadow-regression:${proposalPayload.events[0]!.id}:choiceEffectExecution:PASS`));
+    assert.ok(output.focusedTest.output.includes(`bounded-formal-event-shadow-regression:${proposalPayload.events[0]!.id}:eventHistory:PASS`));
     assert.equal(output.execution.shadowBaselineFingerprint, initialFingerprint);
     assert.equal(output.execution.authoritativeFingerprintAfter, initialFingerprint);
     assert.deepEqual(output.execution.canonicalChangedFileRefs, [...BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS]);
@@ -1241,6 +1291,8 @@ async function testDeterministicShadowExecutionPipeline(): Promise<void> {
       focusedTestExitCode: output.focusedTest.exitCode,
     });
     assert.equal(verification.terminalStatus, 'SHADOW_AUTHORING_VERIFIED');
+    assert.equal(verification.checks.choiceEffectExecution, 'PASS');
+    assert.equal(verification.checks.eventHistory, 'PASS');
     assert.equal(verification.executionResultSha256, sha256Hex(canonicalJson(output.execution)));
     assert.deepEqual(verification.canonicalChanges.map(change => change.path), [...BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS].sort());
 
@@ -2083,6 +2135,7 @@ if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testReviewerAdmissionGuards();
 }
 await testShadowVerificationUsesAuthoritativeBaseline();
+await testVerifierRequiresChoiceEffectAndHistoryEvidence();
 await testShadowVerificationRejectsForbiddenChangedFile();
 await testVerifierRejectsDuplicateEventId();
 await testShadowTrialRequiresExecutionManifest();

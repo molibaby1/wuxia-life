@@ -140,6 +140,55 @@ function buildFocusedRegression(requirement: unknown, payload: unknown, eventId:
     + `  assert.equal(eventConditionsPassForHabitState(predicateEvent, { trainingHabit: 2, businessHabit: 2 }), true);\n`
     + `  assert.equal(eventConditionsPassForHabitState(predicateEvent, { trainingHabit: 2, businessHabit: 0 }), false);\n`
     + `  assert.equal(eventConditionsPassForHabitState(predicateEvent, { trainingHabit: 0, businessHabit: 2 }), false);\n`
+    + `  const executionEvent = materializedShadowEvent;\n`
+    + `  const configuredTriggerAge = executionEvent.triggers?.find(trigger => trigger.type === 'age_reach')?.value;\n`
+    + `  const executionAge = typeof configuredTriggerAge === 'number' ? configuredTriggerAge : executionEvent.ageRange.min;\n`
+    + `  const initialEventState = () => {\n`
+    + `    const engine = new GameEngineIntegration();\n`
+    + `    engine.setPlayerAttributes({ age: executionAge, martialPower: 10, connections: 10, reputation: 10, statuses: [], traits: [], lifeStates: { trainingHabit: 2, studyHabit: 0, businessHabit: 2 } });\n`
+    + `    return engine;\n`
+    + `  };\n`
+    + `  const assertNoUndeclaredPublicDelta = (before: Record<string, unknown>, after: Record<string, unknown>, effects: Array<{ type: string; target?: string }>) => {\n`
+    + `    const allowedFields = new Set(effects.flatMap(effect => effect.type === 'stat_modify' && effect.target ? [effect.target] : effect.type === 'life_state_change' ? ['lifeStates'] : effect.type === 'status_add' || effect.type === 'status_remove' ? ['statuses'] : []));\n`
+    + `    for (const [field, value] of Object.entries(before)) if (!allowedFields.has(field)) assert.deepEqual(after[field], value, 'event execution must not change an undeclared public player field');\n`
+    + `  };\n`
+    + `  const assertHistory = (execution: { gameState: { eventHistory: Array<{ eventId: string; age?: number }> } }) => {\n`
+    + `    const matchingHistory = execution.gameState.eventHistory.filter(record => record.eventId === executionEvent.id);\n`
+    + `    assert.equal(matchingHistory.length, 1, 'canonical Event execution must append history exactly once');\n`
+    + `    assert.equal(matchingHistory[0]?.age, executionAge, 'canonical Event history must preserve the trigger age');\n`
+    + `  };\n`
+    + `  if (executionEvent.eventType === 'choice') {\n`
+    + `    const executionChoices = executionEvent.choices ?? [];\n`
+    + `    assert.ok(executionChoices.length > 0, 'the materialized choice Event must expose at least one choice');\n`
+    + `    if (executionEvent.id === 'p42_training_business_river_delivery') assert.deepEqual(executionChoices.map(choice => choice.id).sort(), ['carry_the_river_road', 'keep_the_full_drill'].sort(), 'the accepted Formal Event must retain both reviewed choices');\n`
+    + `    let isolatedInitialPlayer: Record<string, unknown> | undefined;\n`
+    + `    for (const choice of executionChoices) {\n`
+    + `      const engine = initialEventState();\n`
+    + `      const beforePlayer = JSON.parse(JSON.stringify(engine.getGameState().player)) as Record<string, unknown>;\n`
+    + `      if (isolatedInitialPlayer === undefined) isolatedInitialPlayer = beforePlayer;\n`
+    + `      else assert.deepEqual(beforePlayer, isolatedInitialPlayer, 'each choice must use an isolated identical initial state');\n`
+    + `      const expectedPlayerAfter = JSON.parse(JSON.stringify(beforePlayer)) as Record<string, unknown>;\n`
+    + `      if (executionEvent.id === 'p42_training_business_river_delivery') {\n`
+    + `        if (choice.id === 'carry_the_river_road') Object.assign(expectedPlayerAfter, { martialPower: 12, connections: 12, statuses: ['fatigued'] });\n`
+    + `        else if (choice.id === 'keep_the_full_drill') Object.assign(expectedPlayerAfter, { martialPower: 13, reputation: 8 });\n`
+    + `        else assert.fail('the accepted Formal Event must retain its reviewed choice IDs');\n`
+    + `      }\n`
+    + `      const execution = await engine.executeChoiceEffects(choice.effects, executionEvent.id, choice.id);\n`
+    + `      const afterPlayer = execution.gameState.player as unknown as Record<string, unknown>;\n`
+    + `      if (executionEvent.id === 'p42_training_business_river_delivery') assert.deepEqual(afterPlayer, expectedPlayerAfter, 'the accepted choice must apply exactly its declared public state delta');\n`
+    + `      else assertNoUndeclaredPublicDelta(beforePlayer, afterPlayer, choice.effects);\n`
+    + `      assertHistory(execution);\n`
+    + `    }\n`
+    + `  } else {\n`
+    + `    const effects = executionEvent.autoEffects ?? [];\n`
+    + `    const engine = initialEventState();\n`
+    + `    const beforePlayer = JSON.parse(JSON.stringify(engine.getGameState().player)) as Record<string, unknown>;\n`
+    + `    const execution = await engine.executeAutoEvent(executionEvent);\n`
+    + `    assertNoUndeclaredPublicDelta(beforePlayer, execution.gameState.player as unknown as Record<string, unknown>, effects);\n`
+    + `    assertHistory(execution);\n`
+    + `  }\n`
+    + `  console.log(${JSON.stringify(`bounded-formal-event-shadow-regression:${eventId}:choiceEffectExecution:PASS`)});\n`
+    + `  console.log(${JSON.stringify(`bounded-formal-event-shadow-regression:${eventId}:eventHistory:PASS`)});\n`
     + `  console.log(${JSON.stringify(`bounded-formal-event-shadow-regression:${eventId}:ok`)});\n`
     + `}\n`;
 }

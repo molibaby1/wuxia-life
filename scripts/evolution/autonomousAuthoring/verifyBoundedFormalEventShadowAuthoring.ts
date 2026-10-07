@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { EventLoader, collectChoiceIdValidationErrors } from '../../../src/core/EventLoader';
+import { GameEngineIntegration } from '../../../src/core/GameEngineIntegration';
+import type { RuntimeEventCatalog } from '../../../src/core/RuntimeEventCatalog';
 import {
   BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS,
   BOUNDED_FORMAL_EVENT_PRODUCTION_PATH,
@@ -22,7 +24,7 @@ import {
   validateBoundedFormalEventShadowExecutionV1,
   type BoundedFormalEventShadowExecutionV1,
 } from '../../../src/evolution/boundedFormalEventShadowExecutionContract';
-import type { EventDefinition } from '../../../src/types/eventTypes';
+import type { EventDefinition, GameState } from '../../../src/types/eventTypes';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
   captureWorkspaceSnapshot,
@@ -46,6 +48,8 @@ export interface BoundedFormalEventShadowVerificationV2 {
     eventLoaderShape: 'PASS';
     conditionEvaluator: 'PASS';
     effectAllowlist: 'PASS';
+    choiceEffectExecution: 'PASS';
+    eventHistory: 'PASS';
     bothHabitConditions: 'PASS';
     focusedTest: 'PASS';
     authoritativeFingerprintUnchanged: 'PASS';
@@ -93,6 +97,162 @@ function assertBothHabitPredicates(event: BoundedFormalEventV1): void {
   }
   if (eventConditionsPassForHabitState(event, { trainingHabit: 0, businessHabit: 2 })) {
     throw new Error('Formal Event condition allows business without training Habit');
+  }
+}
+
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function assertNoUndeclaredPublicPlayerDelta(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+  effects: readonly { type: string; target?: string; status?: string; value?: number; operator?: string }[],
+  label: string,
+): void {
+  const allowedFields = new Set<string>();
+  const allowedLifeStateFields = new Set<string>();
+  for (const effect of effects) {
+    if (effect.type === 'stat_modify' && effect.target) allowedFields.add(effect.target);
+    if (effect.type === 'status_add' || effect.type === 'status_remove') allowedFields.add('statuses');
+    if (effect.type === 'life_state_change' && effect.target) {
+      allowedFields.add('lifeStates');
+      allowedLifeStateFields.add(effect.target);
+    }
+  }
+
+  for (const [field, beforeValue] of Object.entries(before)) {
+    if (field === 'lifeStates' && allowedFields.has(field)) {
+      const beforeLifeStates = beforeValue as Record<string, unknown>;
+      const afterLifeStates = after.lifeStates as Record<string, unknown>;
+      for (const [lifeState, value] of Object.entries(beforeLifeStates)) {
+        if (!allowedLifeStateFields.has(lifeState) && JSON.stringify(value) !== JSON.stringify(afterLifeStates[lifeState])) {
+          throw new Error(`Formal Event ${label} changed undeclared public life state ${lifeState}`);
+        }
+      }
+      continue;
+    }
+    if (!allowedFields.has(field) && JSON.stringify(beforeValue) !== JSON.stringify(after[field])) {
+      throw new Error(`Formal Event ${label} changed undeclared public player field ${field}`);
+    }
+  }
+}
+
+function assertDeclaredPublicEffectsApplied(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+  effects: readonly { type: string; target?: string; status?: string; value?: number; operator?: string }[],
+  label: string,
+): void {
+  const finalStatusEffect = new Map<string, string>();
+  for (const effect of effects) {
+    if (effect.type === 'stat_modify' && effect.target) {
+      const unchangedOperation = effect.value === 0
+        || (effect.operator === 'multiply' && effect.value === 1)
+        || (effect.operator === 'divide' && effect.value === 1);
+      if (!unchangedOperation && before[effect.target] === after[effect.target]) {
+        throw new Error(`Formal Event ${label} did not apply declared stat effect ${effect.target}`);
+      }
+    }
+    if ((effect.type === 'status_add' || effect.type === 'status_remove') && effect.status) {
+      finalStatusEffect.set(effect.status, effect.type);
+    }
+    if (effect.type === 'life_state_change' && effect.target && effect.value !== 0) {
+      const beforeLifeStates = before.lifeStates as Record<string, unknown>;
+      const afterLifeStates = after.lifeStates as Record<string, unknown>;
+      if (beforeLifeStates[effect.target] === afterLifeStates[effect.target]) {
+        throw new Error(`Formal Event ${label} did not apply declared life-state effect ${effect.target}`);
+      }
+    }
+  }
+
+  const afterStatuses = after.statuses as string[];
+  for (const [status, operation] of finalStatusEffect) {
+    const present = afterStatuses.includes(status);
+    if ((operation === 'status_add' && !present) || (operation === 'status_remove' && present)) {
+      throw new Error(`Formal Event ${label} did not apply declared status effect ${status}`);
+    }
+  }
+}
+
+async function verifyChoiceEffectExecutionAndHistory(event: BoundedFormalEventV1): Promise<void> {
+  const eventDefinition = event as unknown as EventDefinition;
+  const catalog: RuntimeEventCatalog = {
+    getAllEvents: () => [eventDefinition],
+    getEventsByAge: age => age >= event.ageRange.min && age <= (event.ageRange.max ?? event.ageRange.min)
+      ? [eventDefinition]
+      : [],
+    getEventById: id => id === event.id ? eventDefinition : undefined,
+    getWeightForAge: (candidate, age) => age >= candidate.ageRange.min
+      && age <= (candidate.ageRange.max ?? candidate.ageRange.min)
+      ? candidate.weight ?? 0
+      : 0,
+  };
+  const triggerAge = event.triggers[0]?.value ?? event.ageRange.min;
+  const initialEngine = (effects: readonly { type: string; status?: string }[]): GameEngineIntegration => {
+    const engine = new GameEngineIntegration(catalog);
+    engine.setPlayerAttributes({
+      age: triggerAge,
+      martialPower: 20,
+      chivalry: 20,
+      constitution: 20,
+      knowledge: 20,
+      charisma: 20,
+      businessAcumen: 20,
+      influence: 20,
+      connections: 20,
+      reputation: 20,
+      martialHeritage: 20,
+      scholarlyHeritage: 20,
+      merchantNetwork: 20,
+      statuses: effects
+        .filter(effect => effect.type === 'status_remove' && effect.status)
+        .map(effect => effect.status!) as GameState['player']['statuses'],
+      lifeStates: { trainingHabit: 2, studyHabit: 2, businessHabit: 2 },
+      traits: [],
+    });
+    return engine;
+  };
+  const verifyResult = (
+    result: { gameState: GameState },
+    beforePlayer: Record<string, unknown>,
+    effects: readonly { type: string; target?: string; status?: string; value?: number; operator?: string }[],
+    label: string,
+  ): void => {
+    assertDeclaredPublicEffectsApplied(
+      beforePlayer,
+      result.gameState.player as unknown as Record<string, unknown>,
+      effects,
+      label,
+    );
+    assertNoUndeclaredPublicPlayerDelta(
+      beforePlayer,
+      result.gameState.player as unknown as Record<string, unknown>,
+      effects,
+      label,
+    );
+    const matchingHistory = result.gameState.eventHistory.filter(record => record.eventId === event.id);
+    if (matchingHistory.length !== 1 || matchingHistory[0]?.age !== triggerAge) {
+      throw new Error(`Formal Event ${label} did not append canonical Event history at age ${triggerAge}`);
+    }
+  };
+
+  if (event.eventType === 'choice') {
+    if (!Array.isArray(event.choices) || event.choices.length === 0) {
+      throw new Error('Formal Event V4 requires at least one choice for canonical choice-effect verification');
+    }
+    for (const choice of event.choices) {
+      const engine = initialEngine(choice.effects);
+      const beforePlayer = cloneJson(engine.getGameState().player) as unknown as Record<string, unknown>;
+      const result = await engine.executeChoiceEffects(choice.effects, event.id, choice.id);
+      verifyResult(result, beforePlayer, choice.effects, `choice ${choice.id}`);
+    }
+  } else {
+    const effects = event.autoEffects ?? [];
+    const engine = initialEngine(effects);
+    const beforePlayer = cloneJson(engine.getGameState().player) as unknown as Record<string, unknown>;
+    const result = await engine.executeAutoEvent(eventDefinition);
+    verifyResult(result, beforePlayer, effects, 'auto effects');
   }
 }
 
@@ -185,6 +345,7 @@ export async function verifyBoundedFormalEventShadowAuthoring(input: {
     throw new Error('EventLoader cannot schedule the appended Formal Event at its minimum age');
   }
   assertBothHabitPredicates(event);
+  await verifyChoiceEffectExecutionAndHistory(event);
 
   const authoritativeAfter = await captureWorkspaceSnapshot(authoritativeRoot);
   if (authoritativeAfter.fingerprintSha256 !== authoritativeBefore.fingerprintSha256) {
@@ -214,6 +375,8 @@ export async function verifyBoundedFormalEventShadowAuthoring(input: {
       eventLoaderShape: 'PASS',
       conditionEvaluator: 'PASS',
       effectAllowlist: 'PASS',
+      choiceEffectExecution: 'PASS',
+      eventHistory: 'PASS',
       bothHabitConditions: 'PASS',
       focusedTest: 'PASS',
       authoritativeFingerprintUnchanged: 'PASS',

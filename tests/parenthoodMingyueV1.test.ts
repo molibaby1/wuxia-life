@@ -159,7 +159,7 @@ function testCatalogAddsExactlyTheThreeConcreteEvents(): void {
   const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8')) as EventDefinition[];
   assert.equal(source.length, 12, 'Mingyue source must contain its existing 9 events plus exactly 3 Parenthood events');
   assert.deepEqual(source.slice(-3).map(event => event.id), [IDS.decision, IDS.arrival, IDS.early]);
-  assert.equal(eventLoader.getAllEvents().length, 391);
+  assert.equal(eventLoader.getAllEvents().length, 392);
   assert.deepEqual(
     [IDS.decision, IDS.arrival, IDS.early].map(id => Boolean(eventLoader.getEventById(id))),
     [true, true, true],

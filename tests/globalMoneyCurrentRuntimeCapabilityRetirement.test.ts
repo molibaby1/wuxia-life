@@ -125,7 +125,7 @@ function testFormalWritesAndConditionsZero(): void {
   assert.equal(collectFormalMoneyWrites().length, 0);
   const formalErrors = collectFormalWalletAuthoringErrors(EventLoader.getInstance().getAllEvents());
   assert.deepEqual(formalErrors, []);
-  assert.equal(EventLoader.getInstance().getAllEvents().length, 391);
+  assert.equal(EventLoader.getInstance().getAllEvents().length, 392);
 }
 
 function testDifficultySetbackMoneyMutationsZero(): void {

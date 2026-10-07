@@ -1614,6 +1614,21 @@ async function testFormalEventParticipantAdapters(): Promise<void> {
     const reviewerPrompt = await readFile(join(reviewerCase.destinationRoot, 'participant-prompt.txt'), 'utf8');
     assert.ok(reviewerPrompt.includes('Proposal to review:'));
     assert.ok(reviewerPrompt.includes(proposal.contractPayload!.events[0]!.id));
+    for (const schemaLine of [
+      '"schemaVersion": a string exactly "autonomous-authoring-review-assessment-v2".',
+      '"decision": a string exactly one of "ACCEPT" | "REJECT" | "REQUEST_MORE_WORK" | "DEFER" | "ESCALATE".',
+      '"applicabilityAssessment": one string, exactly one of "APPLICABLE" | "NOT_APPLICABLE" | "INSUFFICIENT_EVIDENCE" | "CONTRACT_CHANGE_REQUIRED".',
+      '"conformance": one string, exactly one of "CONFORMING" | "NON_CONFORMING" | "AMBIGUOUS".',
+      '"executionEnvelope": one string, exactly one of "WITHIN_ENVELOPE" | "EXECUTION_ENVELOPE_EXCEEDED" | "UNKNOWN".',
+      '"requirementCoverage": one string, exactly one of "COVERED" | "NOT_COVERED" | "UNCERTAIN".',
+      '"pastPresentFutureAssessment": one string, exactly one of "COHERENT" | "INCOHERENT" | "UNCERTAIN".',
+      '"assessment": a plain non-empty string.',
+      '"blockers": an array of strings.',
+      'Do not wrap any assessment field in an object such as {"status": "...", "details": "..."}; put explanations in assessment or blockers.',
+      'These are representation rules only and do not imply a review conclusion.',
+    ]) {
+      assert.ok(reviewerPrompt.includes(schemaLine), `Reviewer prompt must include: ${schemaLine}`);
+    }
 
     const invalidProposalCases: Array<[string, string]> = [
       ['invalid-json', '{not-json'],
@@ -1667,6 +1682,14 @@ async function testFormalEventParticipantAdapters(): Promise<void> {
       ['author-identity', sourceProposal => JSON.stringify({
         ...canonicalFakeReview(sourceProposal, 'unused-reviewer-ref'),
         reviewerRef: sourceProposal.proposedBy,
+      })],
+      ['object-wrapped-assessment', (sourceProposal, reviewerRef) => JSON.stringify({
+        ...canonicalFakeReview(sourceProposal, reviewerRef),
+        applicabilityAssessment: { status: 'APPLICABLE', details: 'The type must remain a string.' },
+        conformance: { status: 'CONFORMING', details: 'The type must remain a string.' },
+        executionEnvelope: { status: 'WITHIN_ENVELOPE', details: 'The type must remain a string.' },
+        requirementCoverage: { status: 'COVERED', details: 'The type must remain a string.' },
+        pastPresentFutureAssessment: { status: 'COHERENT', details: 'The type must remain a string.' },
       })],
     ];
     for (const [name, makeRawOutput] of invalidReviewCases) {

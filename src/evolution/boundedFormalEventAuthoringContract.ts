@@ -39,6 +39,41 @@ const STAT_TARGETS = [
   'knowledge',
 ] as const;
 
+export const BOUNDED_FORMAL_EVENT_AUTHORING_SAFE_PROJECTION_V1 = {
+  contractId: BOUNDED_FORMAL_EVENT_CONTRACT_ID,
+  contractVersion: BOUNDED_FORMAL_EVENT_CONTRACT_VERSION,
+  maxNewEvents: BOUNDED_FORMAL_EVENT_MAX_NEW_EVENTS,
+  allowedWritePaths: BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS,
+  event: {
+    categories: ['main_story', 'side_quest'],
+    priorities: [0, 1, 2, 3],
+    requiredTrigger: { type: 'age_reach', count: 1 },
+    requiredCondition: {
+      type: 'expression',
+      allowedExpressions: [
+        'lifeStates.trainingHabit >= 2 && lifeStates.businessHabit >= 2',
+        'lifeStates.businessHabit >= 2 && lifeStates.trainingHabit >= 2',
+      ],
+    },
+    eventTypes: ['choice', 'auto'],
+  },
+  allowedEffects: {
+    statModifyTargets: STAT_TARGETS,
+    lifeStateChangeTargets: LIFE_STATE_KEYS,
+    statusIds: STATUS_ID_VALUES,
+  },
+  narrativeContinuity: {
+    required: ['pastEvidenceRefs', 'presentRequiredContextIndexes', 'futureOutcomeRefs'],
+    futureHook: 'NONE',
+  },
+  forbidden: [
+    'multiple Events',
+    'new Person or Relationship progression',
+    'new state, stat, fact, flag, scheduler, Runtime, or Schema semantics',
+    'random, special, ending, or faction effects',
+  ],
+} as const;
+
 export type BoundedFormalEventEffectV1 =
   | {
       type: 'stat_modify';

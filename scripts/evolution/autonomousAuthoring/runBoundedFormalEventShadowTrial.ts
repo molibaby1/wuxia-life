@@ -16,6 +16,7 @@ import {
 import type { BoundedFormalEventShadowExecutionV1 } from '../../../src/evolution/boundedFormalEventShadowExecutionContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import { captureAuthoritativeFingerprint } from '../problemAgnosticSolution/agentWorkspace';
+import { validateFreshBoundedFormalEventAuthorizationCandidate } from './boundedFormalEventTrialAuthorization';
 
 export interface BoundedFormalEventShadowTrialInput {
   authoritativeRoot: string;
@@ -117,6 +118,15 @@ export async function runBoundedFormalEventShadowTrial(
   if (actualAuthorizationSha256 !== expectedAuthorizationSha256) {
     throw new Error('Human authorization artifact does not match the separately supplied accepted SHA-256');
   }
+  await validateFreshBoundedFormalEventAuthorizationCandidate({
+    repositoryRoot: authoritativeRoot,
+    authorizationArtifactPath,
+    expectedCanonicalSha256: expectedAuthorizationSha256,
+    proposal: input.proposal,
+    review: input.review,
+    observedLifeStates: input.observedLifeStates,
+    participantJobs: input.participantJobs ?? 0,
+  });
 
   const admission = await evaluateBoundedFormalEventAdmission({
     repositoryRoot: authoritativeRoot,

@@ -4,7 +4,8 @@
 
 **HUMAN ACCEPTED — 2026-10-07**  
 **Governance authority: active**  
-**Execution availability: unavailable until the corresponding Host / Contract implementation is landed and deterministically verified**
+**Deterministic infrastructure: landed / verified**  
+**Model-backed execution: paused until PD-125 authorization-flow reconciliation is landed and deterministically verified**
 
 ## Authority identifier
 
@@ -387,6 +388,36 @@ fixed Authoring Requirement
 This validates the downstream authoring capability independently. A later integration test may connect a diagnosed problem to the same Requirement boundary; that is a separate proof.
 
 Natural product effectiveness remains a post-promotion question and is not proven by shadow success.
+
+### 12.1 PD-125 authorization model
+
+For this Contract, Human authority is semantic rather than digest-driven.
+
+Once the Requirement and Contract are Human accepted and Host proves the current case remains inside the Contract/applicability envelope, the intended model-backed validation flow is continuous:
+
+~~~text
+Host automatic freshness preflight
+→ Proposal Participant
+→ independent Reviewer
+→ Host admission
+→ isolated shadow execution
+→ deterministic verification
+→ Human reviews the actual verified patch for authoritative promotion
+~~~
+
+The Host must still capture and validate exact repo, authority, evidence, prompt, binding, proposal, review, admission, workspace and result identities. Those hashes/digests are machine provenance and freshness evidence.
+
+The flow must not pause for Human approval of a Gate A / Gate B bare SHA.
+
+Any implementation artifact currently named authorization candidate may remain as a machine manifest if useful, but:
+
+- it must not expose `AWAITING_HUMAN_EXACT_SHA256_APPROVAL` as the normal bounded path;
+- it must not require Human to copy or approve a digest before Participant generation;
+- it must not require a second digest approval before shadow execution;
+- drift during the attempt must still fail closed;
+- Contract / Requirement / permission-envelope expansion must still return to Human.
+
+Human exact-patch promotion remains required. “Exact patch” means Human reviews the real candidate content/patch while Host automatically records its exact identity; Human does not approve a hash in isolation.
 
 ---
 

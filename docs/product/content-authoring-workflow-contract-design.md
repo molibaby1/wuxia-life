@@ -434,7 +434,7 @@ PD-121 的 shadow-only Contract 例外不改变上述 authoritative promotion �
 
 进入此阶段后，产品语义已经锁定。
 
-默认 Implementation 仍在 Human Approval 后进行。PD-121 授权的 shadow authoring 属于 isolated workspace 中的预备实现与验证，不改变 authoritative repository，也不替代 Human exact-patch promotion。
+默认 authoritative Implementation 仍在 Human Approval 后进行。PD-121 授权的 shadow authoring 属于 isolated workspace 中的预备实现与验证，不改变 authoritative repository，也不替代 Human exact-patch promotion。PD-125 进一步明确：已批准 Contract + accepted Requirement 覆盖的 bounded shadow-only workload 不需要 per-attempt Human exact-SHA approval；attempt digest 由 Host 作为 freshness / provenance 自动管理。
 
 Codex/implementation agent 主要负责：
 
@@ -564,12 +564,12 @@ Player-visible signal
 - 主动研究缺的是人物、事件、长期 payoff、有因果连接的内容序列、Milestone，或某个领域的 authored variety；
 - 形成完整的 Content Proposal 与 Draft Authoring Contract，作为 Human approval material。
 
-在 Human-approved Autonomous Authoring Contract 范围内，且 Host 证明当前 Requirement APPLICABLE、独立语义审查与 Host mechanical admission 均通过时，可 author、implement、verify isolated shadow patch；产物只进入 Human exact-patch promotion review。
+在 Human-approved Autonomous Authoring Contract 范围内，且 Host 证明当前 Requirement APPLICABLE、独立语义审查与 Host mechanical admission 均通过时，可 author、implement、verify isolated shadow patch；产物只进入 Human exact-patch promotion review。PD-125 下，该 bounded flow 默认连续执行，不在 Participant generation 与 shadow execution 之间插入 bare SHA / digest 的 Human approval round-trip。
 
 当前治理批准的 bounded Contract families 为：
 
 - `preschool-shared-neutral-passive-capacity-v1@1`；
-- `bounded-formal-event-authoring-v1@1`（PD-124；在对应 runtime / Host implementation 未落地前 execution unavailable）。
+- `bounded-formal-event-authoring-v1@1`（PD-124；deterministic infrastructure 已落地，首次 model-backed trial 需先完成 PD-125 runtime reconciliation）。
 
 不能：
 
@@ -609,7 +609,11 @@ AE 在既有 Contract 内自动 author + implement
 
 - 是否值得做；
 - 人物/人生变化是否符合产品；
-- scope 是否可接受。
+- scope 是否可接受；
+- Contract / Requirement 是否需要扩大或改变；
+- shadow verification 完成后，是否 promotion 实际 patch 到 authoritative repository。
+
+Human 不负责批准没有新增产品判断信息的 bare SHA / digest。Host 自动把 Human 的语义决定绑定到 exact machine provenance；如果实际 patch 发生变化，旧 promotion 决定自动失效。
 
 ### 10.4 Codex / Implementation Agent
 

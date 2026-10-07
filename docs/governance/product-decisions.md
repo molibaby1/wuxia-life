@@ -2372,6 +2372,8 @@ Base Decision 是不可变 evidence。Continuation 必须产生独立 Decision�
 
 该 clarification 不授权获取新 evidence 或 gameplay sample，不增加 Participant binding、Contract authority、Responsibility Brief、promotion authority 或 continuation 次数。Human exact-patch promotion 保持不变；PD-122 的 exact binding 与 exact-SHA attempt authorization 保持不变。历史 attempt-000018 不回写、不重放；Layer A proof split 与 `NOT ESTABLISHED` 结论保持不变。
 
+> **Current supersession note（2026-10-07）：** 上述“future governed attempt 需要 Human exact-SHA authorization”的要求已由 PD-125 对后续 bounded shadow-only workload supersede。历史 #13–#19 及其 consumed authorization SHA 继续作为历史事实与 proof evidence，不重写、不重解释。Human exact-patch promotion authority 保持不变。
+
 ### PD-122：Model-Adaptive Participant Harness v1
 
 **产品决策（Human accepted：2026-10-03）**
@@ -2392,6 +2394,8 @@ For each attempted correction, retain the original Participant prompt and raw te
 After deterministic verification, the real governed workload remains the primary evidence path. No synthetic recertification campaign is restored.
 
 本决策不生成新的 `attempt-000014` authorization candidate，也不授权执行 `attempt-000014`。binding drift 后仍必须取得 fresh exact binding 与 fresh exact-digest Human authorization。
+
+> **Current supersession note（2026-10-07）：** PD-125 保留 fresh exact binding resolution、role-specific binding lock、no-silent-rebind、watchdog/correction 与完整 provenance，但 supersede “每个 bounded shadow-only attempt 都必须由 Human 批准 canonical SHA/digest”以及“binding drift 本身自动要求新的 Human digest approval”。这些 digest 继续由 Host 生成、校验和留存，不再作为默认 Human approval token。
 
 ### PD-123：Low-Frequency Exceptional Life Events（低频异常人生事件）
 
@@ -2509,3 +2513,104 @@ Shared abstraction 只允许覆盖稳定的 authoring lifecycle envelope，例�
 - 第二个以上新 authoring family 证明显式 routing 产生实质重复，需要重新评估 shared abstraction；
 - 需要 persistent Person / Relationship、new Runtime / Schema、scheduler semantics 或 generic Story/Task abstraction；
 - 实际 shadow trial 证明当前 Requirement → Contract → verification 边界不足以安全委托。
+
+### PD-125：Standing Semantic Authorization & Host-Enforced Freshness v1
+
+**产品决策（Human accepted：2026-10-07）**
+
+Human authority 必须落在真正存在产品或权限判断的边界上；机器生成的 SHA / digest / fingerprint 默认是 provenance 与 freshness evidence，不是 Human decision surface。
+
+本决策 supersede PD-122 及其后续 clarification 中“每个 governed bounded shadow attempt 都必须由 Human 批准该 attempt canonical SHA/digest 才能启动 Participant 或继续 shadow execution”的默认要求。
+
+对已经落在 Human-approved Contract 与 accepted Requirement 范围内的 bounded shadow-only workload，默认流程改为：
+
+~~~text
+Human-approved Contract
++ accepted Authoring Requirement
++ Host proves current case stays inside the approved applicability/execution envelope
+→ Host automatic preflight / freshness snapshot
+→ Proposal / Authoring Participant
+→ independent Reviewer
+→ Host admission
+→ isolated shadow execution
+→ deterministic verification
+→ Human reviews the actual verified patch for authoritative promotion
+~~~
+
+中间不要求 Human 对 bare SHA / digest 进行 Gate A / Gate B 式逐次批准。
+
+#### Human standing semantic authorization
+
+standing semantic authorization 来自已经存在的 Human 产品 authority，而不是新增一张每次 attempt 都要手工批准的 token：
+
+- Contract 本身已由 Human approved；
+- Requirement 已由 Human 直接建立，或由问题驱动路径形成后被 Human accepted；
+- Contract 已明确 Participant roles、scope、effect/write envelope、STOP boundary 与 shadow-only authority；
+- Host 当前 preflight 仍能证明 case 位于该 Contract 内。
+
+standing semantic authorization 不需要额外 candidate 文件、Human 抄录 SHA、或“批准这个十六进制值”的交互。
+
+#### Host-enforced freshness
+
+Host 仍必须精确捕获并留存 repository HEAD / fingerprint、Contract / Requirement identity、canonical evidence、role-specific binding locks、prompt / trace / raw output、proposal / review / admission / result digest、job budget、write surface、workspace provenance 与 shadow patch identity。
+
+这些 digest 用于 identity、freshness、integrity、replay prevention、forensics 与 exact artifact binding；不再作为默认 Human approval token。
+
+attempt 开始前，Host fresh resolve 当前 binding 与 repo/evidence snapshot。若当前真实状态仍在已批准语义内，则生成新的机器 snapshot 并继续。若 evidence 不足则 DEFER；若需要扩大 Contract、权限或产品语义则 CONTRACT_CHANGE_REQUIRED / ESCALATE_HUMAN。
+
+attempt 进行中发生 repo / authority / binding / evidence drift 时必须 STOP / fail closed；不得 silent rebind，也不得跨 snapshot 继续。
+
+Participant binding 在不同 attempt 之间发生变化本身不构成 Human re-approval 条件；只有 role、权限、workspace 能力或 execution envelope 实质扩大时才返回 Human。
+
+#### PD-122 retained semantics
+
+PD-122 的 fresh exact binding resolution、role-specific binding-lock provenance、no silent rebind、PD-099 v2 watchdog、最多一次 same-thread structural correction、correction evidence retention、strict Role-schema validation 与 fail-closed semantics 继续有效。本决策只移除没有实际 Human 决策信息的 per-attempt exact-SHA approval ceremony。
+
+#### Human re-entry points
+
+默认只在以下边界返回 Human：
+
+1. Requirement 产品含义发生实质改变；
+2. Contract/version、effect authority、write surface、Participant role/permission envelope 或 job budget 需要扩大；
+3. 需要新 Runtime、Schema、Person/Relationship、scheduler 或其他 Contract 外能力；
+4. Host 得出 CONTRACT_CHANGE_REQUIRED / authority conflict；
+5. 某个 future Product Decision 明确规定“是否启动这次高风险运行”本身具有独立 Human 决策价值；
+6. shadow verification 完成后，是否 promotion 实际 patch 到 authoritative repository。
+
+第 5 类若未来出现，Human 应批准可理解的语义动作与 scope，而不是仅批准 bare digest；Host 自动把该决定绑定到 exact machine identity。
+
+#### Exact-patch promotion semantics
+
+PD-121 / PD-124 的 Human exact-patch promotion authority 保持不变。“exact”表示 Human 审核并批准的是实际 patch / content result，系统自动记录与该决定绑定的 exact patch identity；Human 不需要手工读取、复制或确认 patch SHA。patch 内容变化后旧 promotion approval 自动失效。
+
+本决策不授权 autonomous authoritative commit / push / merge。
+
+#### Historical compatibility
+
+历史 #13–#19、preschool Layer A consumed authorization SHA、binding-lock 与 exact-patch evidence 保持原样，继续作为当时治理下的真实历史证据。不回写历史 attempt，不重算历史 authorization，也不因为本决策否定既有 proof。
+
+旧 clarification 中“PD-122 exact-SHA authorization 保持不变”的句子，对 future bounded shadow-only execution 由本决策 supersede；其余 proof semantics 保持有效。
+
+#### Formal Event v1 reconciliation
+
+`bounded-formal-event-authoring-v1@1` 当前 Gate A / Gate B digest 应保留为 machine manifests / provenance：Gate A 是 Participant execution preflight manifest；Gate B 是 proposal + review + admission + shadow execution manifest。它们不再是 Human approval tokens，也不应造成 Human ↔ ChatGPT ↔ Codex 的中间往返。
+
+Formal Event 第一次 model-backed trial 在 runtime 完成该 reconciliation、deterministic verification 重新通过之后，允许按一次连续 bounded flow 执行；仍不接完整 AE。
+
+**明确不做**
+
+- 不降低 Contract / Requirement / applicability / Reviewer / Host admission 边界；
+- 不允许 silent binding rebind；
+- 不允许越过 Contract 的 effect / write / job envelope；
+- 不允许 autonomous authoritative repository mutation；
+- 不把 shadow success 解释为 Natural Effectiveness；
+- 不删除 SHA / digest provenance；
+- 不把“减少 friction”解释为“取消 Human 产品 authority”。
+
+**重新讨论条件**
+
+- 实际运行出现无法由 Host freshness 正确捕获的权限或语义漂移；
+- standing authorization 导致重复越界或 replay 风险；
+- promotion review 本身成为主要瓶颈；
+- multi-user / multi-approver workflow 需要新的责任分离；
+- 某类高风险执行证明 pre-run Human semantic confirmation 本身具有真实决策价值。

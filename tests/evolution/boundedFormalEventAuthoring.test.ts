@@ -316,9 +316,11 @@ async function testParticipantGenerationPreflightManifest(): Promise<void> {
       proposalMaximumJobs: 2,
       reviewerMaximumJobs: 2,
     });
-    for (const forbiddenField of ['approvalState', 'humanApprovedSha256', 'humanAuthorizationRef']) {
-      assert.equal(forbiddenField in manifest, false, `preflight manifest must not contain ${forbiddenField}`);
-    }
+    assert.equal(
+      Object.keys(manifest).some(key => /human|approval/i.test(key)),
+      false,
+      'preflight manifest must contain no Human approval fields',
+    );
     assert.equal(built.canonicalBytes.toString('utf8'), canonicalJson(manifest));
     assert.equal(sha256Hex(built.canonicalBytes), built.canonicalSha256);
 

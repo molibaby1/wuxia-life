@@ -1,6 +1,6 @@
 # Content Authoring Workflow Contract v4
 
-**状态：** 当前权威规范（Human accepted：2026-10-07；PD-124）
+**状态：** 当前权威规范（Human accepted：2026-10-07；PD-124；PD-125 authorization amendment active）
 
 **历史：** PD-106（2026-09-01）保留为历史 Human Accepted 决策；PD-120（2026-09-19）保留问题驱动 Content Authoring 的 Gap Diagnosis authority；PD-121（2026-09-24）保留 Human-approved Contract shadow-only delegated-authority 基线。v4 增加 Authoring Requirement 入口解耦：问题驱动内容仍必须先证明 CONTENT_GAP；Human 可以直接建立明确的产品内容需求而无需伪造 Gap。两条路径在 Authoring Requirement 后汇合。v4 同时纳入 PD-124 批准的第二个 bounded Contract family。
 
@@ -812,3 +812,5 @@ Content Authoring Workflow Contract v4 成功意味着：
 14. Auto Evolution 保持 `RUN / OBSERVE`，不获得自动扩张 authoritative catalog 的权力。
 
 该 Contract 不要求立即生成新人物或新事件；它首先是内容生产的一致治理边界。PD-120 / PD-121 未被本次明确 supersede 的其余边界继续有效。
+
+**PD-125 amendment：**本 Workflow 中的 Human Approval boundary 继续保护产品语义与 authoritative mutation，但 bounded shadow-only workload 不再要求 Human 对 per-attempt bare SHA/digest 逐次批准。Host 必须自动执行 freshness/provenance enforcement；Human exact-patch promotion 继续针对实际 patch/content result。

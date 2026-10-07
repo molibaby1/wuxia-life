@@ -55,6 +55,9 @@ import {
   prepareBoundedFormalEventTrial,
 } from '../../scripts/evolution/autonomousAuthoring/prepareBoundedFormalEventTrial';
 import {
+  runBoundedFormalEventModelBackedTrial,
+} from '../../scripts/evolution/autonomousAuthoring/runBoundedFormalEventModelBackedTrial';
+import {
   runBoundedFormalEventProposalParticipant,
 } from '../../scripts/evolution/autonomousAuthoring/runBoundedFormalEventProposalParticipant';
 import {
@@ -1853,6 +1856,197 @@ async function testFakeParticipantPreparationBuildsPreflightManifest(): Promise<
   }
 }
 
+async function testContinuousBoundedFormalEventTrial(): Promise<void> {
+  type Scenario = 'eligible' | 'proposal-invalid' | 'review-rejected' | 'manifest-drift' | 'contract-change';
+  const runScenario = async (scenario: Scenario) => {
+    const root = await mkdtemp(join(tmpdir(), `bounded-formal-event-continuous-${scenario}-`));
+    const repositoryRoot = process.cwd();
+    const proposalInvocationRef = `continuous-${scenario}-proposal-v1`;
+    const reviewerInvocationRef = `continuous-${scenario}-reviewer-v1`;
+    let proposal = canonicalFakeProposal(proposalInvocationRef, nextUnusedFixtureEventId());
+    let review = canonicalFakeReview(proposal, reviewerInvocationRef);
+    if (scenario === 'contract-change') {
+      proposal = {
+        ...validProposal(null),
+        proposedBy: proposal.proposedBy,
+        applicabilityClaim: 'CONTRACT_CHANGE_REQUIRED',
+        contractPayload: null,
+      };
+      review = {
+        ...canonicalFakeReview(proposal, reviewerInvocationRef),
+        decision: 'ESCALATE',
+        applicabilityAssessment: 'CONTRACT_CHANGE_REQUIRED',
+      };
+    } else if (scenario === 'review-rejected') {
+      review = {
+        ...review,
+        decision: 'REJECT',
+        conformance: 'NON_CONFORMING',
+        blockers: ['The candidate does not satisfy the Requirement.'],
+      };
+    }
+    const proposalRawOutput = scenario === 'proposal-invalid' ? '{not-json' : JSON.stringify(proposal);
+    const proposalLock = testBindingLock(`continuous-${scenario}-proposal`);
+    const reviewerLock = testBindingLock(`continuous-${scenario}-reviewer`);
+    const starts = { proposal: 0, reviewer: 0 };
+    const consumptionRoot = join(root, 'consumption');
+    const participantResolver = async (input: {
+      repositoryRoot: string;
+      lock: ReferenceParticipantBindingLockV1;
+    }) => {
+      const rawOutput = input.lock.modelConfigured === proposalLock.modelConfigured
+        ? proposalRawOutput
+        : JSON.stringify(review);
+      const resolved = await fakeBindingResolver({})(input);
+      return {
+        ...resolved,
+        participant: deterministicParticipant(rawOutput, () => {
+          if (input.lock.modelConfigured === proposalLock.modelConfigured) starts.proposal += 1;
+          if (input.lock.modelConfigured === reviewerLock.modelConfigured) starts.reviewer += 1;
+        }),
+      } as never;
+    };
+    const manifestDependencies = {
+      resolveProposalBindingFromLock: fakeBindingResolver({}),
+      resolveReviewerBindingFromLock: fakeBindingResolver({}),
+    };
+    const evaluateAdmission = async (input: Parameters<typeof evaluateBoundedFormalEventAdmission>[0]) => {
+      const admission = await evaluateBoundedFormalEventAdmission(input);
+      lastAdmissionStatus = admission.status;
+      return admission;
+    };
+    let lastAdmissionStatus: string | null = null;
+    let buildCalls = 0;
+    let shadowCalls = 0;
+    const input = {
+      repositoryRoot,
+      proposalWorkspaceRoot: join(root, 'proposal-workspace'),
+      proposalDestinationRoot: join(root, 'proposal-observability'),
+      proposalInvocationRef,
+      proposalBindingLock: proposalLock,
+      reviewerWorkspaceRoot: join(root, 'reviewer-workspace'),
+      reviewerDestinationRoot: join(root, 'reviewer-observability'),
+      reviewerInvocationRef,
+      reviewerBindingLock: reviewerLock,
+      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
+      preflightManifestPath: join(root, 'preflight', 'preflight-manifest.json'),
+      executionManifestPath: join(root, 'execution', 'execution-manifest.json'),
+      shadowRoot: join(root, 'shadow-workspace'),
+      artifactRoot: join(root, 'trial-artifacts'),
+    };
+    await Promise.all([
+      mkdir(input.proposalWorkspaceRoot, { recursive: true }),
+      mkdir(input.reviewerWorkspaceRoot, { recursive: true }),
+    ]);
+    assert.doesNotMatch(JSON.stringify(input), /human/i, 'runner input must not request a Human authorization ref or digest');
+
+    const reviewerDependencies = {
+      resolveBindingFromLock: participantResolver,
+      consumeManifest: fakeGenerationManifestConsumer(consumptionRoot),
+      manifestDependencies,
+    };
+    const runReviewer = scenario === 'manifest-drift'
+      ? async (
+          reviewInput: Parameters<typeof runBoundedFormalEventReviewParticipant>[0],
+          dependencies: Parameters<typeof runBoundedFormalEventReviewParticipant>[1],
+        ) => {
+          const manifestPath = reviewInput.generationManifestRef.manifestPath;
+          const manifestValue = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, unknown>;
+          await writeFile(manifestPath, canonicalJson({ ...manifestValue, requirementSha256: 'f'.repeat(64) }));
+          return runBoundedFormalEventReviewParticipant(reviewInput, dependencies);
+        }
+      : undefined;
+    const preparationDependencies = {
+      proposalDependencies: {
+        resolveBindingFromLock: participantResolver,
+        consumeManifest: fakeGenerationManifestConsumer(consumptionRoot),
+        manifestDependencies,
+      } as never,
+      reviewerDependencies: reviewerDependencies as never,
+      ...(runReviewer ? { runReviewer } : {}),
+      evaluateAdmission,
+      manifestDependencies: {
+        ...manifestDependencies,
+        evaluateAdmission,
+      },
+    } as never;
+    const executionManifestDependencies = {
+      ...manifestDependencies,
+      evaluateAdmission,
+    };
+    const dependencies = {
+      preparationDependencies,
+      buildExecutionManifest: async (...args: Parameters<typeof buildBoundedFormalEventTrialExecutionManifest>) => {
+        buildCalls += 1;
+        assert.equal(lastAdmissionStatus, 'ELIGIBLE', 'execution manifest must be built only after eligible Host Admission');
+        assert.equal(await readFile(input.executionManifestPath).then(() => true).catch(() => false), false);
+        return buildBoundedFormalEventTrialExecutionManifest(...args);
+      },
+      executionManifestDependencies,
+      runShadowTrial: async (...args: Parameters<typeof runBoundedFormalEventShadowTrial>) => {
+        shadowCalls += 1;
+        return runBoundedFormalEventShadowTrial(...args);
+      },
+      shadowTrialDependencies: { executionManifestDependencies },
+    };
+    try {
+      const authoritativeFingerprintBefore = await captureAuthoritativeFingerprint(repositoryRoot);
+      if (scenario === 'manifest-drift') {
+        await assert.rejects(() => runBoundedFormalEventModelBackedTrial(input as never, dependencies as never), /manifest|digest|provenance/i);
+        assert.equal(buildCalls, 0);
+        assert.equal(shadowCalls, 0);
+        assert.equal(starts.proposal, 1);
+        assert.equal(starts.reviewer, 0, 'changed preflight manifest must fail before the Reviewer job starts');
+      } else {
+        const result = await runBoundedFormalEventModelBackedTrial(input as never, dependencies as never);
+        assert.equal(await captureAuthoritativeFingerprint(repositoryRoot), authoritativeFingerprintBefore);
+        if (scenario === 'eligible') {
+          assert.equal(result.preparation.status, 'ELIGIBLE');
+          assert.equal(result.shadowTrial?.result.terminalStatus, 'SHADOW_AUTHORING_VERIFIED');
+          assert.ok(result.executionManifest);
+          assert.equal(buildCalls, 1);
+          assert.equal(shadowCalls, 1);
+          assert.equal(starts.proposal, 1);
+          assert.equal(starts.reviewer, 1);
+          assert.notEqual(result.preparation.proposal.participantRef, result.preparation.reviewer.participantRef);
+          assert.notEqual(result.preparation.proposal.invocationRef, result.preparation.reviewer.invocationRef);
+          assert.equal(result.executionManifest.manifest.schemaVersion, 'bounded-formal-event-trial-execution-manifest-v1');
+          assert.deepEqual(
+            result.shadowTrial?.execution?.canonicalChangedFileRefs,
+            [...BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS],
+          );
+          assert.equal(result.shadowTrial?.result.authoritativeFingerprintBefore, authoritativeFingerprintBefore);
+          assert.equal(result.shadowTrial?.result.authoritativeFingerprintAfter, authoritativeFingerprintBefore);
+          assert.equal('humanAuthorizationRef' in result, false);
+          assert.equal(await readFile(input.executionManifestPath).then(() => true).catch(() => false), true);
+          await assert.rejects(
+            readFile(join(root, 'authorization-candidate.json')),
+            error => (error as NodeJS.ErrnoException).code === 'ENOENT',
+          );
+        } else {
+          assert.notEqual(result.preparation.status, 'ELIGIBLE');
+          assert.equal('shadowTrial' in result, false);
+          assert.equal(buildCalls, 0);
+          assert.equal(shadowCalls, 0);
+          assert.equal(await readFile(input.executionManifestPath).then(() => true).catch(() => false), false);
+          assert.equal(starts.proposal, 1);
+          assert.equal(starts.reviewer, scenario === 'proposal-invalid' ? 0 : 1);
+          if (scenario === 'proposal-invalid') assert.equal(result.preparation.status, 'PREPARATION_FAILED');
+          if (scenario === 'contract-change') assert.equal(result.preparation.admission?.status, 'CONTRACT_CHANGE_REQUIRED');
+        }
+      }
+      assert.equal(buildCalls, scenario === 'eligible' ? 1 : 0);
+      assert.equal(shadowCalls, scenario === 'eligible' ? 1 : 0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  };
+
+  for (const scenario of ['eligible', 'proposal-invalid', 'review-rejected', 'manifest-drift', 'contract-change'] as const) {
+    await runScenario(scenario);
+  }
+}
+
 testAuthoringRequirementV1();
 testExplicitRouting();
 await testBoundedFormalEventContract();
@@ -1872,6 +2066,7 @@ if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
 }
 if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testFakeParticipantPreparationBuildsPreflightManifest();
+  await testContinuousBoundedFormalEventTrial();
 }
 if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testDeterministicShadowExecutionPipeline();

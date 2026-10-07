@@ -17,9 +17,9 @@ import {
 } from '../problemAgnosticSolution/runStructuredParticipantExecution';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
-  consumeBoundedFormalEventParticipantGenerationAuthorization,
-  validateFreshBoundedFormalEventParticipantGenerationAuthorization,
-  type BoundedFormalEventGenerationAuthorizationApprovalV1,
+  consumeBoundedFormalEventParticipantGenerationManifest,
+  validateFreshBoundedFormalEventParticipantGenerationManifest,
+  type BoundedFormalEventParticipantGenerationManifestRefV1,
 } from './boundedFormalEventParticipantGenerationAuthorization';
 import {
   readBoundedFormalEventParticipantEvidence,
@@ -33,7 +33,7 @@ export interface BoundedFormalEventProposalParticipantInput {
   destinationRoot: string;
   invocationRef: string;
   bindingLock: ReferenceParticipantBindingLockV1;
-  generationAuthorization: BoundedFormalEventGenerationAuthorizationApprovalV1;
+  generationManifestRef: BoundedFormalEventParticipantGenerationManifestRefV1;
   evidence?: BoundedFormalEventParticipantEvidenceV1;
 }
 
@@ -43,9 +43,8 @@ export interface BoundedFormalEventProposalParticipantOutput {
   invocationRef: string;
   bindingLockSha256: string;
   bindingLock: ReferenceParticipantBindingLockV1;
-  generationAuthorizationSha256: string;
-  generationHumanAuthorizationRef: string;
-  generationAuthorizationConsumptionRef: string;
+  generationManifestSha256: string;
+  generationManifestConsumptionRef: string;
   promptSha256: string;
   proposal?: ReturnType<typeof validateBoundedFormalEventProposalV2>;
   execution: StructuredParticipantExecutionResult<ReturnType<typeof validateBoundedFormalEventProposalV2>>;
@@ -82,8 +81,8 @@ export async function runBoundedFormalEventProposalParticipant(
   dependencies: {
     resolveBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
     executeStructured?: typeof runStructuredParticipantExecution;
-    authorizationDependencies?: Parameters<typeof validateFreshBoundedFormalEventParticipantGenerationAuthorization>[1];
-    consumeAuthorization?: typeof consumeBoundedFormalEventParticipantGenerationAuthorization;
+    manifestDependencies?: Parameters<typeof validateFreshBoundedFormalEventParticipantGenerationManifest>[1];
+    consumeManifest?: typeof consumeBoundedFormalEventParticipantGenerationManifest;
   } = {},
 ): Promise<BoundedFormalEventProposalParticipantOutput> {
   const repositoryRoot = resolve(input.repositoryRoot);
@@ -97,14 +96,14 @@ export async function runBoundedFormalEventProposalParticipant(
   const ref = participantRef(input.invocationRef);
   const bindingLockSha256 = referenceParticipantBindingLockSha256(input.bindingLock);
   const resolveBindingFromLock = dependencies.resolveBindingFromLock ?? resolveReferenceParticipantBindingFromLock;
-  await validateFreshBoundedFormalEventParticipantGenerationAuthorization({
+  await validateFreshBoundedFormalEventParticipantGenerationManifest({
     repositoryRoot,
-    approval: input.generationAuthorization,
+    manifestRef: input.generationManifestRef,
     role: 'proposal',
     invocationRef: input.invocationRef,
     bindingLock: input.bindingLock,
     evidence,
-  }, dependencies.authorizationDependencies ?? {
+  }, dependencies.manifestDependencies ?? {
     resolveProposalBindingFromLock: resolveBindingFromLock,
     resolveReviewerBindingFromLock: resolveBindingFromLock,
   });
@@ -114,12 +113,10 @@ export async function runBoundedFormalEventProposalParticipant(
   });
   const execute = dependencies.executeStructured ?? runStructuredParticipantExecution;
   const initialPrompt = renderBoundedFormalEventProposalPrompt({ invocationRef: input.invocationRef, evidence });
-  const generationAuthorizationConsumptionRef = await (dependencies.consumeAuthorization
-    ?? consumeBoundedFormalEventParticipantGenerationAuthorization)({
+  const generationManifestConsumptionRef = await (dependencies.consumeManifest
+    ?? consumeBoundedFormalEventParticipantGenerationManifest)({
     repositoryRoot,
-    authorizationCandidatePath: input.generationAuthorization.authorizationCandidatePath,
-    generationAuthorizationSha256: input.generationAuthorization.humanApprovedSha256,
-    humanAuthorizationRef: input.generationAuthorization.humanAuthorizationRef,
+    manifestRef: input.generationManifestRef,
     role: 'proposal',
     invocationRef: input.invocationRef,
     bindingLockSha256,
@@ -153,9 +150,8 @@ export async function runBoundedFormalEventProposalParticipant(
     invocationRef: input.invocationRef,
     bindingLockSha256,
     bindingLock: input.bindingLock,
-    generationAuthorizationSha256: input.generationAuthorization.humanApprovedSha256,
-    generationHumanAuthorizationRef: input.generationAuthorization.humanAuthorizationRef,
-    generationAuthorizationConsumptionRef,
+    generationManifestSha256: input.generationManifestRef.manifestSha256,
+    generationManifestConsumptionRef,
     promptSha256: sha256Hex(initialPrompt),
     ...(execution.ok ? { proposal: execution.value } : {}),
     execution,

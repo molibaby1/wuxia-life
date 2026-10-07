@@ -24,10 +24,8 @@ import {
   renderBoundedFormalEventReviewPromptTemplate,
   type BoundedFormalEventParticipantEvidenceV1,
 } from './boundedFormalEventParticipantEvidence';
-import type { BoundedFormalEventProposalParticipantOutput } from './runBoundedFormalEventProposalParticipant';
 
 export const BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME = 'bounded-formal-event-participant-generation-input-v1.json' as const;
-export const BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_CANDIDATE_SCHEMA = 'bounded-formal-event-participant-generation-authorization-candidate-v1' as const;
 export const BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_MANIFEST_SCHEMA = 'bounded-formal-event-participant-generation-preflight-manifest-v1' as const;
 
 export interface BoundedFormalEventParticipantGenerationInputV1 {
@@ -55,46 +53,13 @@ export interface BoundedFormalEventParticipantGenerationInputV1 {
     bindingLock: ReferenceParticipantBindingLockV1;
     bindingLockSha256: string;
     promptTemplateSha256: string;
-    proposalInputRule: 'exact validated ProposalV2 from the authorized proposal invocation';
+  proposalInputRule: 'exact validated ProposalV2 from the same preflight-manifest proposal invocation';
   };
   budget: {
     allowedParticipantJobs: 4;
     proposalMaximumJobs: 2;
     reviewerMaximumJobs: 2;
   };
-}
-
-export interface BoundedFormalEventParticipantGenerationAuthorizationCandidateV1 {
-  schemaVersion: typeof BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_CANDIDATE_SCHEMA;
-  approvalState: 'AWAITING_HUMAN_EXACT_SHA256_APPROVAL';
-  generationInputRef: typeof BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME;
-  generationInputSha256: string;
-  repository: BoundedFormalEventRepositorySnapshotV1;
-  requirementSha256: string;
-  contract: { contractId: typeof BOUNDED_FORMAL_EVENT_CONTRACT_ID; contractVersion: typeof BOUNDED_FORMAL_EVENT_CONTRACT_VERSION };
-  participantBindingLockSha256: { proposal: string; reviewer: string };
-  proposalInvocationRef: string;
-  proposalPromptSha256: string;
-  reviewerInvocationRef: string;
-  reviewerPromptTemplateSha256: string;
-  budget: BoundedFormalEventParticipantGenerationInputV1['budget'];
-}
-
-export interface BuildBoundedFormalEventParticipantGenerationAuthorizationCandidateInput {
-  repositoryRoot: string;
-  proposalInvocationRef: string;
-  proposalBindingLock: ReferenceParticipantBindingLockV1;
-  reviewerInvocationRef: string;
-  reviewerBindingLock: ReferenceParticipantBindingLockV1;
-  candidatePath: string;
-}
-
-export interface BuildBoundedFormalEventParticipantGenerationAuthorizationCandidateResult {
-  candidate: BoundedFormalEventParticipantGenerationAuthorizationCandidateV1;
-  canonicalBytes: Buffer;
-  canonicalSha256: string;
-  generationInputPath: string;
-  generationInputSha256: string;
 }
 
 export interface BoundedFormalEventParticipantGenerationManifestRefV1 {
@@ -133,12 +98,6 @@ export interface BuildBoundedFormalEventParticipantGenerationManifestResult {
   canonicalSha256: string;
   generationInputPath: string;
   generationInputSha256: string;
-}
-
-export interface BoundedFormalEventGenerationAuthorizationApprovalV1 {
-  authorizationCandidatePath: string;
-  humanApprovedSha256: string;
-  humanAuthorizationRef: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -217,30 +176,6 @@ function generationInput(input: {
   };
 }
 
-function buildCandidate(
-  input: BoundedFormalEventParticipantGenerationInputV1,
-  generationInputSha256: string,
-): BoundedFormalEventParticipantGenerationAuthorizationCandidateV1 {
-  return {
-    schemaVersion: BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_CANDIDATE_SCHEMA,
-    approvalState: 'AWAITING_HUMAN_EXACT_SHA256_APPROVAL',
-    generationInputRef: BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME,
-    generationInputSha256,
-    repository: input.repository,
-    requirementSha256: input.requirementSha256,
-    contract: input.contract,
-    participantBindingLockSha256: {
-      proposal: input.proposalParticipant.bindingLockSha256,
-      reviewer: input.reviewerParticipant.bindingLockSha256,
-    },
-    proposalInvocationRef: input.proposalParticipant.invocationRef,
-    proposalPromptSha256: input.proposalParticipant.promptSha256,
-    reviewerInvocationRef: input.reviewerParticipant.invocationRef,
-    reviewerPromptTemplateSha256: input.reviewerParticipant.promptTemplateSha256,
-    budget: input.budget,
-  };
-}
-
 function buildManifest(
   input: BoundedFormalEventParticipantGenerationInputV1,
   generationInputSha256: string,
@@ -262,68 +197,6 @@ function buildManifest(
     reviewerPromptTemplateSha256: input.reviewerParticipant.promptTemplateSha256,
     budget: input.budget,
   };
-}
-
-export async function buildBoundedFormalEventParticipantGenerationAuthorizationCandidate(
-  input: BuildBoundedFormalEventParticipantGenerationAuthorizationCandidateInput,
-  dependencies: {
-    captureRepositorySnapshot?: typeof captureBoundedFormalEventRepositorySnapshot;
-    readParticipantEvidence?: typeof readBoundedFormalEventParticipantEvidence;
-    resolveProposalBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
-    resolveReviewerBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
-  } = {},
-): Promise<BuildBoundedFormalEventParticipantGenerationAuthorizationCandidateResult> {
-  const repositoryRoot = resolve(input.repositoryRoot);
-  const proposalInvocationRef = validateInvocationRef(input.proposalInvocationRef, 'Formal Event proposal invocationRef');
-  const reviewerInvocationRef = validateInvocationRef(input.reviewerInvocationRef, 'Formal Event Reviewer invocationRef');
-  if (proposalInvocationRef === reviewerInvocationRef) {
-    throw new Error('Formal Event Proposal and Reviewer invocationRef values must differ');
-  }
-  const candidatePath = assertBoundedFormalEventAuthorizationArtifactPath(
-    repositoryRoot,
-    input.candidatePath,
-    'Formal Event Gate A candidate',
-  );
-  const generationInputPath = join(dirname(candidatePath), BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME);
-  if (basename(candidatePath) === BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME) {
-    throw new Error('Gate A authorization candidate path must differ from its generation input packet path');
-  }
-
-  const captureSnapshot = dependencies.captureRepositorySnapshot ?? captureBoundedFormalEventRepositorySnapshot;
-  const repository = await captureSnapshot(repositoryRoot);
-  const evidence = await (dependencies.readParticipantEvidence ?? readBoundedFormalEventParticipantEvidence)(repositoryRoot);
-  if (canonicalJson(await captureSnapshot(repositoryRoot)) !== canonicalJson(repository)) {
-    throw new Error('Authoritative repository changed while Gate A Participant inputs were captured');
-  }
-  const generation = generationInput({
-    repository,
-    evidence,
-    proposalInvocationRef,
-    proposalBindingLock: input.proposalBindingLock,
-    reviewerInvocationRef,
-    reviewerBindingLock: input.reviewerBindingLock,
-  });
-  await (dependencies.resolveProposalBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
-    repositoryRoot,
-    lock: input.proposalBindingLock,
-  });
-  await (dependencies.resolveReviewerBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
-    repositoryRoot,
-    lock: input.reviewerBindingLock,
-  });
-  if (canonicalJson(await captureSnapshot(repositoryRoot)) !== canonicalJson(repository)) {
-    throw new Error('Authoritative repository changed while Gate A binding locks were resolved');
-  }
-
-  const generationBytes = Buffer.from(canonicalJson(generation), 'utf8');
-  const generationInputSha256 = sha256Hex(generationBytes);
-  const candidate = buildCandidate(generation, generationInputSha256);
-  const canonicalBytes = Buffer.from(canonicalJson(candidate), 'utf8');
-  const canonicalSha256 = sha256Hex(canonicalBytes);
-  await mkdir(dirname(generationInputPath), { recursive: true });
-  await writeFile(generationInputPath, generationBytes, { flag: 'wx' });
-  await writeFile(candidatePath, canonicalBytes, { flag: 'wx' });
-  return { candidate, canonicalBytes, canonicalSha256, generationInputPath, generationInputSha256 };
 }
 
 async function readCanonicalRegularFile(path: string, label: string): Promise<Buffer> {
@@ -417,168 +290,6 @@ function validateGenerationInput(value: unknown): BoundedFormalEventParticipantG
     throw new Error(`Gate A prompt, identity, lock, or budget provenance changed: ${nestedFields.join(', ')}`);
   }
   return value as unknown as BoundedFormalEventParticipantGenerationInputV1;
-}
-
-export async function validateFreshBoundedFormalEventParticipantGenerationAuthorization(input: {
-  repositoryRoot: string;
-  approval: BoundedFormalEventGenerationAuthorizationApprovalV1;
-  role: 'proposal' | 'reviewer';
-  invocationRef: string;
-  bindingLock: ReferenceParticipantBindingLockV1;
-  evidence: BoundedFormalEventParticipantEvidenceV1;
-  proposalParticipant?: BoundedFormalEventProposalParticipantOutput;
-}, dependencies: {
-  captureRepositorySnapshot?: typeof captureBoundedFormalEventRepositorySnapshot;
-  readParticipantEvidence?: typeof readBoundedFormalEventParticipantEvidence;
-  resolveProposalBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
-  resolveReviewerBindingFromLock?: typeof resolveReferenceParticipantBindingFromLock;
-} = {}): Promise<BoundedFormalEventParticipantGenerationAuthorizationCandidateV1> {
-  if (!input.approval || typeof input.approval !== 'object') {
-    throw new Error('Human-approved Gate A authorization is required before Participant execution');
-  }
-  assertSha256(input.approval.humanApprovedSha256, 'Human-approved Gate A SHA-256');
-  if (typeof input.approval.humanAuthorizationRef !== 'string'
-    || !input.approval.humanAuthorizationRef.trim()
-    || input.approval.humanAuthorizationRef.length > 256
-    || /[\u0000-\u001f\u007f]/.test(input.approval.humanAuthorizationRef)) {
-    throw new Error('Human authorization reference must be a non-empty bounded identifier');
-  }
-  const candidatePath = resolve(input.approval.authorizationCandidatePath);
-  const candidateBytes = await readCanonicalRegularFile(candidatePath, 'Gate A authorization candidate');
-  if (sha256Hex(candidateBytes) !== input.approval.humanApprovedSha256) {
-    throw new Error('Human-approved Gate A SHA-256 does not match the participant-generation authorization candidate');
-  }
-  if (candidateBytes.toString('utf8') !== canonicalJson(JSON.parse(candidateBytes.toString('utf8')) as unknown)) {
-    throw new Error('Gate A authorization candidate must use canonical JSON bytes');
-  }
-  const candidateValue = JSON.parse(candidateBytes.toString('utf8')) as unknown;
-  if (!isRecord(candidateValue)) throw new Error('Gate A authorization candidate must be an object');
-  assertExactKeys(candidateValue, [
-    'schemaVersion', 'approvalState', 'generationInputRef', 'generationInputSha256', 'repository',
-    'requirementSha256', 'contract', 'participantBindingLockSha256', 'proposalInvocationRef',
-    'proposalPromptSha256', 'reviewerInvocationRef', 'reviewerPromptTemplateSha256', 'budget',
-  ], 'Gate A authorization candidate');
-  if (candidateValue.schemaVersion !== BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_CANDIDATE_SCHEMA
-    || candidateValue.approvalState !== 'AWAITING_HUMAN_EXACT_SHA256_APPROVAL'
-    || candidateValue.generationInputRef !== BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME) {
-    throw new Error('Gate A authorization candidate identity or approval state is invalid');
-  }
-  assertSha256(candidateValue.generationInputSha256, 'Gate A generation input digest');
-  const inputPath = join(dirname(candidatePath), BOUNDED_FORMAL_EVENT_PARTICIPANT_GENERATION_INPUT_FILENAME);
-  const inputBytes = await readCanonicalRegularFile(inputPath, 'Gate A generation input');
-  if (sha256Hex(inputBytes) !== candidateValue.generationInputSha256) {
-    throw new Error('Gate A generation input does not match its candidate digest');
-  }
-  const inputValue = JSON.parse(inputBytes.toString('utf8')) as unknown;
-  const generation = validateGenerationInput(inputValue);
-  if (inputBytes.toString('utf8') !== canonicalJson(inputValue)) throw new Error('Gate A generation input must use canonical JSON bytes');
-  if (canonicalJson(buildCandidate(generation, candidateValue.generationInputSha256)) !== candidateBytes.toString('utf8')) {
-    throw new Error('Gate A authorization candidate fields do not match its generation input');
-  }
-
-  const roleInput = input.role === 'proposal' ? generation.proposalParticipant : generation.reviewerParticipant;
-  if (input.invocationRef !== roleInput.invocationRef
-    || referenceParticipantBindingLockSha256(input.bindingLock) !== roleInput.bindingLockSha256
-    || canonicalJson(input.evidence) !== canonicalJson(generation.participantEvidence)) {
-    throw new Error(`Gate A ${input.role} invocation is not the exact approved Participant input`);
-  }
-  const currentPromptSha256 = input.role === 'proposal'
-    ? sha256Hex(renderBoundedFormalEventProposalPrompt({
-        invocationRef: input.invocationRef,
-        evidence: input.evidence,
-      }))
-    : sha256Hex(renderBoundedFormalEventReviewPromptTemplate({
-        invocationRef: input.invocationRef,
-        evidence: input.evidence,
-      }));
-  const approvedPromptSha256 = input.role === 'proposal'
-    ? generation.proposalParticipant.promptSha256
-    : generation.reviewerParticipant.promptTemplateSha256;
-  if (currentPromptSha256 !== approvedPromptSha256) {
-    throw new Error(`Gate A ${input.role} prompt changed after authorization`);
-  }
-  if (input.role === 'reviewer') {
-    const proposalParticipant = input.proposalParticipant;
-    if (!proposalParticipant?.ok
-      || !proposalParticipant.proposal
-      || proposalParticipant.invocationRef !== generation.proposalParticipant.invocationRef
-      || proposalParticipant.participantRef !== generation.proposalParticipant.participantRef
-      || proposalParticipant.bindingLockSha256 !== generation.proposalParticipant.bindingLockSha256
-      || proposalParticipant.generationAuthorizationSha256 !== input.approval.humanApprovedSha256
-      || proposalParticipant.generationHumanAuthorizationRef !== input.approval.humanAuthorizationRef) {
-      throw new Error('Gate A Reviewer input must be the accepted Proposal from this authorized Proposal invocation');
-    }
-  }
-
-  const captureSnapshot = dependencies.captureRepositorySnapshot ?? captureBoundedFormalEventRepositorySnapshot;
-  const currentRepository = await captureSnapshot(input.repositoryRoot);
-  if (canonicalJson(currentRepository) !== canonicalJson(generation.repository)) {
-    throw new Error('Gate A authorization is stale because the dev commit or authoritative repository fingerprint changed');
-  }
-  const currentEvidence = await (dependencies.readParticipantEvidence ?? readBoundedFormalEventParticipantEvidence)(resolve(input.repositoryRoot));
-  if (canonicalJson(currentEvidence) !== canonicalJson(generation.participantEvidence)) {
-    throw new Error('Gate A authorization is stale because canonical Event or schema evidence changed');
-  }
-  await (dependencies.resolveProposalBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
-    repositoryRoot: resolve(input.repositoryRoot),
-    lock: generation.proposalParticipant.bindingLock,
-  });
-  await (dependencies.resolveReviewerBindingFromLock ?? resolveReferenceParticipantBindingFromLock)({
-    repositoryRoot: resolve(input.repositoryRoot),
-    lock: generation.reviewerParticipant.bindingLock,
-  });
-  const repositoryAfterBindingResolution = await captureSnapshot(input.repositoryRoot);
-  if (canonicalJson(repositoryAfterBindingResolution) !== canonicalJson(generation.repository)) {
-    throw new Error('Gate A authorization became stale during fresh binding resolution');
-  }
-  return buildCandidate(generation, candidateValue.generationInputSha256);
-}
-
-export async function consumeBoundedFormalEventParticipantGenerationAuthorization(input: {
-  repositoryRoot: string;
-  authorizationCandidatePath: string;
-  consumptionRoot?: string;
-  generationAuthorizationSha256: string;
-  humanAuthorizationRef: string;
-  role: 'proposal' | 'reviewer';
-  invocationRef: string;
-  bindingLockSha256: string;
-}): Promise<string> {
-  assertSha256(input.generationAuthorizationSha256, 'Gate A authorization digest');
-  assertSha256(input.bindingLockSha256, 'Gate A binding lock digest');
-  assertBoundedFormalEventAuthorizationArtifactPath(
-    input.repositoryRoot,
-    input.authorizationCandidatePath,
-    'Formal Event Gate A candidate',
-  );
-  const markerFilename = `bounded-formal-event-generation-consumed-${input.generationAuthorizationSha256}-${input.role}.json`;
-  const consumptionRoot = resolve(input.consumptionRoot
-    ?? join(resolve(input.repositoryRoot), '.tmp', 'evolution', 'bounded-formal-event-participant-generation-consumption'));
-  await mkdir(consumptionRoot, { recursive: true });
-  const markerPath = join(consumptionRoot, markerFilename);
-  let markerHandle: Awaited<ReturnType<typeof open>>;
-  try {
-    markerHandle = await open(markerPath, 'wx', 0o600);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
-      throw new Error(`Gate A ${input.role} Participant authorization has already been consumed`);
-    }
-    throw error;
-  }
-  try {
-    await markerHandle.writeFile(canonicalJson({
-      schemaVersion: 'bounded-formal-event-participant-generation-consumption-v1',
-      generationAuthorizationSha256: input.generationAuthorizationSha256,
-      humanAuthorizationRef: input.humanAuthorizationRef,
-      role: input.role,
-      invocationRef: input.invocationRef,
-      bindingLockSha256: input.bindingLockSha256,
-      maximumParticipantJobs: 2,
-    }));
-  } finally {
-    await markerHandle.close();
-  }
-  return markerFilename;
 }
 
 function validateParticipantGenerationManifest(value: unknown): BoundedFormalEventParticipantGenerationManifestV1 {

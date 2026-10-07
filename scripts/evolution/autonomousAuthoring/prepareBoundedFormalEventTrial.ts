@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { HUMAN_DIRECT_FORMAL_EVENT_REFERENCE_REQUIREMENT } from '../../../src/evolution/boundedFormalEventReferenceRequirement';
 import type { ReferenceParticipantBindingLockV1 } from '../operator/referenceParticipantBinding';
@@ -7,15 +8,16 @@ import {
 } from './evaluateBoundedFormalEventAdmission';
 import {
   captureBoundedFormalEventRepositorySnapshot,
-  buildBoundedFormalEventTrialAuthorizationCandidate,
-  type BuildBoundedFormalEventTrialAuthorizationCandidateResult,
   type BoundedFormalEventRepositorySnapshotV1,
 } from './boundedFormalEventTrialAuthorization';
 import {
   readBoundedFormalEventParticipantEvidence,
 } from './boundedFormalEventParticipantEvidence';
 import type { BoundedFormalEventParticipantEvidenceV1 } from './boundedFormalEventParticipantEvidence';
-import type { BoundedFormalEventGenerationAuthorizationApprovalV1 } from './boundedFormalEventParticipantGenerationAuthorization';
+import {
+  buildBoundedFormalEventParticipantGenerationManifest,
+  type BuildBoundedFormalEventParticipantGenerationManifestResult,
+} from './boundedFormalEventParticipantGenerationAuthorization';
 import {
   runBoundedFormalEventProposalParticipant,
   type BoundedFormalEventProposalParticipantOutput,
@@ -36,8 +38,8 @@ export interface PrepareBoundedFormalEventTrialInput {
   reviewerInvocationRef: string;
   reviewerBindingLock: ReferenceParticipantBindingLockV1;
   observedLifeStates: { trainingHabit: number; businessHabit: number };
-  generationAuthorization: BoundedFormalEventGenerationAuthorizationApprovalV1;
-  authorizationCandidatePath: string;
+  preflightManifestPath: string;
+  executionManifestPath: string;
 }
 
 export type BoundedFormalEventPreparationOutcome =
@@ -47,7 +49,7 @@ export type BoundedFormalEventPreparationOutcome =
       proposal: BoundedFormalEventProposalParticipantOutput;
       reviewer: null;
       admission: null;
-      authorizationCandidate: null;
+      generationManifest: BuildBoundedFormalEventParticipantGenerationManifestResult;
     }
   | {
       status: 'NOT_ELIGIBLE';
@@ -55,7 +57,7 @@ export type BoundedFormalEventPreparationOutcome =
       proposal: BoundedFormalEventProposalParticipantOutput;
       reviewer: BoundedFormalEventReviewParticipantOutput;
       admission: Awaited<ReturnType<typeof evaluateBoundedFormalEventAdmission>>;
-      authorizationCandidate: null;
+      generationManifest: BuildBoundedFormalEventParticipantGenerationManifestResult;
     }
   | {
       status: 'ELIGIBLE';
@@ -63,7 +65,7 @@ export type BoundedFormalEventPreparationOutcome =
       proposal: BoundedFormalEventProposalParticipantOutput;
       reviewer: BoundedFormalEventReviewParticipantOutput;
       admission: Awaited<ReturnType<typeof evaluateBoundedFormalEventAdmission>>;
-      authorizationCandidate: BuildBoundedFormalEventTrialAuthorizationCandidateResult;
+      generationManifest: BuildBoundedFormalEventParticipantGenerationManifestResult;
     };
 
 function isWithin(parentRoot: string, candidatePath: string): boolean {
@@ -99,10 +101,10 @@ export async function prepareBoundedFormalEventTrial(
     runProposal?: typeof runBoundedFormalEventProposalParticipant;
     runReviewer?: typeof runBoundedFormalEventReviewParticipant;
     evaluateAdmission?: typeof evaluateBoundedFormalEventAdmission;
-    buildAuthorizationCandidate?: typeof buildBoundedFormalEventTrialAuthorizationCandidate;
+    buildGenerationManifest?: typeof buildBoundedFormalEventParticipantGenerationManifest;
     proposalDependencies?: Parameters<typeof runBoundedFormalEventProposalParticipant>[1];
     reviewerDependencies?: Parameters<typeof runBoundedFormalEventReviewParticipant>[1];
-    candidateDependencies?: Parameters<typeof buildBoundedFormalEventTrialAuthorizationCandidate>[1];
+    manifestDependencies?: Parameters<typeof buildBoundedFormalEventParticipantGenerationManifest>[1];
   } = {},
 ): Promise<BoundedFormalEventPreparationOutcome> {
   const repositoryRoot = resolve(input.repositoryRoot);
@@ -113,6 +115,26 @@ export async function prepareBoundedFormalEventTrial(
   if (canonicalJson(await captureSnapshot(repositoryRoot)) !== canonicalJson(repository)) {
     throw new Error('Authoritative repository changed while Formal Event Participant evidence was captured');
   }
+  const readEvidence = dependencies.readParticipantEvidence ?? readBoundedFormalEventParticipantEvidence;
+  const generationManifest = await (dependencies.buildGenerationManifest ?? buildBoundedFormalEventParticipantGenerationManifest)({
+    repositoryRoot,
+    proposalInvocationRef: input.proposalInvocationRef,
+    proposalBindingLock: input.proposalBindingLock,
+    reviewerInvocationRef: input.reviewerInvocationRef,
+    reviewerBindingLock: input.reviewerBindingLock,
+    manifestPath: input.preflightManifestPath,
+  }, {
+    captureRepositorySnapshot: dependencies.manifestDependencies?.captureRepositorySnapshot ?? captureSnapshot,
+    readParticipantEvidence: dependencies.manifestDependencies?.readParticipantEvidence ?? readEvidence,
+    ...dependencies.manifestDependencies,
+  });
+  const generationInput = JSON.parse(await readFile(generationManifest.generationInputPath, 'utf8')) as {
+    participantEvidence?: unknown;
+  };
+  if (canonicalJson(generationManifest.manifest.repository) !== canonicalJson(repository)
+    || canonicalJson(generationInput.participantEvidence) !== canonicalJson(evidence)) {
+    throw new Error('Authoritative repository or evidence changed while the Formal Event preflight manifest was built');
+  }
   const requirement = HUMAN_DIRECT_FORMAL_EVENT_REFERENCE_REQUIREMENT;
   const proposal = await (dependencies.runProposal ?? runBoundedFormalEventProposalParticipant)({
     repositoryRoot,
@@ -120,7 +142,7 @@ export async function prepareBoundedFormalEventTrial(
     destinationRoot: input.proposalDestinationRoot,
     invocationRef: input.proposalInvocationRef,
     bindingLock: input.proposalBindingLock,
-    generationAuthorization: input.generationAuthorization,
+    generationManifestRef: generationManifest.manifestRef,
     evidence,
   }, dependencies.proposalDependencies);
   if (!proposal.ok || !proposal.proposal) {
@@ -130,7 +152,7 @@ export async function prepareBoundedFormalEventTrial(
       proposal,
       reviewer: null,
       admission: null,
-      authorizationCandidate: null,
+      generationManifest,
     };
   }
   const reviewer = await (dependencies.runReviewer ?? runBoundedFormalEventReviewParticipant)({
@@ -140,7 +162,7 @@ export async function prepareBoundedFormalEventTrial(
     invocationRef: input.reviewerInvocationRef,
     bindingLock: input.reviewerBindingLock,
     proposalParticipant: proposal,
-    generationAuthorization: input.generationAuthorization,
+    generationManifestRef: generationManifest.manifestRef,
     evidence,
   }, dependencies.reviewerDependencies);
   if (!reviewer.ok || !reviewer.review) {
@@ -156,7 +178,7 @@ export async function prepareBoundedFormalEventTrial(
       proposal,
       reviewer,
       admission,
-      authorizationCandidate: null,
+      generationManifest,
     };
   }
   const admission = await (dependencies.evaluateAdmission ?? evaluateBoundedFormalEventAdmission)({
@@ -173,24 +195,15 @@ export async function prepareBoundedFormalEventTrial(
       proposal,
       reviewer,
       admission,
-      authorizationCandidate: null,
+      generationManifest,
     };
   }
-  const authorizationCandidate = await (dependencies.buildAuthorizationCandidate ?? buildBoundedFormalEventTrialAuthorizationCandidate)({
-    repositoryRoot,
-    preparedAgainst: repository,
-    participantEvidence: evidence,
-    proposalParticipant: proposal,
-    reviewerParticipant: reviewer,
-    observedLifeStates: input.observedLifeStates,
-    candidatePath: input.authorizationCandidatePath,
-  }, dependencies.candidateDependencies);
   return {
     status: 'ELIGIBLE',
     repository,
     proposal,
     reviewer,
-    admission: authorizationCandidate.admission,
-    authorizationCandidate,
+    admission,
+    generationManifest,
   };
 }

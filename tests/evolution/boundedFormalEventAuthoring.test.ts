@@ -49,11 +49,8 @@ import {
 } from '../../scripts/evolution/autonomousAuthoring/boundedFormalEventTrialAuthorization';
 import {
   buildBoundedFormalEventParticipantGenerationManifest,
-  buildBoundedFormalEventParticipantGenerationAuthorizationCandidate,
   consumeBoundedFormalEventParticipantGenerationManifest,
-  consumeBoundedFormalEventParticipantGenerationAuthorization,
   validateFreshBoundedFormalEventParticipantGenerationManifest,
-  validateFreshBoundedFormalEventParticipantGenerationAuthorization,
 } from '../../scripts/evolution/autonomousAuthoring/boundedFormalEventParticipantGenerationAuthorization';
 import {
   prepareBoundedFormalEventTrial,
@@ -237,34 +234,29 @@ function canonicalFakeReview(proposal: ReturnType<typeof canonicalFakeProposal>,
   };
 }
 
-async function buildFakeGenerationAuthorization(input: {
+async function buildFakeGenerationManifest(input: {
   repositoryRoot: string;
-  candidatePath: string;
+  manifestPath: string;
   proposalInvocationRef: string;
   proposalBindingLock: ReferenceParticipantBindingLockV1;
   reviewerInvocationRef: string;
   reviewerBindingLock: ReferenceParticipantBindingLockV1;
 }) {
-  const candidate = await buildBoundedFormalEventParticipantGenerationAuthorizationCandidate({
+  const manifest = await buildBoundedFormalEventParticipantGenerationManifest({
     ...input,
   }, {
     resolveProposalBindingFromLock: fakeBindingResolver({}),
     resolveReviewerBindingFromLock: fakeBindingResolver({}),
   });
   return {
-    candidate,
-    approval: {
-      authorizationCandidatePath: input.candidatePath,
-      humanApprovedSha256: candidate.canonicalSha256,
-      humanAuthorizationRef: 'deterministic-fake-human-approval',
-    },
-    consumeAuthorization: fakeGenerationAuthorizationConsumer(join(dirname(input.candidatePath), 'consumption')),
+    ...manifest,
+    consumeManifest: fakeGenerationManifestConsumer(join(dirname(input.manifestPath), 'consumption')),
   };
 }
 
-function fakeGenerationAuthorizationConsumer(consumptionRoot: string) {
-  return (input: Parameters<typeof consumeBoundedFormalEventParticipantGenerationAuthorization>[0]) =>
-    consumeBoundedFormalEventParticipantGenerationAuthorization({ ...input, consumptionRoot });
+function fakeGenerationManifestConsumer(consumptionRoot: string) {
+  return (input: Parameters<typeof consumeBoundedFormalEventParticipantGenerationManifest>[0]) =>
+    consumeBoundedFormalEventParticipantGenerationManifest({ ...input, consumptionRoot });
 }
 
 async function testParticipantGenerationPreflightManifest(): Promise<void> {
@@ -528,294 +520,183 @@ async function testParticipantGenerationPreflightManifest(): Promise<void> {
   }
 }
 
-async function testParticipantGenerationAuthorizationGateA(): Promise<void> {
+async function testParticipantGenerationPreflightAdapters(): Promise<void> {
   const repositoryRoot = process.cwd();
-  const root = await mkdtemp(join(tmpdir(), 'bounded-formal-event-gate-a-'));
-  const proposalInvocationRef = 'gate-a-author-v1';
-  const reviewerInvocationRef = 'gate-a-reviewer-v1';
-  const proposalLock = testBindingLock('gate-a-proposal');
-  const reviewerLock = testBindingLock('gate-a-reviewer');
-  const consumeAuthorization = fakeGenerationAuthorizationConsumer(join(root, 'consumption'));
+  const evidence = await readBoundedFormalEventParticipantEvidence(repositoryRoot);
+  const root = await mkdtemp(join(tmpdir(), 'bounded-formal-event-preflight-adapters-'));
+  const proposalInvocationRef = 'preflight-adapter-author-v1';
+  const reviewerInvocationRef = 'preflight-adapter-reviewer-v1';
+  const proposalLock = testBindingLock('preflight-adapter-proposal');
+  const reviewerLock = testBindingLock('preflight-adapter-reviewer');
   const proposal = canonicalFakeProposal(proposalInvocationRef);
-  const proposalRaw = JSON.stringify(proposal);
   const review = canonicalFakeReview(proposal, reviewerInvocationRef);
-  const reviewerRaw = JSON.stringify(review);
-  let modelJobs = 0;
-  const bindingResolver = (raw: string) => async (input: { repositoryRoot: string; lock: ReferenceParticipantBindingLockV1 }) => {
-    const resolved = await fakeBindingResolver({ [input.lock.modelConfigured]: raw })(input);
+  let proposalJobs = 0;
+  let reviewerJobs = 0;
+  let workspaceNumber = 0;
+  let validProposalWorkspaceRoot = '';
+  let validReviewerWorkspaceRoot = '';
+  const bindingResolver = (rawByModel: Record<string, string>) => async (input: {
+    repositoryRoot: string;
+    lock: ReferenceParticipantBindingLockV1;
+  }) => {
+    const resolved = await fakeBindingResolver(rawByModel)(input);
     return {
       ...resolved,
-      participant: deterministicParticipant(raw, () => { modelJobs += 1; }),
+      participant: deterministicParticipant(rawByModel[input.lock.modelConfigured] ?? '{}', () => {
+        if (input.lock.modelConfigured === proposalLock.modelConfigured) proposalJobs += 1;
+        if (input.lock.modelConfigured === reviewerLock.modelConfigured) reviewerJobs += 1;
+      }),
     } as never;
   };
-  const candidatePath = join(root, 'authorization-candidate.json');
-  const authorization = (approvedSha256: string) => ({
-    authorizationCandidatePath: candidatePath,
-    humanApprovedSha256: approvedSha256,
-    humanAuthorizationRef: 'test-human-approval:gate-a',
+  const built = await buildFakeGenerationManifest({
+    repositoryRoot,
+    manifestPath: join(root, 'preflight-manifest.json'),
+    proposalInvocationRef,
+    proposalBindingLock: proposalLock,
+    reviewerInvocationRef,
+    reviewerBindingLock: reviewerLock,
   });
+  const manifestDependencies = {
+    resolveProposalBindingFromLock: fakeBindingResolver({}),
+    resolveReviewerBindingFromLock: fakeBindingResolver({}),
+  };
+  const runProposal = async (
+    label: string,
+    manifestRef = built.manifestRef,
+    dependencies: Parameters<typeof runBoundedFormalEventProposalParticipant>[1] = {},
+  ) => {
+    workspaceNumber += 1;
+    const workspaceRoot = join(root, `proposal-workspace-${workspaceNumber}`);
+    if (label === 'valid') validProposalWorkspaceRoot = workspaceRoot;
+    await mkdir(workspaceRoot, { recursive: true });
+    return runBoundedFormalEventProposalParticipant({
+      repositoryRoot,
+      workspaceRoot,
+      destinationRoot: join(root, `proposal-observability-${label}-${workspaceNumber}`),
+      invocationRef: proposalInvocationRef,
+      bindingLock: proposalLock,
+      generationManifestRef: manifestRef,
+      evidence,
+    }, {
+      resolveBindingFromLock: bindingResolver({ [proposalLock.modelConfigured]: JSON.stringify(proposal) }),
+      consumeManifest: built.consumeManifest,
+      manifestDependencies,
+      ...dependencies,
+    } as never);
+  };
+  const runReviewer = async (
+    label: string,
+    proposalParticipant: Awaited<ReturnType<typeof runProposal>>,
+    inputEvidence = evidence,
+    dependencies: Parameters<typeof runBoundedFormalEventReviewParticipant>[1] = {},
+  ) => {
+    workspaceNumber += 1;
+    const workspaceRoot = join(root, `reviewer-workspace-${workspaceNumber}`);
+    if (label === 'valid') validReviewerWorkspaceRoot = workspaceRoot;
+    await mkdir(workspaceRoot, { recursive: true });
+    return runBoundedFormalEventReviewParticipant({
+      repositoryRoot,
+      workspaceRoot,
+      destinationRoot: join(root, `reviewer-observability-${label}-${workspaceNumber}`),
+      invocationRef: reviewerInvocationRef,
+      bindingLock: reviewerLock,
+      proposalParticipant,
+      generationManifestRef: built.manifestRef,
+      evidence: inputEvidence,
+    }, {
+      resolveBindingFromLock: bindingResolver({ [reviewerLock.modelConfigured]: JSON.stringify(review) }),
+      consumeManifest: built.consumeManifest,
+      manifestDependencies,
+      ...dependencies,
+    } as never);
+  };
+
   try {
-    const candidate = await buildBoundedFormalEventParticipantGenerationAuthorizationCandidate({
+    await assert.rejects(() => runProposal('bad-digest', {
+      ...built.manifestRef,
+      manifestSha256: 'f'.repeat(64),
+    }), /manifest|Human-approved Gate A/i);
+    assert.equal(proposalJobs, 0, 'invalid manifest digest must fail before Proposal job starts');
+
+    const tamperedPath = join(root, 'tampered', 'preflight-manifest.json');
+    const tampered = await buildFakeGenerationManifest({
       repositoryRoot,
-      proposalInvocationRef,
-      proposalBindingLock: proposalLock,
-      reviewerInvocationRef,
-      reviewerBindingLock: reviewerLock,
-      candidatePath,
-    }, {
-      resolveProposalBindingFromLock: fakeBindingResolver({}),
-      resolveReviewerBindingFromLock: fakeBindingResolver({}),
+      manifestPath: tamperedPath,
+      proposalInvocationRef: 'tampered-preflight-author-v1',
+      proposalBindingLock: testBindingLock('tampered-proposal'),
+      reviewerInvocationRef: 'tampered-preflight-reviewer-v1',
+      reviewerBindingLock: testBindingLock('tampered-reviewer'),
     });
-    assert.equal(modelJobs, 0, 'Gate A candidate creation must not start Participant jobs');
-    assert.equal(candidate.candidate.budget.allowedParticipantJobs, 4);
-    assert.equal(candidate.candidate.approvalState, 'AWAITING_HUMAN_EXACT_SHA256_APPROVAL');
-    assert.equal(candidate.canonicalBytes.toString('utf8'), canonicalJson(candidate.candidate));
-    assert.equal(sha256Hex(candidate.canonicalBytes), candidate.canonicalSha256);
-    process.stdout.write(`Gate A fake candidate SHA-256: ${candidate.canonicalSha256}\n`);
-    await assert.rejects(() => buildBoundedFormalEventParticipantGenerationAuthorizationCandidate({
-      repositoryRoot,
-      proposalInvocationRef,
-      proposalBindingLock: proposalLock,
-      reviewerInvocationRef,
-      reviewerBindingLock: reviewerLock,
-      candidatePath: join(repositoryRoot, 'src', 'gate-a-candidate-must-not-change-authority', 'authorization-candidate.json'),
-    }), /outside the authoritative repository|under artifacts\//i);
+    const tamperedBytes = Buffer.from(canonicalJson({ ...tampered.manifest, extra: 'tampered' }), 'utf8');
+    await writeFile(tamperedPath, tamperedBytes);
+    await assert.rejects(() => runProposal('tampered', {
+      manifestPath: tamperedPath,
+      manifestSha256: sha256Hex(tamperedBytes),
+    }), /exactly|manifest|Human-approved Gate A/i);
+    assert.equal(proposalJobs, 0, 'tampered manifest must fail before Proposal job starts');
 
-    const evidence = await readBoundedFormalEventParticipantEvidence(repositoryRoot);
-    const proposalWorkspaceRoot = join(root, 'proposal-workspace');
-    await mkdir(proposalWorkspaceRoot, { recursive: true });
-    await assert.rejects(() => runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-unapproved-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-      generationAuthorization: authorization('f'.repeat(64)),
-    }, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-    }), /Human-approved Gate A SHA-256/i);
-    assert.equal(modelJobs, 0, 'mismatched Gate A SHA must fail before Proposal Participant execution');
-    await assert.rejects(() => runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-missing-authorization-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-    } as never, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-    }), /Human-approved Gate A authorization is required/i);
-    assert.equal(modelJobs, 0, 'missing Gate A approval must fail before Proposal Participant execution');
-
-    await assert.rejects(() => runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-binding-drift-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: { ...proposalLock, modelConfigured: 'drifted-gate-a-proposal' },
-      evidence,
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-    }), /not the exact approved Participant input/i);
-    assert.equal(modelJobs, 0, 'changed Gate A binding lock must fail before Proposal Participant execution');
-    await assert.rejects(() => runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-evidence-drift-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence: { ...evidence, currentEventIds: [...evidence.currentEventIds, 'drifted_event_id'] },
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-    }), /not the exact approved Participant input/i);
-    assert.equal(modelJobs, 0, 'changed Gate A Event evidence must fail before Proposal Participant execution');
-    await assert.rejects(() => runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-repository-drift-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-      consumeAuthorization,
-      authorizationDependencies: {
+    await assert.rejects(() => runProposal('stale-repository', built.manifestRef, {
+      manifestDependencies: {
+        ...manifestDependencies,
         captureRepositorySnapshot: async () => ({
-          ...candidate.candidate.repository,
-          authoritativeFingerprintSha256: 'b'.repeat(64),
+          ...built.manifest.repository,
+          authoritativeFingerprintSha256: 'd'.repeat(64),
         }),
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
       },
-    }), /stale because the dev commit or authoritative repository fingerprint changed/i);
-    assert.equal(modelJobs, 0, 'Gate A repository drift must fail before Proposal Participant execution');
+    } as never), /stale|Human-approved Gate A/i);
+    assert.equal(proposalJobs, 0, 'stale repository manifest must fail before Proposal job starts');
 
-    const tamperedGenerationApproval = async (
-      label: string,
-      mutate: (generationInput: Record<string, unknown>) => void,
-    ) => {
-      const candidatePath = join(root, label, 'authorization-candidate.json');
-      const generated = await buildBoundedFormalEventParticipantGenerationAuthorizationCandidate({
-        repositoryRoot,
-        proposalInvocationRef,
-        proposalBindingLock: proposalLock,
-        reviewerInvocationRef,
-        reviewerBindingLock: reviewerLock,
-        candidatePath,
-      }, {
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
-      });
-      const generationInputPath = join(root, label, 'bounded-formal-event-participant-generation-input-v1.json');
-      const generationInput = JSON.parse(await readFile(generationInputPath, 'utf8')) as Record<string, unknown>;
-      mutate(generationInput);
-      const generationBytes = Buffer.from(canonicalJson(generationInput), 'utf8');
-      await writeFile(generationInputPath, generationBytes);
-      const tamperedCandidate = { ...generated.candidate, generationInputSha256: sha256Hex(generationBytes) };
-      const candidateBytes = Buffer.from(canonicalJson(tamperedCandidate), 'utf8');
-      await writeFile(candidatePath, candidateBytes);
-      return {
-        authorizationCandidatePath: candidatePath,
-        humanApprovedSha256: sha256Hex(candidateBytes),
-        humanAuthorizationRef: 'deterministic-fake-human-approval:tamper-case',
-      };
-    };
-    const requirementDriftApproval = await tamperedGenerationApproval('requirement-drift', generationInput => {
-      const requirement = generationInput.requirement as Record<string, unknown>;
-      generationInput.requirement = { ...requirement, requirementId: 'drifted-formal-event-requirement' };
-      generationInput.requirementSha256 = sha256Hex(canonicalJson(generationInput.requirement));
-    });
-    await assert.rejects(() => validateFreshBoundedFormalEventParticipantGenerationAuthorization({
-      repositoryRoot,
-      approval: requirementDriftApproval,
-      role: 'proposal',
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-    }, {
-      resolveProposalBindingFromLock: fakeBindingResolver({}),
-      resolveReviewerBindingFromLock: fakeBindingResolver({}),
-    }), /not the fixed Human-direct Requirement/i);
-    const contractDriftApproval = await tamperedGenerationApproval('contract-drift', generationInput => {
-      generationInput.contract = { contractId: BOUNDED_FORMAL_EVENT_CONTRACT_ID, contractVersion: 99 };
-    });
-    await assert.rejects(() => validateFreshBoundedFormalEventParticipantGenerationAuthorization({
-      repositoryRoot,
-      approval: contractDriftApproval,
-      role: 'proposal',
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-    }, {
-      resolveProposalBindingFromLock: fakeBindingResolver({}),
-      resolveReviewerBindingFromLock: fakeBindingResolver({}),
-    }), /Contract identity is invalid/i);
-    assert.equal(modelJobs, 0, 'Gate A requirement and Contract drift checks must not start Participant jobs');
+    const author = await runProposal('valid');
+    assert.equal(author.ok, true);
+    assert.deepEqual(author.proposal, validateBoundedFormalEventProposalV2(proposal, evidence.currentEventIds));
+    assert.equal(author.generationManifestSha256, built.canonicalSha256);
+    assert.equal(author.generationManifestConsumptionRef,
+      `bounded-formal-event-generation-manifest-consumed-${built.canonicalSha256}-proposal.json`);
+    assert.equal('generationHumanAuthorizationRef' in author, false);
+    assert.equal('humanAuthorizationRef' in author, false);
+    assert.equal(proposalJobs, 1);
+    const proposalFiles = await readdir(join(root, 'proposal-observability-valid-4'));
+    assert.ok(proposalFiles.includes('participant-prompt.txt'));
 
-    const authorizedProposal = await runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-authorized-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-      consumeAuthorization,
-      authorizationDependencies: {
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
-      },
-    });
-    assert.equal(authorizedProposal.ok, true);
-    assert.equal(authorizedProposal.generationAuthorizationSha256, candidate.canonicalSha256);
-    assert.equal(
-      authorizedProposal.generationAuthorizationConsumptionRef,
-      `bounded-formal-event-generation-consumed-${candidate.canonicalSha256}-proposal.json`,
-    );
-    assert.equal(modelJobs, 1);
-    await assert.rejects(() => runBoundedFormalEventProposalParticipant({
-      repositoryRoot,
-      workspaceRoot: proposalWorkspaceRoot,
-      destinationRoot: join(root, 'proposal-replayed-observability'),
-      invocationRef: proposalInvocationRef,
-      bindingLock: proposalLock,
-      evidence,
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(proposalRaw),
-      consumeAuthorization,
-      authorizationDependencies: {
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
-      },
-    }), /already been consumed/i);
-    assert.equal(modelJobs, 1, 'replaying one Gate A Proposal authorization must not start another job');
+    await assert.rejects(() => runProposal('replay'), /already been consumed/i);
+    assert.equal(proposalJobs, 1, 'replaying one manifest role must not start another Proposal job');
 
-    const reviewerWorkspaceRoot = join(root, 'reviewer-workspace');
-    await mkdir(reviewerWorkspaceRoot, { recursive: true });
-    await assert.rejects(() => runBoundedFormalEventReviewParticipant({
-      repositoryRoot,
-      workspaceRoot: reviewerWorkspaceRoot,
-      destinationRoot: join(root, 'reviewer-unapproved-observability'),
-      invocationRef: reviewerInvocationRef,
-      bindingLock: reviewerLock,
-      proposalParticipant: authorizedProposal,
-      evidence,
-      generationAuthorization: authorization('f'.repeat(64)),
-    }, {
-      resolveBindingFromLock: bindingResolver(reviewerRaw),
-      consumeAuthorization,
-      authorizationDependencies: {
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
+    const beforeReview = reviewerJobs;
+    await assert.rejects(() => runReviewer('repository-drift', author, evidence, {
+      manifestDependencies: {
+        ...manifestDependencies,
+        captureRepositorySnapshot: async () => ({
+          ...built.manifest.repository,
+          authoritativeFingerprintSha256: 'e'.repeat(64),
+        }),
       },
-    }), /Human-approved Gate A SHA-256/i);
-    assert.equal(modelJobs, 1, 'mismatched Gate A SHA must fail before Reviewer Participant execution');
+    } as never), /stale|Human-approved Gate A/i);
+    assert.equal(reviewerJobs, beforeReview, 'repository drift after Proposal must fail before Reviewer job');
+    await assert.rejects(() => runReviewer('evidence-drift', author, {
+      ...evidence,
+      currentEventIds: [...evidence.currentEventIds, 'drifted_event_id'],
+    }), /preflight-manifest Participant input|Human-approved Gate A/i);
+    assert.equal(reviewerJobs, beforeReview, 'evidence drift after Proposal must fail before Reviewer job');
+    await assert.rejects(() => runReviewer('binding-drift', author, evidence, {
+      manifestDependencies: {
+        ...manifestDependencies,
+        resolveReviewerBindingFromLock: async () => { throw new Error('fresh Reviewer binding drift'); },
+      },
+    } as never), /fresh Reviewer binding drift/i);
+    assert.equal(reviewerJobs, beforeReview, 'binding drift after Proposal must fail before Reviewer job');
 
-    const authorizedReviewer = await runBoundedFormalEventReviewParticipant({
-      repositoryRoot,
-      workspaceRoot: reviewerWorkspaceRoot,
-      destinationRoot: join(root, 'reviewer-authorized-observability'),
-      invocationRef: reviewerInvocationRef,
-      bindingLock: reviewerLock,
-      proposalParticipant: authorizedProposal,
-      evidence,
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(reviewerRaw),
-      consumeAuthorization,
-      authorizationDependencies: {
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
-      },
-    });
-    assert.equal(authorizedReviewer.ok, true);
-    assert.equal(authorizedReviewer.generationAuthorizationSha256, candidate.canonicalSha256);
-    assert.equal(modelJobs, 2);
-    await assert.rejects(() => runBoundedFormalEventReviewParticipant({
-      repositoryRoot,
-      workspaceRoot: reviewerWorkspaceRoot,
-      destinationRoot: join(root, 'reviewer-replayed-observability'),
-      invocationRef: reviewerInvocationRef,
-      bindingLock: reviewerLock,
-      proposalParticipant: authorizedProposal,
-      evidence,
-      generationAuthorization: authorization(candidate.canonicalSha256),
-    }, {
-      resolveBindingFromLock: bindingResolver(reviewerRaw),
-      consumeAuthorization,
-      authorizationDependencies: {
-        resolveProposalBindingFromLock: fakeBindingResolver({}),
-        resolveReviewerBindingFromLock: fakeBindingResolver({}),
-      },
-    }), /already been consumed/i);
-    assert.equal(modelJobs, 2, 'replaying one Gate A Reviewer authorization must not start another job');
+    const reviewer = await runReviewer('valid', author);
+    assert.equal(reviewer.ok, true);
+    assert.equal(reviewer.generationManifestSha256, built.canonicalSha256);
+    assert.equal(reviewer.generationManifestConsumptionRef,
+      `bounded-formal-event-generation-manifest-consumed-${built.canonicalSha256}-reviewer.json`);
+    assert.equal('generationHumanAuthorizationRef' in reviewer, false);
+    assert.notEqual(author.participantRef, reviewer.participantRef);
+    assert.notEqual(author.invocationRef, reviewer.invocationRef);
+    assert.notEqual(validProposalWorkspaceRoot, validReviewerWorkspaceRoot);
+    assert.equal(reviewerJobs, 1, 'one valid Reviewer input starts exactly one independent Reviewer job');
+    const reviewerFiles = await readdir(join(root, 'reviewer-observability-valid-9'));
+    assert.ok(reviewerFiles.includes('participant-prompt.txt'));
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -1482,9 +1363,9 @@ async function testFormalEventParticipantAdapters(): Promise<void> {
     await mkdir(workspaceRoot, { recursive: true });
     const bindingLock = testBindingLock(`fake-proposal-${caseNumber}`);
     const reviewerBindingLock = testBindingLock(`fake-reviewer-for-${caseNumber}`);
-    const generationAuthorization = await buildFakeGenerationAuthorization({
+    const generationManifest = await buildFakeGenerationManifest({
       repositoryRoot,
-      candidatePath: join(root, `gate-a-${currentCase}`, 'authorization-candidate.json'),
+      manifestPath: join(root, `preflight-${currentCase}`, 'preflight-manifest.json'),
       proposalInvocationRef: invocationRef,
       proposalBindingLock: bindingLock,
       reviewerInvocationRef,
@@ -1496,17 +1377,17 @@ async function testFormalEventParticipantAdapters(): Promise<void> {
       destinationRoot,
       invocationRef,
       bindingLock,
-      generationAuthorization: generationAuthorization.approval,
+      generationManifestRef: generationManifest.manifestRef,
       evidence,
     }, {
       resolveBindingFromLock: fakeBindingResolver({ [bindingLock.modelConfigured]: rawOutput }),
-      consumeAuthorization: generationAuthorization.consumeAuthorization,
-      authorizationDependencies: {
+      consumeManifest: generationManifest.consumeManifest,
+      manifestDependencies: {
         resolveProposalBindingFromLock: fakeBindingResolver({}),
         resolveReviewerBindingFromLock: fakeBindingResolver({}),
       },
     });
-    return { output, generationAuthorization, reviewerInvocationRef, reviewerBindingLock, destinationRoot };
+    return { output, generationManifest, reviewerInvocationRef, reviewerBindingLock, destinationRoot };
   };
   const runReviewCase = async (
     name: string,
@@ -1525,12 +1406,12 @@ async function testFormalEventParticipantAdapters(): Promise<void> {
       invocationRef,
       bindingLock: authorCase.reviewerBindingLock,
       proposalParticipant: authorCase.output,
-      generationAuthorization: authorCase.generationAuthorization.approval,
+      generationManifestRef: authorCase.generationManifest.manifestRef,
       evidence,
     }, {
       resolveBindingFromLock: fakeBindingResolver({ [authorCase.reviewerBindingLock.modelConfigured]: rawOutput }),
-      consumeAuthorization: authorCase.generationAuthorization.consumeAuthorization,
-      authorizationDependencies: {
+      consumeManifest: authorCase.generationManifest.consumeManifest,
+      manifestDependencies: {
         resolveProposalBindingFromLock: fakeBindingResolver({}),
         resolveReviewerBindingFromLock: fakeBindingResolver({}),
       },
@@ -1668,7 +1549,7 @@ async function testReviewerAdmissionGuards(): Promise<void> {
   }
 }
 
-async function testFakeParticipantPreparationAndAuthorizationCandidate(): Promise<void> {
+async function testFakeParticipantPreparationBuildsPreflightManifest(): Promise<void> {
   const repositoryRoot = process.cwd();
   const root = await mkdtemp(join(tmpdir(), 'bounded-formal-event-preparation-'));
   const proposalInvocationRef = 'preparation-author-v1';
@@ -1677,25 +1558,37 @@ async function testFakeParticipantPreparationAndAuthorizationCandidate(): Promis
   const review = canonicalFakeReview(proposal, reviewerInvocationRef);
   const proposalLock = testBindingLock('fake-formal-proposal');
   const reviewerLock = testBindingLock('fake-formal-reviewer');
-  const generationAuthorization = await buildFakeGenerationAuthorization({
-    repositoryRoot,
-    candidatePath: join(root, 'generation-authorization-candidate.json'),
-    proposalInvocationRef,
-    proposalBindingLock: proposalLock,
-    reviewerInvocationRef,
-    reviewerBindingLock: reviewerLock,
-  });
-  const resolveBindingFromLock = fakeBindingResolver({
-    [proposalLock.modelConfigured]: JSON.stringify(proposal),
-    [reviewerLock.modelConfigured]: JSON.stringify(review),
-  });
   const proposalWorkspaceRoot = join(root, 'proposal-workspace');
   const reviewerWorkspaceRoot = join(root, 'reviewer-workspace');
   await Promise.all([
     mkdir(proposalWorkspaceRoot, { recursive: true }),
     mkdir(reviewerWorkspaceRoot, { recursive: true }),
   ]);
-  const authorizationCandidatePath = join(root, 'authorization-candidate.json');
+  const starts = { proposal: 0, reviewer: 0 };
+  const resolver = (rawByModel: Record<string, string>) => async (input: {
+    repositoryRoot: string;
+    lock: ReferenceParticipantBindingLockV1;
+  }) => {
+    const resolved = await fakeBindingResolver(rawByModel)(input);
+    return {
+      ...resolved,
+      participant: deterministicParticipant(rawByModel[input.lock.modelConfigured] ?? '{}', () => {
+        if (input.lock.modelConfigured === proposalLock.modelConfigured) starts.proposal += 1;
+        if (input.lock.modelConfigured === reviewerLock.modelConfigured) starts.reviewer += 1;
+      }),
+    } as never;
+  };
+  const preflightManifestPath = join(root, 'preflight', 'preflight-manifest.json');
+  const executionManifestPath = join(root, 'execution', 'execution-manifest.json');
+  const consumptionRoot = join(root, 'consumption');
+  const resolveBindingFromLock = resolver({
+    [proposalLock.modelConfigured]: JSON.stringify(proposal),
+    [reviewerLock.modelConfigured]: JSON.stringify(review),
+  });
+  const manifestDependencies = {
+    resolveProposalBindingFromLock: fakeBindingResolver({}),
+    resolveReviewerBindingFromLock: fakeBindingResolver({}),
+  };
   try {
     const preparation = await prepareBoundedFormalEventTrial({
       repositoryRoot,
@@ -1708,155 +1601,95 @@ async function testFakeParticipantPreparationAndAuthorizationCandidate(): Promis
       reviewerInvocationRef,
       reviewerBindingLock: reviewerLock,
       observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-      generationAuthorization: generationAuthorization.approval,
-      authorizationCandidatePath,
+      preflightManifestPath,
+      executionManifestPath,
     }, {
       proposalDependencies: {
         resolveBindingFromLock,
-        consumeAuthorization: generationAuthorization.consumeAuthorization,
-      },
+        consumeManifest: fakeGenerationManifestConsumer(consumptionRoot),
+        manifestDependencies,
+      } as never,
       reviewerDependencies: {
         resolveBindingFromLock,
-        consumeAuthorization: generationAuthorization.consumeAuthorization,
-      },
-      candidateDependencies: {
-        resolveProposalBindingFromLock: resolveBindingFromLock,
-        resolveReviewerBindingFromLock: resolveBindingFromLock,
-      },
-    });
+        consumeManifest: fakeGenerationManifestConsumer(consumptionRoot),
+        manifestDependencies,
+      } as never,
+      manifestDependencies,
+    } as never);
     assert.equal(preparation.status, 'ELIGIBLE');
     assert.equal(preparation.admission.status, 'ELIGIBLE');
     assert.equal(preparation.proposal.ok, true);
     assert.equal(preparation.reviewer.ok, true);
     assert.notEqual(preparation.proposal.participantRef, preparation.reviewer.participantRef);
     assert.notEqual(preparation.proposal.invocationRef, preparation.reviewer.invocationRef);
-    const candidate = preparation.authorizationCandidate.candidate;
-    assert.equal(candidate.approvalState, 'AWAITING_HUMAN_EXACT_SHA256_APPROVAL');
-    assert.equal(candidate.repository.branch, 'dev');
-    assert.equal(candidate.repository.commitSha, (await captureBoundedFormalEventRepositorySnapshot(repositoryRoot)).commitSha);
-    assert.equal(candidate.requirementSha256, sha256Hex(canonicalJson(HUMAN_DIRECT_FORMAL_EVENT_REFERENCE_REQUIREMENT)));
-    assert.equal(candidate.contract.contractId, BOUNDED_FORMAL_EVENT_CONTRACT_ID);
-    assert.equal(candidate.contract.contractVersion, BOUNDED_FORMAL_EVENT_CONTRACT_VERSION);
-    assert.equal(candidate.participantBindingLockSha256.proposal, referenceParticipantBindingLockSha256(proposalLock));
-    assert.equal(candidate.participantBindingLockSha256.reviewer, referenceParticipantBindingLockSha256(reviewerLock));
-    assert.equal(candidate.trial.allowedParticipantJobs, 0);
-    assert.equal(candidate.trial.intendedRunner, 'scripts/evolution/autonomousAuthoring/runBoundedFormalEventShadowTrial.ts');
-    assert.deepEqual(candidate.trial.allowedWritePaths, BOUNDED_FORMAL_EVENT_ALLOWED_WRITE_PATHS);
-    assert.deepEqual(candidate.trial.expectedArtifacts, ['verification.json', 'focused-test.log', 'result.json']);
-    assert.equal(
-      sha256Hex(preparation.authorizationCandidate.canonicalBytes),
-      preparation.authorizationCandidate.canonicalSha256,
-    );
-    assert.equal(
-      preparation.authorizationCandidate.canonicalBytes.toString('utf8'),
-      canonicalJson(candidate),
-    );
-    const packet = JSON.parse(await readFile(preparation.authorizationCandidate.preparationInputPath, 'utf8')) as Record<string, unknown>;
-    assert.equal(packet.schemaVersion, 'bounded-formal-event-preparation-input-v1');
-    assert.equal((packet.proposalParticipant as Record<string, unknown>).transportRole, 'solution');
-    assert.equal((packet.reviewerParticipant as Record<string, unknown>).transportRole, 'reviewer');
-    assert.equal(
-      (packet.proposalParticipant as Record<string, unknown>).generationAuthorizationSha256,
-      generationAuthorization.candidate.canonicalSha256,
-    );
-    assert.equal(
-      (packet.reviewerParticipant as Record<string, unknown>).generationAuthorizationSha256,
-      generationAuthorization.candidate.canonicalSha256,
-    );
-    assert.equal((packet.admission as Record<string, unknown>).status, 'ELIGIBLE');
+    assert.equal(starts.proposal, 1);
+    assert.equal(starts.reviewer, 1);
+    const manifestBytes = await readFile(preflightManifestPath);
+    const manifest = JSON.parse(manifestBytes.toString('utf8')) as Record<string, unknown>;
+    assert.equal(sha256Hex(manifestBytes), preparation.proposal.generationManifestSha256);
+    assert.equal(preparation.reviewer.generationManifestSha256, preparation.proposal.generationManifestSha256);
+    assert.equal('approvalState' in manifest, false);
+    assert.equal('generationHumanAuthorizationRef' in preparation.proposal, false);
+    assert.equal('generationHumanAuthorizationRef' in preparation.reviewer, false);
+    assert.equal('authorizationCandidate' in preparation, false);
+    assert.equal(await readFile(preflightManifestPath, 'utf8'), canonicalJson(manifest));
+    assert.equal(await readFile(executionManifestPath).then(() => true).catch(() => false), false);
 
-    const verifiedCandidate = await validateFreshBoundedFormalEventAuthorizationCandidate({
+    const failedProposalInvocationRef = 'preparation-invalid-author-v1';
+    const failedReviewerInvocationRef = 'preparation-invalid-reviewer-v1';
+    const failedProposalLock = testBindingLock('failed-formal-proposal');
+    const failedReviewerLock = testBindingLock('failed-formal-reviewer');
+    const failedRoots = {
+      proposal: join(root, 'failed-proposal-workspace'),
+      reviewer: join(root, 'failed-reviewer-workspace'),
+    };
+    await Promise.all([
+      mkdir(failedRoots.proposal, { recursive: true }),
+      mkdir(failedRoots.reviewer, { recursive: true }),
+    ]);
+    const failedStarts = { proposal: 0, reviewer: 0 };
+    const failedResolver = (rawByModel: Record<string, string>) => async (input: {
+      repositoryRoot: string;
+      lock: ReferenceParticipantBindingLockV1;
+    }) => {
+      const resolved = await fakeBindingResolver(rawByModel)(input);
+      return {
+        ...resolved,
+        participant: deterministicParticipant(rawByModel[input.lock.modelConfigured] ?? '{}', () => {
+          if (input.lock.modelConfigured === failedProposalLock.modelConfigured) failedStarts.proposal += 1;
+          if (input.lock.modelConfigured === failedReviewerLock.modelConfigured) failedStarts.reviewer += 1;
+        }),
+      } as never;
+    };
+    const failedPreparation = await prepareBoundedFormalEventTrial({
       repositoryRoot,
-      authorizationArtifactPath: authorizationCandidatePath,
-      expectedCanonicalSha256: preparation.authorizationCandidate.canonicalSha256,
-      proposal,
-      review,
+      proposalWorkspaceRoot: failedRoots.proposal,
+      proposalDestinationRoot: join(root, 'failed-proposal-observability'),
+      proposalInvocationRef: failedProposalInvocationRef,
+      proposalBindingLock: failedProposalLock,
+      reviewerWorkspaceRoot: failedRoots.reviewer,
+      reviewerDestinationRoot: join(root, 'failed-reviewer-observability'),
+      reviewerInvocationRef: failedReviewerInvocationRef,
+      reviewerBindingLock: failedReviewerLock,
       observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-      participantJobs: 0,
+      preflightManifestPath: join(root, 'failed', 'preflight-manifest.json'),
+      executionManifestPath: join(root, 'failed', 'execution-manifest.json'),
     }, {
-      resolveProposalBindingFromLock: resolveBindingFromLock,
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    });
-    assert.deepEqual(verifiedCandidate, candidate);
-    await assert.rejects(() => validateFreshBoundedFormalEventAuthorizationCandidate({
-      repositoryRoot,
-      authorizationArtifactPath: authorizationCandidatePath,
-      expectedCanonicalSha256: preparation.authorizationCandidate.canonicalSha256,
-      proposal,
-      review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-      participantJobs: 1,
-    }, {
-      resolveProposalBindingFromLock: resolveBindingFromLock,
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    }), /permits zero Participant jobs/i);
-    await assert.rejects(() => validateFreshBoundedFormalEventAuthorizationCandidate({
-      repositoryRoot,
-      authorizationArtifactPath: authorizationCandidatePath,
-      expectedCanonicalSha256: preparation.authorizationCandidate.canonicalSha256,
-      proposal: { ...proposal, proposedBy: 'drifted-author' },
-      review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-    }, {
-      resolveProposalBindingFromLock: resolveBindingFromLock,
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    }), /stale because proposal, review/i);
-    await assert.rejects(() => validateFreshBoundedFormalEventAuthorizationCandidate({
-      repositoryRoot,
-      authorizationArtifactPath: authorizationCandidatePath,
-      expectedCanonicalSha256: preparation.authorizationCandidate.canonicalSha256,
-      proposal: {
-        ...proposal,
-        requirement: {
-          ...HUMAN_DIRECT_FORMAL_EVENT_REFERENCE_REQUIREMENT,
-          requirementId: 'drifted-formal-event-requirement',
-        },
-      },
-      review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-    }, {
-      resolveProposalBindingFromLock: resolveBindingFromLock,
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    }), /stale because proposal, review/i);
-    await assert.rejects(() => validateFreshBoundedFormalEventAuthorizationCandidate({
-      repositoryRoot,
-      authorizationArtifactPath: authorizationCandidatePath,
-      expectedCanonicalSha256: preparation.authorizationCandidate.canonicalSha256,
-      proposal,
-      review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-    }, {
-      captureRepositorySnapshot: async () => ({
-        ...candidate.repository,
-        commitSha: 'a'.repeat(40),
-      }),
-      resolveProposalBindingFromLock: resolveBindingFromLock,
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    }), /stale because the dev commit or authoritative repository fingerprint changed/i);
-    await assert.rejects(() => validateFreshBoundedFormalEventAuthorizationCandidate({
-      repositoryRoot,
-      authorizationArtifactPath: authorizationCandidatePath,
-      expectedCanonicalSha256: preparation.authorizationCandidate.canonicalSha256,
-      proposal,
-      review,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-    }, {
-      resolveProposalBindingFromLock: async () => { throw new Error('Participant binding drift'); },
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    }), /Participant binding drift/i);
-    const rebuilt = await buildBoundedFormalEventTrialAuthorizationCandidate({
-      repositoryRoot,
-      preparedAgainst: preparation.repository,
-      participantEvidence: await readBoundedFormalEventParticipantEvidence(repositoryRoot),
-      proposalParticipant: preparation.proposal,
-      reviewerParticipant: preparation.reviewer,
-      observedLifeStates: { trainingHabit: 2, businessHabit: 2 },
-      candidatePath: join(root, 'reproduced', 'authorization-candidate.json'),
-    }, {
-      resolveProposalBindingFromLock: resolveBindingFromLock,
-      resolveReviewerBindingFromLock: resolveBindingFromLock,
-    });
-    assert.equal(rebuilt.canonicalSha256, preparation.authorizationCandidate.canonicalSha256);
+      proposalDependencies: {
+        resolveBindingFromLock: failedResolver({ [failedProposalLock.modelConfigured]: '{not-json' }),
+        consumeManifest: fakeGenerationManifestConsumer(join(root, 'failed-consumption')),
+        manifestDependencies,
+      } as never,
+      reviewerDependencies: {
+        resolveBindingFromLock: failedResolver({ [failedReviewerLock.modelConfigured]: JSON.stringify(review) }),
+        consumeManifest: fakeGenerationManifestConsumer(join(root, 'failed-consumption')),
+        manifestDependencies,
+      } as never,
+      manifestDependencies,
+    } as never);
+    assert.equal(failedPreparation.status, 'PREPARATION_FAILED');
+    assert.equal(failedStarts.reviewer, 0, 'Proposal terminal failure must prevent Reviewer execution');
+    assert.ok(failedStarts.proposal > 0);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -1868,7 +1701,7 @@ await testBoundedFormalEventContract();
 await testApplicabilityAndAdmission();
 if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testParticipantGenerationPreflightManifest();
-  await testParticipantGenerationAuthorizationGateA();
+  await testParticipantGenerationPreflightAdapters();
   await testFormalEventParticipantAdapters();
   await testReviewerAdmissionGuards();
 }
@@ -1877,7 +1710,7 @@ await testShadowVerificationRejectsForbiddenChangedFile();
 await testVerifierRejectsDuplicateEventId();
 await testShadowTrialRequiresSeparateHumanAuthorization();
 if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
-  await testFakeParticipantPreparationAndAuthorizationCandidate();
+  await testFakeParticipantPreparationBuildsPreflightManifest();
 }
 if (process.env.BOUNDED_FORMAL_EVENT_SHADOW_REGRESSION_EVENT_ID === undefined) {
   await testDeterministicShadowExecutionPipeline();

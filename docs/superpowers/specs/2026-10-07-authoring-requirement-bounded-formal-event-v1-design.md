@@ -5,7 +5,8 @@
 **HUMAN ACCEPTED — 2026-10-07**  
 **Governance authority: active**  
 **Deterministic infrastructure: landed / verified**  
-**Model-backed execution: paused until PD-125 authorization-flow reconciliation is landed and deterministically verified**
+**First real model-backed bounded validation: COMPLETED / PROMOTED**  
+**Natural Effectiveness: NOT ESTABLISHED**
 
 ## Authority identifier
 
@@ -418,6 +419,26 @@ Any implementation artifact currently named authorization candidate may remain a
 - Contract / Requirement / permission-envelope expansion must still return to Human.
 
 Human exact-patch promotion remains required. “Exact patch” means Human reviews the real candidate content/patch while Host automatically records its exact identity; Human does not approve a hash in isolation.
+
+### 12.2 First real model-backed validation outcome
+
+The first Human-direct validation campaign is complete.
+
+Evidence-bounded outcome:
+
+- the initial real trial failed closed at Reviewer Role-schema validation; no execution manifest, shadow mutation, or promotion patch was produced;
+- Reviewer schema communication was corrected without weakening the Host validator or correction ceiling;
+- a fresh model-backed trial then produced a schema-valid Proposal and independent accepting Review, received `ELIGIBLE` Host admission, and completed isolated shadow authoring;
+- V4 verification was subsequently tightened to execute every choice through the canonical `GameEngineIntegration.executeChoiceEffects()` path and verify canonical `eventHistory`;
+- the accepted Event payload remained unchanged through that mechanical verification;
+- Human reviewed the actual verified patch and chose `PROMOTE_EXACT_PATCH`;
+- Event `p42_training_business_river_delivery` was promoted in commit `a06c33cb1029511806c09ccfc65fa5205327a1c9`;
+- catalog inventory baselines were reconciled in `21f9256c207a262d4dedde1d30862b90f97f8457`;
+- GitHub Actions quality for that closure commit completed successfully across typecheck, build, full test, deterministic evolution gates, event-quality, stability, and experience-health gates.
+
+This establishes one real bounded Contract-constrained model-backed authoring/review/admission/shadow-verification/promotion closure for this family.
+
+It does **not** establish generic Event authoring, unbounded authority, cross-family generalization, full Auto Evolution discovery-to-authoring proof, or Natural Effectiveness. Natural Player-visible evidence remains a later `RUN / OBSERVE` question.
 
 ---
 

@@ -4,7 +4,8 @@
 
 **HUMAN ACCEPTED — 2026-10-07**  
 **Governance authority: active**  
-**Implementation status: runtime reconciliation required before the next real model-backed bounded trial**
+**Implementation status: implemented / deterministically verified for Formal Event v1**  
+**First real bounded flow: completed through Human exact-patch promotion; repository CI closure green**
 
 ## Authority identifier
 
@@ -109,7 +110,7 @@ For `bounded-formal-event-authoring-v1@1`, the existing Participant-generation c
 
 Proposal and Reviewer may run continuously after Host preflight; after Host admission, isolated shadow execution may continue without a second Human digest gate. The first model-backed trial stays bounded to the accepted Human-direct “持续修行 × 持续经商” Requirement and does not reconnect full Auto Evolution.
 
-The current runtime still contains Human-SHA gating added before PD-125. That is now an implementation deviation to reconcile before the first real model-backed trial.
+The Formal Event runtime reconciliation is complete: preflight/execution identities are Host-managed machine manifests, and ordinary bounded execution no longer waits for Human approval of bare SHA/digest values. The first real model-backed Formal Event flow exercised this standing-authorization path through independent review, Host admission, shadow verification, and Human review of the actual patch. No Human digest gate was reintroduced.
 
 ## 13. Preschool application
 
@@ -142,13 +143,18 @@ Future preschool bounded shadow execution follows the same default authorization
 11. historical proof artifacts remain unchanged;
 12. deterministic verification passes before the first real model-backed trial.
 
-## 16. Next implementation slice
+## 16. Implementation outcome
 
-1. remove Human exact-SHA approval as a required precondition from Formal Event Participant generation;
-2. remove the second Human exact-SHA approval as a required precondition from Formal Event shadow execution;
-3. preserve manifest hashes, binding locks, freshness checks, job/correction budgets, replay protection and fail-closed semantics;
-4. reinterpret Gate A / Gate B artifacts as Host machine manifests where useful;
-5. update deterministic tests for continuous execution plus all drift/STOP boundaries;
-6. run focused Formal Event tests, autonomous-authoring regression, typecheck and diff check;
-7. after those pass, run one continuous model-backed bounded Formal Event trial;
-8. do not reconnect full Auto Evolution for that first trial.
+The implementation slice above is closed for Formal Event v1.
+
+Verified outcome:
+
+1. Human exact-SHA approval is no longer a Participant-generation or shadow-execution prerequisite;
+2. Host machine manifests retain exact repo/evidence/binding/prompt/proposal/review/admission/result provenance;
+3. binding drift, repo/evidence drift, schema failure, non-ELIGIBLE admission, and verification failure remain fail closed;
+4. one fresh real model-backed bounded trial completed continuously under standing semantic authorization after the Reviewer schema communication defect was corrected;
+5. Human reviewed the actual verified patch rather than a bare digest;
+6. the promoted Event entered the authoritative catalog only after that Human decision;
+7. repository CI is green after the legitimate catalog-count baseline moved from 391 to 392.
+
+No additional authorization-runtime expansion is required by this proof. The next evidence question is Natural Effectiveness under ordinary `RUN / OBSERVE`, not further SHA-gate infrastructure.

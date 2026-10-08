@@ -569,7 +569,7 @@ Player-visible signal
 当前治理批准的 bounded Contract families 为：
 
 - `preschool-shared-neutral-passive-capacity-v1@1`；
-- `bounded-formal-event-authoring-v1@1`（PD-124；deterministic infrastructure 已落地，首次 model-backed trial 需先完成 PD-125 runtime reconciliation）。
+- `bounded-formal-event-authoring-v1@1`（PD-124；PD-125 runtime reconciliation 已完成；首个真实 Human-direct model-backed bounded case 已完成 independent review、Host admission、V1–V6 shadow verification 与 Human exact-patch promotion；Natural Effectiveness 尚未建立）。
 
 不能：
 
@@ -614,6 +614,8 @@ AE 在既有 Contract 内自动 author + implement
 - shadow verification 完成后，是否 promotion 实际 patch 到 authoritative repository。
 
 Human 不负责批准没有新增产品判断信息的 bare SHA / digest。Host 自动把 Human 的语义决定绑定到 exact machine provenance；如果实际 patch 发生变化，旧 promotion 决定自动失效。
+
+**2026-10-08 first real Formal Event closure evidence：**`bounded-formal-event-authoring-v1@1` 已在固定 Human-direct “持续修行 × 持续经商” Requirement 上完成一次真实 model-backed Proposal → independent Reviewer → Host admission → isolated shadow → V1–V6 verification → Human exact-patch promotion 闭环。该 evidence 证明 bounded downstream path 可运行，不把单一 case 外推为 generic/unbounded authoring，也不等同 Natural Player-visible Effectiveness。
 
 ### 10.4 Codex / Implementation Agent
 

@@ -14,6 +14,16 @@ When no story event and no planning actions (mirrors local `useNewGameEngine`):
 
 - Server reuses `advanceTime(3, 'month')` on hydrated engine, then re-resolves event/planning.
 
+## Formal Event / active planning priority (PD-126)
+
+- `terminal`, unconfirmed progression results, and an already selected event take precedence over a new event selection.
+- Forced events and required milestones keep their existing priority.
+- If there is no pending event and valid planning options exist, repeated phase resolution and restore preserve `active_planning` without selecting an ordinary event.
+- After an active action advances time, the Runtime offers one existing Scheduler evaluation only after the action summary and any disturbance result are acknowledged. No selection returns the player to planning.
+- Completing an ordinary event returns to valid planning instead of recursively selecting another ordinary event. When no action is executable, the existing catch-up / terminal path continues.
+- These transitions are shared by P8/headless and API restore through the same session. Snapshot stays at `3.16.0`; the existing `pendingStoryEventId` carries a selected catalog event through restore, and runtime-built events continue to use volatile state.
+- Formal / Daily Event eligibility and selection parameters are unchanged. Reading a phase or restoring the same decision point does not create another Scheduler opportunity.
+
 ## sessionPhase (authoritative client driver)
 
 | Phase | Client shows |

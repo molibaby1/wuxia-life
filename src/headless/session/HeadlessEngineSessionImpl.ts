@@ -252,10 +252,31 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     }
   }
 
-  async getNextEvent(): Promise<NextEventResult | null> {
+  async getNextEvent(options?: {
+    afterActionConfirmation?: boolean;
+    afterTimeAdvance?: boolean;
+  }): Promise<NextEventResult | null> {
     this.lastError = null;
     if (this.getTerminalState()) {
       this.lastError = { code: 'TERMINAL_STATE', message: 'Session is in terminal state' };
+      return null;
+    }
+    const phase = this.getSessionPhase();
+    if (
+      phase === 'action_summary' ||
+      phase === 'disturbance_narrative' ||
+      phase === 'period_summary'
+    ) {
+      return null;
+    }
+    if (this.volatile.currentEvent) {
+      return this.describePendingEvent();
+    }
+    if (
+      phase === 'active_planning' &&
+      !options?.afterActionConfirmation &&
+      !options?.afterTimeAdvance
+    ) {
       return null;
     }
     return this.runWithRandomAsync(async () => {
@@ -318,6 +339,12 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       });
       stageResults.push(...execution.stageResults);
       stepsExecuted += 1;
+      const stateWithPendingEvent = this.engine.getGameState() as GameState & {
+        pendingStoryEventId?: string;
+      };
+      if (stateWithPendingEvent.pendingStoryEventId === current.id) {
+        delete stateWithPendingEvent.pendingStoryEventId;
+      }
       this.volatile.currentEvent = null;
     }
 
@@ -433,6 +460,10 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     });
     this.volatile.lastFeedback = feedback;
     this.volatile.lastOutcomeText = resolved?.outcomeText ?? null;
+    const stateWithPendingEvent = state as GameState & { pendingStoryEventId?: string };
+    if (stateWithPendingEvent.pendingStoryEventId === event.id) {
+      delete stateWithPendingEvent.pendingStoryEventId;
+    }
     this.volatile.currentEvent = null;
     const choiceBody =
       resolved?.outcomeText ??
@@ -475,8 +506,23 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       time: this.dependencies.time,
     });
     const current = this.volatile.currentEvent;
-    if (current && !nextRequiresChoice(current)) {
-      snapshot.state.pendingStoryEventId = current.id;
+    if (current) {
+      delete snapshot.state.pendingStoryEventId;
+      try {
+        this.dependencies.catalog.getEventById(current.id, this.catalogVersion);
+        snapshot.state.pendingStoryEventId = current.id;
+      } catch {
+        // Runtime-built events remain in the existing volatile cache.
+      }
+    } else if (snapshot.state.pendingStoryEventId) {
+      try {
+        this.dependencies.catalog.getEventById(
+          snapshot.state.pendingStoryEventId,
+          this.catalogVersion,
+        );
+      } catch {
+        delete snapshot.state.pendingStoryEventId;
+      }
     }
     return snapshot;
   }
@@ -658,22 +704,21 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     if (!shouldOfferDailyPlanning(age)) {
       return 'passive_progression';
     }
+    if (this.engine.hasPendingForcedEvent()) {
+      return 'story_event';
+    }
     const planningActions = this.engine.getAvailableActiveActions();
     if (age <= CHILDHOOD_MAX_AGE && planningActions.length > 0) {
       return 'active_planning';
-    }
-    if (this.engine.hasPendingForcedEvent()) {
-      return 'story_event';
     }
     return 'active_planning';
   }
 
   getProgressionVolatileState(): HeadlessProgressionVolatileState {
     const current = this.volatile.currentEvent;
-    const pending = current ? this.describePendingEvent() : null;
     let pendingStoryEventId: string | null = null;
     let pendingEphemeralStoryEvent: EventDefinition | null = null;
-    if (pending?.isAutomatic && current) {
+    if (current) {
       try {
         this.dependencies.catalog.getEventById(current.id, this.catalogVersion);
         pendingStoryEventId = current.id;
@@ -757,7 +802,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         return;
       }
       this.volatile.storyGapPassiveServed = false;
-      await this.resolveAfterPlanningAck();
+      await this.resolveAfterPlanningAck(true);
       return;
     }
     if (ackKind === 'disturbance') {
@@ -770,7 +815,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       }
       this.volatile.pendingDisturbanceNarrative = null;
       this.volatile.storyGapPassiveServed = false;
-      await this.resolveAfterPlanningAck();
+      await this.resolveAfterPlanningAck(true);
       return;
     }
     if (ackKind === 'story_automatic') {
@@ -822,8 +867,11 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       if (phase !== 'period_summary') {
         throw new ProgressionError('INVALID_SESSION_PHASE', 'period_summary ack requires period_summary phase');
       }
+      const eventResultConfirmed = ['剧情事件', '剧情抉择'].includes(
+        this.volatile.pendingPeriodSummary?.sourceLabel ?? '',
+      );
       this.volatile.pendingPeriodSummary = null;
-      await this.resolveAfterPlanningAck();
+      await this.resolveAfterPlanningAck(false, eventResultConfirmed);
       if (this.getSessionPhase() !== 'active_planning') {
         this.ensurePassivePresentation();
       }
@@ -832,20 +880,44 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     throw new ProgressionError('INVALID_ACK_KIND', `Unknown ackKind: ${ackKind}`);
   }
 
-  private async resolveAfterPlanningAck(): Promise<void> {
+  private async resolveAfterPlanningAck(
+    afterActionConfirmation = false,
+    afterEventResultConfirmation = false,
+  ): Promise<void> {
+    if (afterEventResultConfirmation) {
+      delete (this.engine.getGameState() as GameState & { pendingStoryEventId?: string })
+        .pendingStoryEventId;
+    }
     this.volatile.currentEvent = null;
     const age = this.engine.getGameState().player?.age ?? 0;
+    if (this.hasPendingForcedEvent()) {
+      await this.getNextEvent(afterActionConfirmation ? { afterActionConfirmation: true } : undefined);
+      return;
+    }
     if (shouldOfferDailyPlanning(age)) {
       const actions = this.engine.getAvailableActiveActions();
       if (actions.length > 0) {
+        if (afterActionConfirmation) {
+          await this.getNextEvent({ afterActionConfirmation: true });
+        }
         return;
       }
     }
+    let schedulerBoundary: { afterActionConfirmation?: boolean; afterTimeAdvance?: boolean } | undefined =
+      afterActionConfirmation ? { afterActionConfirmation: true } : undefined;
+    if (afterEventResultConfirmation && shouldOfferDailyPlanning(age)) {
+      if (this.hasUpcomingMandatoryEvent()) return;
+      await this.advanceCalendar(3, 'month');
+      schedulerBoundary = { afterTimeAdvance: true };
+    }
     let guard = 0;
     while (guard < 8) {
+      if (this.getTerminalState()) return;
       guard += 1;
-      const next = await this.getNextEvent();
+      const next = await this.getNextEvent(schedulerBoundary);
+      schedulerBoundary = undefined;
       if (next) return;
+      if (this.getTerminalState()) return;
       if (this.hasPendingForcedEvent() || this.hasUpcomingMandatoryEvent()) {
         return;
       }
@@ -858,6 +930,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       await this.runWithRandomAsync(async () => {
         this.engine.advanceTime(3, 'month');
       });
+      schedulerBoundary = { afterTimeAdvance: true };
     }
   }
 

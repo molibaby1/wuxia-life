@@ -2614,3 +2614,24 @@ Formal Event 第一次 model-backed trial 在 runtime 完成该 reconciliation�
 - promotion review 本身成为主要瓶颈；
 - multi-user / multi-approver workflow 需要新的责任分离；
 - 某类高风险执行证明 pre-run Human semantic confirmation 本身具有真实决策价值。
+
+### PD-126：Formal Event / Active Planning Decision-Point Priority v1
+
+**产品决策（Human accepted：2026-10-08）**
+
+Headless、P8 与 API 正常游戏及存档恢复遵守同一阶段优先级：
+
+1. Terminal；
+2. 尚未确认的行动摘要、事件结果、反馈与中断结果；
+3. 已选择但尚未完成的当前事件；
+4. 现有规则要求的强制事件与必要里程碑；
+5. 当前没有待处理事件且存在有效行动选项时的 `active_planning`；
+6. 仅在合法调度边界上由现有 Event Scheduler 尝试选择普通事件。
+
+主动行动完成并按现有规则推进时间后，玩家必须先确认其摘要及可能存在的中断结果。最终确认处提供一次正常 Scheduler 评估机会。该机会继续使用现有 eligibility、priority、weight、cooldown、suppression 与 Formal / Daily Event 选择行为，不保证选中事件。
+
+如果 Scheduler 未选中事件且行动仍可用，Runtime 返回有效主动规划。已选事件在完成及必要结算前继续作为当前决策点；阶段重复解析、API response 读取或恢复相同决策点不得重新抽取或替换它。普通事件完成后，如无待处理强制事项且行动可用，Runtime 返回主动规划，不立即递归抽取下一普通事件。若没有可执行行动，继续沿用已有时间推进、事件调度和终局路径。
+
+存档恢复保持 Snapshot `3.16.0` 结构与版本。现有 `pendingStoryEventId` 保存可由目录恢复的当前事件标识；运行时构造、不能由目录标识恢复的事件继续使用既有 volatile state。恢复有效主动规划或重复读取阶段不得额外授予普通事件调度机会。现有版本、并发校验及 Scheduler 内部选择规则保持不变；本决策不增加持久化调度标记、事件配额、概率参数或频率指标。
+
+本决策不修改 Event 内容、eligibility、trigger、weight、priority、Habit、Persona 策略、Event effects、authoring/promotion 机制，也不改变 Formal Event Natural Effectiveness 的证据状态。

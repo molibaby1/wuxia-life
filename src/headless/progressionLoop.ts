@@ -40,9 +40,7 @@ export async function ensureProgressionCatchUp(
   const ageAfter = session.getRuntimeState().player?.age ?? 0;
   if (ageAfter <= ageBefore) {
     await session.advanceCalendar(1, 'year');
-    if (session.hasPendingForcedEvent()) {
-      await session.getNextEvent();
-    }
+    await session.getNextEvent({ afterTimeAdvance: true });
   }
 }
 
@@ -50,6 +48,18 @@ export async function progressUntilChoiceOrTerminal(session: HeadlessEngineSessi
   let guard = 0;
   while (guard < 32) {
     guard += 1;
+    const phase = session.getSessionPhase();
+    if (
+      phase === 'terminal' ||
+      phase === 'action_summary' ||
+      phase === 'disturbance_narrative' ||
+      phase === 'period_summary'
+    ) {
+      break;
+    }
+    if (phase === 'active_planning' && session.getPlanningOptions().length > 0) {
+      break;
+    }
     const next = await session.getNextEvent();
     if (!next) {
       const phase = session.getSessionPhase();

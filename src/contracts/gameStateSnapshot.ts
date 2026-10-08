@@ -134,7 +134,7 @@ export interface GameStateSnapshotState {
   /** Childhood shaping accumulator; explicitly save-compatible. */
   p16TendencyShaping?: OriginWorldviewShaping;
 
-  /** Pending automatic story event ID for volatile state restoration across server restarts. */
+  /** Selected catalog story event ID for resuming its existing decision point after restore. */
   pendingStoryEventId?: string;
 
   /** @deprecated Superseded by `eventHistory` (§9.2). */

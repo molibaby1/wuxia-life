@@ -30,9 +30,10 @@ Persona 策略：`selectPersonaActiveAction`, `applyPersonaChoiceBias`, `resolve
 | --- | --- |
 | `finalAge` | exact match |
 | `martialPower`（或 `externalSkill+internalSkill` 合计代理） | exact 或 ±1 舍入 |
-| `records` 中 active_action 条数 | 允许 headless:local 比值 ≤ 8（phase 微步 vs 年度模型） |
 | choice 条数 | 同上比值 ≤ 8 |
-| action history length | 同上比值 ≤ 8 |
+| active action 可达性 | 不比较两条随机轨迹的总数；在合法规划状态下逐年龄验证 Headless session 能提供并执行行动 |
+
+PD-126 起，Headless 在有效主动规划阶段保留玩家决策点，`local_direct` 仍是年度事件优先的开发对照模型。因此 active action 记录数与 action history 长度不再作为跨模型比例门禁；这不改变各自 Scheduler 的事件选择规则。
 
 失败须在测试中打印双端摘要，不 silent pass。
 

@@ -6,7 +6,7 @@ import { getP8PersonaById } from '../../src/p8/personas';
 /** Parity tolerance per docs/designs/headless-playability-gate.md */
 const AGE_TOLERANCE = 2;
 /** Headless phase loop yields more micro-steps per calendar year than local_direct annual model. */
-const COUNT_RATIO_MAX = 8;
+const CHOICE_RATIO_MAX = 8;
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -56,20 +56,12 @@ export async function runP81HeadlessLocalParityTest(): Promise<void> {
     `finalAge parity: local=${localReport.finalAge} headless=${headlessReport.finalAge} (tol ${AGE_TOLERANCE})`,
   );
 
-  const localActions = localReport.records.filter(r => r.progressionKind === 'active_action').length;
-  const headlessActions = headlessReport.records.filter(r => r.progressionKind === 'active_action').length;
   assert(
-    countRatioWithin(localActions, headlessActions, COUNT_RATIO_MAX),
-    `active action ratio: local=${localActions} headless=${headlessActions} (max ratio ${COUNT_RATIO_MAX})`,
-  );
-
-  assert(
-    countRatioWithin(localReport.totalChoices, headlessReport.totalChoices, COUNT_RATIO_MAX),
+    countRatioWithin(localReport.totalChoices, headlessReport.totalChoices, CHOICE_RATIO_MAX),
     `choice ratio: local=${localReport.totalChoices} headless=${headlessReport.totalChoices}`,
   );
 
   assert(headlessResult.stoppedReason !== 'max_steps', 'headless path should not stall');
-  assert(localActions >= 1 && headlessActions >= 1, 'both paths record active actions');
   assert(localReport.totalChoices >= 1 && headlessReport.totalChoices >= 1, 'both paths record choices');
 }
 

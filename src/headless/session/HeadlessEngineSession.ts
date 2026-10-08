@@ -30,11 +30,14 @@ export interface HeadlessEngineSession {
   readonly sessionId: string;
   readonly dependencies: HeadlessSessionDependencies;
 
-  /** Replace runtime state from a validated snapshot (async: may re-select next event internally). */
+  /** Replace runtime state from a validated snapshot without selecting a new event. */
   hydrate(snapshot: GameStateSnapshot): Promise<void>;
 
   /** Select and attach the next playable event; does not execute choice effects. */
-  getNextEvent(): Promise<NextEventResult | null>;
+  getNextEvent(options?: {
+    afterActionConfirmation?: boolean;
+    afterTimeAdvance?: boolean;
+  }): Promise<NextEventResult | null>;
 
   /** Run automatic event chains until choice required, terminal, or safety limit. */
   progressAutomatic(options?: { maxSteps?: number }): Promise<ProgressAutomaticResult>;

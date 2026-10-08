@@ -31,7 +31,8 @@ async function getSectEvent(martialPower: number) {
     { snapshot: age14Snapshot(martialPower) },
     { random: new SeededRandomSource(1) },
   );
-  const next = await session.getNextEvent();
+  await session.advanceCalendar(3, 'month');
+  const next = await session.getNextEvent({ afterTimeAdvance: true });
   assert(next?.eventId === 'sect_choice', `expected sect_choice, got ${next?.eventId ?? 'none'}`);
   return { session, next };
 }

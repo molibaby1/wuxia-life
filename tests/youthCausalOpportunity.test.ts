@@ -5,6 +5,7 @@ import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { eventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { getCanonicalFormalSetbackEventId } from '../src/core/SetbackEventSystem';
+import { EventPriority } from '../src/types/eventTypes';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import goldenLinePayoffMap from '../src/data/golden-line-payoff-map.json';
@@ -429,7 +430,8 @@ async function main(): Promise<void> {
 
   // A life with no target line still selects regular formal or daily gameplay at 21.
   const noMajorLine = createYouthEngine(21);
-  const noMajorIds = availableIds(noMajorLine, 21);
+  const noMajorEvents = noMajorLine.getAvailableEvents(21);
+  const noMajorIds = new Set(noMajorEvents.map(event => event.id));
   const unavailableAtTwentyOne = new Set([
     'sect_choice',
     'mingyue_market_meet',
@@ -448,6 +450,22 @@ async function main(): Promise<void> {
   for (const eventId of unavailableAtTwentyOne) {
     assert(!noMajorIds.has(eventId), `${eventId} must not backfill at age 21`);
   }
+  const hasRegularOrDailyCandidate = noMajorEvents.some(event => {
+    const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
+    const isDaily =
+      event.category === 'daily' ||
+      event.category === 'daily_event' ||
+      tags.includes('daily_pool');
+    const isRegularFormal =
+      (event.priority ?? EventPriority.NORMAL) >= EventPriority.NORMAL &&
+      !event.storyLine &&
+      !isDaily;
+    return !unavailableAtTwentyOne.has(event.id) && (isDaily || isRegularFormal);
+  });
+  assert(
+    hasRegularOrDailyCandidate,
+    'age 21 with no major line retains eligible regular formal or daily candidates',
+  );
   const progressionState = createYouthEngine(21).getGameState();
   const progressionSnapshot = defaultSnapshotConverter.toSnapshot(progressionState, {
     eventCatalogVersion: '1.0.0',
@@ -455,22 +473,7 @@ async function main(): Promise<void> {
     time: { now: () => 0 },
   });
   const progressionSession = HeadlessEngineSessionImpl.create({ snapshot: progressionSnapshot });
-  let reachedRegularOrDaily = false;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const nextAtTwentyOne = await progressionSession.getNextEvent();
-    assert(nextAtTwentyOne, 'age 21 with no major line must still select an event');
-    assert(!unavailableAtTwentyOne.has(nextAtTwentyOne.eventId));
-    const isRegularFormal =
-      (nextAtTwentyOne.raw.priority ?? 2) >= 2 && !nextAtTwentyOne.raw.storyLine;
-    if (isRegularFormal || nextAtTwentyOne.raw.category === 'daily') {
-      reachedRegularOrDaily = true;
-      break;
-    }
-
-    assert(nextAtTwentyOne.raw.storyLine, 'only a selected unrelated storyline can be marked seen');
-    recordFact(progressionSession.getRuntimeState(), nextAtTwentyOne.eventId);
-  }
-  assert(reachedRegularOrDaily, 'age 21 with no major line must reach regular formal or daily gameplay');
+  assert((await progressionSession.getNextEvent()) === null, 'reading age-21 planning does not create a scheduler opportunity');
 
   // The slice must not add runtime state or change the persisted schema.
   const cleanState = createYouthEngine(21).getGameState();

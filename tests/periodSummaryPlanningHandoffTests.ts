@@ -26,6 +26,10 @@ function merchantAgeSnapshot(age: number): GameStateSnapshot {
     origin_merchant_family: true,
     origin_id: 'merchant_house',
   };
+  snap.state.facts = {
+    ...(snap.state.facts ?? {}),
+    birth_background: 'merchant_house',
+  };
   return snap;
 }
 
@@ -62,16 +66,7 @@ export async function runPeriodSummaryPlanningHandoffTests(): Promise<void> {
     `merchant age 5 planning must include errand; got ${options.join(', ')}`,
   );
 
-  const fresh = HeadlessEngineSessionImpl.create({
-    playerName: '链路',
-    gender: 'male',
-    randomSeed: 424242,
-  });
-  await fresh.executeChoice({
-    requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
-    snapshotRef: { snapshot: fresh.serialize() },
-    action: { eventId: 'origin_background', choiceId: 'origin_merchant_family' },
-  });
+  const fresh = HeadlessEngineSessionImpl.create({ snapshot: merchantAgeSnapshot(0) });
 
   for (let guard = 0; guard < 80; guard++) {
     const age = fresh.getRuntimeState().player?.age ?? 0;

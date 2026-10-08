@@ -81,7 +81,7 @@ function shouldPersistProgressionVolatile(
   ) {
     return true;
   }
-  return phase === 'story_event' && resolved?.nextEvent?.isAutomatic === true;
+  return phase === 'story_event' && resolved?.nextEvent !== null && resolved?.nextEvent !== undefined;
 }
 
 function syncProgressionVolatileCache(
@@ -224,6 +224,7 @@ export async function createNewSession(
         snapshotHashAfter: snapRow.content_hash,
       });
     }
+    syncProgressionVolatileCache(session.id, snapRow.id, headless, resolved);
 
     return {
       sessionId: session.id,

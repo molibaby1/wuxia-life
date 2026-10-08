@@ -82,7 +82,7 @@ export interface HeadlessProgressionVolatileState {
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   passiveNarrative: PassiveNarrativeDisplay | null;
   annualPassiveMemory: AnnualPassiveMemoryPlan | null;
-  /** Automatic story event awaiting player continue (not in snapshot). */
+  /** Selected story event retained by the API volatile cache. */
   pendingStoryEventId: string | null;
   /** Daily / runtime-built events not resolvable via catalog id alone. */
   pendingEphemeralStoryEvent?: EventDefinition | null;

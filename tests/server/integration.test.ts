@@ -4,6 +4,8 @@ import { loadBackendEnv } from '../../server/src/config/env.js';
 import { bootstrapDevice } from '../../server/src/services/deviceService.js';
 import * as gameService from '../../server/src/services/gameService.js';
 import { seedActiveCatalog } from '../../server/src/http/router.js';
+import * as saveSlotRepo from '../../server/src/repositories/saveSlotRepository.js';
+import * as snapshotRepo from '../../server/src/repositories/snapshotRepository.js';
 import { hashToken } from '../../server/src/crypto/tokens.js';
 import { ApiError } from '../../server/src/errors/apiError.js';
 import type { SessionProgressionPayload } from '../../src/contracts/sessionProgression.js';
@@ -103,6 +105,159 @@ export async function runP6bIntegrationTests(databaseUrl: string): Promise<void>
   });
   assert(restored.sessionId !== created.sessionId, 'new session on restore');
   assert(restored.sessionPhase.length > 0, 'restore has sessionPhase');
+
+  const planningBase = await gameService.createNewSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 2,
+    playerName: '规划存档',
+    gender: 'male',
+    sourcePlatform: 'web-browser',
+  });
+  const planningSnapshot = structuredClone(planningBase.snapshot.snapshot);
+  planningSnapshot.state.player.age = 16;
+  planningSnapshot.state.player.alive = true;
+  planningSnapshot.state.player.connections = 5;
+  planningSnapshot.state.player.affiliation = null;
+  planningSnapshot.state.player.events = [];
+  planningSnapshot.state.eventHistory = [];
+  delete planningSnapshot.state.pendingStoryEventId;
+  const planningSnapRow = await snapshotRepo.insertSnapshot(db, {
+    saveSlotId: planningBase.slot.id,
+    sessionId: planningBase.sessionId,
+    slotVersion: planningBase.slot.version + 1,
+    snapshot: planningSnapshot,
+    engineVersion: env.engineVersion,
+    eventCatalogVersion: env.eventCatalogVersion,
+  });
+  const planningSlot = await saveSlotRepo.updateSlotPointer(
+    db,
+    planningBase.slot.id,
+    planningBase.slot.version,
+    planningSnapRow.id,
+  );
+  assert(planningSlot !== null, 'age-16 planning snapshot becomes current');
+  const restoredPlanning = await gameService.restoreSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 2,
+  });
+  assert(restoredPlanning.sessionPhase === 'active_planning', 'restore preserves age-16 planning');
+  assert(restoredPlanning.planningOptions.length === 5, 'restored save retains all five planning options');
+  assert(restoredPlanning.nextEvent === null, 'restore does not prefetch an ordinary event');
+  const repeatedPlanningRestore = await gameService.restoreSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 2,
+  });
+  assert(repeatedPlanningRestore.sessionPhase === 'active_planning', 'repeated restore preserves planning');
+  assert(repeatedPlanningRestore.snapshotId === restoredPlanning.snapshotId, 'repeated restore uses same snapshot');
+  assert(repeatedPlanningRestore.nextEvent === null, 'repeated restore does not draw another event');
+
+  const age16Action = await gameService.executeActiveAction(db, env, {
+    deviceToken: boot1.deviceToken,
+    sessionId: restoredPlanning.sessionId,
+    sessionToken: restoredPlanning.sessionToken,
+    expectedSlotVersion: restoredPlanning.slotVersion,
+    expectedSnapshotId: restoredPlanning.snapshotId,
+    actionId: 'action_training_basic',
+  });
+  assert(age16Action.sessionPhase === 'action_summary', 'API age-16 action reaches its result decision point');
+  const age16ActionSnapshot = await snapshotRepo.getSnapshotById(db, age16Action.snapshotId);
+  if (!age16ActionSnapshot) throw new Error('API age-16 action snapshot is persisted');
+  assert(
+    (age16ActionSnapshot.snapshot.state.actionHistory ?? []).some(
+      entry => entry.sourceKind === 'active_action' && entry.actionId === 'action_training_basic',
+    ),
+    'API age-16 action is written to History before scheduling',
+  );
+  assert(
+    JSON.stringify(age16ActionSnapshot.snapshot.state.currentTime) !==
+      JSON.stringify(planningSnapshot.state.currentTime),
+    'API age-16 action advances time before its result is acknowledged',
+  );
+  const restoredAge16Summary = await gameService.restoreSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 2,
+  });
+  assert(restoredAge16Summary.sessionPhase === 'action_summary', 'API restore preserves the pending action result');
+  assert(restoredAge16Summary.snapshotId === age16Action.snapshotId, 'action-result restore retains the same snapshot');
+  const repeatedAge16SummaryRestore = await gameService.restoreSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 2,
+  });
+  assert(
+    repeatedAge16SummaryRestore.sessionPhase === 'action_summary' &&
+      repeatedAge16SummaryRestore.snapshotId === restoredAge16Summary.snapshotId,
+    'repeated API restore preserves the same unconfirmed result without advancing it',
+  );
+  let age16Acknowledged = await gameService.acknowledgeProgression(db, env, {
+    deviceToken: boot1.deviceToken,
+    sessionId: repeatedAge16SummaryRestore.sessionId,
+    sessionToken: repeatedAge16SummaryRestore.sessionToken,
+    expectedSlotVersion: repeatedAge16SummaryRestore.slotVersion,
+    expectedSnapshotId: repeatedAge16SummaryRestore.snapshotId,
+    ackKind: 'action_summary',
+  });
+  if (age16Acknowledged.sessionPhase === 'disturbance_narrative') {
+    age16Acknowledged = await gameService.acknowledgeProgression(db, env, {
+      deviceToken: boot1.deviceToken,
+      sessionId: repeatedAge16SummaryRestore.sessionId,
+      sessionToken: repeatedAge16SummaryRestore.sessionToken,
+      expectedSlotVersion: age16Acknowledged.slotVersion,
+      expectedSnapshotId: age16Acknowledged.snapshotId,
+      ackKind: 'disturbance',
+    });
+  }
+  assert(
+    age16Acknowledged.sessionPhase === 'active_planning' || age16Acknowledged.sessionPhase === 'story_event',
+    'API acknowledges action and interruption results before returning planning or a selected event',
+  );
+
+  const pendingEventBase = await gameService.createNewSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 3,
+    playerName: '待处理事件存档',
+    gender: 'male',
+    sourcePlatform: 'web-browser',
+  });
+  const pendingEventSnapshot = structuredClone(pendingEventBase.snapshot.snapshot);
+  pendingEventSnapshot.state.player.age = 16;
+  pendingEventSnapshot.state.player.alive = true;
+  pendingEventSnapshot.state.player.connections = 5;
+  pendingEventSnapshot.state.player.affiliation = null;
+  pendingEventSnapshot.state.player.events = [];
+  pendingEventSnapshot.state.eventHistory = [];
+  pendingEventSnapshot.state.pendingStoryEventId = 'mingyue_market_meet';
+  const pendingEventSnapRow = await snapshotRepo.insertSnapshot(db, {
+    saveSlotId: pendingEventBase.slot.id,
+    sessionId: pendingEventBase.sessionId,
+    slotVersion: pendingEventBase.slot.version + 1,
+    snapshot: pendingEventSnapshot,
+    engineVersion: env.engineVersion,
+    eventCatalogVersion: env.eventCatalogVersion,
+  });
+  const pendingEventSlot = await saveSlotRepo.updateSlotPointer(
+    db,
+    pendingEventBase.slot.id,
+    pendingEventBase.slot.version,
+    pendingEventSnapRow.id,
+  );
+  assert(pendingEventSlot !== null, 'pending-event snapshot becomes current');
+  const restoredPendingEvent = await gameService.restoreSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 3,
+  });
+  assert(restoredPendingEvent.sessionPhase === 'story_event', 'restore resumes the pending event phase');
+  assert(
+    restoredPendingEvent.nextEvent?.eventId === 'mingyue_market_meet',
+    'restore retains the selected formal event',
+  );
+  const repeatedPendingEventRestore = await gameService.restoreSession(db, env, {
+    deviceToken: boot1.deviceToken,
+    slotIndex: 3,
+  });
+  assert(
+    repeatedPendingEventRestore.nextEvent?.eventId === 'mingyue_market_meet',
+    'repeated restore retains the same pending event',
+  );
 
   let progressionCursor: Progression & { sessionId: string; sessionToken: string } = {
     ...created,

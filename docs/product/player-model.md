@@ -96,6 +96,18 @@
 
 故事事实记录会影响未来内容的重要经历，例如加入门派、担任官职、救过某人、持有信物。仅用于回顾的内容进入历史记录，不创建新状态字段。
 
+### Status 的准入与生命周期约束
+
+Status 只表达**当前仍然成立、后续人生演化确实需要识别的可变处境**。它不是事件文案、即时情绪或一次性后果的通用持久化标签；不因叙事中出现「疲惫」「烦躁」等词，就自动创建 Status。
+
+- **必要且不可替代**：只有不创建该 Status 会造成具体的玩法或因果表达缺失，且现有属性、Trait、HealthStatus、故事 Fact、事件历史或一次性结算反馈不能恰当承担时，才允许提出新增。单纯丰富文案、增加装饰性标签或预留可能的未来用途，不构成理由。
+- **类型严格受控**：Canonical Status 必须属于明确批准的有限类型集合。新增类型、改变含义或扩充适用范围需要独立的 Human 产品裁决；事件作者、内容生成器和 Auto Evolution 不得自行扩展，也不得通过新 flag、Fact 或其他字段绕过限制，制造同义的第二状态来源。
+- **具有实际消费价值**：每种 Status 必须指出至少一项明确、合法且有意义的后续用途，例如事件资格、选择条件或内容分支；不能只在结算时添加一个名称而没有实际后续作用。用途须符合状态本身的语义，不要求一律产生数值惩罚或收益。
+- **生命周期匹配游戏时间**：必须明确状态因何进入、在何种条件下退出、预期持续的时间尺度，以及跨月、跨年等时间推进后是否仍应成立。可以提出时间到期、具体事件解除或条件解除等不同方式，但只能采用已经具备正式产品授权与可靠执行能力的机制。无法合理跨越下一次玩家可感知时间节点的短暂感受，应优先通过事件叙事或一次性结果表达，而不是强行保留为持续 Status。
+- **新增前核验**：新增提案必须能说明类型边界、进入与退出规则、时间适配、实际消费者以及玩家如何理解该状态；缺少其中关键环节时，不得先添加再指望未来内容补齐。
+
+以上为新增和扩充 Status 的准入原则，不自动改变既有类型或执行机制。尤其是本文件 5.1 节对 `fatigued`、`anxious` 的二值、事件添加与移除、无时间自动衰减等现行约束仍然有效。若发现既有状态与人生时间尺度不匹配，应另行依据具体证据审查并裁决；不得借本条直接添加计时、自动恢复、层级或新的 Schema / Runtime 语义。
+
 重要人物与人物关系的正式产品语义由 [Character / Relationship Product Contract v1](character-relationship-product-contract-design.md) 定义。该 Contract 位于本规范之下，不得覆盖本文件定义的玩家模型边界。
 
 Generic Relationship Legacy Quarantine 的 active-content disposition、generic relationship boolean 的 concrete-person consumer boundary 与 future replacement 规则由 [Generic Relationship Legacy Quarantine Design](generic-relationship-legacy-quarantine-design.md) 与 PD-104 定义；该 decision 不授权 replacement NPC、Relationship v2 或 PD-103 自动 materialization。

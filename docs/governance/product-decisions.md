@@ -2753,25 +2753,25 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 
 **明确退役的对象：**
 
-1. 通过未配置 \`VITE_P6B_API_URL\` 进入的浏览器 \`useNewGameEngine\` 游戏模式，以及相应的双模式选择逻辑、Local 独立阶段编排、Local 专属玩家读档／存档 UI 与失去实际用途的浏览器 Local 流程。
+1. 通过未配置 `VITE_P6B_API_URL` 进入的浏览器 `useNewGameEngine` 游戏模式，以及相应的双模式选择逻辑、Local 独立阶段编排、Local 专属玩家读档／存档 UI 与失去实际用途的浏览器 Local 流程。
 2. 任何为了维持上述浏览器模式的可玩性、与 API 的行为对齐、独立反馈或兼容性而新增的长期治理义务。Local-only 差异不需要先修复再退休。
 3. 正式浏览器构建不再通过缺少 API 配置而自动落入另一条游戏模式。API 配置缺失或后端不可用时应有明确错误／不可用反馈，不自动切换、重新建立或伪装成 Local 游戏。
 
 **必须保留的能力：**
 
-1. \`HeadlessEngineSessionImpl\`、现有 API／服务端正式结算、\`GameEngineIntegration\` 及其仍被消费的事件执行、时间、世界、人物、历史、Milestone 和其他共享领域能力。删除 \`useNewGameEngine\` 不等于删除共享引擎。
-2. 可在本机运行正式 API／PostgreSQL 的开发与 QA 环境；无数据库的 Headless 运行、模拟、回放及其用于正式产品验证的测试能力。带 \`local_direct\` 名称的 \`GameProcessSimulator\`／P8 旧对照路径与浏览器 Local 不是同一实现，须按实际消费者核定保留或简化范围；但它不应成为要求两套玩家 Runtime 长期保持等价的产品义务。
-3. 已批准的 PD-030／PD-033／PD-126 正式交互与调度边界、PD-128 Milestone 反馈、PD-129 单角色人生目标，以及当前有效领域 Contract／Snapshot \`3.16.0\`。任何仍为 Headless/API／合法测试消费的共享文件、适配器或转换器，不得因“Local”名称被误删。
+1. `HeadlessEngineSessionImpl`、现有 API／服务端正式结算、`GameEngineIntegration` 及其仍被消费的事件执行、时间、世界、人物、历史、Milestone 和其他共享领域能力。删除 `useNewGameEngine` 不等于删除共享引擎。
+2. 可在本机运行正式 API／PostgreSQL 的开发与 QA 环境；无数据库的 Headless 运行、模拟、回放及其用于正式产品验证的测试能力。带 `local_direct` 名称的 `GameProcessSimulator`／P8 旧对照路径与浏览器 Local 不是同一实现，须按实际消费者核定保留或简化范围；但它不应成为要求两套玩家 Runtime 长期保持等价的产品义务。
+3. 已批准的 PD-030／PD-033／PD-126 正式交互与调度边界、PD-128 Milestone 反馈、PD-129 单角色人生目标，以及当前有效领域 Contract／Snapshot `3.16.0`。任何仍为 Headless/API／合法测试消费的共享文件、适配器或转换器，不得因“Local”名称被误删。
 
-**存档与兼容裁决：** Human 明确表示**不保留任何现有存档**，包括浏览器 Local 旧档及已有服务端游戏档的历史可读性；无需新增迁移、导入、同步、兼容 read／fallback 或双轨过渡。不要求为了清理模式主动销毁线上数据库或用户数据，也不因放弃历史存档自动授权修改现行 Snapshot \`3.16.0\` Contract、当前规范存档能力、鉴权或并发语义。新路径的新建、保存和恢复仍须满足现行正式规则。
+**存档与兼容裁决：** Human 明确表示**不保留任何现有存档**，包括浏览器 Local 旧档及已有服务端游戏档的历史可读性；无需新增迁移、导入、同步、兼容 read／fallback 或双轨过渡。不要求为了清理模式主动销毁线上数据库或用户数据，也不因放弃历史存档自动授权修改现行 Snapshot `3.16.0` Contract、当前规范存档能力、鉴权或并发语义。新路径的新建、保存和恢复仍须满足现行正式规则。
 
-**与现行阶段及历史文档的关系：** PD-127／PD-129 的单角色人生产品目标和收敛原则不变。经本次 Human 明确裁决，允许将**浏览器 Local 玩家模式退役**作为全局差异审查后的一个独立、有界的实施事项；这不是进入无边界 BASELINE HARDENING、改造游戏系统或启动其他缺陷修复的授权。现有 \`docs/local-api-dev.md\`、\`docs/contracts/web-runtime-adapter-boundary.md\` 等关于 Local 的文字，实施之前只是现状／历史边界，不再构成长期保留 Local 的产品理由；应在真正退役后同步修正为准确的实现说明。
+**与现行阶段及历史文档的关系：** PD-127／PD-129 的单角色人生产品目标和收敛原则不变。经本次 Human 明确裁决，允许将**浏览器 Local 玩家模式退役**作为全局差异审查后的一个独立、有界的实施事项；这不是进入无边界 BASELINE HARDENING、改造游戏系统或启动其他缺陷修复的授权。现有 `docs/local-api-dev.md`、`docs/contracts/web-runtime-adapter-boundary.md` 等关于 Local 的文字，实施之前只是现状／历史边界，不再构成长期保留 Local 的产品理由；应在真正退役后同步修正为准确的实现说明。
 
 **独立实施及验收边界：**
 
-- 先基于实施时的 \`dev\` HEAD 只读确认 \`App.vue\`、\`GameScreen.vue\`、\`useNewGameEngine\`、\`SaveManager\`、\`DebugPanel\`、\`GameProcessSimulator\`、测试及脚本的实际依赖；仅移除已确认属于浏览器 Local 玩家流程的路径，避免误伤共用源码。
+- 先基于实施时的 `dev` HEAD 只读确认 `App.vue`、`GameScreen.vue`、`useNewGameEngine`、`SaveManager`、`DebugPanel`、`GameProcessSimulator`、测试及脚本的实际依赖；仅移除已确认属于浏览器 Local 玩家流程的路径，避免误伤共用源码。
 - 正式 Web 从新游戏、主动规划、合法选择、事件确认、反馈、正常结束到新档存取，只使用 API／Headless；缺少配置／服务不可用不能静默启动 Local。
 - 用当前代码的 typecheck、build、相称的 Headless／API／合同测试，以及实际 API 驱动的 Web smoke 验证结果；未经执行不得宣称 PASS。
-- 相关 Local-only 问题（见单角色人生差异台账 \`SL-GAP-02\`／\`SL-GAP-03\`）只有在旧入口被证实移除后才能以 \`RETIRED_WITH_RUNTIME\` 处理；\`SL-GAP-04\` 只对正式 API／Headless 决策点保留合规检查。共享时间节点 \`SL-GAP-01\` 等其他差异不因本决策消失。
+- 相关 Local-only 问题（见单角色人生差异台账 `SL-GAP-02`／`SL-GAP-03`）只有在旧入口被证实移除后才能以 `RETIRED_WITH_RUNTIME` 处理；`SL-GAP-04` 只对正式 API／Headless 决策点保留合规检查。共享时间节点 `SL-GAP-01` 等其他差异不因本决策消失。
 
 **明确不做：** 不设计纯离线产品、纯静态托管模式、自动故障切换、不加新 API／Schema／通用 Adapter／Game State，不进行其它领域重构、数值平衡、内容扩写、Ending 改造、AE 扩权或跨人物系统建设。本条仅批准退役方向与有界工程交接，不宣称代码迁移或测试已经完成。

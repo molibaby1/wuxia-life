@@ -8,6 +8,9 @@
 > **登记状态：**初次全局调查完成；后续需由 Human 分项确认验证与治理授权。  
 > **更新原则：**未来更新时记录新的核验日期、HEAD、可重现证据、Human 决定和结果，不用新的代码状态自动覆盖已有正式产品语义。
 
+> **2026-10-10 架构裁决：**[PD-130](product-decisions.md) 已批准**退役浏览器 Local 玩家 Runtime**，但尚未实施、未验证。原始代码审查证据保留。SL-GAP-02／03 不再作为独立 Local 缺陷修复目标，随退役完成后才可标记 `RETIRED_WITH_RUNTIME`；SL-GAP-04 不再追求与浏览器 Local 的玩家体验 parity，转为正式 Headless／API 调度合规验证。SL-GAP-01 及其他非 Local-only 问题照常保持 OPEN。**不迁移或兼容旧存档**，但不据此更改现行 Snapshot Contract。
+
+
 ## 1. 权威与使用边界
 
 - **顶层游戏产品：**[`docs/product/game-product-foundation.md`](../product/game-product-foundation.md)；以单角色完整人生及行动—时间—世界—历史—反馈—正常结束因果闭环作为审查主线。
@@ -51,9 +54,9 @@
 | ID | 待处理问题 | 证据定性 | 初步优先 | 当前状态 | 后续最小决策点 |
 | --- | --- | --- | --- | --- | --- |
 | SL-GAP-01 | 主动行动的年龄推进可能遗漏正式节点钩子 | CONFIRMED_PATH_DIFFERENCE | P1 | OPEN / 待复现 | 跨生日时节点事实是否缺失、最小受影响路径 |
-| SL-GAP-02 | Local 拒绝合法的零效果选择 | CONFIRMED_CODE_GAP | P1 | OPEN / 待复现 | 合法无状态效果的选择应被记录并进入下一阶段 |
-| SL-GAP-03 | Local 读档不保留未完成的当前正式事件 | CONFIRMED_PATH_DIFFERENCE | P1 | OPEN / 待复现 | 相同 Snapshot 是否恢复同一决策点 |
-| SL-GAP-04 | Local / Headless / API 调度与行动优先级可能不一致 | CONFIRMED_PATH_DIFFERENCE | P1 验证 | OPEN / 待验证影响 | 合法调度边界是否改变玩家行动机会 |
+| SL-GAP-02 | Local 拒绝合法的零效果选择 | CONFIRMED_CODE_GAP | 退役归档 | OPEN / 待 PD-130 退役验证 | 无需在 Local 修复；正式 API 路径须仍允许合法零效果决定 |
+| SL-GAP-03 | Local 读档不保留未完成的当前正式事件 | CONFIRMED_PATH_DIFFERENCE | 退役归档 | OPEN / 待 PD-130 退役验证 | 无需在 Local 修复；核对 API／Headless 恢复同一决策点 |
+| SL-GAP-04 | Local / Headless / API 调度与行动优先级可能不一致 | CONFIRMED_PATH_DIFFERENCE | P1 验证 | OPEN / 正式路径验证 | 正式 Headless／API 决策点是否符合 PD-126；不再要求浏览器 Local parity |
 | SL-GAP-05 | Milestone 详细持续查询未进入当前主界面 | CONFIRMED_CODE_GAP | P1 反馈 | OPEN | 四项反馈职责在生产入口的实际可达性 |
 | SL-GAP-06 | Milestone 重要经历覆盖可能不足 | NEEDS_VALIDATION | P2 | OPEN | 真实人生中哪些有证据的重要经历未获记录 |
 | SL-GAP-07 | 重要人物与关系的可达人生连续性 | NEEDS_VALIDATION | P2 | OPEN | 已批准 Person-first 语义在活跃内容中是否成立 |

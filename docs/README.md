@@ -46,6 +46,7 @@ Auto Evolution Model（独立辅助工作流；游戏语义须服从上述权威
 
 - [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood、Generic Relationship Legacy Quarantine、Content Authoring Workflow、Person Domain Authoring consolidation、Life Milestone Domain & Feedback v2、Canonical Setback Occurrence / Resolution Ownership、Active Formal Random Trigger Retirement、Bounded Causal Attribution Evidence Handoff、Bounded Identity-Year Practice Duration 与 Sample-Line `currentGoal` Active-Objective Eligibility 的 current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104 / PD-106 / PD-107 / PD-108 / PD-109 / PD-110 / PD-111 / PD-114 / PD-115。
 - [当前产品阶段](governance/current-product-stage.md)：短滚动看板；当前成熟度、优先级、授权边界与 STOP。
+- [单角色人生实现差异台账](governance/single-life-implementation-gap-register.md)：2026-10-10 全局只读审查的证据、待验证风险、因果优先级与逐项治理状态；**非新产品决策或实施授权**。
 - [项目收敛](governance/project-convergence.md)：长期收敛、模块化和复杂度预算原则。
 - [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作，以及 Role / Participant / Skill / Report / Contract 的职责边界。
 

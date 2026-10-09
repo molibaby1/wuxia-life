@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-09。此前 AE 证据（2026-10-08）：attempt-000019 已归档：`SUCCEEDED / CLEANUP`、`SHADOW_AUTHORING_VERIFIED`；execution authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费，`reviewContinuation=null`，V1–V5 六项均 PASS，且不需要 PD-117 continuation。归档后 canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`，共 18 次 attempt，最新 #19 成功且无活动 attempt；authoritative repo fingerprint 前后相同。
+> 最后更新：2026-10-10。此前 AE 证据（2026-10-08）：attempt-000019 已归档：`SUCCEEDED / CLEANUP`、`SHADOW_AUTHORING_VERIFIED`；execution authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费，`reviewContinuation=null`，V1–V5 六项均 PASS，且不需要 PD-117 continuation。归档后 canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`，共 18 次 attempt，最新 #19 成功且无活动 attempt；authoritative repo fingerprint 前后相同。
 > Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。exact patch SHA `88c4e5ed16709d5d33efd2d34b179cb2069b5d60304ca26d3b7f92a32d2e48f3` 的 Human promotion outcome 为 `REJECT`：authoritative dev 已有后续等价 residual preschool shared-capacity 内容（commit `6a46b2749c301b002420f3f77190ea3439d783bb`），故未应用该 historical patch。没有执行 Natural PVER；Layer B / Layer C 均未建立。历史 Layer A tuning 结束，总体返回 `RUN / OBSERVE`。
 > 2026-10-07 Human direction：Content Authoring 的需求来源与 downstream authoring capability 已按 PD-124 解耦。除问题驱动的 `DIAGNOSED_PROBLEM → CONTENT_GAP → Authoring Requirement` 外，Human 可直接建立 `HUMAN_DIRECT` Authoring Requirement。第二个治理上已批准的 bounded family 为 `bounded-formal-event-authoring-v1@1`；其 deterministic downstream pipeline 与 Participant authorization preparation 已落地。当前不为了验证该 family 启动完整 AE 或制造 Gap。
 > 2026-10-07 Human direction（PD-125）：停止为普通 bounded shadow run 生成需要 Human 手工批准的 Gate A / Gate B SHA candidate。Human 批准的是 Requirement / Contract 与最终 authoritative promotion；repo / binding / evidence / prompt / proposal / review / admission / result digest 改为 Host 自动 freshness/provenance。
@@ -10,8 +10,8 @@
 
 ## 当前导航
 
-- **总体产品工作阶段：**`GAME PRODUCT FOUNDATION / PRODUCT DECISION CONVERGENCE`（Human accepted：2026-10-09；PD-127、PD-128、PD-129）。当前先统一确认和登记游戏基础战略、单角色核心体验及正式产品边界；**暂不进入局部实现差异治理、Codex 修改或迁移**。实现审查和 BASELINE HARDENING 排在产品决策全局收口之后。
-- **Primary objective：**形成相互一致、可追溯的 Wuxia-Life 单角色人生产品决策权威：主循环中玩家与世界的权责、人生阶段的长期因果、里程碑核心反馈、终局可选回顾及明确的跨人物延期边界。**本阶段完成文档收口与冲突登记，不进行专项代码治理**；下一阶段再以批准的产品语义统一核对实际 dev 实现。
+- **总体产品工作阶段：**`SINGLE-LIFE IMPLEMENTATION GAP REVIEW / BOUNDED PLAYER RUNTIME CONSOLIDATION`（2026-10-10；PD-127–PD-130）。产品基础决策已收敛，首轮全局差异已登记；Human 已批准**退役浏览器 Local 玩家模式**（PD-130），但 **Runtime 改动与退役验证尚未实施**。当前只准备这一个有界 Codex 工程事项；不据此授权其他领域治理、无限制 BASELINE HARDENING 或 AE 扩张。
+- **Primary objective：**以 [单角色人生实现差异台账](single-life-implementation-gap-register.md) 为审查导航，先完成 PD-130 的浏览器 Local 玩家模式独立退役：正式玩家路径统一为 Web → API → Headless → 共享核心，保留有用的无数据库 Headless 模拟与测试；**旧存档无需迁移／兼容**。本项完成后依证据更新 SL-GAP-02／03／04；共享时间节点、Milestone、人物与终局等其他事项仍须逐项独立确认和授权。
 - **AE 运行成熟度与历史结果：**AE 仍处于 `RUN / OBSERVE` operating mode，既有两类 bounded contract family、Formal Event Human-direct model-backed shadow → promotion 工程闭环均保留；Natural Effectiveness 仍为 `NOT ESTABLISHED`。目前不主动继续采样、扩展 AE 或优化内容生成器，除非 Human 另行批准。
 - **已完成的 Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导；历史 tuning 已结束。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。

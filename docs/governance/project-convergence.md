@@ -27,12 +27,11 @@
 
 ### 2.1 单一权威产品模型
 
-第一层产品规范：
+- `docs/product/game-product-foundation.md` 是**游戏产品领域的最高层规范**。
+- `docs/product/player-model.md` 在其下负责江湖人物模型，既有正式领域 Contract 在委托范围内继续有效。
+- `docs/product/auto-evolution-model.md` 是独立的 AE 辅助工作流规范，不与 Game Foundation 竞争游戏产品方向；处理游戏内容时必须遵守游戏权威。
 
-- `docs/product/player-model.md`
-- `docs/product/auto-evolution-model.md`
-
-代码、测试和历史 Human acceptance 都不能自动覆盖第一层产品语义。
+不同职责的权威不互相覆盖。代码、测试和历史 Human acceptance 都不能自动覆盖对应的正式产品语义。
 
 ### 2.2 单一事实来源
 
@@ -160,20 +159,17 @@ Game 与 Auto Evolution 可以当前共存在一个 repository，但产品语义
 
 ## 3. 当前阶段的收敛顺序
 
+当前游戏产品阶段按 PD-129 明确分层：
+
 ```text
-Sidecar Run Report
-→ Multi-round Execution Validation
-→ Communication Contract Consolidation
+基础产品战略与决策一致性收口（当前）
+→ 全局实现差异审查（后续）
+→ 经 Human 单独授权的有界代码迁移与证据化验证
 ```
 
-这个顺序有意避免：
+不得把某项决策的获批解释成当前即可开始该领域专项代码治理；不因看到既有代码缺口就自动调整优先级。
 
-- 先猜 Contract；
-- 先做 Report Analysis；
-- 先做完整 UI；
-- 先做 Skill 生态。
-
-每一步都应由上一步真实运行事实提供依据。
+此前的 Sidecar Run Report → Multi-round Execution Validation → Communication Contract Consolidation 是 **AE 历史工作路线**，不再作为当前游戏产品默认下一步。AE 自身的 `RUN / OBSERVE` 成熟度及历史证据保持有效，详见 `current-product-stage.md`。
 
 ## 4. 文档收敛
 

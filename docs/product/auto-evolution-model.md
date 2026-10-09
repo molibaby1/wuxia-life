@@ -2,8 +2,8 @@
 
 > 状态：当前权威规范  
 > 日期：2026-09-16 PD-119 Candidate-local Participant Output Rejection Isolation v1 authority sync
-> 发生冲突时，Auto Evolution 产品语义以本文件为准。历史 Phase、实验 PRD / plan、领域专用 investigation 路线不得覆盖本文件。  
-> 与 `docs/product/player-model.md` 同属第一层产品规范。
+> 发生冲突时，Auto Evolution 工作流语义以本文件为准。历史 Phase、实验 PRD / plan、领域专用 investigation 路线不得覆盖本文件。
+> 本文件是独立的 AE 辅助工作流规范，不与 [Game Product Foundation](game-product-foundation.md) 竞争游戏产品权威；AE 处理游戏内容时必须服从该基础规范和对应领域 Contract。
 
 ---
 
@@ -495,9 +495,11 @@ Future Report Analysis Consumer
 
 Game 与 Auto Evolution 当前实际能否物理拆开、世界观能否顺畅替换，仍属**尚待验证**，不得把设计方向写成已确认事实。
 
-## 12. 当前开发顺序
+## 12. AE 历史开发顺序与独立运行阶段
 
-当前优先顺序：
+以下记录 AE 自身曾采用的开发路径及尚未开放的能力边界，**不是当前游戏产品的下一步实施路线**。游戏产品当前先完成单角色基础产品决策收敛，后续才统一核对实现差异（PD-129；参见 [Current Product Stage](../governance/current-product-stage.md)）。AE 自身仍为 `RUN / OBSERVE`，其运行成熟度与游戏产品工作阶段必须分开。
+
+历史 AE 开发路径：
 
 ```text
 P1 Sidecar Run Report / Operational Observability Minimal Slice

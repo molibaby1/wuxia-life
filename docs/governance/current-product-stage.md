@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-10-08。attempt-000019 已归档：`SUCCEEDED / CLEANUP`、`SHADOW_AUTHORING_VERIFIED`；execution authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费，`reviewContinuation=null`，V1–V5 六项均 PASS，且不需要 PD-117 continuation。归档后 canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`，共 18 次 attempt，最新 #19 成功且无活动 attempt；authoritative repo fingerprint 前后相同。
+> 最后更新：2026-10-09。此前 AE 证据（2026-10-08）：attempt-000019 已归档：`SUCCEEDED / CLEANUP`、`SHADOW_AUTHORING_VERIFIED`；execution authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费，`reviewContinuation=null`，V1–V5 六项均 PASS，且不需要 PD-117 continuation。归档后 canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`，共 18 次 attempt，最新 #19 成功且无活动 attempt；authoritative repo fingerprint 前后相同。
 > Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。exact patch SHA `88c4e5ed16709d5d33efd2d34b179cb2069b5d60304ca26d3b7f92a32d2e48f3` 的 Human promotion outcome 为 `REJECT`：authoritative dev 已有后续等价 residual preschool shared-capacity 内容（commit `6a46b2749c301b002420f3f77190ea3439d783bb`），故未应用该 historical patch。没有执行 Natural PVER；Layer B / Layer C 均未建立。历史 Layer A tuning 结束，总体返回 `RUN / OBSERVE`。
 > 2026-10-07 Human direction：Content Authoring 的需求来源与 downstream authoring capability 已按 PD-124 解耦。除问题驱动的 `DIAGNOSED_PROBLEM → CONTENT_GAP → Authoring Requirement` 外，Human 可直接建立 `HUMAN_DIRECT` Authoring Requirement。第二个治理上已批准的 bounded family 为 `bounded-formal-event-authoring-v1@1`；其 deterministic downstream pipeline 与 Participant authorization preparation 已落地。当前不为了验证该 family 启动完整 AE 或制造 Gap。
 > 2026-10-07 Human direction（PD-125）：停止为普通 bounded shadow run 生成需要 Human 手工批准的 Gate A / Gate B SHA candidate。Human 批准的是 Requirement / Contract 与最终 authoritative promotion；repo / binding / evidence / prompt / proposal / review / admission / result digest 改为 Host 自动 freshness/provenance。
@@ -10,15 +10,16 @@
 
 ## 当前导航
 
-- **总体产品阶段：**`RUN / OBSERVE`；这不表示现在立即继续 ordinary AE sampling。
-- **Primary objective：**Contract-driven autonomous content authoring。当前治理上批准的 bounded families 为 `preschool-shared-neutral-passive-capacity-v1@1` 与 PD-124 `bounded-formal-event-authoring-v1@1`。Formal Event 的 PD-125 standing-authorization runtime、真实 model-backed bounded authoring、independent review、Host admission、V1–V6 shadow verification、Human promotion 与 repository CI closure 已在一个 Human-direct case 上闭环；当前重点回到 `RUN / OBSERVE`，获取自然玩家可见 evidence，而不是继续预先扩展 authoring infrastructure。
+- **总体产品工作阶段：**`GAME PRODUCT FOUNDATION / PRODUCT DECISION CONVERGENCE`（Human accepted：2026-10-09；PD-127、PD-128、PD-129）。当前先统一确认和登记游戏基础战略、单角色核心体验及正式产品边界；**暂不进入局部实现差异治理、Codex 修改或迁移**。实现审查和 BASELINE HARDENING 排在产品决策全局收口之后。
+- **Primary objective：**形成相互一致、可追溯的 Wuxia-Life 单角色人生产品决策权威：主循环中玩家与世界的权责、人生阶段的长期因果、里程碑核心反馈、终局可选回顾及明确的跨人物延期边界。**本阶段完成文档收口与冲突登记，不进行专项代码治理**；下一阶段再以批准的产品语义统一核对实际 dev 实现。
+- **AE 运行成熟度与历史结果：**AE 仍处于 `RUN / OBSERVE` operating mode，既有两类 bounded contract family、Formal Event Human-direct model-backed shadow → promotion 工程闭环均保留；Natural Effectiveness 仍为 `NOT ESTABLISHED`。目前不主动继续采样、扩展 AE 或优化内容生成器，除非 Human 另行批准。
 - **已完成的 Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导；历史 tuning 已结束。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。
 - **Latest governed attempt：**`attempt-000019 = SUCCEEDED / CLEANUP`，terminal result=`SHADOW_AUTHORING_VERIFIED`，validation layer=`HISTORICAL_CONTROLLED_DOWNSTREAM_MECHANISM`，responsibility provenance=`HUMAN_APPROVED_REFERENCE_RESPONSIBILITIES`。Authorization SHA `b588ac21102229cc3c95064573e7ad917fee105bc955d1ccfddfe4aff5d74319` 已消费；`reviewContinuation=null`，authority integrity、mechanical conformance、semantic conformance、red-green regression、adjacent regression 与 evidence-bounded completion 均 PASS，`failures=[]`。不需要 PD-117 continuation。Canonical history SHA=`bc42913ad78c5780f41e36608e11d0d618adb2f27260b77dd273d998cff6149d`；共 18 次 attempt，最新 #19 `SUCCEEDED`，无活动 attempt。
 - **Human promotion outcome：**exact patch SHA `88c4e5ed16709d5d33efd2d34b179cb2069b5d60304ca26d3b7f92a32d2e48f3` = `REJECT`。authoritative dev 已包含后续等价 residual preschool shared-capacity 内容（commit `6a46b2749c301b002420f3f77190ea3439d783bb`），因此没有应用 historical patch。该 `REJECT` 不改变 Layer A PASS；authoritative repo fingerprint 在 #19 前后相同。
 - **已完成的 Human-prioritized milestone（Formal Event）：**首个真实 model-backed Bounded Formal Event authoring/promotion closure = `ESTABLISHED / PASS`，范围仅限固定 Human-direct “持续修行 × 持续经商” Requirement 与 `bounded-formal-event-authoring-v1@1`。standing authorization 没有 bare-SHA Human round-trip；最终 exact patch 经 Human 审阅后 promotion。preschool historical tuning 不重开。
 - **Current evidence limit：**preschool Layer A 仍只证明受控 historical downstream mechanism。Formal Event 现在额外证明了一个真实 Human-direct bounded case 可以完成 model-backed authoring → independent review → admission → shadow verification → Human promotion；这仍不证明 generic/unbounded Event authoring、跨 Contract family 泛化、完整 AE 自动发现→authoring 闭环或 Natural Effectiveness。Natural PVER 尚未执行。
-- **Current return point：**总体 operating mode 仍是 `RUN / OBSERVE`。Formal Event 特殊验证/tuning 到此收口，不需要为了证明 infrastructure 再制造第二个 bounded sample。后续等待该已 promotion Event 在自然运行中的玩家可见 evidence；若自然体验暴露问题，再按正常 Gap Diagnosis / Contract 路径处理。该 closure 不计作 preschool Layer B proof；Formal Event Natural Effectiveness 仍为 `NOT ESTABLISHED`。
+- **此前 AE return point（2026-10-08）：**AE operating mode 仍为 `RUN / OBSERVE`；Formal Event 特殊验证/tuning 已收口，不制造第二个 bounded sample。该 case 的自然玩家可见效果仍待验证，不计作 preschool Layer B proof；Formal Event Natural Effectiveness 仍为 `NOT ESTABLISHED`。2026-10-09 起本项目当前工作优先级以本节 Primary objective 的单角色基础产品决策收敛为准。
 - **Non-blocking Status 风险追踪（Human 手工登记）：** [GitHub Issue #5：Status 生命周期、时间尺度与反馈边界](https://github.com/molibaby1/wuxia-life/issues/5) 保留已识别风险、证据与重新审查触发点；在《雨后渡口》Natural PVER、未来 Status 内容准入或 Status UI/反馈设计时主动检索复核。该 Issue 不是 PD-100 自动 HFL work item、正式 Product Decision、实施授权或自动提醒；不阻塞当前 `RUN / OBSERVE`。
 - **attempt-000014：**the pre-upgrade authorization became stale after Participant binding drift and was not reused. A fresh one-time authorization admitted #14, which terminally failed at `SHADOW_AUTHORING`; that authorization is consumed. Detailed Host-verified outcome is recorded below.
 - **Historical binding diagnostics：**under the tested binding, Matrix A passed 3/3. Matrix B timed out on its first large terminal Solution-like payload; this is diagnostic evidence for that workload and does not establish failure of artifact-backed Solution or real Reviewer/Shadow transport. Matrix C and later artifact/probe steps were not run.
@@ -34,7 +35,7 @@ Auto Evolution 当前处于：
 
 > **EARLY OPERATIONAL / RUN-OBSERVE STAGE — 核心 Agent workflow、旁路运行报告与一次跨轮工程路径已经可用；当前重点是进入真实使用并观察，而不是继续预先扩展系统。**
 
-这里的 `RUN / OBSERVE` 是总体产品阶段，不表示当前立即继续 ordinary AE sampling；当前 Human-prioritized 顺序见上方导航。
+这里的 `RUN / OBSERVE` **仅指 Auto Evolution 自身的运行成熟度**，不是当前游戏产品总体阶段。当前游戏产品阶段是 `PRODUCT DECISION CONVERGENCE`；Human-prioritized 顺序见上方导航。
 
 real cross-round transition 已自然观察到一次；这仍不是 production-ready / fully autonomous 的声明；长期稳定性尚未证明。
 
@@ -128,11 +129,13 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 
 上述真实 evidence 条件已于 ordinary-run-20260913-000006 自然满足一次（disposable evolution workspace 内 bounded configuration execution，changed file：`src/data/lines/preschool-passive-spine.json`；`authoritativeRootChanged = false`；Round 2 自动启动后以 `DEFER_MORE_WORK_REQUESTED` 终止，不视为失败）。长期稳定性仍需继续观察。
 
-## 4. 当前阶段：RUN / OBSERVE
+## 4. AE 历史阶段与当前游戏产品工作
 
-当前不新增新的核心能力阶段。总体阶段仍为 `RUN / OBSERVE`；attempt-000019 的 Layer A historical proof 与 Human promotion disposition 已关闭，回到 ordinary observation。此次 closure 本身没有启动 ordinary run、Natural PVER 或新的 governed attempt。
+2026-10-09 起当前**游戏产品工作**先进入 `GAME PRODUCT FOUNDATION / PRODUCT DECISION CONVERGENCE`（PD-129 对 PD-127 的阶段细化）；正式产品决策收口后才进入 `BASELINE HARDENING` 的统一实现审查。本节以下 AE 流程、attempt 与机制回放是此前 `RUN / OBSERVE` 阶段的证据和背景，不代表当前应优先继续 AE 开发。
 
-当前导航顺序是：
+AE 自身 operating mode 仍为 `RUN / OBSERVE`，但不立即启动新的 ordinary run、Natural PVER 或 governed attempt。attempt-000019 的 Layer A historical proof 与 Human promotion disposition 已关闭，不因产品工作重排而改变其结果。
+
+以下为此前 AE 工作路径的历史回顾（不是当前实施计划）：
 
 ```text
 Historical Solution-only Probe #1 / #2 已成功完成；artifact-backed 首次 communication reopening gate = REESTABLISHED
@@ -340,7 +343,9 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 
 真实运行明细进入 runtime artifacts / Sidecar Run Report，不重新堆入本文件。
 
-## 8. 一分钟检查单
+## 8. AE 历史检查单（非当前游戏产品优先级）
+
+> 下列问题记录此前 AE 的成熟度与 operational 状态；当前游戏产品工作阶段及优先事项以上方「当前导航」为准。
 
 1. 核心 Agent workflow 能跑？→ **YES**
 2. First Skill 能真实复用？→ **YES**
@@ -349,7 +354,7 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 4. P2 engineering path 完整？→ **YES / CLOSED**
 5. P2 deterministic cross-round path 已验证？→ **YES**
 6. P2 real Participant product hypothesis 已验证？→ **YES — first natural real cross-round transition observed（ordinary-run-20260913-000006）；long-run/generalized reliability remains unverified**
-7. 当前阶段？→ **RUN / OBSERVE**
+7. AE 自身 operating mode？→ **RUN / OBSERVE**；游戏产品当前阶段？→ **PRODUCT DECISION CONVERGENCE（PD-129）**
 8. 当前应该继续加 P2 代码？→ **NO**
 9. P3 full Communication Contract Consolidation 当前启动？→ **NO / DEFERRED**
 9b. 下一 bounded P3 communication slice 是否由 PRD C 提出？→ **NO / `NO_BOUNDED_P3_SLICE_JUSTIFIED`（STOP → HUMAN GATE）**

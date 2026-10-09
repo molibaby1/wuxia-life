@@ -4,19 +4,26 @@
 
 ## 当前权威文档
 
-### 产品规范（第一层）
+### 游戏产品规范（最高层）
 
-- [玩家模型](product/player-model.md)：当前游戏人物状态与产品语义的权威规范；含 Derived Life Milestone Domain & Feedback v2（PD-108）。
-- [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator、Skill、旁路运行报告与模块边界的当前权威产品规范。
+- [Game Product Foundation](product/game-product-foundation.md)：游戏产品定位、单角色核心体验、玩家／世界权责、长期因果、里程碑反馈与四项长期架构原则的最高层权威（PD-127、PD-128、PD-129）。
+- [玩家模型](product/player-model.md)：Game Product Foundation 之下的江湖人物状态与具体产品语义权威；含 Life Milestone Domain & Core Feedback（PD-108，经 PD-128 / PD-129 限定更新）。
 
-`player-model` 与 `auto-evolution-model` 同属第一层产品规范；`Wealth / Economy Product Contract v1`、`Character / Relationship Product Contract v1`、`Parenthood / Family Life Product Contract v1` 与 `Generic Relationship Legacy Quarantine Design (PD-104)` 是在玩家模型之下登记的当前 accepted product/governance authorities，不替代第一层规范。`player-model` 分别把经济能力、重要人物与人物关系、子女与家庭生活及 generic relationship legacy disposition 委托给对应 authority；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
+### 独立的辅助工作流规范
+
+- [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator、Skill、旁路运行报告与权限边界的独立规范。AE 不拥有游戏产品定位的决定权；涉及游戏内容时必须遵守 Game Product Foundation 和对应领域 Contract。
+
+`Wealth / Economy Product Contract v1`、`Character / Relationship Product Contract v1`、`Parenthood / Family Life Product Contract v1` 与 `Generic Relationship Legacy Quarantine Design (PD-104)` 继续在玩家模型之下担任已接受的领域 authority，不因新增 Game Foundation 而改变具体语义。
 
 ```text
-player-model
-├─ Wealth / Economy Contract
-├─ Character / Relationship Contract
-│  └─ Sex-Variant Person Archetype Contract
-└─ Parenthood / Family Life Contract
+Game Product Foundation（游戏顶层）
+└─ Player Model（江湖人物）
+   ├─ Wealth / Economy Contract
+   ├─ Character / Relationship Contract
+   │  └─ Sex-Variant Person Archetype Contract
+   └─ Parenthood / Family Life Contract
+
+Auto Evolution Model（独立辅助工作流；游戏语义须服从上述权威）
 ```
 
 ### 已接受的产品契约
@@ -173,8 +180,8 @@ Game 是被改进对象；Auto Evolution 是演化工作流；Skill 是 Particip
 
 ## 权威层级
 
-1. 本文件明确列出的第一层产品规范；
-2. 当前 Product Decisions 与治理文档；
+1. 游戏产品以 [Game Product Foundation](product/game-product-foundation.md) 为最高层；其下江湖人物模型由 [Player Model](product/player-model.md) 负责。AE 工作流以独立的 [Auto Evolution Model](product/auto-evolution-model.md) 为权威，处理游戏事项时须服从游戏规范；
+2. 当前 Product Decisions 与治理文档，以及各自授权范围内的正式 Contract / Schema；
 3. 当前任务明确指定且仍 active 的 accepted design；
 4. 当前真实实现与对应测试；
 5. 其他未分类文档。
@@ -220,7 +227,7 @@ docs/superpowers/plans/
 
 1. `AGENTS.md`
 2. `docs/README.md`
-3. 与任务相关的第一层产品规范
+3. 与任务相关的游戏产品基础规范、领域规范或独立 AE 产品规范
 4. `governance/product-decisions.md`
 5. `governance/current-product-stage.md`
 6. 与任务直接相关的 Contract / 当前 active design

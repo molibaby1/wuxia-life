@@ -2777,3 +2777,31 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 **实施核验（2026-10-10；实施起点 `dev` / `42f77408bcb7f2f08b679674fa80de93a242b8fe`）：**正式 Web 入口及玩家组件不再消费 `useNewGameEngine`；真实浏览器 API smoke 已覆盖新档、年龄推进后的事件选择及反馈、主动行动及结算、保存、重载恢复并继续。缺少 `VITE_P6B_API_URL` 与 API 不可用两种浏览器场景均显示明确错误且未启动 Local。`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 通过；普通寿终由 Headless `normalLongevityEndingClosure.test.ts` 验证，未执行从出生到寿终的完整自然 Web 人生。默认 Headless `npm run gate:playability` 仍失败（8 个 persona 有 frustration / opaque-ratio blockers）；隔离的未修改基线也失败，剔除报告中的 `generatedAt` 后 JSON 完全相同，且本次 diff 未改动 Gate 的 Headless Runtime、Simulator、Persona、指标或脚本依赖。因此这些 blocker 没有显示为本次 Runtime 退役引入的回归，但 `SL-GAP-04` 仍保持开放。`report:p2-gameplay-structure` 未运行；已知 `routeCompletionRate is not defined` 在实施起点也存在，本次对脚本的修改仅调整 Choice feedback 覆盖扫描，未处理该异常。该扫描只检查测试源码片段是否存在，不作为行为测试通过证据；行为结论来自实际执行的 Headless/API 测试与浏览器 smoke。`SL-GAP-02`／`SL-GAP-03` 在入口退役及恢复验证后记为 `RETIRED_WITH_RUNTIME`。未执行从出生到寿终的完整自然 Web 人生；细节见[单角色人生实现差异台账](single-life-implementation-gap-register.md)。
 
 **明确不做：** 不设计纯离线产品、纯静态托管模式、自动故障切换、不加新 API／Schema／通用 Adapter／Game State，不进行其它领域重构、数值平衡、内容扩写、Ending 改造、AE 扩权或跨人物系统建设。本条只批准并记录这个有界 Runtime 事项；其他差异仍须逐项依据现行权威确认与授权。
+
+### PD-131：Frustration Fairness & Player-Visible Evidence Boundary
+
+**产品与评价语义裁决（Human accepted：2026-10-10；工程／Gate 口径迁移状态：NOT IMPLEMENTED）**
+
+**背景与目标：** 默认 `headless_server` P8 playability gate 在 8/8 persona 上因 `frustration / opaqueRatio` 失败。2026-10-10 对基线 `fc418f2c0ead3ae66fb672e647eae9f2da416e25` 的只读复现与玩家可见追踪发现，33 条当前评价器认定的负面记录中 26 条被标为 `opaque`，但同时混有真实不合理的结算／展示、文字规则漏判，以及尚未澄清的状态上限异常。**该结果证明当前 Gate NO-GO，不证明 26 条都是产品意义上的“不公平挫折”。**本决策明确玩家体验的判断依据，不追认旧关键词分类为产品真源。
+
+**规则 1 — 真实负面事实与合法因果：** 评价先核对正式合法状态、执行的效果、实际 before/after、历史及玩家相关的实际后果。真实损失、关系变化、重要 Status、不可逆结果可以形成负面经历；但**任意数值下降不自动等于玩家所感受的不公平挫折**，也不得以选项文案、理论配置值或模糊关键词代替已经结算的事实。发现数值超界、截断／归一化等状态异常时，应先追溯状态生成及边界 Contract，保留异常证据；未完成归因前不得自行将其当作正常挫折或为降低失败率而直接从分母剔除。
+
+**规则 2 — 选择前可预见性与事后解释分离：** 玩家主动选择中，**合理可预见且对人物有实质影响的代价或风险方向**应能从选项／合法先验信息中理解，不要求展示精确效果数值、内部公式或隐藏判定（PD-032）；不要求预告所有偶然结果。世界自主变化、合法意外和失败可以不预先警告，且无需保护玩家必获成功或给予补偿；但发生后应以可靠事实说明发生了什么、造成什么影响，以及可被证明的因果。**结算后展示真实 delta 不等于选择前有预警，也不等于事后因果已经解释充分。**恢复路径仅在事实支持时呈现，不得为降低挫折分数捏造“总能补救”的承诺。
+
+**规则 3 — 实际玩家可见结果与事实一致：** 正式 API／Web 玩家能够感知的结果，应来自合法结算的 canonical before/after 与既有正式领域事实；公开的正、负、零或混合属性变化按 PD-031／PD-033 如实表达，**对体验或后续决策重要的 Status／关系／长期后果**不得仅写入内部状态而完全失去适当的玩家反馈。不得重新执行效果、依据配置的假定增量展示或揭示隐藏诊断字段。本条规定产品可见性要求，不预先裁决要用结果卡、既有状态面板还是其他最小合法呈现方式，也不授权新建通用 Status 系统或扩大 API／Snapshot 字段。
+
+**规则 4 — 评价必须具备可核验的玩家证据：** P8/Headless 的 frustration 评价应分开记录／核查（a）真实负面因果是否成立，（b）选择前可合理获知的风险，（c）结算后的实际反馈与解释，（d）证据缺失、状态异常或不适用场景。结论须能回溯到实际执行的事件／选择、效果与**正式玩家能看到的内容**；源码关键词可以作为辅助诊断，不能单独证明有无充分预警／解释。不要把世界意外和玩家承诺选择套用同一“必须预警”条件，也不得把事后结果卡视作选择前信息。
+
+**当前 Gate 与指标边界：** 现有 `src/p8/collectPersonaMetrics.ts` 的 `opaqueRatio` 及 `src/p8/playabilityGate.ts` 的 `> 0.35` 仍是**未修改的当前工程 Gate**，保持 NO-GO；其当前分子、分母及 `warned / explained / recoverable / opaque` 分类**不自动等价于本条的产品公平性判断**。本决策不调整数值阈值、不重写历史报告或现有基线，不以更改关键字／删掉样本达成 PASS。后续若实现语义口径变更，必须先明确适用样本、证据结构、版本与独立基线，测试新旧结果的不可直接比较处，并单独取得有界实施授权；`0.35` 是否继续有产品解释力，须基于新口径另外验证，而非在本条先行裁决。
+
+**当前待核查的有界样本（非直接内容修改授权）：**
+
+- `refugee_sect_story`、`court_politics_revealed`、`p26_business_habit_obligation`、`merchant_talent_discovery` 的未显式指定 `stat_modify.operator`，目前共享执行规则默认为 `set`；逐例核对内容意图和合法效果，**不全局改变默认 `set` 语义**。
+- `youth_road_peril` 的“带伤／伤痛”预警被现有文字分类漏识别；须核对全部可见上下文及评价规则，而非仅增一个关键字。
+- `career_martial_innovation` 的 `fatigued` 等 Status 效果可能缺少正式玩家可见反馈；核对真实 API／Web 通路后才定义最小呈现范围。
+- `medical_imperial_doctor`／`medical_palace_intrigue` 等样本出现 `charisma` 从 101／104 归一化为 100；先追溯超出已知 0–100 边界的来源、状态处理与可见反馈，不直接宣告两条“误报”。
+- `demonic_encounter` 的侠义代价已经结算显示，但选择前方向提示是否充足仍需按本条核验。
+
+**验收方向（非当前已通过结论）：** 在代表性样本中，能够凭同一实际结算与正式玩家展示证据区分明确损失／状态异常／无负面经历；区分选择前与事后的可理解性；对重大后果不漏报且不虚构必然恢复；独立 Gate 能给出可回溯、可重复的判断。当前 8/8 blocker 不因此关闭。
+
+**权威与范围调和：** 遵守 Game Product Foundation、PD-031／032／033／079／126／129，以及现有 Character、Status、Content Authoring、Choice 与 Snapshot Contract。PD-079 已退休 legacy wallet 作为 P8 negative domain 的部分旧语义，本条不恢复它。PD-126 的合法调度优先级验证仍独立开放（`SL-GAP-04`）；本次 frustration 证据治理另记 `SL-GAP-10`。自然出生至寿终验收仍归 `SL-GAP-09`。**本裁决不实施代码、事件、Gate、Schema、Snapshot、API、UI、AE 或其他系统改动；具体根因修正须按台账另行有界实施并验证。**

@@ -65,3 +65,4 @@ interface P8PlayabilityReportMeta {
 
 - 真人 API 栈验收走 `docs/local-api-dev.md` 的双终端联调，不依赖已删除的临时 test script 文档。
 - `local_direct` 仅作开发对比；默认 gate 保持 `headless_server`。
+- **PD-131（2026-10-10；正式语义已批准、Gate 尚未迁移）：**当前 frustration/opaqueRatio 仍使用原版 GameProcessRecord 负面领域和文本关键词分类，`> 0.35` 阈值未改；它不直接等价于已核定的玩家不公平挫折比例。当前默认 Headless Gate 的 8/8 persona frustration blockers 保持 `NO-GO`。后续应在单独有界工程任务中以真实结算、选择前信息、结果后反馈及正式玩家可见证据核对口径；如更改分子／分母／分类，须明确指标版本和重新建立合法基线，不覆盖 tracked P8 fixture 伪造通过。参见 [PD-131](../governance/product-decisions.md) 与 [SL-GAP-10](../governance/single-life-implementation-gap-register.md)。

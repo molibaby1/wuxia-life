@@ -13,6 +13,8 @@
 > **PD-130 实施核验（2026-10-10；实施起点 `dev` HEAD `42f77408bcb7f2f08b679674fa80de93a242b8fe`）：**正式 Web 入口已无 `useNewGameEngine` 路径。真实浏览器 API smoke 覆盖新档、事件选择与反馈、主动行动与结算、保存、页面重载、恢复并继续；另在“柜台边的小主意”待选择时保存，重载后恢复同一事件及两个选项并结算。缺少 `VITE_P6B_API_URL` 显示配置错误，API 不可用显示后端失败，均未启动 Local。Headless `playerVisibleFeedback.test.ts` 覆盖正式自动事件、Choice outcome 结算与玩家反馈；`headlessSession.test.ts` 覆盖合法空效果选择、单次事件记录及结果确认；`p72SessionPhase.test.ts` 覆盖阶段确认与事件调度；`tests/AllTests.ts` 保留共享 `resolveFirstChoiceEffects` 的首个可用 outcome、条件不满足／无效条件及选择 effects fallback 行为断言。API 集成测试覆盖待处理正式事件保存恢复，`normalLongevityEndingClosure.test.ts` 覆盖寿终、终局快照恢复与重复推进幂等。**未执行从出生到寿终的完整自然 Web 人生。**`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 通过。默认 Headless `npm run gate:playability` 当前与隔离的未修改基线均失败，8 个 persona 有 frustration / opaque-ratio blockers；剔除 `generatedAt` 后两份 JSON 报告完全相同，且本次 diff 未改动 Gate 的 Headless Runtime、Simulator、Persona、指标或脚本依赖，未发现本次退役引入的 Gate 回归；SL-GAP-04 因此仍开放。`report:p2-gameplay-structure` 未运行；已知 `routeCompletionRate is not defined` 在实施起点也存在，本次脚本差异只调整 Choice feedback 覆盖扫描，未处理该异常。
 
 
+> **2026-10-10 Frustration 调查与裁决：**基线 dev / fc418f2c0ead3ae66fb672e647eae9f2da416e25 上，默认 Headless P8 Gate 复现 8/8 persona frustration blockers；8 局均截至年龄 40。按**旧评价器**统计 33 条候选负面记录、26 opaque；样本混有实际大幅结算下降、状态展示疑点、文本分类漏判与属性超限归一化疑点。不能把 26 条一律裁为“不公平挫折”。Human 已批准 [PD-131](product-decisions.md) 作为产品评价依据；**当前 Gate、阈值、基线、事件和 Runtime 均未修改，Gate 仍 NO-GO**。此项另记 SL-GAP-10，不能以 frustration blocker 代替 SL-GAP-04 的调度违规证据。
+
 ## 1. 权威与使用边界
 
 - **顶层游戏产品：**[`docs/product/game-product-foundation.md`](../product/game-product-foundation.md)；以单角色完整人生及行动—时间—世界—历史—反馈—正常结束因果闭环作为审查主线。
@@ -59,12 +61,13 @@
 | SL-GAP-01 | 主动行动的年龄推进可能遗漏正式节点钩子 | CONFIRMED_PATH_DIFFERENCE | P1 | OPEN / 待复现 | 跨生日时节点事实是否缺失、最小受影响路径 |
 | SL-GAP-02 | 已退役 Local 曾拒绝合法的零效果选择 | CONFIRMED_CODE_GAP（历史基线） | 退役归档 | RETIRED_WITH_RUNTIME | 浏览器 Local 执行入口已删除；不为旧路径补修；此状态不代表已验证 API 零效果选择 |
 | SL-GAP-03 | 已退役 Local 曾无法恢复未完成的当前正式事件 | CONFIRMED_PATH_DIFFERENCE（历史基线） | 退役归档 | RETIRED_WITH_RUNTIME | 真实 API Web smoke 已保存并恢复正式事件后继续；不为旧路径补修 |
-| SL-GAP-04 | 正式 Headless/API 调度与行动优先级合规性仍需核验 | CONFIRMED_PATH_DIFFERENCE | P1 验证 | OPEN / 保留正式路径验证 | 继续核验 PD-126 决策点；不要求浏览器 Local parity；当前 Headless playability gate 有未解决 blocker |
+| SL-GAP-04 | 正式 Headless/API 调度与行动优先级合规性仍需核验 | CONFIRMED_PATH_DIFFERENCE | P1 验证 | OPEN / 保留正式路径验证 | 核验 PD-126 决策点；8 个 frustration blockers 不构成已证实调度违规（另见 SL-GAP-10） |
 | SL-GAP-05 | Milestone 详细持续查询未进入当前主界面 | CONFIRMED_CODE_GAP | P1 反馈 | OPEN | 四项反馈职责在生产入口的实际可达性 |
 | SL-GAP-06 | Milestone 重要经历覆盖可能不足 | NEEDS_VALIDATION | P2 | OPEN | 真实人生中哪些有证据的重要经历未获记录 |
 | SL-GAP-07 | 重要人物与关系的可达人生连续性 | NEEDS_VALIDATION | P2 | OPEN | 已批准 Person-first 语义在活跃内容中是否成立 |
 | SL-GAP-08 | 无家庭人物可被推为“壮志未酬” | CONFIRMED_CODE_GAP / 领域冲突 | P2 | OPEN | 评价是否具备实际志向未实现的事实依据 |
 | SL-GAP-09 | 自然出生至终局 / 早逝 / 存档的端到端证据不足 | NEEDS_VALIDATION | P2 验证 | OPEN | 不注入终局年龄时能否正常结束且状态一致 |
+| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / 根因调查完成，待有界治理 | 依 PD-131 先核对内容／属性上限／Status，再经单独授权处理指标与验证；Gate 仍 NO-GO |
 
 ### SL-GAP-01 — 主动行动与日历推进的年龄节点分叉
 
@@ -96,7 +99,7 @@
 ### SL-GAP-04 — 正式 Headless/API 调度与行动优先级合规性
 
 - **历史路径差异：**首次审查发现的 Local [`getNextEvent()` L125–244] 在判断可用主动行动前尝试调度；浏览器 Local Runtime 已退役，这个差异不再形成并行维护或 parity 要求。
-- **当前正式路径证据：**PD-126 约束 Headless/API 的行动、强制事件、行动确认与时间推进调度；`npm run test:headless`、`npm run test:p6b` 通过，但默认 `npm run gate:playability` 有 8 个 persona frustration / opaque-ratio blockers，尚不足以关闭本项。
+- **当前正式路径证据：**PD-126 约束 Headless/API 的行动、强制事件、行动确认与时间推进调度；`npm run test:headless`、`npm run test:p6b` 通过。2026-10-10 的 8 个 persona frustration / opaque-ratio blockers 已另归 SL-GAP-10：代表性运行未见可确认的调度违规，但未采集完整 Scheduler 候选、eligibility、权重与选择证据，故不能据此关闭本项。
 - **正式语义：**PD-126 对 Headless、P8、API 的优先级具有具体约束；PD-030 / PD-033 约束操作与正式结算。不可把 PD-126 未写明的 Local 范围自动扩张为已经裁决的实现细节。
 - **可能影响（推断）：**正式 Web 的 API/Headless 决策点可能仍有不合 PD-126 的情况；随机选择天然允许不同，不要求相同 seed 的每个事件绝对一致。
 - **最小验证：**对正式 API/Headless 的合法决策点和受控调度机会核对何时允许 Scheduler 抽取、是否抢占有效主动规划、结果是否重复确认；不再比较浏览器 Local。
@@ -144,10 +147,23 @@
 - **禁止：**把新的详细人生总结或评价系统当成验证正常结束的必要前置。
 - **状态：**OPEN / NEEDS_VALIDATION。
 
+### SL-GAP-10 — Frustration Fairness 与 Gate 证据口径
+
+- **复现事实：**2026-10-10 / fc418f2c0ead3ae66fb672e647eae9f2da416e25。默认 Headless P8 Gate 失败，8/8 persona blocker、0 warning，全部运行到年龄 40（并非寿终）。原分类器口径各人 3–5 条“负面记录”，合计 33 条、26 opaque／7 warned；**这些是旧评价器的输出，不是已经验证的玩家不公平挫折数量**。附加 Headless 玩家界面与结算状态追踪支持以下有界分类，未更改源码。
+- **A — 真实属性下降／内容意图待核对（16 条 opaque）：**refugee_sect_story（8 persona）、court_politics_revealed（5）、p26_business_habit_obligation（2）、merchant_talent_discovery（1）相关 stat_modify 省略 operator；共享 statModifySemantics.ts 默认 set，结算与部分正面／中性选择文案冲突。仍须逐事件核对作者意图，不能全局改默认 operator。
+- **B — 文本分类漏判（5 条）：**youth_road_peril 的选项描述已有“带伤／伤痛”等可见风险，但现有关键词组合将其判为 opaque；应核对完整玩家可见信息与评价判定，不能仅靠增加单词关闭缺陷。
+- **C — 状态反馈疑点（2 条）：**career_martial_innovation 确实添加 fatigued 等 Status；捕获结果卡未展示其变化。当前 API PlayerSummaryDto 没有 statuses，需继续核验 Web 是否有正式展示或解释路径，再决定最小反馈范围。
+- **D — 越界／归一化疑点（2 条）：**medical_imperial_doctor、medical_palace_intrigue 样本观察到 charisma 101→100、104→100；正式操作 clamp 至 0–100，应追溯越界生产路径，不允许以“正常的负面经历”或“直接从分母排除”替代根因定位。
+- **E — 预警充分性待核查（1 条）：**demonic_encounter 的 chivalry 8→0 已由结果卡展示，选择前对侠义损失的可预见性仍需核验。
+- **权威与分界：**[PD-131](product-decisions.md) 已明确真实事实、选择前合理可预见性、事后事实反馈与玩家可见 Gate 证据的不同职责。PD-031／032／033 与 PD-079 保持有效。与 PD-126 调度（SL-GAP-04）及自然完整人生（SL-GAP-09）分开处理。
+- **下一步最小范围：**按 A–E 从实际结算与正式玩家可见展示核验具体样本，明确作者效果意图、超限来源和 Status 可见性；之后独立限定生产修复与 Gate 口径修正。现有 >0.35 阈值、旧报告、历史 fixture 不改；一旦正式更换指标口径，单独版本化并建立有证据的新基线和回归，不以删除 blocker 为目标。
+- **状态：**OPEN / DIAGNOSED。PD-131 产品裁决完成，工程迁移和 Gate 修复均未启动。Gate 仍 NO-GO；SL-GAP-04、SL-GAP-09 继续开放。
+
 ## 4. 依赖关系与建议治理节奏
 
 ```text
 SL-GAP-01 / 04：合法行动与正式时间、调度
+SL-GAP-10：独立的负面经历／反馈／Gate 证据（不据 frustration 推断调度违规）
                   ↓
 SL-GAP-05 / 06：获得、查询、回顾真实 Milestone
                   ↓
@@ -178,6 +194,6 @@ SL-GAP-07 / 08 / 09：人物长期连续性、价值中立终局与自然完整�
 
 **本次 PD-130 结果：**仅退役浏览器 Local 玩家 Runtime 和无消费者 Local 专属脚手架；保留共享 `GameEngineIntegration`、Headless/API、Snapshot 转换、`SaveManager.ts` 的测试/模拟用途及 `GameProcessSimulator.local_direct`。新档、事件选择、主动行动、保存/恢复有真实 API Web 运行证据；正常终局由 Headless 测试覆盖。工作树基线、测试结果和 Headless gate blocker 见上方实施核验记录。
 
-**仍未建立的证据：**完整自然出生至寿终 Web 人生；Headless gate 的 8 个 persona blockers；SL-GAP-01、04–09 的各自验证。退役不自动关闭这些事项，也不授权扩展到 gameplay 修复、Schema/Snapshot 变更或其他阶段。
+**仍未建立的证据：**完整自然出生至寿终 Web 人生；Headless gate 的 8 个 persona blockers（独立见 SL-GAP-10，PD-131 仅裁决语义并未修复）；SL-GAP-01、04–10 的各自验证。退役不自动关闭这些事项，也不授权扩展到 gameplay 修复、Schema/Snapshot 变更或其他阶段。
 
 > 本台账的存在只是保证下一轮可以从既有证据继续调查，而不是要求一次性完成全部事项。更新此文档时，优先修改既有条目状态及证据，不无边界增列工程 TODO。

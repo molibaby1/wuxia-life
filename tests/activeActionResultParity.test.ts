@@ -1,15 +1,32 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { mapSessionProgression } from '../server/src/services/sessionProgressionMapper';
+import {
+  applyStatDeltas,
+  executeActiveActionOnState,
+} from '../src/core/activePlanning/ActivePlanningService';
 import { buildActiveActionSummaryDisplay } from '../src/core/activePlanning/activeActionSummaryBuilder';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { createDefaultRuntimeEventCatalog } from '../src/core/EventLoaderRuntimeCatalog';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
+import { calculatePublicStatDeltas } from '../src/core/activePlanning/periodSummaryBuilder';
 import type { ActiveActionSummaryDisplay } from '../src/types/activeActionTypes';
 import type { ChoiceFeedbackModel } from '../src/types/choiceFeedback';
 import * as progressionOverlay from '../src/types/progressionOverlay';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
+}
+
+function assertDeltasMatch(
+  actual: Record<string, number>,
+  expected: Record<string, number>,
+  message: string,
+): void {
+  const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
+  for (const key of keys) {
+    assert((actual[key] ?? 0) === (expected[key] ?? 0), `${message}: ${key}`);
+  }
 }
 
 function makeSummary(): ActiveActionSummaryDisplay {
@@ -280,9 +297,192 @@ function testSharedEngineConsumesSharedBuilder(): void {
   assert(Boolean(result?.activeActionSummary.appliedDeltaSummary?.includes('功力')), 'GameEngineIntegration must expose actual public delta');
 }
 
+function testActiveActionRecordsOnlyAppliedCharismaDeltas(): void {
+  const run = (charisma: number, random: () => number) => {
+    const engine = new GameEngineIntegration();
+    const state = engine.getGameState();
+    state.player.age = 30;
+    state.player.charisma = charisma;
+    state.player.connections = 20;
+    state.actionHistory = [];
+    state.eventHistory = [];
+    const beforeTime = { ...state.currentTime! };
+    const beforePlayer = { ...state.player };
+    const beforeCharisma = state.player.charisma;
+    const result = executeActiveActionOnState(state, 'action_socializing_basic', {
+      random,
+      includeDisturbance: false,
+    });
+    assert(result !== null, 'socializing remains available at the charisma cap');
+    const actualPublicDelta = calculatePublicStatDeltas(beforePlayer, state.player);
+    assertDeltasMatch(result!.actionResult.deltas, actualPublicDelta, 'ActionResult must match canonical before/after');
+    assertDeltasMatch(
+      state.actionHistory?.at(-1)?.deltas ?? {},
+      actualPublicDelta,
+      'action history must match canonical before/after',
+    );
+    return { state, beforeCharisma, beforeTime, result: result! };
+  };
+
+  const ordinary = run(90, () => 0);
+  assert(ordinary.state.player.charisma === 91, 'charisma 90 keeps its normal +1 growth');
+  assert(ordinary.result.actionResult.deltas.charisma === 1, 'ActionResult records ordinary applied growth');
+
+  const nearlyFull = run(99, () => 0.99);
+  assert(nearlyFull.state.player.charisma === 100, 'charisma 99 caps at 100 when rolled reward exceeds room');
+  assert(nearlyFull.result.actionResult.deltas.charisma === 1, 'ActionResult records only the remaining +1');
+  assert(nearlyFull.state.actionHistory?.at(-1)?.deltas.charisma === 1, 'action history records the applied +1');
+  assert(nearlyFull.result.actionResult.metadata.rewardSummary.includes('魅力+1'), 'result reward summary uses actual +1');
+  assert(nearlyFull.result.activeActionSummary.appliedDeltaSummary?.includes('魅力+1') === true, 'applied summary uses actual +1');
+  assert(nearlyFull.result.activeActionSummary.resultExplanation?.includes('魅力+1') === true, 'result explanation uses actual +1');
+  assert(nearlyFull.result.feedbackText.includes('魅力+1'), 'completion feedback uses actual +1');
+  assert(!nearlyFull.result.feedbackText.includes('魅力+3'), 'completion feedback omits rolled-away growth');
+
+  const full = run(100, () => 0);
+  const actualCharismaDelta = full.state.player.charisma - full.beforeCharisma;
+  const summaryText = `${full.result.actionResult.metadata.rewardSummary} ${full.result.activeActionSummary.appliedDeltaSummary} ${full.result.activeActionSummary.resultExplanation}`;
+  assert(full.state.player.charisma === 100, 'charisma 100 stays capped after socializing');
+  assert(actualCharismaDelta === 0, 'full charisma has no applied charisma growth');
+  assert(full.result.actionResult.deltas.charisma === undefined, 'ActionResult omits the capped zero delta');
+  assert(full.state.actionHistory?.at(-1)?.deltas.charisma === undefined, 'history omits the capped zero delta');
+  assert(!summaryText.includes('魅力'), 'active result summary must not report theoretical charisma growth');
+  assert(!full.result.feedbackText.includes('魅力'), 'completion feedback must not report theoretical charisma growth');
+  assert(
+    JSON.stringify(full.state.currentTime) !== JSON.stringify(full.beforeTime),
+    'a zero applied charisma delta must not cancel time progression',
+  );
+  assert(full.state.actionHistory?.length === 1, 'a zero applied charisma delta must still record the action');
+}
+
+function testSharedStatWriterKeepsOtherAttributeSemantics(): void {
+  const engine = new GameEngineIntegration();
+  const player = engine.getGameState().player;
+  player.charisma = 0;
+  player.chivalry = 0;
+  player.reputation = 0;
+  player.connections = 0;
+  player.knowledge = 0;
+
+  const applied = applyStatDeltas(player, {
+    charisma: 200,
+    chivalry: -5,
+    reputation: 150,
+    connections: 150,
+    knowledge: 150,
+  });
+
+  assert(player.charisma === 100 && applied.charisma === 100, 'charisma is capped at 100');
+  assert(player.chivalry === -5 && applied.chivalry === -5, 'chivalry continues to allow negative values');
+  assert(player.reputation === 150, 'reputation remains without a fixed upper cap');
+  assert(player.connections === 150, 'connections remain without a fixed upper cap');
+  assert(player.knowledge === 150, 'knowledge remains without a fixed upper cap');
+
+  const lowerBoundApplied = applyStatDeltas(player, { charisma: -250 });
+  assert(player.charisma === 0 && lowerBoundApplied.charisma === -100, 'charisma is also capped at 0');
+}
+
+async function testMarriageLoveChoiceUsesSharedCharismaBoundary(): Promise<void> {
+  const engine = new GameEngineIntegration();
+  const player = engine.getGameState().player;
+  player.age = 25;
+  player.charisma = 99;
+  player.chivalry = 0;
+
+  await engine.executeChoiceEffects([], 'marriage_choice', 'love');
+
+  const state = engine.getGameState();
+  assert(state.player.charisma === 100, 'marriage love choice must not exceed the charisma cap');
+  assert(state.player.chivalry === 5, 'marriage love choice must preserve its chivalry increase');
+  assert(state.criticalChoices?.marriage_choice === 'love', 'marriage love choice fact remains recorded');
+}
+
+async function testMedicalPositiveCharismaEffectsRemainZeroDeltaAtCap(): Promise<void> {
+  const catalog = createDefaultRuntimeEventCatalog();
+  const cases = [
+    { eventId: 'medical_imperial_doctor', choiceId: 'medical_imperial_doctor_choice_1', stat: 'reputation' as const, delta: 30 },
+    { eventId: 'medical_palace_intrigue', choiceId: 'medical_palace_intrigue_choice_1', stat: 'chivalry' as const, delta: 5 },
+  ];
+
+  for (const item of cases) {
+    const event = catalog.getEventById(item.eventId);
+    const choice = event?.choices?.find(candidate => candidate.id === item.choiceId);
+    assert(choice !== undefined, `${item.eventId} keeps its selected Medical choice`);
+    const engine = new GameEngineIntegration();
+    const player = engine.getGameState().player;
+    player.charisma = 100;
+    player[item.stat] = 10;
+    const before = { ...player };
+
+    await engine.executeChoiceEffects(choice!.effects ?? [], item.eventId, item.choiceId);
+
+    const after = engine.getGameState().player;
+    assert(after.charisma === 100, `${item.eventId} positive charisma effect stays at 100`);
+    assert(after.charisma - before.charisma === 0, `${item.eventId} produces no false negative charisma delta`);
+    assert(after[item.stat] - before[item.stat] === item.delta, `${item.eventId} preserves its other positive effect`);
+    assert(
+      calculatePublicStatDeltas(before, after).charisma === undefined,
+      `${item.eventId} public delta does not report a charisma decrease`,
+    );
+    if (item.eventId === 'medical_imperial_doctor') {
+      assert(engine.getGameState().flags?.medical_imperial === true, 'imperial doctor choice keeps its route flag');
+    }
+  }
+}
+
+async function testHeadlessAtCharismaCapExposesOnlyActualActionOutcome(): Promise<void> {
+  const bootstrap = HeadlessEngineSessionImpl.create({
+    playerName: '魅力边界 parity',
+    gender: 'female',
+    catalogVersion: '1.0.0',
+    randomSeed: 803,
+  });
+  const snapshot = bootstrap.serialize();
+  snapshot.state.player.age = 30;
+  snapshot.state.player.charisma = 100;
+  snapshot.state.player.events = [];
+  snapshot.state.eventHistory = [];
+  snapshot.state.actionHistory = [];
+  snapshot.state.flags = {};
+  snapshot.state.player.flags = {};
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+
+  assert(session.getSessionPhase() === 'active_planning', 'capped Headless fixture enters active planning');
+  await session.executeActiveAction('action_socializing_basic');
+
+  const after = session.serialize().state;
+  const volatile = session.getProgressionVolatileState();
+  const history = after.actionHistory?.at(-1);
+  const summaryText = `${volatile.pendingActionSummary?.appliedDeltaSummary} ${volatile.pendingActionSummary?.resultExplanation}`;
+  assert(after.player.charisma === 100, 'Headless state remains at the charisma cap');
+  assert(history?.deltas.charisma === undefined, 'Headless action history omits unapplied charisma growth');
+  assert(!summaryText.includes('魅力'), 'Headless action summary reports only applied public deltas');
+  assert(!String(volatile.lastOutcomeText).includes('魅力'), 'Headless completion feedback reports only applied rewards');
+
+  const apiPayload = mapSessionProgression({
+    getSessionPhase: () => 'action_summary',
+    getNextEvent: async () => null,
+    getPlanningOptions: () => [],
+    getProgressionVolatileState: () => volatile,
+    getRuntimeState: () => session.getRuntimeState(),
+  } as never, 1, 'charisma-cap-snapshot', null, {} as never);
+  assert(
+    apiPayload.activeActionSummary === volatile.pendingActionSummary,
+    'API preserves the actual Headless action summary',
+  );
+  assert(
+    !String(apiPayload.activeActionSummary?.resultExplanation).includes('魅力'),
+    'API action summary does not expose the unapplied charisma reward',
+  );
+}
+
 async function main(): Promise<void> {
   testApiMapperPreservesSharedSemantics();
   testSharedEngineConsumesSharedBuilder();
+  testActiveActionRecordsOnlyAppliedCharismaDeltas();
+  testSharedStatWriterKeepsOtherAttributeSemantics();
+  await testMarriageLoveChoiceUsesSharedCharismaBoundary();
+  await testMedicalPositiveCharismaEffectsRemainZeroDeltaAtCap();
+  await testHeadlessAtCharismaCapExposesOnlyActualActionOutcome();
   await testHeadlessConsumesSharedBuilder();
   testBrowserConsumerRendersSharedFields();
   testProgressionEchoKeepsOnlyNewOutcomeInformation();

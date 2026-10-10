@@ -11,6 +11,7 @@
  */
 
 import type { CriticalChoices, GameState } from '../types/eventTypes';
+import { writePlayerNumeric } from '../utils/playerStatAccess';
 
 export class CriticalChoiceSystem {
   /**
@@ -159,7 +160,7 @@ export class CriticalChoiceSystem {
         if (option === 'arranged') {
           player.connections += 20;
         } else if (option === 'love') {
-          player.charisma += 5;
+          writePlayerNumeric(player, 'charisma', player.charisma + 5);
           player.chivalry += 5;
         }
         break;

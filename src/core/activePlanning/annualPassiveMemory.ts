@@ -48,9 +48,9 @@ function addDeltas(target: Record<string, number>, source: Record<string, number
 function applyEntry(state: GameState, entry: PassiveNarrativeEntry, deltas: Record<string, number>): void {
   const age = state.player?.age ?? 0;
   const applied = clampPassiveStatDeltasForAge(age, entry.statDeltas);
-  applyStatDeltas(state.player, applied);
+  const actualDeltas = applyStatDeltas(state.player, applied);
   applyPassiveNarrativeFlags(state, entry.flags);
-  addDeltas(deltas, applied);
+  addDeltas(deltas, actualDeltas);
   if (!state.eventHistory) state.eventHistory = [];
   if (shouldRecordPassiveNarrativeInHistory(entry.id)) {
     state.eventHistory.push({

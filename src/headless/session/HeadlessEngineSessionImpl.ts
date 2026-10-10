@@ -654,7 +654,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
           ? (resolvePreschoolPassiveEntryByTitle(displayedTitle, age) ?? entry)
           : entry;
       const appliedDeltas = clampPassiveStatDeltasForAge(age, historyEntry.statDeltas);
-      applyStatDeltas(state.player, appliedDeltas);
+      const actualDeltas = applyStatDeltas(state.player, appliedDeltas);
       applyPassiveNarrativeFlags(state, historyEntry.flags);
       this.engine.advanceTime(3, 'month');
       if (!state.eventHistory) {
@@ -669,7 +669,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         state.eventHistory.push(record);
       }
       appendPassiveTitleToHistory(state, displayedTitle ?? historyEntry.title);
-      return { selected: historyEntry, deltas: appliedDeltas };
+      return { selected: historyEntry, deltas: actualDeltas };
     });
     this.volatile.pendingPeriodSummary = buildPeriodSummary({
       sourceLabel: '童年岁月',

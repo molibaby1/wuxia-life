@@ -45,5 +45,7 @@ export function writePlayerNumeric(player: PlayerState, key: string, value: numb
     return;
   }
   const record = player as unknown as Record<string, number>;
-  record[key] = value;
+  record[key] = key === 'charisma'
+    ? Math.max(0, Math.min(100, value))
+    : value;
 }

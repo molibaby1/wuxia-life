@@ -23,7 +23,7 @@ import { resolveDisturbanceAfterAction } from './DisturbanceResolver';
 import { buildActiveActionSummaryDisplay } from './activeActionSummaryBuilder';
 
 import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder';
-import { calculatePublicStatDeltas } from './periodSummaryBuilder';
+import { calculatePublicStatDeltas, formatStatDeltaSummary } from './periodSummaryBuilder';
 
 import { collectPracticeImpactLines } from '../../utils/practiceTrajectorySummary';
 import { formatLongTermFlag, isPlayerVisibleFlag } from '../../utils/playerFacingLabels';
@@ -50,13 +50,23 @@ function durationToAdvanceUnit(duration: ActionDuration): { value: number; unit:
   return { value: months, unit: 'month' };
 }
 
-export function applyStatDeltas(player: PlayerState, deltas: Record<string, number>): void {
+export function applyStatDeltas(
+  player: PlayerState,
+  deltas: Record<string, number>,
+): Record<string, number> {
+  const appliedDeltas: Record<string, number> = {};
   for (const [key, delta] of Object.entries(deltas)) {
     if (!isCanonicalPlayerNumericStat(key)) {
       continue;
     }
-    writePlayerNumeric(player, key, readPlayerNumeric(player, key) + delta);
+    const before = readPlayerNumeric(player, key);
+    writePlayerNumeric(player, key, before + delta);
+    const appliedDelta = readPlayerNumeric(player, key) - before;
+    if (appliedDelta !== 0) {
+      appliedDeltas[key] = appliedDelta;
+    }
   }
+  return appliedDeltas;
 }
 
 export function appendActionHistory(
@@ -126,7 +136,8 @@ export function executeActiveActionOnState(
   // is sufficient because public delta calculation reads only top-level numeric fields.
   const beforePlayer: PlayerState = { ...state.player };
 
-  applyStatDeltas(state.player, resolved.deltas);
+  resolved.deltas = applyStatDeltas(state.player, resolved.deltas);
+  resolved.metadata.rewardSummary = formatStatDeltaSummary(resolved.deltas);
   const publicDelta = calculatePublicStatDeltas(beforePlayer, state.player);
 
   updateFocusStreak(state, resolved.metadata.category);

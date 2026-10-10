@@ -15,6 +15,7 @@ import {
 import { reactive } from 'vue';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
+import { buildPeriodSummary } from '../src/core/activePlanning/periodSummaryBuilder';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 import type { PassiveNarrativeEntry } from '../src/data/passiveNarrativeTypes';
 
@@ -56,6 +57,59 @@ function testPrepareAnnualPassiveMemoryWithReactiveState(): void {
   );
 }
 
+function testPassiveCharismaSummaryUsesAppliedGrowth(): void {
+  const entry: PassiveNarrativeEntry = {
+    id: 'test_passive_charisma_growth',
+    title: '人情往来',
+    text: '你在往来中渐渐学会与人相处。',
+    originTags: [],
+    ageMin: 0,
+    ageMax: 100,
+    statDeltas: { charisma: 3 },
+  };
+
+  for (const scenario of [
+    { before: 90, after: 93, delta: 3 },
+    { before: 99, after: 100, delta: 1 },
+    { before: 100, after: 100, delta: 0 },
+  ]) {
+    const state = merchantInfantState(8);
+    state.player.charisma = scenario.before;
+    const result = commitAnnualPassiveMemory(state, {
+      headline: '人情往来',
+      body: entry.text,
+      entries: [entry],
+    });
+    const summary = buildPeriodSummary({
+      sourceLabel: '童年岁月',
+      headline: result.headline,
+      body: result.body,
+      deltas: result.deltas,
+      deltaCause: result.headline,
+    });
+
+    assert(state.player.charisma === scenario.after, `passive charisma ${scenario.before} settles to ${scenario.after}`);
+    assert(
+      (result.deltas.charisma ?? 0) === scenario.delta,
+      `passive result records actual charisma delta ${scenario.delta}`,
+    );
+    if (scenario.delta === 0) {
+      assert(
+        summary.statDeltaSummary === '本期未见明显数值变化',
+        'passive summary must not claim growth after the cap removes it',
+      );
+    } else {
+      assert(
+        summary.statDeltaSummary.includes(`魅力+${scenario.delta}`),
+        'passive summary shows only actual charisma growth',
+      );
+      if (scenario.delta < 3) {
+        assert(!summary.statDeltaSummary.includes('魅力+3'), 'passive summary omits the capped theoretical amount');
+      }
+    }
+  }
+}
+
 async function testHeadlessAnnualAdvance(): Promise<void> {
   const bootstrap = HeadlessEngineSessionImpl.create({
     playerName: '年度记忆',
@@ -86,6 +140,66 @@ async function testHeadlessAnnualAdvance(): Promise<void> {
   const after = restored.getProgressionVolatileState();
   assert(after.pendingPeriodSummary === null, 'annual card does not add a second summary acknowledgement');
   assert(after.passiveNarrative?.title === '2岁这一年', 'the same acknowledgement reaches the next annual card');
+}
+
+async function testHeadlessPassiveSummaryUsesAppliedCharismaGrowth(): Promise<void> {
+  const entry: PassiveNarrativeEntry = {
+    id: 'test_passive_charisma_growth',
+    title: '人情往来',
+    text: '你在往来中渐渐学会与人相处。',
+    originTags: [],
+    ageMin: 0,
+    ageMax: 100,
+    statDeltas: { charisma: 3 },
+  };
+
+  for (const scenario of [
+    { before: 99, after: 100, delta: 1 },
+    { before: 100, after: 100, delta: 0 },
+  ]) {
+    const bootstrap = HeadlessEngineSessionImpl.create({
+      playerName: '被动魅力边界',
+      gender: 'female',
+      catalogVersion: '1.0.0',
+      randomSeed: 23,
+    });
+    const snapshot = bootstrap.serialize();
+    snapshot.state.player.age = 4;
+    snapshot.state.player.charisma = scenario.before;
+    snapshot.state.player.events = [];
+    snapshot.state.eventHistory = [];
+    const session = HeadlessEngineSessionImpl.create({ snapshot });
+
+    assert(session.getSessionPhase() === 'passive_progression', 'age-four passive session keeps its phase');
+    session.ensurePassivePresentation();
+    const current = session.getProgressionVolatileState();
+    assert(current.annualPassiveMemory !== null, 'preschool seasonal passive plan is prepared');
+    const plan = { headline: entry.title, body: entry.text, entries: [entry] };
+    session.applyProgressionVolatileState({
+      ...current,
+      passiveNarrative: { title: plan.headline, text: plan.body },
+      annualPassiveMemory: plan,
+    });
+
+    await session.acknowledgeProgression('passive_continue');
+
+    const after = session.serialize().state;
+    const summary = session.getProgressionVolatileState().pendingPeriodSummary;
+    assert(after.player.charisma === scenario.after, `Headless passive charisma ${scenario.before} settles to ${scenario.after}`);
+    assert(summary !== null, 'preschool passive acknowledgement produces its existing summary');
+    if (scenario.delta === 0) {
+      assert(
+        summary!.statDeltaSummary === '本期未见明显数值变化',
+        'Headless passive summary must not claim charisma growth after the cap removes it',
+      );
+    } else {
+      assert(
+        summary!.statDeltaSummary.includes(`魅力+${scenario.delta}`),
+        'Headless passive summary shows only applied charisma growth',
+      );
+      assert(!summary!.statDeltaSummary.includes('魅力+3'), 'Headless passive summary omits capped theoretical growth');
+    }
+  }
 }
 
 async function testAnnualPlanClearsAcrossProgressionResets(): Promise<void> {
@@ -125,12 +239,15 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(!isPreschoolSeasonMemoryAge(3), 'age 3 stays on annual memory');
   assert(!isPreschoolSeasonMemoryAge(8), 'age 8 leaves season-memory band');
   testPrepareAnnualPassiveMemoryWithReactiveState();
+  testPassiveCharismaSummaryUsesAppliedGrowth();
   testPreparePreschoolSeasonMemory();
   testApprovedCapacityEntriesAreConsumedBeforeGap();
   testApprovedResidualCapacityEntriesAreConsumedBeforeGap();
   testPreparePreschoolSeasonMemoryConsumesNeutralBeforeGap();
   testPreparePreschoolSeasonMemoryNeutralFirstClassWithOriginPresent();
   testPreparePreschoolSeasonMemoryTitlePreferenceDoesNotForceGap();
+
+  await testHeadlessPassiveSummaryUsesAppliedCharismaGrowth();
 
   const state = merchantInfantState(0);
   const plan = prepareAnnualPassiveMemory(state, () => 0);

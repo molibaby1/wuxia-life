@@ -2804,4 +2804,4 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 
 **验收方向（非当前已通过结论）：** 在代表性样本中，能够凭同一实际结算与正式玩家展示证据区分明确损失／状态异常／无负面经历；区分选择前与事后的可理解性；对重大后果不漏报且不虚构必然恢复；独立 Gate 能给出可回溯、可重复的判断。当前 8/8 blocker 不因此关闭。
 
-**权威与范围调和：** 遵守 Game Product Foundation、PD-031／032／033／079／126／129，以及现有 Character、Status、Content Authoring、Choice 与 Snapshot Contract。PD-079 已退休 legacy wallet 作为 P8 negative domain 的部分旧语义，本条不恢复它。PD-126 的合法调度优先级验证仍独立开放（`SL-GAP-04`）；本次 frustration 证据治理另记 `SL-GAP-10`。自然出生至寿终验收仍归 `SL-GAP-09`。**本裁决不实施代码、事件、Gate、Schema、Snapshot、API、UI、AE 或其他系统改动；具体根因修正须按台账另行有界实施并验证。**
+**权威与范围调和：** 遵守 Game Product Foundation、PD-031／032／033／079／126／129，以及适用的 Character／Relationship、Content Authoring、Choice 与 Snapshot Contract 和 Player Model 中的 Status 语义。PD-079 已退休 legacy wallet 作为 P8 negative domain 的部分旧语义，本条不恢复它。PD-126 的合法调度优先级验证仍独立开放（`SL-GAP-04`）；本次 frustration 证据治理另记 `SL-GAP-10`。自然出生至寿终验收仍归 `SL-GAP-09`。**本裁决不实施代码、事件、Gate、Schema、Snapshot、API、UI、AE 或其他系统改动；具体根因修正须按台账另行有界实施并验证。**

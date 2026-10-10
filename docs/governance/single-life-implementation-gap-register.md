@@ -67,7 +67,7 @@
 | SL-GAP-07 | 重要人物与关系的可达人生连续性 | NEEDS_VALIDATION | P2 | OPEN | 已批准 Person-first 语义在活跃内容中是否成立 |
 | SL-GAP-08 | 无家庭人物可被推为“壮志未酬” | CONFIRMED_CODE_GAP / 领域冲突 | P2 | OPEN | 评价是否具备实际志向未实现的事实依据 |
 | SL-GAP-09 | 自然出生至终局 / 早逝 / 存档的端到端证据不足 | NEEDS_VALIDATION | P2 验证 | OPEN | 不注入终局年龄时能否正常结束且状态一致 |
-| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / Slice A、D 已完成，其余证据与治理仍开放 | 按 PD-131 继续处理文本分类、Status 与 Gate 证据口径；最新隔离 P8 Gate 为 4 个 frustration blocker，仍 NO-GO |
+| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / Slice A、D、C1、C2a 已完成；C2 与其他证据仍开放 | 按 PD-131 继续处理未决 Status、文本分类与 Gate 证据口径；最新隔离 P8 Gate 为 4 个 frustration blocker，仍 NO-GO |
 
 ### SL-GAP-01 — 主动行动与日历推进的年龄节点分叉
 
@@ -169,6 +169,12 @@
 - **Slice C1 实施与验证（2026-10-11；提交 `aaf418cf72376d75488e0eee634db6f49e39b0ca`）：**Choice 仅在 canonical before/after 确认 `fatigued` / `anxious` 净变化时，将事实说明附加到既有 `narrativeResult`；Daily recovery 仅在结算确实移除对应 Status 时写入 stage result，单独 `story_automatic` 结果也只消费实际 stage result。未改变 Status 结算或生命周期，未新增反馈 Contract、API 字段或 Snapshot 语义。
 - **Slice C1 验证结果：**定向 `playerVisibleFeedback.test.ts` 先 RED（空状态 `innovate_full` 未报告两项新增），修复后 PASS；覆盖重复添加、已存在及不存在状态的移除、属性 delta 与叙事并存、恢复后 Choice、Daily fatigue/anxiety recovery、catch-up 与独立 `story_automatic` 结果，以及无实际变化时不声称恢复。`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b`、`git diff --check` 均通过。隔离正式 API 的 Choice 请求返回 HTTP 200，API 反馈与 canonical 状态一致；真实浏览器 DOM/截图验证 `innovate_full` 的 `[] → [fatigued, anxious]`、状态说明与功力 `+10`，以及 `innovate_suspend` 的 `[anxious] → []`、解除说明与学识 `+3`。当前浏览器工具未提供独立 DevTools Console/Network 面板；API 响应另以 HTTP 请求核验。当前代码与隔离的 `origin/dev` / `11a7c799` Headless P8 对照均为 `FAIL`、4 个相同 frustration blocker、0 warning，阈值 `0.35` 未改；该结果不改变 Gate 口径，也不证明长期 Status 价值。
 - **SL-GAP-10 / Slice C 状态：**Slice C1 `CLOSED`；Slice C2 `OPEN`，仍待按具体事件审查长期消费者、可达性、恢复机会、玩家理解及人生时间尺度。Slice A、Slice D 保持 `CLOSED`；**SL-GAP-10 整体仍为 `OPEN`**。
+
+- **Slice C2a 实施与验证（2026-10-11；起始 `dev` / `7b820853b418e6ec2902d3573c2f95092eff615f`；代码提交 `5143fbb5`）：**按 PD-131 补充裁决，仅移除指定 10 个 Daily 与 6 个 Choice 的持久 `status_add`。Daily 与 Choice ID 清单见 PD-131 的 2026-10-11 Status 具体内容裁决；4 个未决 Daily `anxious` 来源及 `innovate_full` 的 `anxious` 保持原行为。未改 Status 类型与生命周期、调度、Snapshot、C1 反馈、奖励或 P8 Gate。Family crisis 的 `family_crisis_limited_support` 移除最后一项效果后显式保留空效果 Choice；正式 Headless 结算测试确认仍成功执行、未添加 `anxious`，且存档历史与响应追加各恰有一条 `family_crisis` 记录。
+- **Slice C2a 定向与项目验证：**`canonicalFatigueAnxietyStatusMigration.test.ts`、`playerVisibleFeedback.test.ts`、`choiceIdExecutionClosure.test.ts`、`boundedFormalEventAuthoring.test.ts`、`p38FrustrationRemediationTests.ts`、`wealthDailyCashAbstraction.test.ts` 均通过；新增 Family crisis 空效果 Choice 历史结算断言。`git diff --check`、`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 均通过。测试覆盖指定来源删除、保留来源、恢复与 before/after 反馈、确定性奖励及空效果正式事件历史；武林大会 Choice 1 的 `+50 / -10` 声望分支定义由内容契约断言保护。
+- **Slice C2a 自然轨迹与 Gate 对照：**`p8-martial-lin / seed 801 / local_direct` before/after 均运行到 40 岁，38 条事件、22 次选择。33 岁 `innovate_full` 功力均为 `24→34`；Status 从 `[]→[fatigued, anxious]` 变为 `[]→[anxious]`，最终仍有 `anxious`。34 岁自然选择武林大会的 Choice 3，既有属性结果不变。该自然轨迹没有选中 25 岁 Daily 焦虑来源，因而不作为该 Daily 在自然人生中消失的证据；该来源由定向 DailyEventSystem 结算测试验证。改动前后 8-persona P8 Gate 均为 `FAIL`、终止年龄 40、4 个相同 frustration blocker、0 warning、阈值 `0.35`；创新事件 blocker 描述从“进入疲惫状态”变为“进入焦虑状态”。Gate 指标、分类器、阈值及 fixture 未修改，此结果不评价本次裁决正确性。
+- **武林大会随机效果的既存限制：**正式 Headless 对 Choice 1 的改动前、改动后结算，在 seed `1..3` 下声望均保持 `40`；改动前状态会新增 `fatigued`，改动后不再新增。Choice JSON 中原有 `success` `+50` / `failure` `-10` 声望分支仍完整保留，但当前 `RandomEffectHandler` 读取 `effects[]`，而此效果提供 `success`／`failure`，正式路径两侧都没有应用该奖励。此行为已在实施起点存在；EventExecutor 属于明确排除范围，本次未修复，故不能声称随机胜败奖励已由运行时验证，只能确认 C2a 未改变其既存行为。
+- **SL-GAP-10 / Slice C2a 状态：**`CLOSED`（仅限本次批准的 16 个具体来源与自身验证）；Slice C2 仍 `OPEN`，包括 4 个未裁决 Daily `anxious` 来源、`innovate_full` 的 `anxious` 长期价值、保留生产者的完整玩家反馈核查、旧 Snapshot 状态的实际人生行为、武林大会 Choice 1 的既存随机奖励未执行问题、`youth_road_peril` 文本与 Gate 证据分类、`demonic_encounter` 选择前风险、非法 Snapshot `charisma` 输入传播，以及独立开放的 SL-GAP-04 和 SL-GAP-09。Slice A、Slice D 与 Slice C1 继续 `CLOSED`；**SL-GAP-10 整体及 PD-131 的 C2 均保持 `OPEN`**。
 
 ## 4. 依赖关系与建议治理节奏
 

@@ -2820,3 +2820,11 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 **C1 有界实施授权：**允许复用现有 Choice `narrativeResult` 与自动事件 `AutomaticStageResultDisplay.body`，为实际新增或解除的 `fatigued`、`anxious` 提供简洁事实反馈；必须由 canonical before/after 确认净变化，保留既有事件叙事和数值反馈，不扩展公开 Feedback Contract、API、Snapshot 或 Status 生命周期机制。
 
 **C2 状态：OPEN。**尚未完成对具体 Status 事件的长期用途、可达性、恢复机会、生命周期与玩家理解审查；即时反馈交付不能关闭该问题。本补充不改变现行二值语义、事件添加/解除规则、无时间自动衰减约束，不调整 P8 Gate，也不把 PD-131 或 SL-GAP-10 整体标记为完成。
+
+**Status 具体内容裁决（Human accepted：2026-10-11；SL-GAP-10 / Slice C2a）：**依照 Player Model §5.1 与上述 C2 原则，单次短时烦躁、懊恼或高强度消耗不足以证明一个可能持续多年的 Status。批准只移除下列具体来源中的持久 `status_add`，保留事件本身及其叙事：
+
+- Daily `anxious`：`daily_morning_training_neg_1`、`daily_skip_training_neg_1`、`daily_training_bottleneck_neg_1`、`daily_reading_notes_neg_1`、`daily_take_odd_job_neg_1`、`daily_small_trade_neg_1`、`daily_night_reflection_neg_1`、`daily_second_guess_neg_1`、`daily_get_back_spirit_neg_1`；Daily `fatigued`：`daily_copybook_practice_neg_1`。
+- Choice `fatigued`：`career_martial_innovation / innovate_full`、`career_martial_arts_conference / career_martial_arts_conference_choice_1`、`p42_training_business_river_delivery / carry_the_river_road`。
+- Choice `anxious`：`career_sect_expansion / career_sect_expansion_choice_1`、`family_crisis / family_crisis_full_support`、`family_crisis / family_crisis_limited_support`。
+
+保留 `innovate_full` 的 `anxious`，以及 `daily_tight_budget_neg_1`、`daily_home_letter_neg_1`、`daily_shared_meal_neg_1`、`daily_household_burden_neg_1` 的 `anxious`；这五项生产者仍待分别审查，本裁决不确认其长期价值。所有奖励、条件、flags、事件／选择 ID、叙事、恢复路径、Status 类型与生命周期机制保持原义；本次不改变调度、Snapshot、反馈系统或 P8 Gate。Slice C2a 可在完成其自身验证后关闭，Slice C2、PD-131 与 SL-GAP-10 仍保持 OPEN。

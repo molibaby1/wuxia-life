@@ -67,7 +67,7 @@
 | SL-GAP-07 | 重要人物与关系的可达人生连续性 | NEEDS_VALIDATION | P2 | OPEN | 已批准 Person-first 语义在活跃内容中是否成立 |
 | SL-GAP-08 | 无家庭人物可被推为“壮志未酬” | CONFIRMED_CODE_GAP / 领域冲突 | P2 | OPEN | 评价是否具备实际志向未实现的事实依据 |
 | SL-GAP-09 | 自然出生至终局 / 早逝 / 存档的端到端证据不足 | NEEDS_VALIDATION | P2 验证 | OPEN | 不注入终局年龄时能否正常结束且状态一致 |
-| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / Slice A 已完成，其余证据与治理仍开放 | 按 PD-131 继续处理文本分类、Status、属性边界与其余风险；当前 P8 Gate 仍 NO-GO |
+| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / Slice A、D 已完成，其余证据与治理仍开放 | 按 PD-131 继续处理文本分类、Status 与 Gate 证据口径；最新隔离 P8 Gate 为 4 个 frustration blocker，仍 NO-GO |
 
 ### SL-GAP-01 — 主动行动与日历推进的年龄节点分叉
 
@@ -156,10 +156,15 @@
 - **D — 越界／归一化疑点（2 条）：**medical_imperial_doctor、medical_palace_intrigue 样本观察到 charisma 101→100、104→100；正式操作 clamp 至 0–100，应追溯越界生产路径，不允许以“正常的负面经历”或“直接从分母排除”替代根因定位。
 - **E — 预警充分性待核查（1 条）：**demonic_encounter 的 chivalry 8→0 已由结果卡展示，选择前对侠义损失的可预见性仍需核验。
 - **权威与分界：**[PD-131](product-decisions.md) 已明确真实事实、选择前合理可预见性、事后事实反馈与玩家可见 Gate 证据的不同职责。PD-031／032／033 与 PD-079 保持有效。与 PD-126 调度（SL-GAP-04）及自然完整人生（SL-GAP-09）分开处理。
-- **下一步最小范围：**A 类 Slice A 已完成。继续按 B–E 核验正式玩家可见文本、Status 反馈、魅力越界来源与 demonic_encounter 选择前风险，并独立治理 P8 证据口径。现有 >0.35 阈值、旧报告、历史 fixture 不改；一旦正式更换指标口径，单独版本化并建立有证据的新基线和回归，不以删除 blocker 为目标。
+- **下一步最小范围：**A 类 Slice A 与 D 类 Slice D 已完成。继续核验 B 类文本分类、C 类 Status 玩家可见反馈、E 类 `demonic_encounter` 选择前风险，并独立治理 P8 证据口径。现有 `>0.35` 阈值、旧报告、历史 fixture 不改；一旦正式更换指标口径，单独版本化并建立有证据的新基线和回归，不以删除 blocker 为目标。
 - **Slice A 实施与验证（2026-10-10；实施提交 `281b51193fc9760fbd02e46cf37238a71dd60ea6`）：**仅对四事件九项已裁决效果写入显式 `operator`；新增 `tests/fourEventStatEffectIntent.test.ts`，通过 EventLoader 装载正式定义、EventExecutor 实际结算，并将玩家公开 delta 与 canonical before/after 对照。回归先在旧行为下复现失败（侠义 `-8→5`，预期增量结算 `-8→-3`）；修复后覆盖多组属性初值、Trait 增长倍率、名望下限、魅力上限、flags、资格条件及 Merchant 开店资格。公布真相选项增加方向性文案“公开真相可能损及名望。”，不披露精确数值。PD-081 未被追溯解释为曾规定声望使用 `add`；该操作符依据是本次 Human 补充裁决。
 - **Slice A 验证结果：**`git diff --check`、`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 与定向真实结算测试均通过。隔离输出的 P8 Headless Gate 仍为 `fail`：5 个 persona blocker、0 warning，阈值仍为 `0.35`；未覆盖或未解决的样本包括 youth_road_peril、demonic_encounter、career_martial_innovation、medical_imperial_doctor／medical_palace_intrigue。该 Gate 结果不代表 PD-131 整体语义迁移完成。
 - **SL-GAP-10 / Slice A 状态：**CLOSED；**SL-GAP-10 整体状态：OPEN。**PD-131 的 Status 玩家可见反馈、`charisma` 越界来源、文本与 Gate 证据口径以及其他风险仍开放；没有把 26 条 opaque 一并关闭。SL-GAP-04 与 SL-GAP-09 继续独立开放。
+- **Slice D 根因与修复（2026-10-10；修复提交 `31a081442ee5bcf5c6ef1947553006b0016aecef`）：**首次越界来自年龄 29 的 `p8-social-gu / seed 803`：`medical_divine_doctor_fame` 将 charisma `92→100` 后，第 178 步 `action_socializing_basic` 经 `executeActiveActionOnState → applyStatDeltas → writePlayerNumeric` 写成 `100→101`。共享写入函数当时没有 charisma 边界；主动行动的历史、解析结果和反馈沿用了理论增量。之后两次交游将状态推至 `104`，Medical `add` 效果才把 `101→100`、`104→100`，故 Medical 不是首个越界生产者。完整修复前运行峰值为 `133`。
+- **Slice D 修复内容：**共享 `writePlayerNumeric` 只对 charisma 截断至 `0..100`，其他属性语义不变；`applyStatDeltas` 返回实际 before/after 增量，主动行动的 `ActionResult.deltas`、`ActionHistoryEntry.deltas`、奖励摘要、行动摘要、结果解释和完成反馈都消费该实际值。年度／学前被动成长摘要采用实际增量；`CriticalChoiceSystem` 的 `marriage_choice:love` 直接魅力写入也改走共享边界，侠义 `+5` 与选择事实保留。Trait 倍率、年龄收益、事件定义、Snapshot 与 Gate 口径未改。
+- **Slice D 验证结果：**`90→91` 正常增长、`99→100` 只记录实际 `+1`、`100→100` 记录 charisma `0` 且行动仍推进时间并留历史；主动行动历史、结果对象及公开 before/after delta 一致。Headless 被动 `99→100` 公开 `+1`、`100→100` 不显示虚构收益；关键选择近上限不越界；两条 Medical 正向效果在 `100` 输入时保持 `100→100` 且其他奖励／flag 正常。`p8-social-gu / seed 803` 修复后完整运行至 40 岁，最大值 `100`、越界转移 `0`；8 个 P8 persona（seed `801..808`）均运行至 40 岁，越界转移均为 `0`。`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b`、`git diff --check` 及定向回归通过；覆盖包含 Trait 增长倍率和 Slice A 四事件效果。
+- **Slice D Gate 与 Snapshot 边界：**隔离 P8 Gate `fail`，4 blocker、0 warning、阈值 `0.35`，均为 frustration opaque-ratio（`p8-martial-lin`、`p8-scholar-su`、`p8-deviant-ye`、`p8-explorer-lu`）；Slice A 后的 5-blocker 基线报告保留未覆盖。Snapshot `3.16.0` 校验及 Headless 恢复实测仍接受并保留 `charisma=101`；本次按范围未改 Snapshot validator 或 Contract，旧／外部构造的非法 Snapshot 仍是单独待治理的传播风险。
+- **SL-GAP-10 / Slice D 状态：**CLOSED（仅限已确认的主动行动、共享被动成长和关键选择写入路径及其结果一致性）；**SL-GAP-10 整体状态仍为 OPEN**。Status 反馈、文本分类、选择前风险与 Gate 证据口径仍待处理；不得据此将 PD-131 整体迁移、SL-GAP-04 或 SL-GAP-09 标记完成。
 
 ## 4. 依赖关系与建议治理节奏
 

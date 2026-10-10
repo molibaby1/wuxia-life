@@ -5,8 +5,11 @@ import { dailyEvents } from '../src/data/life/dailyEvents';
 import { DailyEventSystem } from '../src/core/DailyEventSystem';
 import { EndingSystem } from '../src/core/EndingSystem';
 import { EventExecutor } from '../src/core/EventExecutor';
+import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
+import { CHOICE_EXECUTION_REQUEST_VERSION } from '../src/contracts/choiceExecution';
+import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import { EffectType } from '../src/types/eventTypes';
 import { traitSystem } from '../src/core/TraitSystem';
 import type { DailyEventConfig, GameState, PlayerState } from '../src/types/eventTypes';
@@ -103,6 +106,9 @@ export async function runCanonicalFatigueAnxietyStatusMigrationTests(): Promise<
 
   assertDailyStatusEffects();
   assertFormalStatusEffects();
+  await assertDailyStatusSettlement();
+  await assertFormalChoiceSettlement();
+  await assertFamilyCrisisEmptyChoiceHistory();
   assertEndingInvariance(absentState);
   assertLifeMemoryInvariance(absentState);
   await assertFormalOutcomeInvariance(absentState);
@@ -114,9 +120,9 @@ function cloneState(state: GameState): GameState {
   return JSON.parse(JSON.stringify(state)) as GameState;
 }
 
-function withDeterministicRandom<T>(run: () => T): T {
+function withDeterministicRandom<T>(run: () => T, value = 0): T {
   const originalRandom = Math.random;
-  Math.random = () => 0;
+  Math.random = () => value;
   try {
     return run();
   } finally {
@@ -147,23 +153,25 @@ function assertRecoveryEvent(config: DailyEventConfig, status: 'fatigued' | 'anx
 }
 
 function assertDailyStatusEffects(): void {
-  const expectedAdds: Record<string, 'fatigued' | 'anxious'> = {
-    daily_copybook_practice_neg_1: 'fatigued',
-    daily_morning_training_neg_1: 'anxious',
-    daily_skip_training_neg_1: 'anxious',
-    daily_training_bottleneck_neg_1: 'anxious',
-    daily_reading_notes_neg_1: 'anxious',
-    daily_take_odd_job_neg_1: 'anxious',
-    daily_small_trade_neg_1: 'anxious',
+  const retainedAdds: Record<string, 'anxious'> = {
     daily_tight_budget_neg_1: 'anxious',
     daily_home_letter_neg_1: 'anxious',
     daily_shared_meal_neg_1: 'anxious',
     daily_household_burden_neg_1: 'anxious',
-    daily_night_reflection_neg_1: 'anxious',
-    daily_second_guess_neg_1: 'anxious',
-    daily_get_back_spirit_neg_1: 'anxious',
   };
-  for (const [variantId, status] of Object.entries(expectedAdds)) {
+  const removedAdds = [
+    'daily_morning_training_neg_1',
+    'daily_skip_training_neg_1',
+    'daily_training_bottleneck_neg_1',
+    'daily_copybook_practice_neg_1',
+    'daily_reading_notes_neg_1',
+    'daily_take_odd_job_neg_1',
+    'daily_small_trade_neg_1',
+    'daily_night_reflection_neg_1',
+    'daily_second_guess_neg_1',
+    'daily_get_back_spirit_neg_1',
+  ];
+  for (const [variantId, status] of Object.entries(retainedAdds)) {
     const variant = Object.values(dailyEvents)
       .flatMap(config => Object.values(config.variants).flat())
       .find(item => item.id === variantId);
@@ -172,6 +180,14 @@ function assertDailyStatusEffects(): void {
         variant.effects[0].type === EffectType.STATUS_ADD &&
         variant.effects[0].status === status,
       `${variantId} must add ${status}`,
+    );
+  }
+  for (const variantId of removedAdds) {
+    const variant = findDailyVariant(variantId);
+    assert(variant !== undefined, `${variantId} must remain in the Daily catalog`);
+    assert(
+      !variant.effects?.some(effect => effect.type === EffectType.STATUS_ADD),
+      `${variantId} must not add a persistent Status`,
     );
   }
   for (const variantId of ['daily_skip_training_pos_1', 'daily_shared_meal_pos_1']) {
@@ -196,7 +212,7 @@ function findDailyVariant(id: string) {
 }
 
 function assertFormalStatusEffects(): void {
-  const files = ['middle-age-career.json', 'family-life.json', 'love.json'];
+  const files = ['middle-age-career.json', 'family-life.json', 'p22-content-expansions.json', 'love.json'];
   const values = files.flatMap(file => JSON.parse(readFileSync(resolve('src/data/lines', file), 'utf8')) as unknown[]);
   const findById = (id: string): any => {
     const visit = (value: any): any => {
@@ -214,36 +230,159 @@ function assertFormalStatusEffects(): void {
     }
     throw new Error(`formal content not found: ${id}`);
   };
-  const expected: Array<[string, 'fatigued' | 'anxious']> = [
-    ['innovate_full', 'fatigued'],
+  const retained: Array<[string, 'fatigued' | 'anxious']> = [
     ['innovate_full', 'anxious'],
   ];
-  for (const [id, status] of expected) {
+  for (const [id, status] of retained) {
     const target = findById(id);
     const effects = target.effects ?? [];
     assert(effects.some((effect: any) => effect.type === 'status_add' && effect.status === status), `${id} must add ${status}`);
   }
-  for (const [text, status] of [
-    ['参加比武，争夺盟主', 'fatigued'],
-    ['大规模扩建', 'anxious'],
-    ['全力支援家族', 'anxious'],
-    ['尽力而为，量力而行', 'anxious'],
-    ['正面对决', 'anxious'],
-    ['设法缓和局面', 'anxious'],
+  for (const [id, status] of [
+    ['innovate_full', 'fatigued'],
+    ['career_martial_arts_conference_choice_1', 'fatigued'],
+    ['carry_the_river_road', 'fatigued'],
+    ['career_sect_expansion_choice_1', 'anxious'],
+    ['family_crisis_full_support', 'anxious'],
+    ['family_crisis_limited_support', 'anxious'],
   ] as const) {
-    const target = findChoiceContaining(values, text);
-    assert((target.effects ?? []).some((effect: any) => effect.type === 'status_add' && effect.status === status), `${text} must add ${status}`);
+    const target = findById(id);
+    assert(
+      !(target.effects ?? []).some((effect: any) => effect.type === 'status_add' && effect.status === status),
+      `${id} must not add its adjudicated persistent Status`,
+    );
   }
   for (const [id, status] of [
     ['innovate_suspend', 'anxious'],
-    ['career_sect_expansion', 'anxious'],
-    ['love_withdraw', 'anxious'],
+    ['career_sect_expansion_choice_3', 'anxious'],
   ] as const) {
-    const target = id === 'innovate_suspend'
-      ? findById(id)
-      : findChoiceContaining(values, id === 'career_sect_expansion' ? '暂缓扩建' : '暂时退让');
+    const target = findById(id);
     assert((target.effects ?? []).some((effect: any) => effect.type === 'status_remove' && effect.status === status), `${id} must remove ${status}`);
   }
+  const loveWithdrawal = findChoiceContaining(values, '暂时退让');
+  assert((loveWithdrawal.effects ?? []).some((effect: any) => effect.type === 'status_remove' && effect.status === 'anxious'), 'love withdrawal must retain its anxiety recovery');
+
+  const tournamentRandomEffect = findById('career_martial_arts_conference_choice_1').effects
+    ?.find((effect: any) => effect.type === 'random');
+  assert(
+    tournamentRandomEffect?.success?.type === 'stat_modify' &&
+      tournamentRandomEffect.success.target === 'reputation' &&
+      tournamentRandomEffect.success.value === 50 &&
+      tournamentRandomEffect.success.operator === 'add',
+    'tournament choice must retain its original success reputation effect',
+  );
+  assert(
+    tournamentRandomEffect?.failure?.type === 'stat_modify' &&
+      tournamentRandomEffect.failure.target === 'reputation' &&
+      tournamentRandomEffect.failure.value === -10 &&
+      tournamentRandomEffect.failure.operator === 'add',
+    'tournament choice must retain its original failure reputation effect',
+  );
+}
+
+async function assertDailyStatusSettlement(): Promise<void> {
+  for (const [variantId, status] of [
+    ['daily_morning_training_neg_1', 'anxious'],
+    ['daily_copybook_practice_neg_1', 'fatigued'],
+  ] as const) {
+    const config = Object.values(dailyEvents).find(event =>
+      Object.values(event.variants).flat().some(variant => variant.id === variantId),
+    );
+    assert(config !== undefined, `Daily config must exist for ${variantId}`);
+    const engine = new GameEngineIntegration();
+    engine.startNewGame('Status 内容结算测试', 'male');
+    engine.setPlayerAttributes({ age: config.ageRange.min, statuses: [] });
+    const before = cloneState(engine.getGameState());
+    const event = withDeterministicRandom(() => new DailyEventSystem().selectEvent(before, [config]), 0.999999);
+    assert(event?.id === variantId, `${variantId} must be selected through DailyEventSystem`);
+    const after = await new EventExecutor().executeEffects(event.autoEffects ?? [], before);
+    assert(!after.player.statuses.includes(status), `${variantId} settlement must not add ${status}`);
+  }
+}
+
+async function assertFormalChoiceSettlement(): Promise<void> {
+  const cases = [
+    { eventId: 'career_martial_innovation', choiceId: 'innovate_full', status: 'fatigued' },
+    { eventId: 'career_martial_arts_conference', choiceId: 'career_martial_arts_conference_choice_1', status: 'fatigued' },
+    { eventId: 'p42_training_business_river_delivery', choiceId: 'carry_the_river_road', status: 'fatigued' },
+    { eventId: 'career_sect_expansion', choiceId: 'career_sect_expansion_choice_1', status: 'anxious' },
+    { eventId: 'family_crisis', choiceId: 'family_crisis_full_support', status: 'anxious' },
+    { eventId: 'family_crisis', choiceId: 'family_crisis_limited_support', status: 'anxious' },
+  ] as const;
+  const loader = EventLoader.getInstance();
+  const executor = new EventExecutor();
+  for (const item of cases) {
+    const event = loader.getEventById(item.eventId);
+    assert(event !== undefined, `EventLoader must load ${item.eventId}`);
+    const choice = event.choices?.find(candidate => candidate.id === item.choiceId);
+    assert(choice !== undefined, `EventLoader must load choice ${item.choiceId}`);
+    const engine = new GameEngineIntegration();
+    engine.startNewGame('Status 内容结算测试', 'male');
+    engine.setPlayerAttributes({
+      age: event.ageRange.min,
+      martialPower: 10,
+      connections: 10,
+      reputation: 10,
+      statuses: [],
+      traits: [],
+      lifeStates: { trainingHabit: 2, studyHabit: 0, businessHabit: 2 },
+    });
+    const before = cloneState(engine.getGameState());
+    const after = await executor.executeEffects(choice.effects ?? [], before);
+    assert(!after.player.statuses.includes(item.status), `${item.choiceId} settlement must not add ${item.status}`);
+
+    if (item.choiceId === 'innovate_full') {
+      assert(after.player.martialPower === before.player.martialPower + 10, 'innovate_full must retain martialPower +10');
+      assert(after.player.statuses.includes('anxious'), 'innovate_full must retain its unresolved anxious producer');
+    }
+    if (item.choiceId === 'carry_the_river_road') {
+      assert(after.player.martialPower === before.player.martialPower + 2, 'river delivery must retain martialPower +2');
+      assert(after.player.connections === before.player.connections + 2, 'river delivery must retain connections +2');
+    }
+    if (item.choiceId === 'career_sect_expansion_choice_1') {
+      assert(after.player.reputation === before.player.reputation + 30, 'sect expansion must retain reputation +30');
+      assert(after.player.flags.career_sect_major_expansion === true, 'sect expansion must retain its expansion flag');
+    }
+    if (item.choiceId === 'family_crisis_full_support') {
+      assert(after.player.reputation === before.player.reputation + 20, 'family crisis full support must retain reputation +20');
+    }
+  }
+}
+
+async function assertFamilyCrisisEmptyChoiceHistory(): Promise<void> {
+  const bootstrap = HeadlessEngineSessionImpl.create({
+    playerName: '家族危机空效果历史测试',
+    gender: 'male',
+    catalogVersion: '1.0.0',
+  });
+  const snapshot = bootstrap.serialize();
+  snapshot.state.player.age = 40;
+  snapshot.state.player.wealthCapacity = 'modest_savings';
+  snapshot.state.player.statuses = [];
+  snapshot.state.pendingStoryEventId = 'family_crisis';
+  snapshot.state.eventHistory = [];
+
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+  assert(session.getCurrentEvent()?.id === 'family_crisis', 'Headless must load family_crisis as pending');
+  const response = await session.executeChoice({
+    requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
+    snapshotRef: { snapshot: session.serialize() },
+    action: { eventId: 'family_crisis', choiceId: 'family_crisis_limited_support' },
+  });
+
+  assert(response.status === 'success', 'family_crisis_limited_support must execute with empty effects');
+  assert(
+    response.nextSnapshot.state.player.statuses.length === 0,
+    'family_crisis_limited_support must not add anxious after formal settlement',
+  );
+  assert(
+    response.nextSnapshot.state.eventHistory.filter(record => record.eventId === 'family_crisis').length === 1,
+    'family_crisis_limited_support must retain exactly one formal event-history record',
+  );
+  assert(
+    response.append.eventHistory?.filter(record => record.eventId === 'family_crisis').length === 1,
+    'family_crisis_limited_support response must append its formal event-history record',
+  );
 }
 
 function assertEndingInvariance(control: GameState): void {

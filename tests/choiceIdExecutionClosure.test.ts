@@ -112,7 +112,6 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
         conditions: null,
         effects: [
           { type: 'stat_modify', target: 'reputation', value: 20, operator: 'add' },
-          { type: 'status_add', status: 'anxious' },
         ],
         outcomes: null,
       },
@@ -121,9 +120,7 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
         description: null,
         condition: { type: 'wealth_capacity_at_least', minimum: 'modest_savings' },
         conditions: null,
-        effects: [
-          { type: 'status_add', status: 'anxious' },
-        ],
+        effects: [],
         outcomes: null,
       },
       {

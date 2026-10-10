@@ -969,10 +969,6 @@
             "target": "connections",
             "value": 2,
             "operator": "add"
-          },
-          {
-            "type": "status_add",
-            "status": "fatigued"
           }
         ]
       },

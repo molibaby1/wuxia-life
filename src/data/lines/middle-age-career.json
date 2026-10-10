@@ -136,10 +136,6 @@
           },
           {
             "type": "status_add",
-            "status": "fatigued"
-          },
-          {
-            "type": "status_add",
             "status": "anxious"
           }
         ]
@@ -321,10 +317,6 @@
               "value": -10,
               "operator": "add"
             }
-          },
-          {
-            "type": "status_add",
-            "status": "fatigued"
           }
         ]
       },
@@ -424,10 +416,6 @@
             "type": "flag_set",
             "flag": "career_sect_major_expansion",
             "value": true
-          },
-          {
-            "type": "status_add",
-            "status": "anxious"
           }
         ]
       },

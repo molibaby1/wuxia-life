@@ -47,10 +47,6 @@
             "target": "reputation",
             "value": 20,
             "operator": "add"
-          },
-          {
-            "type": "status_add",
-            "status": "anxious"
           }
         ]
       },
@@ -61,12 +57,7 @@
           "type": "wealth_capacity_at_least",
           "minimum": "modest_savings"
         },
-        "effects": [
-          {
-            "type": "status_add",
-            "status": "anxious"
-          }
-        ]
+        "effects": []
       },
       {
         "id": "family_crisis_self_preserve",

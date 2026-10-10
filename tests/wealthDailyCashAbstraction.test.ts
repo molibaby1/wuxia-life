@@ -99,14 +99,14 @@ function testDailyLivelihoodVariantsLoseOnlyMoneyGain(): void {
     'daily_take_odd_job must keep narrative tone',
   );
   assert.equal(
-    oddJob.variants.negative?.[0].effects?.some(effect => effect.type === 'status_add'),
-    true,
-    'daily_take_odd_job must keep status pressure',
+    oddJob.variants.negative?.[0].effects?.some(effect => effect.type === 'status_add') ?? false,
+    false,
+    'daily_take_odd_job must not persist its short-term anxiety as status pressure',
   );
   assert.equal(
-    smallTrade.variants.negative?.[0].effects?.some(effect => effect.type === 'status_add'),
-    true,
-    'daily_small_trade must keep status pressure',
+    smallTrade.variants.negative?.[0].effects?.some(effect => effect.type === 'status_add') ?? false,
+    false,
+    'daily_small_trade must not persist its short-term anxiety as status pressure',
   );
 }
 

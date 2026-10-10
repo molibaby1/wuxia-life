@@ -105,13 +105,13 @@ async function createDailyRecoverySession(
 async function assertChoiceStatusFeedback(): Promise<void> {
     const empty = await executeRestoredCareerChoice([], 'innovate_full');
     assert(
-      JSON.stringify(empty.nextSnapshot.state.player.statuses) === JSON.stringify(['fatigued', 'anxious']),
-      'innovate_full from empty statuses must apply both canonical statuses',
+      JSON.stringify(empty.nextSnapshot.state.player.statuses) === JSON.stringify(['anxious']),
+      'innovate_full from empty statuses must retain only its unresolved anxious producer',
     );
     assert(
-      empty.feedback.player.narrativeResult?.includes('状态变化：进入疲惫状态') === true &&
-        empty.feedback.player.narrativeResult.includes('进入焦虑状态'),
-      'innovate_full must report both actually added statuses',
+      empty.feedback.player.narrativeResult?.includes('状态变化：进入焦虑状态') === true &&
+        !empty.feedback.player.narrativeResult.includes('疲惫'),
+      'innovate_full must report anxious and must not claim newly added fatigue',
     );
     assert(
       !JSON.stringify(empty.feedback.player).includes('rawEffects'),
@@ -126,7 +126,7 @@ async function assertChoiceStatusFeedback(): Promise<void> {
     );
     assert(emptyCard?.body === empty.feedback.player.narrativeResult, 'result card must show Status feedback');
     const martialDelta = empty.feedback.player.statImpacts.find(impact => impact.stat === 'martialPower')?.delta;
-    assert(typeof martialDelta === 'number' && martialDelta > 0, 'formal choice must retain its actual martial gain');
+    assert(typeof martialDelta === 'number' && martialDelta > 0, 'formal choice must retain its actual martialPower gain');
     assert(
       emptyCard?.metaLines?.includes(`功力 +${martialDelta}`) === true,
       'Status feedback must preserve the actual numeric gain on the result card',
@@ -139,8 +139,18 @@ async function assertChoiceStatusFeedback(): Promise<void> {
     });
     assert(
       preservedNarrative.player.narrativeResult ===
-        '闭关数日，你对武学有了新的领悟。 状态变化：进入疲惫状态；进入焦虑状态。',
-      'actual Status feedback must preserve the existing narrative result',
+        '闭关数日，你对武学有了新的领悟。 状态变化：进入焦虑状态。',
+      'actual anxiety feedback must preserve the existing narrative result',
+    );
+    const fatigueFeedback = generateChoiceFeedback({
+      narrativeResult: '你长途奔走后终于歇下。',
+      effects: [],
+      beforePlayer: { ...empty.nextSnapshot.state.player, statuses: [] },
+      afterPlayer: { ...empty.nextSnapshot.state.player, statuses: ['fatigued'] },
+    });
+    assert(
+      fatigueFeedback.player.narrativeResult === '你长途奔走后终于歇下。 状态变化：进入疲惫状态。',
+      'generic canonical before/after feedback must still report a real fatigue change',
     );
     const effectsOnly = generateChoiceFeedback({
       effects: [{ type: 'status_add', status: 'fatigued' }],
@@ -152,14 +162,18 @@ async function assertChoiceStatusFeedback(): Promise<void> {
 
     const anxiousAlreadyPresent = await executeRestoredCareerChoice(['anxious'], 'innovate_full');
     assert(
-      JSON.stringify(anxiousAlreadyPresent.nextSnapshot.state.player.statuses) ===
-        JSON.stringify(['anxious', 'fatigued']),
-      'innovate_full must retain existing anxious and add fatigued',
+      JSON.stringify(anxiousAlreadyPresent.nextSnapshot.state.player.statuses) === JSON.stringify(['anxious']),
+      'innovate_full must retain existing anxious without adding fatigue',
     );
     assert(
-      anxiousAlreadyPresent.feedback.player.narrativeResult?.includes('进入疲惫状态') === true &&
-        !anxiousAlreadyPresent.feedback.player.narrativeResult.includes('焦虑'),
-      'existing anxious must not be reported as a new status',
+      anxiousAlreadyPresent.feedback.player.narrativeResult === null,
+      'existing anxious must not be reported as new, and no fatigue addition may be reported',
+    );
+    assert(
+      anxiousAlreadyPresent.feedback.player.statImpacts.some(
+        impact => impact.stat === 'martialPower' && impact.delta > 0,
+      ),
+      'existing anxious must not change the actual martialPower reward',
     );
 
     const bothAlreadyPresent = await executeRestoredCareerChoice(['fatigued', 'anxious'], 'innovate_full');
@@ -185,9 +199,9 @@ async function assertChoiceStatusFeedback(): Promise<void> {
     );
     assert(
       removedAfterRestore.feedback.player.statImpacts.some(
-        impact => impact.stat === 'knowledge' && impact.delta === 3,
+        impact => impact.stat === 'knowledge' && impact.delta > 0,
       ),
-      'status resolution must preserve the formal choice knowledge delta',
+      'status resolution must preserve the formal choice knowledge reward',
     );
 
     const removedWhenAbsent = await executeRestoredCareerChoice([], 'innovate_suspend');

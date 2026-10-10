@@ -200,7 +200,7 @@ function testRealOpaqueResultRemainsOpaque(): void {
 function testDailyNegativeStateEvidenceIsClassified(): void {
   const explained = collectFrustrationMetrics([
     record(
-      'daily_morning_training_neg_1',
+      'synthetic_daily_negative_status',
       '你勉强练完，心里却始终烦躁，没什么收获。',
       state({ statuses: [] }),
       state({ statuses: ['anxious'] }),
@@ -214,7 +214,7 @@ function testDailyNegativeStateEvidenceIsClassified(): void {
 
   const noResult = collectFrustrationMetrics([
     record(
-      'daily_morning_training_neg_1',
+      'synthetic_daily_negative_status',
       '你勉强练完，心里却始终烦躁，没什么收获。',
       state({ statuses: ['anxious'] }),
       state({ statuses: ['anxious'] }),
@@ -353,7 +353,7 @@ function testInventoryBClassifierCoverage(): void {
 
   const dailyAnxiety = collectFrustrationMetrics([
     record(
-      'daily_reading_notes_neg_1',
+      'synthetic_daily_negative_status',
       '你记了半天，越看越觉得前后矛盾，心里反倒添了几分烦躁。',
       state({ statuses: [] }),
       state({ statuses: ['anxious'] }),

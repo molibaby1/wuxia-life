@@ -203,16 +203,19 @@
       {
         "id": "court_politics_revealed_choice_1",
         "text": "将真相公之于众",
+        "description": "公开真相可能损及名望。",
         "effects": [
           {
             "type": "stat_modify",
             "stat": "reputation",
-            "value": -50
+            "value": 50,
+            "operator": "subtract"
           },
           {
             "type": "stat_modify",
             "stat": "connections",
-            "value": 20
+            "value": 20,
+            "operator": "add"
           },
           {
             "type": "flag_set",
@@ -228,7 +231,8 @@
           {
             "type": "stat_modify",
             "stat": "reputation",
-            "value": 15
+            "value": 15,
+            "operator": "add"
           },
           {
             "type": "flag_set",
@@ -281,12 +285,14 @@
           {
             "type": "stat_modify",
             "stat": "chivalry",
-            "value": 5
+            "value": 5,
+            "operator": "add"
           },
           {
             "type": "stat_modify",
             "stat": "connections",
-            "value": 10
+            "value": 10,
+            "operator": "add"
           },
           {
             "type": "flag_set",
@@ -302,7 +308,8 @@
           {
             "type": "stat_modify",
             "stat": "knowledge",
-            "value": 5
+            "value": 5,
+            "operator": "add"
           }
         ]
       }

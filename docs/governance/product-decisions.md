@@ -2796,7 +2796,7 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 
 **当前待核查的有界样本（非直接内容修改授权）：**
 
-- `refugee_sect_story`、`court_politics_revealed`、`p26_business_habit_obligation`、`merchant_talent_discovery` 的未显式指定 `stat_modify.operator`，目前共享执行规则默认为 `set`；逐例核对内容意图和合法效果，**不全局改变默认 `set` 语义**。
+- A 类四事件 `refugee_sect_story`、`court_politics_revealed`、`p26_business_habit_obligation`、`merchant_talent_discovery` 的未显式指定 `stat_modify.operator` 原由共享执行规则按 `set` 结算；逐例核验后，具体实施授权与结果见下方 2026-10-10 Human 补充裁决。共享默认 `set` 语义不变。
 - `youth_road_peril` 的“带伤／伤痛”预警被现有文字分类漏识别；须核对全部可见上下文及评价规则，而非仅增一个关键字。
 - `career_martial_innovation` 的 `fatigued` 等 Status 效果可能缺少正式玩家可见反馈；核对真实 API／Web 通路后才定义最小呈现范围。
 - `medical_imperial_doctor`／`medical_palace_intrigue` 等样本出现 `charisma` 从 101／104 归一化为 100；先追溯超出已知 0–100 边界的来源、状态处理与可见反馈，不直接宣告两条“误报”。
@@ -2805,3 +2805,12 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 **验收方向（非当前已通过结论）：** 在代表性样本中，能够凭同一实际结算与正式玩家展示证据区分明确损失／状态异常／无负面经历；区分选择前与事后的可理解性；对重大后果不漏报且不虚构必然恢复；独立 Gate 能给出可回溯、可重复的判断。当前 8/8 blocker 不因此关闭。
 
 **权威与范围调和：** 遵守 Game Product Foundation、PD-031／032／033／079／126／129，以及适用的 Character／Relationship、Content Authoring、Choice 与 Snapshot Contract 和 Player Model 中的 Status 语义。PD-079 已退休 legacy wallet 作为 P8 negative domain 的部分旧语义，本条不恢复它。PD-126 的合法调度优先级验证仍独立开放（`SL-GAP-04`）；本次 frustration 证据治理另记 `SL-GAP-10`。自然出生至寿终验收仍归 `SL-GAP-09`。**本裁决不实施代码、事件、Gate、Schema、Snapshot、API、UI、AE 或其他系统改动；具体根因修正须按台账另行有界实施并验证。**
+
+**有界内容实施补充（Human accepted：2026-10-10；SL-GAP-10 / Slice A）：** Human 后续明确批准以下九项既有 `stat_modify` 操作符修正，作为本次事件源头修复的依据；目标属性与批准的效果幅度、其余 effects、flags、资格与路线保持不变。`court_politics_revealed_choice_1` 的名望配置按批准改为正操作数 `50` 配合 `subtract`：
+
+- `refugee_sect_story`：`refugee_sect_story_choice_1` 的 `chivalry +5`、`connections +10` 与 `refugee_sect_story_choice_2` 的 `knowledge +5` 均使用 `add`。
+- `court_politics_revealed`：`court_politics_revealed_choice_1` 的 `reputation` 明确 `subtract 50`、`connections +20` 使用 `add`；`court_politics_revealed_choice_2` 的 `reputation +15` 使用 `add`。公布真相的名望代价保留，并在选择前提示风险方向，不显示精确数值。
+- `p26_business_habit_obligation`：`take_long_term_ledger` 的 `reputation +5` 使用 `add`；PD-081 只规定保留原声望效果并退役 legacy wallet rewards，**当时没有裁决该效果必须使用 `add`**。本次操作符依据来自这项后续 Human 裁决。
+- `merchant_talent_discovery`：`study_business` 的 `charisma +5` 与 `focus_studying` 的 `knowledge +5` 均使用 `add`；保留 `wealth_capacity_raise_to: modest_savings` 与既有 Merchant 开店资格链。
+
+此补充只批准上述九项事件效果修正及对应定向验证，不改变共享 `stat_modify` 缺省 `set` 语义，不扩大至其他事件或 P8 Gate，不把 PD-131 整体状态标记为完成。Status 玩家可见反馈、`charisma` 越界来源、Gate 证据口径及其他 SL-GAP-10 样本仍待处理。

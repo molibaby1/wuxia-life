@@ -90,6 +90,10 @@ const suites: Suite[] = [
     name: 'medicalStatModifyAdditiveSemantics',
     entry: 'tests/medicalStatModifyAdditiveSemantics.test.ts',
   },
+  {
+    name: 'fourEventStatEffectIntent',
+    entry: 'tests/fourEventStatEffectIntent.test.ts',
+  },
   { name: 'v10LaunchReadinessTests', entry: 'tests/v10LaunchReadinessTests.ts' },
   { name: 'AllTests', entry: 'tests/AllTests.ts' },
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },

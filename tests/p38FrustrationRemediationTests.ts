@@ -522,12 +522,12 @@ function testWealthTargetEffectInvariance(): void {
   assert(
     JSON.stringify(merchantChoice?.effects) ===
       JSON.stringify([
-        { type: 'stat_modify', stat: 'charisma', value: 5 },
+        { type: 'stat_modify', stat: 'charisma', value: 5, operator: 'add' },
         { type: 'wealth_capacity_raise_to', minimum: 'modest_savings' },
         { type: 'flag_set', flag: 'merchant_talent', value: true },
         { type: 'flag_set', flag: 'route_merchant', value: true },
       ]),
-    'merchant target effects must remain unchanged',
+    'merchant charisma must grow additively while its Wealth Capacity and route effects remain unchanged',
   );
   assert(merchantEvent?.weight === 100, 'merchant target weight must remain unchanged');
   assert(JSON.stringify(merchantEvent?.ageRange) === JSON.stringify({ min: 8, max: 16 }), 'merchant age range must remain unchanged');

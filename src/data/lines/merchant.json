@@ -24,7 +24,7 @@
         "text": "学习经商",
         "description": "从头学习经商，系统磨炼经营与待人接物的本领。",
         "effects": [
-          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "stat_modify", "stat": "charisma", "value": 5, "operator": "add"},
           {"type": "wealth_capacity_raise_to", "minimum": "modest_savings"},
           {"type": "flag_set", "flag": "merchant_talent", "value": true},
           {"type": "flag_set", "flag": "route_merchant", "value": true}
@@ -34,7 +34,7 @@
         "id": "focus_studying",
         "text": "专心读书",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 5}
+          {"type": "stat_modify", "stat": "knowledge", "value": 5, "operator": "add"}
         ]
       }
     ],
@@ -590,7 +590,7 @@
         "id": "take_long_term_ledger",
         "text": "接下账路，换取更稳更深的商脉",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "stat_modify", "stat": "reputation", "value": 5, "operator": "add"},
           {"type": "flag_set", "flag": "p26_business_obligation_taken", "value": true}
         ]
       },

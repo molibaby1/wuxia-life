@@ -18,7 +18,6 @@ const WEALTH_REPLACEMENT_EFFECTS = new Set([
 type ChoiceExpectation = {
   id: string;
   reputationDelta?: number;
-  reputationValue?: number;
   merchantNetworkDelta?: number;
   flag: string;
 };
@@ -40,7 +39,7 @@ const EXPECTATIONS: EventExpectation[] = [
     condition: 'lifeStates.businessHabit >= 3',
     habitThreshold: 3,
     choices: [
-      { id: 'take_long_term_ledger', reputationValue: 5, flag: 'p26_business_obligation_taken' },
+      { id: 'take_long_term_ledger', reputationDelta: 5, flag: 'p26_business_obligation_taken' },
       { id: 'stay_small_scale', flag: 'p26_business_obligation_declined' },
     ],
   },
@@ -152,7 +151,7 @@ function testEligibilityAndWalletInvariance(): Promise<void> {
           assert.equal('money' in after.player, false, `${event.id}/${choice.id} must preserve money=${money}`);
           assert.equal(
             after.player.reputation,
-            choiceExpectation.reputationValue ?? beforeReputation + (choiceExpectation.reputationDelta ?? 0),
+            beforeReputation + (choiceExpectation.reputationDelta ?? 0),
           );
           assert.equal(after.player.merchantNetwork, beforeMerchantNetwork + (choiceExpectation.merchantNetworkDelta ?? 0));
           assert.equal(after.flags[choiceExpectation.flag], true, `${event.id}/${choice.id} must preserve ${choiceExpectation.flag}`);

@@ -2798,7 +2798,7 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 
 - A 类四事件 `refugee_sect_story`、`court_politics_revealed`、`p26_business_habit_obligation`、`merchant_talent_discovery` 的未显式指定 `stat_modify.operator` 原由共享执行规则按 `set` 结算；逐例核验后，具体实施授权与结果见下方 2026-10-10 Human 补充裁决。共享默认 `set` 语义不变。
 - `youth_road_peril` 的“带伤／伤痛”预警被现有文字分类漏识别；须核对全部可见上下文及评价规则，而非仅增一个关键字。
-- `career_martial_innovation` 的 `fatigued` 等 Status 效果可能缺少正式玩家可见反馈；核对真实 API／Web 通路后才定义最小呈现范围。
+- `career_martial_innovation` 的 `fatigued`／`anxious` 即时反馈归入下方 Slice C1；其真实消费者、可达性、恢复机会及人生时间尺度仍由 Slice C2 按具体事件审查。
 - `medical_imperial_doctor`／`medical_palace_intrigue` 等样本出现 `charisma` 从 101／104 归一化为 100；先追溯超出已知 0–100 边界的来源、状态处理与可见反馈，不直接宣告两条“误报”。
 - `demonic_encounter` 的侠义代价已经结算显示，但选择前方向提示是否充足仍需按本条核验。
 
@@ -2813,4 +2813,10 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 - `p26_business_habit_obligation`：`take_long_term_ledger` 的 `reputation +5` 使用 `add`；PD-081 只规定保留原声望效果并退役 legacy wallet rewards，**当时没有裁决该效果必须使用 `add`**。本次操作符依据来自这项后续 Human 裁决。
 - `merchant_talent_discovery`：`study_business` 的 `charisma +5` 与 `focus_studying` 的 `knowledge +5` 均使用 `add`；保留 `wealth_capacity_raise_to: modest_savings` 与既有 Merchant 开店资格链。
 
-此补充只批准上述九项事件效果修正及对应定向验证，不改变共享 `stat_modify` 缺省 `set` 语义，不扩大至其他事件或 P8 Gate，不把 PD-131 整体状态标记为完成。Status 玩家可见反馈、`charisma` 越界来源、Gate 证据口径及其他 SL-GAP-10 样本仍待处理。
+此补充只批准上述九项事件效果修正及对应定向验证，不改变共享 `stat_modify` 缺省 `set` 语义，不扩大至其他事件或 P8 Gate，不把 PD-131 整体状态标记为完成。Status 即时反馈（Slice C1）与长期用途审查（Slice C2）、`charisma` 越界来源、Gate 证据口径及其他 SL-GAP-10 样本仍分别处理。
+
+**Status 使用价值与即时反馈补充裁决（Human accepted：2026-10-10；SL-GAP-10 / Slice C1）：**依据 [Player Model 的 Status 准入与生命周期约束](../product/player-model.md)，Status 的即时可见反馈与长期保留价值必须分别判断。玩家应及时理解实际发生的重要 Status 变化，反馈以合法结算后的 canonical before/after 为准；这不证明 Status 的长期用途或生命周期合理。持续保留价值须结合具体消费者、可达性、恢复机会、玩家理解与人生时间尺度审查。单有自我恢复事件不足以证明持续 Status 必要；如果具体事件不能证明持续状态的必要性，应审查该事件实际用途，不先扩大 Status 系统，也不自动判定所有现有生产者无效。
+
+**C1 有界实施授权：**允许复用现有 Choice `narrativeResult` 与自动事件 `AutomaticStageResultDisplay.body`，为实际新增或解除的 `fatigued`、`anxious` 提供简洁事实反馈；必须由 canonical before/after 确认净变化，保留既有事件叙事和数值反馈，不扩展公开 Feedback Contract、API、Snapshot 或 Status 生命周期机制。
+
+**C2 状态：OPEN。**尚未完成对具体 Status 事件的长期用途、可达性、恢复机会、生命周期与玩家理解审查；即时反馈交付不能关闭该问题。本补充不改变现行二值语义、事件添加/解除规则、无时间自动衰减约束，不调整 P8 Gate，也不把 PD-131 或 SL-GAP-10 整体标记为完成。

@@ -67,7 +67,7 @@
 | SL-GAP-07 | 重要人物与关系的可达人生连续性 | NEEDS_VALIDATION | P2 | OPEN | 已批准 Person-first 语义在活跃内容中是否成立 |
 | SL-GAP-08 | 无家庭人物可被推为“壮志未酬” | CONFIRMED_CODE_GAP / 领域冲突 | P2 | OPEN | 评价是否具备实际志向未实现的事实依据 |
 | SL-GAP-09 | 自然出生至终局 / 早逝 / 存档的端到端证据不足 | NEEDS_VALIDATION | P2 验证 | OPEN | 不注入终局年龄时能否正常结束且状态一致 |
-| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / 根因调查完成，待有界治理 | 依 PD-131 先核对内容／属性上限／Status，再经单独授权处理指标与验证；Gate 仍 NO-GO |
+| SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / Slice A 已完成，其余证据与治理仍开放 | 按 PD-131 继续处理文本分类、Status、属性边界与其余风险；当前 P8 Gate 仍 NO-GO |
 
 ### SL-GAP-01 — 主动行动与日历推进的年龄节点分叉
 
@@ -150,14 +150,16 @@
 ### SL-GAP-10 — Frustration Fairness 与 Gate 证据口径
 
 - **复现事实：**2026-10-10 / fc418f2c0ead3ae66fb672e647eae9f2da416e25。默认 Headless P8 Gate 失败，8/8 persona blocker、0 warning，全部运行到年龄 40（并非寿终）。原分类器口径各人 3–5 条“负面记录”，合计 33 条、26 opaque／7 warned；**这些是旧评价器的输出，不是已经验证的玩家不公平挫折数量**。附加 Headless 玩家界面与结算状态追踪支持以下有界分类，未更改源码。
-- **A — 真实属性下降／内容意图待核对（16 条 opaque）：**refugee_sect_story（8 persona）、court_politics_revealed（5）、p26_business_habit_obligation（2）、merchant_talent_discovery（1）相关 stat_modify 省略 operator；共享 statModifySemantics.ts 默认 set，结算与部分正面／中性选择文案冲突。仍须逐事件核对作者意图，不能全局改默认 operator。
+- **A — 真实属性下降／内容意图（审查基线 16 条 opaque）：**refugee_sect_story（8 persona）、court_politics_revealed（5）、p26_business_habit_obligation（2）、merchant_talent_discovery（1）相关 stat_modify 省略 operator；共享 statModifySemantics.ts 默认 set。Human 已对九项效果作出后续明确裁决，Slice A 已按批准的操作符修复，详见下方实施记录；共享默认语义未变。
 - **B — 文本分类漏判（5 条）：**youth_road_peril 的选项描述已有“带伤／伤痛”等可见风险，但现有关键词组合将其判为 opaque；应核对完整玩家可见信息与评价判定，不能仅靠增加单词关闭缺陷。
 - **C — 状态反馈疑点（2 条）：**career_martial_innovation 确实添加 fatigued 等 Status；捕获结果卡未展示其变化。当前 API PlayerSummaryDto 没有 statuses，需继续核验 Web 是否有正式展示或解释路径，再决定最小反馈范围。
 - **D — 越界／归一化疑点（2 条）：**medical_imperial_doctor、medical_palace_intrigue 样本观察到 charisma 101→100、104→100；正式操作 clamp 至 0–100，应追溯越界生产路径，不允许以“正常的负面经历”或“直接从分母排除”替代根因定位。
 - **E — 预警充分性待核查（1 条）：**demonic_encounter 的 chivalry 8→0 已由结果卡展示，选择前对侠义损失的可预见性仍需核验。
 - **权威与分界：**[PD-131](product-decisions.md) 已明确真实事实、选择前合理可预见性、事后事实反馈与玩家可见 Gate 证据的不同职责。PD-031／032／033 与 PD-079 保持有效。与 PD-126 调度（SL-GAP-04）及自然完整人生（SL-GAP-09）分开处理。
-- **下一步最小范围：**按 A–E 从实际结算与正式玩家可见展示核验具体样本，明确作者效果意图、超限来源和 Status 可见性；之后独立限定生产修复与 Gate 口径修正。现有 >0.35 阈值、旧报告、历史 fixture 不改；一旦正式更换指标口径，单独版本化并建立有证据的新基线和回归，不以删除 blocker 为目标。
-- **状态：**OPEN / DIAGNOSED。PD-131 产品裁决完成，工程迁移和 Gate 修复均未启动。Gate 仍 NO-GO；SL-GAP-04、SL-GAP-09 继续开放。
+- **下一步最小范围：**A 类 Slice A 已完成。继续按 B–E 核验正式玩家可见文本、Status 反馈、魅力越界来源与 demonic_encounter 选择前风险，并独立治理 P8 证据口径。现有 >0.35 阈值、旧报告、历史 fixture 不改；一旦正式更换指标口径，单独版本化并建立有证据的新基线和回归，不以删除 blocker 为目标。
+- **Slice A 实施与验证（2026-10-10；实施提交 `281b51193fc9760fbd02e46cf37238a71dd60ea6`）：**仅对四事件九项已裁决效果写入显式 `operator`；新增 `tests/fourEventStatEffectIntent.test.ts`，通过 EventLoader 装载正式定义、EventExecutor 实际结算，并将玩家公开 delta 与 canonical before/after 对照。回归先在旧行为下复现失败（侠义 `-8→5`，预期增量结算 `-8→-3`）；修复后覆盖多组属性初值、Trait 增长倍率、名望下限、魅力上限、flags、资格条件及 Merchant 开店资格。公布真相选项增加方向性文案“公开真相可能损及名望。”，不披露精确数值。PD-081 未被追溯解释为曾规定声望使用 `add`；该操作符依据是本次 Human 补充裁决。
+- **Slice A 验证结果：**`git diff --check`、`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 与定向真实结算测试均通过。隔离输出的 P8 Headless Gate 仍为 `fail`：5 个 persona blocker、0 warning，阈值仍为 `0.35`；未覆盖或未解决的样本包括 youth_road_peril、demonic_encounter、career_martial_innovation、medical_imperial_doctor／medical_palace_intrigue。该 Gate 结果不代表 PD-131 整体语义迁移完成。
+- **SL-GAP-10 / Slice A 状态：**CLOSED；**SL-GAP-10 整体状态：OPEN。**PD-131 的 Status 玩家可见反馈、`charisma` 越界来源、文本与 Gate 证据口径以及其他风险仍开放；没有把 26 条 opaque 一并关闭。SL-GAP-04 与 SL-GAP-09 继续独立开放。
 
 ## 4. 依赖关系与建议治理节奏
 

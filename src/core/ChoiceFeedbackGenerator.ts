@@ -108,6 +108,33 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
         visibility: 'player',
       });
     }
+
+    const beforeStatuses = new Set(input.beforePlayer!.statuses ?? []);
+    const afterStatuses = new Set(input.afterPlayer!.statuses ?? []);
+    const statusChanges = ([
+      {
+        id: 'fatigued',
+        added: '进入疲惫状态',
+        removed: '疲惫已解除',
+      },
+      {
+        id: 'anxious',
+        added: '进入焦虑状态',
+        removed: '焦虑已解除',
+      },
+    ] as const).flatMap(status => {
+      const wasPresent = beforeStatuses.has(status.id);
+      const isPresent = afterStatuses.has(status.id);
+      if (wasPresent === isPresent) return [];
+      return [wasPresent ? status.removed : status.added];
+    });
+
+    if (statusChanges.length > 0) {
+      const statusNarrative = `状态变化：${statusChanges.join('；')}。`;
+      baseFeedback.player.narrativeResult = baseFeedback.player.narrativeResult
+        ? `${baseFeedback.player.narrativeResult} ${statusNarrative}`
+        : statusNarrative;
+    }
   }
 
   const routeImpact = resolveRouteImpact(input.beforeFlags, input.afterFlags);

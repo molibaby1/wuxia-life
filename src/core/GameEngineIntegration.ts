@@ -1388,7 +1388,10 @@ export class GameEngineIntegration {
     stageResults: AutomaticStageResultDisplay[];
   }> {
     const ageBeforeEvent = this.gameState.player?.age || 0;
-    const playerBeforeEvent = { ...this.gameState.player };
+    const playerBeforeEvent = {
+      ...this.gameState.player,
+      statuses: [...(this.gameState.player?.statuses ?? [])],
+    };
 
     if (!event.autoEffects || event.autoEffects.length === 0) {
       this.recordEventTrigger(event, ageBeforeEvent);
@@ -1414,13 +1417,24 @@ export class GameEngineIntegration {
     this.pendingEventOutcomeNote = null;
     const adjustedState = updatedState;
     this.applyGameState(adjustedState);
+    const recoveryStatus = event.id.startsWith('daily_fatigue_recovery_')
+      ? 'fatigued'
+      : event.id.startsWith('daily_anxiety_recovery_')
+        ? 'anxious'
+        : null;
+    const recoveryWasApplied = recoveryStatus !== null
+      && playerBeforeEvent.statuses.includes(recoveryStatus)
+      && !this.gameState.player?.statuses?.includes(recoveryStatus);
+    const stageBody = event.id === 'origin_background'
+      ? getBirthBackgroundNarrative(this.gameState) ?? event.content?.text
+      : recoveryWasApplied
+        ? event.content?.text
+        : undefined;
     const stageResults: AutomaticStageResultDisplay[] = [{
       id: event.id,
       sourceKind: 'story_event',
       title: event.content?.title || '上一阶段',
-      ...(event.id === 'origin_background'
-        ? { body: getBirthBackgroundNarrative(this.gameState) ?? event.content?.text }
-        : {}),
+      ...(stageBody !== undefined ? { body: stageBody } : {}),
       deltas: calculatePublicStatDeltas(playerBeforeEvent, this.gameState.player),
     }];
     

@@ -829,14 +829,20 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
           'story_automatic ack requires automatic story event',
         );
       }
-      const narrativeBody = current.id === 'origin_background'
+      const eventNarrativeBody = current.id === 'origin_background'
         ? getBirthBackgroundNarrative(this.engine.getGameState()) ?? current.content?.text ?? ''
         : current.content?.text ?? '';
       const narrativeTitle = current.content?.title ?? '往事一局';
+      const isDailyStatusRecovery =
+        current.id.startsWith('daily_fatigue_recovery_') ||
+        current.id.startsWith('daily_anxiety_recovery_');
       const beforeSnapshot = this.serialize();
       const automaticProgress = await this.progressAutomatic({ maxSteps: 8 });
       await progressUntilChoiceOrTerminal(this);
       const afterSnapshot = this.serialize();
+      const narrativeBody = isDailyStatusRecovery
+        ? automaticProgress.stageResults.find(stage => stage.id === current.id)?.body ?? ''
+        : eventNarrativeBody;
       if (narrativeBody) {
         this.volatile.pendingPeriodSummary = buildPeriodSummary({
           sourceLabel: '剧情事件',

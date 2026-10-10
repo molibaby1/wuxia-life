@@ -10,8 +10,8 @@
 
 ## 当前导航
 
-- **总体产品工作阶段：**`SINGLE-LIFE IMPLEMENTATION GAP REVIEW / BOUNDED PLAYER RUNTIME CONSOLIDATION`（2026-10-10；PD-127–PD-130）。PD-130 的浏览器 Local 玩家 Runtime 已退役并完成 API Web smoke；证据与边界见[单角色人生实现差异台账](single-life-implementation-gap-register.md)。这只收口 Runtime 事项，不代表整体单角色人生体验达标，也不授权其他领域治理、无限制 BASELINE HARDENING 或 AE 扩张。
-- **Primary objective：**PD-130 正式 Web 路径已收敛为 Vue UI → API → Headless → 共享核心；缺少 API 配置或服务不可用时有明确失败反馈。SL-GAP-02／03 已按 `RETIRED_WITH_RUNTIME` 归档；SL-GAP-04 仍保留为正式 Headless/API 合规验证项，当前默认 Headless playability gate 有未解决 blocker。SL-GAP-01、05–09 仍须逐项独立确认和授权；本次未进入其修复或下一阶段。
+- **总体产品工作阶段：**`SINGLE-LIFE IMPLEMENTATION GAP REVIEW / FRUSTRATION EVIDENCE CONVERGENCE`（2026-10-10；PD-127–PD-131）。PD-130 的浏览器 Local 玩家 Runtime 已提交退役（dev `fc418f2c0ead3ae66fb672e647eae9f2da416e25`）；Human 接受 PD-131 的 Frustration Fairness & Player-Visible Evidence Boundary。当前仅完成证据根因调查与产品裁决，Gate／内容／运行代码未按 PD-131 修复。整体人生仍未验收，不授权无界 BASELINE HARDENING 或 AE 扩张。
+- **Primary objective：**优先以 [SL-GAP-10](single-life-implementation-gap-register.md) 调查证据和 PD-131 的四项边界为依据，分别核对内容效果操作符意图、charisma 越界来源、重要 Status 的正式玩家可见性及 P8 分类漏判；随后单独定义有界修复与指标版本／基线迁移。默认 Headless P8 Gate 8/8 frustration blockers 仍 `NO-GO`，不能与 [SL-GAP-04](single-life-implementation-gap-register.md) 的 PD-126 调度合规混为一谈。PD-130 保持 ENGINEERING CLOSED；SL-GAP-01、04–10 仍需按证据独立验证与授权，其中 SL-GAP-09 完整自然人生没有通过。
 - **AE 运行成熟度与历史结果：**AE 仍处于 `RUN / OBSERVE` operating mode，既有两类 bounded contract family、Formal Event Human-direct model-backed shadow → promotion 工程闭环均保留；Natural Effectiveness 仍为 `NOT ESTABLISHED`。目前不主动继续采样、扩展 AE 或优化内容生成器，除非 Human 另行批准。
 - **已完成的 Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导；历史 tuning 已结束。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。

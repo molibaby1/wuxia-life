@@ -15,41 +15,35 @@ type CoverageCheck = {
 
 const CHOICE_FEEDBACK_CHECKS: CoverageCheck[] = [
   {
-    key: 'manual_case_exists',
-    label: 'manual_choice_feedback_case',
-    patterns: ['runChoiceFeedbackManualCoverageCase'],
-  },
-  {
-    key: 'auto_case_exists',
-    label: 'auto_resolve_choice_feedback_case',
-    patterns: ['runChoiceFeedbackAutoResolveNullNarrativeCase'],
+    key: 'headless_case_exists',
+    label: 'headless_choice_feedback_case',
+    patterns: ['await eligible.session.executeChoice'],
   },
   {
     key: 'stat_impact_assertion',
     label: 'stat_impact_assertion',
-    patterns: ['feedback?.player.statImpacts[0]?.stat'],
+    patterns: ['response.feedback.player.statImpacts.some'],
   },
   {
     key: 'relationship_impact_assertion',
     label: 'relationship_impact_assertion',
-    patterns: ['feedback?.player.relationshipImpacts[0]?.relationId'],
+    patterns: ['feedback.player.relationshipImpacts[0]?.relationId'],
   },
   {
     key: 'route_impact_assertion',
     label: 'route_impact_assertion',
-    patterns: ['feedback?.player.routeImpact?.from', 'feedback?.player.routeImpact?.to'],
+    patterns: ['feedback.player.routeImpact?.from', 'feedback.player.routeImpact?.to'],
   },
   {
     key: 'long_term_flag_assertion',
     label: 'long_term_flag_assertion',
-    patterns: ['feedback?.player.longTermFlags.some'],
+    patterns: ['feedback.player.longTermFlags.some'],
   },
   {
     key: 'null_narrative_assertion',
     label: 'nullable_narrative_assertion',
     patterns: [
-      'feedback?.player.narrativeResult as string | null',
-      '缺少显式结果叙事时不得生成兜底文本',
+      'nullNarrativeResponse.feedback.player.narrativeResult === null',
     ],
   },
 ];
@@ -72,7 +66,13 @@ function findMetricValue(
 }
 
 function runChoiceFeedbackCoverageScan() {
-  const source = readFileSync('tests/AllTests.ts', 'utf-8');
+  const source = [
+    'tests/headless/playerVisibleFeedback.test.ts',
+    'tests/choiceFeedbackCanonicalPublicDeltaParity.test.ts',
+    'tests/contracts/choiceExecutionContract.test.ts',
+  ]
+    .map(path => readFileSync(path, 'utf-8'))
+    .join('\n');
   const results = CHOICE_FEEDBACK_CHECKS.map(check => {
     const pass = check.patterns.every(pattern => source.includes(pattern));
     return {

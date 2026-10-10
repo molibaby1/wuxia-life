@@ -62,4 +62,4 @@ assert(mapperSource.includes('affiliation: player?.affiliation'), 'API mapper mu
 assert(mapperSource.includes('title: player?.title'), 'API mapper must expose runtime title');
 assert(!mapperSource.includes('sect: player?.sect'), 'API mapper must remove sect projection');
 
-console.log('✓ Local/API/Browser presentation keeps affiliation, title, experience, direction, and ending separate');
+console.log('✓ API/Web presentation keeps affiliation, title, experience, direction, and ending separate');

@@ -16,7 +16,6 @@ const suites: Suite[] = [
   { name: 'activeActionAttributeBalance', entry: 'tests/activeActionAttributeBalance.test.ts' },
   { name: 'activeActionResultDifferentiation', entry: 'tests/activeActionResultDifferentiation.test.ts' },
   { name: 'activeActionResultParity', entry: 'tests/activeActionResultParity.test.ts' },
-  { name: 'stageAtomicProgression', entry: 'tests/stageAtomicProgression.test.ts' },
   { name: 'experienceTraceTests', entry: 'tests/headless/experienceTrace.test.ts' },
   { name: 'experienceSemanticContext', entry: 'tests/evolution/experienceSemanticContext.test.ts' },
   { name: 'experiencePatternEvidence', entry: 'tests/evolution/experiencePatternEvidence.test.ts' },
@@ -170,10 +169,6 @@ const suites: Suite[] = [
   {
     name: 'globalMoneyHabitConsequenceWalletRetirement',
     entry: 'tests/globalMoneyHabitConsequenceWalletRetirement.test.ts',
-  },
-  {
-    name: 'globalMoneyLocalAutoResolveScoringRetirement',
-    entry: 'tests/globalMoneyLocalAutoResolveScoringRetirement.test.ts',
   },
   {
     name: 'globalMoneyBeggarsRouteWalletRetirement',

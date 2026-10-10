@@ -17,27 +17,6 @@ function read(relativePath: string): string {
   return readFileSync(resolve(root, relativePath), 'utf8');
 }
 
-function extractOutcomeNarrativeBlock(): string {
-  const source = read('src/composables/useNewGameEngine.ts');
-  const match = source.match(/statName === '金钱'[\s\S]{0,180}/);
-  return match?.[0] ?? '';
-}
-
-function testUseNewGameEngineHasNoWalletPresentation(): void {
-  const source = read('src/composables/useNewGameEngine.ts');
-  assert.equal(/const getStatName\s*=/.test(source), false, 'dead outcome text stat helper must be removed');
-
-  const walletBranch = extractOutcomeNarrativeBlock();
-  assert.equal(walletBranch.includes("statName === '金钱'"), false, 'wallet outcome branch must be retired');
-  assert.equal(/钱袋|积蓄少了一些|积蓄/.test(source), false);
-}
-
-function testD6DenyGuardsRemain(): void {
-  const source = read('src/composables/useNewGameEngine.ts');
-  assert.equal((source.match(/if \(target === 'money'\) \{\s*continue;\s*\}/g) ?? []).length >= 1, true,
-    'D6 money deny/ignore guards must remain');
-}
-
 function testChoiceRequirementExplanationHasNoMoneyVocabulary(): void {
   const source = read('src/core/activePlanning/ChoiceRequirementExplanation.ts');
   assert.equal(/\bmoney\s*:\s*'银两'/.test(source), false, 'STAT_LABELS must not map money→银两');
@@ -125,8 +104,6 @@ function testPhaseFPhysicalRemovalBoundary(): void {
   assert.equal(player.wealthCapacity, 'no_surplus');
 }
 
-testUseNewGameEngineHasNoWalletPresentation();
-testD6DenyGuardsRemain();
 testChoiceRequirementExplanationHasNoMoneyVocabulary();
 testWorldProfileHasNoMoneyAuthority();
 testP12AllowsSingleSchedulingRelevantStat();

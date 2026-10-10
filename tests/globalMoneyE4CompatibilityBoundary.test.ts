@@ -56,7 +56,6 @@ const ALLOWED_NON_OWNERSHIP = new Set([
   'src/core/ConditionEvaluator.ts',
   'src/core/EventExecutor.ts',
   'src/core/activePlanning/ChoiceRequirementExplanation.ts',
-  'src/composables/useNewGameEngine.ts',
   'src/utils/playerStatAccess.ts',
   'src/p8/collectPersonaMetrics.ts',
   'src/narrative/profile/wuxiaResources.ts',
@@ -287,10 +286,6 @@ function testE2E3PlayerFacingClosureRemains(): void {
   assert.equal(WUXIA_WORLD_PROFILE.resources.some((resource) => resource.id === 'money'), false);
   const gate = validateWorldProfileForGate(WUXIA_WORLD_PROFILE);
   assert.equal(gate.decision, 'pass', gate.messages.join('; '));
-
-  const d6Source = read('src/composables/useNewGameEngine.ts');
-  assert.equal(/const getStatName\s*=/.test(d6Source), false);
-  assert.equal((d6Source.match(/if \(target === 'money'\) \{\s*continue;\s*\}/g) ?? []).length >= 1, true);
 
   const state = createMinimalState();
   const evaluator = new ConditionEvaluator();

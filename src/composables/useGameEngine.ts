@@ -5,7 +5,7 @@ import { effectExecutor } from '../core/EffectExecutor';
 import type { StoryNode, StoryChoice } from '../types';
 
 /**
- * @deprecated 仅用于历史兼容/演示链路。主流程请使用 useNewGameEngine + gameEngine。
+ * @deprecated 仅用于旧 StoryNode 演示链路，不属于正式 Web 玩家运行时。
  */
 export function useGameEngine() {
   const store = useGameStore();

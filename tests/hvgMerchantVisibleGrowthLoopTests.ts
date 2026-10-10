@@ -91,7 +91,7 @@ function testForkChoiceEffectsCompleteOnceGate(): void {
   assert(Boolean(fork), 'hvg_merchant_early_opportunity_fork should load');
   assert(
     !fork!.autoEffects?.length,
-    'choice events must not rely on autoEffects; useNewGameEngine only applies choice.effects',
+    'choice events must not rely on autoEffects; formal choice settlement applies choice.effects',
   );
   for (const choice of fork!.choices ?? []) {
     const targets = (choice.effects ?? []).map(effect => effect.target);

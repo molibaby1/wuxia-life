@@ -11,17 +11,10 @@ const apiEngineSource = readFileSync(
   resolve(process.cwd(), 'src/composables/useApiGameEngine.ts'),
   'utf8',
 );
-const localEngineSource = readFileSync(
-  resolve(process.cwd(), 'src/composables/useNewGameEngine.ts'),
-  'utf8',
-);
 const appSource = readFileSync(resolve(process.cwd(), 'src/App.vue'), 'utf8');
 const apiRestoreStart = apiEngineSource.indexOf('async function continueSlot');
 const apiRestoreEnd = apiEngineSource.indexOf('async function handleChoice');
 const apiRestoreHandler = apiEngineSource.slice(apiRestoreStart, apiRestoreEnd);
-const localAutoStart = localEngineSource.indexOf('const processAutoEvent = async');
-const localAutoEnd = localEngineSource.indexOf('const evaluateOutcomeCondition');
-const localAutoHandler = localEngineSource.slice(localAutoStart, localAutoEnd);
 
 assert(!source.includes('story-text-clamped'), 'event body must not use the fixed three-line clamp');
 assert(
@@ -32,8 +25,9 @@ assert(!source.includes('false && disturbanceNarrativeDisplay'), 'disturbance na
 assert(!source.includes('setTimeout(() => {\n    progressionTimer'), 'progression must not use the old auto-continue timer');
 assert(!source.includes('progressionFeedbackToast'), 'progression result must not be duplicated in a toast');
 assert(
-  !localAutoHandler.includes('getNextEvent();'),
-  'a genuine automatic story must remain as the next visible stage until the player continues',
+  apiEngineSource.includes("engineState.currentEvent?.isAutomatic === true") &&
+    appSource.includes('apiNeedsProgressionAck'),
+  'a genuine automatic API story must remain as the visible stage until the player continues',
 );
 assert(source.includes('@click="continueToNext"'), 'progression must have an explicit continue action');
 assert(
@@ -45,7 +39,7 @@ assert(
   source.includes('v-if="!hasCanonicalProgressionCard"') &&
     source.includes('let continueClickLocked = false;') &&
     source.includes('if (continueClickLocked || props.isAutoPlaying) return;'),
-  'local continuation must suppress duplicate clicks and duplicate base result text',
+  'API continuation must suppress duplicate clicks and duplicate base result text',
 );
 const ackHandlerStart = apiEngineSource.indexOf('async function handleProgressionAck');
 const ackHandler = apiEngineSource.slice(ackHandlerStart);
@@ -75,41 +69,6 @@ assert(!source.includes('life-memory-feedback-backdrop'), 'Life Memory unlocks m
 assert(!source.includes('aria-modal="true"'), 'Life Memory unlocks must not be modal');
 assert(!source.includes('知道了'), 'Life Memory unlocks must not require confirmation');
 assert(
-  localEngineSource.includes('engineState.progressionOverlay') &&
-    localEngineSource.includes('buildChoiceFeedbackOverlayCard'),
-  'Local settlement must retain its result as a progression echo',
-);
-const localChoiceStart = localEngineSource.indexOf('const handleChoice = async');
-const localChoiceEnd = localEngineSource.indexOf('const handleActiveAction = async');
-const localChoiceHandler = localEngineSource.slice(localChoiceStart, localChoiceEnd);
-assert(
-  localChoiceHandler.includes('getNextEvent();'),
-  'Local choice must enter the next stage inside the original click',
-);
-assert(
-  localChoiceHandler.includes("context?.source !== 'autoResolve'"),
-  'automatic story resolution must remain a visible stage instead of recursively skipping ahead',
-);
-const localActionStart = localEngineSource.indexOf('const handleActiveAction = async');
-const localActionEnd = localEngineSource.indexOf('const pickAutoChoice');
-const localActionHandler = localEngineSource.slice(localActionStart, localActionEnd);
-assert(
-  localActionHandler.includes('continueProgressionFlow();'),
-  'Local active action must skip its standalone summary inside the original click',
-);
-const localContinueStart = localEngineSource.indexOf('const continueProgressionFlow =');
-const localContinueEnd = localEngineSource.indexOf('/**\n   * 开始新游戏');
-const localContinueHandler = localEngineSource.slice(localContinueStart, localContinueEnd);
-assert(
-  localContinueHandler.includes('buildPeriodSummaryOverlayCard') &&
-    localContinueHandler.includes('getNextEvent();'),
-  'one click on a single-path stage must settle it and enter the next stage atomically',
-);
-assert(
-  source.includes('suppressNextLifeMemoryFeedback'),
-  'loading a save must establish a fresh feedback baseline',
-);
-assert(
   !appSource.includes("id: 'action_or_choice_result'"),
   'ordinary choice/action results must not route to a standalone result node',
 );
@@ -128,6 +87,35 @@ const apiActionHandler = apiEngineSource.slice(apiActionStart, apiActionEnd);
 assert(
   apiActionHandler.includes("requestProgressionAck('action_summary')"),
   'API active action must acknowledge its summary inside the original click',
+);
+assert(
+  appSource.includes("from './composables/useApiGameEngine'") &&
+    !appSource.includes('useNewGameEngine') &&
+    !appSource.includes('isApiModeEnabled') &&
+    !appSource.includes('apiMode') &&
+    !appSource.includes("from './components/StartScreen.vue'"),
+  'the production player entry must have one API path and no Local mode selector',
+);
+assert(
+  source.includes("from '../composables/useApiGameEngine'") === false &&
+    !source.includes('useNewGameEngine') &&
+    !source.includes('GameEngineIntegration') &&
+    !source.includes('loadLatestSave'),
+  'GameScreen must remain a presentation component without a browser Local runtime or save path',
+);
+assert(
+  apiEngineSource.includes("flowState.value = 'configuration_error'") &&
+    apiEngineSource.includes('VITE_P6B_API_URL'),
+  'missing API configuration must produce an explicit failure state',
+);
+assert(
+  apiEngineSource.includes('async function bootstrap()') &&
+    apiEngineSource.includes('catch (error) {\n      mapApiError(error);\n    }'),
+  'API bootstrap failures must be surfaced instead of leaving the UI loading or falling back',
+);
+assert(
+  appSource.includes('role="alert"') && appSource.includes('flowMessage'),
+  'API failures during active play must be visible to the player',
 );
 assert(
   apiEngineSource.includes('automaticAdvanceError'),

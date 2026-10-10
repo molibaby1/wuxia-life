@@ -1,6 +1,6 @@
 # Choice Execution Request Contract (P4 US-007)
 
-Stable request shape for executing a player choice against a known game state snapshot. This contract defines transport boundaries only; it does not replace the current runtime choice pipeline in `GameEngineIntegration` / `useNewGameEngine`.
+Stable request shape for executing a player choice against a known game state snapshot. This contract defines transport boundaries only; the formal runtime executes choices through `HeadlessEngineSessionImpl` and the shared `GameEngineIntegration`.
 
 ## 1. Purpose
 

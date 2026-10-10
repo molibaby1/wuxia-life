@@ -4,10 +4,11 @@ PostgreSQL + 后端 API + Vite 前端的当前联调说明。
 
 命令名里仍可能出现历史脚本前缀（如 `p6b:*`）；那是 npm script 名称，不是文档阶段编号。
 
-## 模式定位
+## 正式 Web 运行路径
 
-- **API 模式（默认产品 / QA 路径）**：设置 `VITE_P6B_API_URL` 后，主动人生规划、行动小结与扰动确认由服务端权威会话驱动（见 `docs/designs/session-progression-api.md`）。
-- **本地模式（仅开发 / 离线兜底）**：不设置 `VITE_P6B_API_URL` 时走 `useNewGameEngine` + 浏览器 `localStorage` 存档；用于无数据库时的快速调试，**不是**人工验收主路径。
+正式 Web 玩家流程固定为 Vue UI → Server API → Headless Session → 共享核心引擎。`VITE_P6B_API_URL` 是必需配置，不再用于选择游戏模式：缺少配置时界面显示配置错误；API 服务未就绪或请求失败时显示不可用错误，不会启动浏览器 Local 游戏。
+
+浏览器只保存 API 设备／会话凭据；新建、推进、保存和恢复都由服务端会话处理。无数据库的调度、模拟和回放请使用 Headless 测试或相应模拟脚本，不通过浏览器 Local 玩家模式运行。
 
 **推荐联调命令（API 栈）：**
 

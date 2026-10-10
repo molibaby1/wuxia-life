@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
-import StartScreen from './components/StartScreen.vue';
 import SaveSlotStartScreen from './components/SaveSlotStartScreen.vue';
-import { useNewGameEngine } from './composables/useNewGameEngine';
-import { isApiModeEnabled, useApiGameEngine } from './composables/useApiGameEngine';
-import { gameEngine } from './core/GameEngineIntegration';
+import { useApiGameEngine } from './composables/useApiGameEngine';
 import { resolvePlanningPlaceholderText } from './data/infantPassiveNarratives';
-import { isPlayerDebugEnabled } from './utils/debugAccess';
 import { webPlatformStorage } from './adapters/platform/webPlatformStorage';
-import { deriveLifeMemorySummary } from './core/deriveLifeMemorySummary';
 import type { HeadlessTerminalDto } from './contracts/sessionProgression';
 
 type EndingPayload = NonNullable<HeadlessTerminalDto['ending']>;
@@ -38,19 +33,11 @@ function toEndingPayload(value: unknown): EndingPayload | null {
 
 const GameScreen = defineAsyncComponent(() => import('./components/GameScreen.vue'));
 const EndingScreen = defineAsyncComponent(() => import('./components/EndingScreen.vue'));
-const DebugPanel = defineAsyncComponent(() => import('./components/DebugPanel.vue'));
 
-const apiMode = isApiModeEnabled();
-const debugEnabled = isPlayerDebugEnabled();
-const showDebug = ref(false);
 const gameStarted = ref(false);
 const pendingOverwriteSlot = ref<number | null>(null);
 const apiPlayerName = ref('');
 const apiGender = ref<'male' | 'female'>('male');
-
-const gameEngineComposable = useNewGameEngine();
-const { startNewGame, restartGame, handleChoice, handleActiveAction, isProcessing, getAllSaves, loadGameFromSave } =
-  gameEngineComposable;
 
 const apiEngine = useApiGameEngine();
 const {
@@ -70,26 +57,13 @@ const {
 } = apiEngine;
 
 onMounted(() => {
-  if (apiMode) {
-    void bootstrap();
-  }
+  void bootstrap();
 });
 
 const gamePhase = computed(() => {
   if (!gameStarted.value) return 'start';
-  if (apiMode) {
-    if (apiEngineState.sessionPhase === 'terminal') return 'ending';
-    return 'playing';
-  }
-  const state = gameEngine.getGameState();
-  if (!state.player?.alive) return 'ending';
-  return 'playing';
+  return apiEngineState.sessionPhase === 'terminal' ? 'ending' : 'playing';
 });
-
-const handleStart = (name: string, gender: 'male' | 'female') => {
-  startNewGame(name, gender);
-  gameStarted.value = true;
-};
 
 const handleApiNewGame = async (slotIndex: number, name: string, gender: 'male' | 'female') => {
   const slot = saveSlots.value.find(s => s.slotIndex === slotIndex);
@@ -118,139 +92,54 @@ const onApiContinueSlot = async (slotIndex: number) => {
 };
 
 const handleRestart = () => {
-  if (apiMode) {
-    apiEngine.activeSession.value = null;
-    webPlatformStorageClearSession();
-    void bootstrap();
-  } else {
-    restartGame();
-  }
-  gameStarted.value = false;
-};
-
-function webPlatformStorageClearSession(): void {
+  apiEngine.activeSession.value = null;
   webPlatformStorage.clearSessionAuth();
-}
-
-const latestSave = computed(() => getAllSaves()[0] ?? null);
-
-const latestSaveLabel = computed(() => {
-  if (!latestSave.value) return '';
-  return `${latestSave.value.name}（${new Date(latestSave.value.timestamp).toLocaleString('zh-CN')}）`;
-});
-
-const handleLoadLatestSaveFromEnding = () => {
-  if (!latestSave.value) return;
-  const loaded = loadGameFromSave(latestSave.value.id);
-  if (!loaded) {
-    window.alert('读取失败，存档可能不兼容');
-    return;
-  }
-  gameStarted.value = true;
-  window.alert(`已从结局页恢复：${latestSave.value.name}`);
-};
-
-const toggleDebug = () => {
-  showDebug.value = !showDebug.value;
+  gameStarted.value = false;
+  void bootstrap();
 };
 
 const currentNode = computed(() => {
-  if (apiMode) {
-    if (apiEngineState.sessionPhase === 'period_summary' && apiEngineState.periodSummary) {
-      return {
-        id: 'automatic_advance_status',
-        text: apiEngineState.automaticAdvanceError || '阶段已经结算，正在进入下一阶段。',
-        title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
-        choices: [],
-      };
-    }
-    if (apiEngineState.sessionPhase === 'passive_progression' && apiEngineState.passiveNarrative) {
-      const passive = apiEngineState.passiveNarrative;
-      return {
-        id: 'passive_progression',
-        text: passive.text,
-        title: passive.title,
-        choices: [],
-      };
-    }
-    if (apiEngineState.sessionPhase === 'active_planning') {
-      const age = activeSession.value?.player?.age ?? 0;
-      const placeholder = resolvePlanningPlaceholderText(age);
-      return {
-        id: 'active_planning',
-        text: placeholder.text,
-        title: placeholder.title,
-        choices: [],
-      };
-    }
-    if (apiEngineState.sessionPhase === 'disturbance_narrative' && apiEngineState.disturbanceNarrative) {
-      const narrative = apiEngineState.disturbanceNarrative;
-      return {
-        id: 'disturbance_narrative',
-        text: narrative.bodyText,
-        title: narrative.title,
-        choices: [],
-      };
-    }
-    if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
-      return {
-        id: 'automatic_advance_status',
-        text: apiEngineState.automaticAdvanceError || '行动已经结算，正在进入下一阶段。',
-        title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
-        choices: [],
-      };
-    }
-    const event = apiEngineState.currentEvent;
-    if (!event) return null;
+  if (apiEngineState.sessionPhase === 'period_summary' && apiEngineState.periodSummary) {
     return {
-      id: event.eventId,
-      text: event.text || '(无文本)',
-      title: event.title || '',
-      choices: apiEngineState.availableChoices,
+      id: 'automatic_advance_status',
+      text: apiEngineState.automaticAdvanceError || '阶段已经结算，正在进入下一阶段。',
+      title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
+      choices: [],
     };
   }
-  const event = gameEngineComposable.engineState.currentEvent;
-  if (!event) {
-    if (gameEngineComposable.engineState.isPassiveProgressionMode && gameEngineComposable.engineState.passiveNarrative) {
-      const passive = gameEngineComposable.engineState.passiveNarrative;
-      return {
-        id: 'passive_progression',
-        text: passive.text,
-        title: passive.title,
-        choices: [],
-      };
-    }
-    if (gameEngineComposable.engineState.isActiveActionMode) {
-      const age = gameEngine.getGameState().player?.age ?? 0;
-      const placeholder = resolvePlanningPlaceholderText(age);
-      return {
-        id: 'active_planning',
-        text: placeholder.text,
-        title: placeholder.title,
-        choices: [],
-      };
-    }
-    if (gameEngineComposable.engineState.showingDisturbanceNarrative) {
-      const narrative = gameEngineComposable.engineState.pendingDisturbanceNarrative;
-      return {
-        id: 'disturbance_narrative',
-        text: narrative?.bodyText ?? '江湖中泛起一丝涟漪。',
-        title: narrative?.title ?? '江湖扰动',
-        choices: [],
-      };
-    }
-    return null;
+  if (apiEngineState.sessionPhase === 'passive_progression' && apiEngineState.passiveNarrative) {
+    const passive = apiEngineState.passiveNarrative;
+    return { id: 'passive_progression', text: passive.text, title: passive.title, choices: [] };
   }
+  if (apiEngineState.sessionPhase === 'active_planning') {
+    const age = activeSession.value?.player?.age ?? 0;
+    const placeholder = resolvePlanningPlaceholderText(age);
+    return { id: 'active_planning', text: placeholder.text, title: placeholder.title, choices: [] };
+  }
+  if (apiEngineState.sessionPhase === 'disturbance_narrative' && apiEngineState.disturbanceNarrative) {
+    const narrative = apiEngineState.disturbanceNarrative;
+    return { id: 'disturbance_narrative', text: narrative.bodyText, title: narrative.title, choices: [] };
+  }
+  if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
+    return {
+      id: 'automatic_advance_status',
+      text: apiEngineState.automaticAdvanceError || '行动已经结算，正在进入下一阶段。',
+      title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
+      choices: [],
+    };
+  }
+  const event = apiEngineState.currentEvent;
+  if (!event) return null;
   return {
-    id: event.id,
-    text: event.content?.text || '(无文本)',
-    title: event.content?.title || '',
-    choices: gameEngineComposable.engineState.availableChoices,
+    id: event.eventId,
+    text: event.text || '(无文本)',
+    title: event.title || '',
+    choices: apiEngineState.availableChoices,
   };
 });
 
 const availableChoices = computed(() => {
-  if (apiMode && apiEngineState.sessionPhase === 'active_planning') {
+  if (apiEngineState.sessionPhase === 'active_planning') {
     return apiEngineState.planningOptions.map(option => ({
       id: `active_${option.actionId}`,
       text: option.text,
@@ -259,17 +148,7 @@ const availableChoices = computed(() => {
       isActiveAction: true,
     }));
   }
-  if (apiMode) return apiEngineState.availableChoices;
-  if (gameEngineComposable.engineState.isActiveActionMode) {
-    return gameEngineComposable.engineState.availableActiveActions.map(action => ({
-      id: action.id,
-      text: action.text,
-      description: `${action.description}｜收益：${action.rewardSummary}｜消耗：${action.costSummary}｜风险：${action.riskLevel}`,
-      actionId: action.actionId,
-      isActiveAction: true,
-    }));
-  }
-  return gameEngineComposable.engineState.availableChoices;
+  return apiEngineState.availableChoices;
 });
 
 const apiStoryEventAutomatic = computed(
@@ -287,65 +166,36 @@ const apiNeedsProgressionAck = computed(
     apiStoryEventAutomatic.value,
 );
 
-const progressionOverlay = computed(() =>
-  apiMode ? apiEngineState.progressionOverlay : gameEngineComposable.engineState.progressionOverlay,
-);
+const progressionOverlay = computed(() => apiEngineState.progressionOverlay);
 
 const apiPlayer = computed(() => activeSession.value?.player ?? null);
 const apiLifeMemory = computed(() => activeSession.value?.lifeMemory ?? null);
 
 const endingPlayer = computed(() => {
-  if (apiMode) {
-    const terminal = activeSession.value?.terminal;
-    const player = activeSession.value?.player;
-    if (terminal) {
-      return {
-        name: player?.name ?? (apiPlayerName.value || '侠客'),
-        age: terminal.age,
-        alive: terminal.isAlive,
-        deathReason: terminal.deathReason ?? terminal.ending?.name ?? '人生落幕',
-        title: player?.title ?? null,
-        affiliation: player?.affiliation ?? null,
-        martialPower: player?.martialPower ?? 0,
-        chivalry: player?.chivalry ?? 0,
-      };
-    }
-    return null;
-  }
-  return gameEngine.getGameState().player ?? null;
+  const terminal = activeSession.value?.terminal;
+  const player = activeSession.value?.player;
+  if (!terminal) return null;
+  return {
+    name: player?.name ?? (apiPlayerName.value || '侠客'),
+    age: terminal.age,
+    alive: terminal.isAlive,
+    deathReason: terminal.deathReason ?? terminal.ending?.name ?? '人生落幕',
+    title: player?.title ?? null,
+    affiliation: player?.affiliation ?? null,
+    martialPower: player?.martialPower ?? 0,
+    chivalry: player?.chivalry ?? 0,
+  };
 });
 
-const endingLifeMemory = computed(() => {
-  if (apiMode) return apiLifeMemory.value;
-  return deriveLifeMemorySummary(gameEngine.getGameState());
-});
+const endingLifeMemory = computed(() => apiLifeMemory.value);
+const endingInfo = computed(() => toEndingPayload(activeSession.value?.terminal?.ending));
 
-const endingInfo = computed(() => {
-  const ending = apiMode
-    ? activeSession.value?.terminal?.ending
-    : gameEngine.getGameState().ending;
-  return toEndingPayload(ending);
-});
-
-const onChoice = (choice: { id: string; text: string; actionId?: string; isActiveAction?: boolean; locked?: boolean }) => {
-  if (apiMode) {
-    if (choice.isActiveAction) {
-      void apiHandleActiveAction(choice.actionId ?? choice.id.replace(/^active_/, ''));
-      return;
-    }
-    void apiHandleChoice(choice);
-    return;
-  }
+const onChoice = (choice: { id: string; actionId?: string; isActiveAction?: boolean }) => {
   if (choice.isActiveAction) {
-    void handleActiveAction(choice.actionId ?? choice.id.replace(/^active_/, ''));
+    void apiHandleActiveAction(choice.actionId ?? choice.id.replace(/^active_/, ''));
     return;
   }
-  if (choice.locked) {
-    const msg = gameEngine.consumePlayerFeedbackMessage() ?? '该选项尚未解锁';
-    window.alert(msg);
-    return;
-  }
-  void handleChoice(choice);
+  void apiHandleChoice(choice);
 };
 
 const onApiProgressionAck = () => {
@@ -360,20 +210,8 @@ const onApiManualSave = async () => {
 
 <template>
   <div id="app">
-    <button
-      v-if="debugEnabled && gamePhase === 'playing' && !apiMode"
-      class="debug-toggle"
-      @click="toggleDebug"
-      :title="showDebug ? '关闭调试面板' : '打开调试面板'"
-      :aria-label="showDebug ? '关闭调试面板' : '打开调试面板'"
-    >
-      {{ showDebug ? '关闭调试' : '调试面板' }}
-    </button>
-
-    <DebugPanel v-if="debugEnabled && showDebug && !apiMode" />
-
     <SaveSlotStartScreen
-      v-if="gamePhase === 'start' && apiMode"
+      v-if="gamePhase === 'start'"
       v-model:player-name="apiPlayerName"
       v-model:gender="apiGender"
       :slots="saveSlots"
@@ -384,34 +222,32 @@ const onApiManualSave = async () => {
       @new-game-slot="onApiNewGameSlot"
       @retry="bootstrap"
     />
-    <StartScreen v-else-if="gamePhase === 'start'" @start="handleStart" />
-    <GameScreen
-      v-else-if="gamePhase === 'playing'"
-      :api-mode="apiMode"
-      :current-node="currentNode"
-      :available-choices="availableChoices"
-      :is-auto-playing="apiMode ? apiIsProcessing : isProcessing"
-      :api-disturbance-narrative="apiMode ? apiEngineState.disturbanceNarrative : null"
-      :api-session-phase="apiMode ? apiEngineState.sessionPhase : null"
-      :api-story-event-automatic="apiMode ? apiStoryEventAutomatic : false"
-      :api-needs-progression-ack="apiMode ? apiNeedsProgressionAck : false"
-      :api-player="apiMode ? apiPlayer : null"
-      :api-life-memory="apiMode ? apiLifeMemory : null"
-      :progression-overlay="progressionOverlay"
-      :api-automatic-advance-error="apiMode ? apiEngineState.automaticAdvanceError : null"
-      @choice="onChoice"
-      @manual-save="onApiManualSave"
-      @api-progression-ack="onApiProgressionAck"
-    />
+    <template v-else-if="gamePhase === 'playing'">
+      <p v-if="flowMessage" class="api-failure" role="alert">{{ flowMessage }}</p>
+      <GameScreen
+        v-if="apiPlayer && apiLifeMemory"
+        :current-node="currentNode"
+        :available-choices="availableChoices"
+        :is-auto-playing="apiIsProcessing"
+        :api-disturbance-narrative="apiEngineState.disturbanceNarrative"
+        :api-session-phase="apiEngineState.sessionPhase"
+        :api-needs-progression-ack="apiNeedsProgressionAck"
+        :api-player="apiPlayer"
+        :api-life-memory="apiLifeMemory"
+        :progression-overlay="progressionOverlay"
+        :api-automatic-advance-error="apiEngineState.automaticAdvanceError"
+        @choice="onChoice"
+        @manual-save="onApiManualSave"
+        @api-progression-ack="onApiProgressionAck"
+      />
+      <p v-else class="api-failure" role="alert">游戏会话数据未就绪，请返回选档界面重试。</p>
+    </template>
     <EndingScreen
       v-else
       :player="endingPlayer"
       :life-memory="endingLifeMemory"
       :ending="endingInfo"
-      :has-latest-save="!!latestSave && !apiMode"
-      :latest-save-label="latestSaveLabel"
       @restart="handleRestart"
-      @load-latest-save="handleLoadLatestSaveFromEnding"
     />
   </div>
 </template>
@@ -425,24 +261,12 @@ body,
   height: 100%;
 }
 
-.debug-toggle {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 9999;
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: 2px solid #4ec9b0;
+.api-failure {
+  margin: 16px;
+  padding: 12px 16px;
+  border: 1px solid #a33;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.debug-toggle:hover {
-  background: rgba(78, 201, 176, 0.3);
-  transform: scale(1.1);
+  color: #8d2828;
+  background: #fff5f4;
 }
 </style>

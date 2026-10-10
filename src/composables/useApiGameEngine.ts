@@ -21,6 +21,7 @@ import type { ProgressionAckKind } from '../contracts/sessionProgression';
 export type ApiFlowState =
   | 'idle'
   | 'loading'
+  | 'configuration_error'
   | 'auth_error'
   | 'server_unavailable'
   | 'compatibility_error'
@@ -28,10 +29,6 @@ export type ApiFlowState =
   | 'ready';
 
 const apiClient = createWebApiClient();
-
-export function isApiModeEnabled(): boolean {
-  return apiClient !== null;
-}
 
 function applyProgressionToEngine(
   engineState: {
@@ -139,18 +136,26 @@ export function useApiGameEngine() {
   }
 
   async function bootstrap(): Promise<void> {
-    if (!apiClient) return;
-    flowState.value = 'loading';
-    const ready = await apiClient.healthReady();
-    if (!ready) {
-      flowState.value = 'server_unavailable';
-      flowMessage.value = '后端未就绪';
+    if (!apiClient) {
+      flowState.value = 'configuration_error';
+      flowMessage.value = '未配置正式游戏 API 地址（VITE_P6B_API_URL）。';
       return;
     }
-    deviceToken.value = await apiClient.ensureDeviceToken();
-    saveSlots.value = await apiClient.listSaves(deviceToken.value);
-    flowState.value = 'ready';
-    flowMessage.value = '';
+    flowState.value = 'loading';
+    try {
+      const ready = await apiClient.healthReady();
+      if (!ready) {
+        flowState.value = 'server_unavailable';
+        flowMessage.value = '后端未就绪，请检查 API 服务后重试。';
+        return;
+      }
+      deviceToken.value = await apiClient.ensureDeviceToken();
+      saveSlots.value = await apiClient.listSaves(deviceToken.value);
+      flowState.value = 'ready';
+      flowMessage.value = '';
+    } catch (error) {
+      mapApiError(error);
+    }
   }
 
   async function refreshSaves(): Promise<void> {
@@ -175,8 +180,9 @@ export function useApiGameEngine() {
         confirmOverwrite,
       });
       applySessionResponse(response);
-      flowState.value = 'ready';
       await refreshSaves();
+      flowState.value = 'ready';
+      flowMessage.value = '';
       return true;
     } catch (error) {
       mapApiError(error);
@@ -208,6 +214,7 @@ export function useApiGameEngine() {
         engineState.progressionOverlay = { cards: [resultCard] };
       }
       flowState.value = 'ready';
+      flowMessage.value = '';
       return true;
     } catch (error) {
       mapApiError(error);
@@ -247,6 +254,8 @@ export function useApiGameEngine() {
           )
         : null;
       engineState.progressionOverlay = overlayCard ? { cards: [overlayCard] } : null;
+      flowState.value = 'ready';
+      flowMessage.value = '';
     } catch (error) {
       mapApiError(error);
     } finally {
@@ -289,6 +298,9 @@ export function useApiGameEngine() {
           mapApiError(error);
           engineState.automaticAdvanceError = flowMessage.value || '下一阶段载入失败，请重试';
         }
+      } else {
+        flowState.value = 'ready';
+        flowMessage.value = '';
       }
     } catch (error) {
       mapApiError(error);
@@ -417,6 +429,8 @@ export function useApiGameEngine() {
         },
         snapshot: { id: result.snapshot.id, contentHash: activeSession.value.snapshot.contentHash },
       };
+      flowState.value = 'ready';
+      flowMessage.value = '';
       return true;
     } catch (error) {
       mapApiError(error);

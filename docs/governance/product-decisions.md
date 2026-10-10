@@ -2747,7 +2747,7 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 
 ### PD-130：Browser Local Player Runtime Retirement / API-only Player Path
 
-**产品与架构决策（Human accepted：2026-10-10；执行状态：PENDING IMPLEMENTATION）**
+**产品与架构决策（Human accepted：2026-10-10；执行状态：IMPLEMENTED / API WEB SMOKE VERIFIED，2026-10-10）**
 
 **裁决目标：** Wuxia-Life 不再长期维护浏览器 Local 玩家模式。正式玩家运行路径唯一收敛到 **Vue Web UI → Server API → Headless Session → 共享 GameEngineIntegration／合法结算能力**。这项决策针对玩家流程的运行入口与维护责任，不重新定义人物、事件、选择、时间、反馈、Ending 或 Snapshot 的产品语义。
 
@@ -2774,4 +2774,6 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 - 用当前代码的 typecheck、build、相称的 Headless／API／合同测试，以及实际 API 驱动的 Web smoke 验证结果；未经执行不得宣称 PASS。
 - 相关 Local-only 问题（见单角色人生差异台账 `SL-GAP-02`／`SL-GAP-03`）只有在旧入口被证实移除后才能以 `RETIRED_WITH_RUNTIME` 处理；`SL-GAP-04` 只对正式 API／Headless 决策点保留合规检查。共享时间节点 `SL-GAP-01` 等其他差异不因本决策消失。
 
-**明确不做：** 不设计纯离线产品、纯静态托管模式、自动故障切换、不加新 API／Schema／通用 Adapter／Game State，不进行其它领域重构、数值平衡、内容扩写、Ending 改造、AE 扩权或跨人物系统建设。本条仅批准退役方向与有界工程交接，不宣称代码迁移或测试已经完成。
+**实施核验（2026-10-10；实施起点 `dev` / `42f77408bcb7f2f08b679674fa80de93a242b8fe`）：**正式 Web 入口及玩家组件不再消费 `useNewGameEngine`；真实浏览器 API smoke 已覆盖新档、年龄推进后的事件选择及反馈、主动行动及结算、保存、重载恢复并继续。缺少 `VITE_P6B_API_URL` 与 API 不可用两种浏览器场景均显示明确错误且未启动 Local。`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 通过；普通寿终由 Headless `normalLongevityEndingClosure.test.ts` 验证，未执行从出生到寿终的完整自然 Web 人生。默认 Headless `npm run gate:playability` 仍失败（8 个 persona 有 frustration / opaque-ratio blockers）；隔离的未修改基线也失败，剔除报告中的 `generatedAt` 后 JSON 完全相同，且本次 diff 未改动 Gate 的 Headless Runtime、Simulator、Persona、指标或脚本依赖。因此这些 blocker 没有显示为本次 Runtime 退役引入的回归，但 `SL-GAP-04` 仍保持开放。`report:p2-gameplay-structure` 未运行；已知 `routeCompletionRate is not defined` 在实施起点也存在，本次对脚本的修改仅调整 Choice feedback 覆盖扫描，未处理该异常。该扫描只检查测试源码片段是否存在，不作为行为测试通过证据；行为结论来自实际执行的 Headless/API 测试与浏览器 smoke。`SL-GAP-02`／`SL-GAP-03` 在入口退役及恢复验证后记为 `RETIRED_WITH_RUNTIME`。未执行从出生到寿终的完整自然 Web 人生；细节见[单角色人生实现差异台账](single-life-implementation-gap-register.md)。
+
+**明确不做：** 不设计纯离线产品、纯静态托管模式、自动故障切换、不加新 API／Schema／通用 Adapter／Game State，不进行其它领域重构、数值平衡、内容扩写、Ending 改造、AE 扩权或跨人物系统建设。本条只批准并记录这个有界 Runtime 事项；其他差异仍须逐项依据现行权威确认与授权。

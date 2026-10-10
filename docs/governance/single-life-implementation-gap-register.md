@@ -8,7 +8,9 @@
 > **登记状态：**初次全局调查完成；后续需由 Human 分项确认验证与治理授权。  
 > **更新原则：**未来更新时记录新的核验日期、HEAD、可重现证据、Human 决定和结果，不用新的代码状态自动覆盖已有正式产品语义。
 
-> **2026-10-10 架构裁决：**[PD-130](product-decisions.md) 已批准**退役浏览器 Local 玩家 Runtime**，但尚未实施、未验证。原始代码审查证据保留。SL-GAP-02／03 不再作为独立 Local 缺陷修复目标，随退役完成后才可标记 `RETIRED_WITH_RUNTIME`；SL-GAP-04 不再追求与浏览器 Local 的玩家体验 parity，转为正式 Headless／API 调度合规验证。SL-GAP-01 及其他非 Local-only 问题照常保持 OPEN。**不迁移或兼容旧存档**，但不据此更改现行 Snapshot Contract。
+> **2026-10-10 架构裁决：**[PD-130](product-decisions.md) 已批准**退役浏览器 Local 玩家 Runtime**。原始代码审查证据保留；SL-GAP-02／03 在实际入口退役后记为 `RETIRED_WITH_RUNTIME`，不再作为 Local 缺陷修复目标。SL-GAP-04 不再追求与浏览器 Local 的玩家体验 parity，继续保留正式 Headless／API 调度合规验证。SL-GAP-01 及其他非 Local-only 问题照常保持 OPEN。**不迁移或兼容旧存档**，但不据此更改现行 Snapshot Contract。
+
+> **PD-130 实施核验（2026-10-10；实施起点 `dev` HEAD `42f77408bcb7f2f08b679674fa80de93a242b8fe`）：**正式 Web 入口已无 `useNewGameEngine` 路径。真实浏览器 API smoke 覆盖新档、事件选择与反馈、主动行动与结算、保存、页面重载、恢复并继续；另在“柜台边的小主意”待选择时保存，重载后恢复同一事件及两个选项并结算。缺少 `VITE_P6B_API_URL` 显示配置错误，API 不可用显示后端失败，均未启动 Local。Headless `playerVisibleFeedback.test.ts` 覆盖正式自动事件、Choice outcome 结算与玩家反馈；`headlessSession.test.ts` 覆盖合法空效果选择、单次事件记录及结果确认；`p72SessionPhase.test.ts` 覆盖阶段确认与事件调度；`tests/AllTests.ts` 保留共享 `resolveFirstChoiceEffects` 的首个可用 outcome、条件不满足／无效条件及选择 effects fallback 行为断言。API 集成测试覆盖待处理正式事件保存恢复，`normalLongevityEndingClosure.test.ts` 覆盖寿终、终局快照恢复与重复推进幂等。**未执行从出生到寿终的完整自然 Web 人生。**`npm run typecheck`、`npm run build`、`npm run test:contracts`、`npm run test:headless`、`npm run test:p6b:unit`、`npm test`、`npm run test:p6b` 通过。默认 Headless `npm run gate:playability` 当前与隔离的未修改基线均失败，8 个 persona 有 frustration / opaque-ratio blockers；剔除 `generatedAt` 后两份 JSON 报告完全相同，且本次 diff 未改动 Gate 的 Headless Runtime、Simulator、Persona、指标或脚本依赖，未发现本次退役引入的 Gate 回归；SL-GAP-04 因此仍开放。`report:p2-gameplay-structure` 未运行；已知 `routeCompletionRate is not defined` 在实施起点也存在，本次脚本差异只调整 Choice feedback 覆盖扫描，未处理该异常。
 
 
 ## 1. 权威与使用边界
@@ -22,7 +24,7 @@
 
 **不得据此启动：**通用世界/NPC 模拟、通用 StoryArc 或任务状态机、平行成就/人生评价体系、跨人物档案与奖励、批量事件扩写、整体 Ending 重构或 Auto Evolution 能力扩张。既有 Status Issue #5 继续单独保留，不因这份台账自动升级优先级。
 
-**分项状态含义：**`CONFIRMED_CODE_GAP` = 由当前代码及正式语义直接支持的实现差异（不等于新一轮运行复现已完成）；`CONFIRMED_PATH_DIFFERENCE` = 代码路径差异已明确，但产品影响还需实例；`NEEDS_VALIDATION` = 现有证据不足以定性缺陷；`DEFERRED` = 尚非核心阻碍；`CLOSED_VERIFIED` = 只有取得当前证据后才可使用。所有项初始均为 `OPEN`，禁止写成“已修复”。
+**分项状态含义：**`CONFIRMED_CODE_GAP` = 由当前代码及正式语义直接支持的实现差异（不等于新一轮运行复现已完成）；`CONFIRMED_PATH_DIFFERENCE` = 代码路径差异已明确，但产品影响还需实例；`NEEDS_VALIDATION` = 现有证据不足以定性缺陷；`DEFERRED` = 尚非核心阻碍；`RETIRED_WITH_RUNTIME` = 仅属于已退役 Runtime 的差异不再形成维护义务（不表示替代路径通过了该项独立语义测试）；`CLOSED_VERIFIED` = 只有取得当前证据后才可使用。所有项初始均为 `OPEN`，禁止写成“已修复”。
 
 ## 2. 当前体验链路与实现边界
 
@@ -35,12 +37,13 @@
 → 后续事件机会、人物关系、历史因果
 → 正常寿终或其他合法生命终结
         ↑
-   Local / Headless / API / Snapshot 应保持正式事实与决策点一致
+   正式 Web：Vue UI → Server API → Headless Session → 共享核心引擎
+   无数据库 Headless 模拟 / 回放仍供测试与验证使用
 ```
 
 主实现入口：
-- Local：[`src/App.vue`](../../src/App.vue) → [`src/composables/useNewGameEngine.ts`](../../src/composables/useNewGameEngine.ts) → [`GameEngineIntegration.ts`](../../src/core/GameEngineIntegration.ts)。
 - API：[`useApiGameEngine.ts`](../../src/composables/useApiGameEngine.ts) → [`server/src/services/gameService.ts`](../../server/src/services/gameService.ts) → [`HeadlessEngineSessionImpl.ts`](../../src/headless/session/HeadlessEngineSessionImpl.ts) → 同一核心引擎。
+- `GameProcessSimulator.local_direct` 是 P8 独立仿真路径，不是浏览器玩家 Runtime。
 - 内容和因果：[`EventLoader.ts`](../../src/core/EventLoader.ts)、[`ActivePlanningService.ts`](../../src/core/activePlanning/ActivePlanningService.ts)、[`ChoiceOutcomeResolver.ts`](../../src/core/ChoiceOutcomeResolver.ts)。
 - 长期反馈：[ `deriveMilestoneProjection.ts` ](../../src/core/deriveMilestoneProjection.ts)、[`deriveLifeMemorySummary.ts`](../../src/core/deriveLifeMemorySummary.ts)、[`GameScreen.vue`](../../src/components/GameScreen.vue)。
 - 终局：[`EndingSystem.ts`](../../src/core/EndingSystem.ts)、[`EndingScreen.vue`](../../src/components/EndingScreen.vue)。
@@ -54,9 +57,9 @@
 | ID | 待处理问题 | 证据定性 | 初步优先 | 当前状态 | 后续最小决策点 |
 | --- | --- | --- | --- | --- | --- |
 | SL-GAP-01 | 主动行动的年龄推进可能遗漏正式节点钩子 | CONFIRMED_PATH_DIFFERENCE | P1 | OPEN / 待复现 | 跨生日时节点事实是否缺失、最小受影响路径 |
-| SL-GAP-02 | Local 拒绝合法的零效果选择 | CONFIRMED_CODE_GAP | 退役归档 | OPEN / 待 PD-130 退役验证 | 无需在 Local 修复；正式 API 路径须仍允许合法零效果决定 |
-| SL-GAP-03 | Local 读档不保留未完成的当前正式事件 | CONFIRMED_PATH_DIFFERENCE | 退役归档 | OPEN / 待 PD-130 退役验证 | 无需在 Local 修复；核对 API／Headless 恢复同一决策点 |
-| SL-GAP-04 | Local / Headless / API 调度与行动优先级可能不一致 | CONFIRMED_PATH_DIFFERENCE | P1 验证 | OPEN / 正式路径验证 | 正式 Headless／API 决策点是否符合 PD-126；不再要求浏览器 Local parity |
+| SL-GAP-02 | 已退役 Local 曾拒绝合法的零效果选择 | CONFIRMED_CODE_GAP（历史基线） | 退役归档 | RETIRED_WITH_RUNTIME | 浏览器 Local 执行入口已删除；不为旧路径补修；此状态不代表已验证 API 零效果选择 |
+| SL-GAP-03 | 已退役 Local 曾无法恢复未完成的当前正式事件 | CONFIRMED_PATH_DIFFERENCE（历史基线） | 退役归档 | RETIRED_WITH_RUNTIME | 真实 API Web smoke 已保存并恢复正式事件后继续；不为旧路径补修 |
+| SL-GAP-04 | 正式 Headless/API 调度与行动优先级合规性仍需核验 | CONFIRMED_PATH_DIFFERENCE | P1 验证 | OPEN / 保留正式路径验证 | 继续核验 PD-126 决策点；不要求浏览器 Local parity；当前 Headless playability gate 有未解决 blocker |
 | SL-GAP-05 | Milestone 详细持续查询未进入当前主界面 | CONFIRMED_CODE_GAP | P1 反馈 | OPEN | 四项反馈职责在生产入口的实际可达性 |
 | SL-GAP-06 | Milestone 重要经历覆盖可能不足 | NEEDS_VALIDATION | P2 | OPEN | 真实人生中哪些有证据的重要经历未获记录 |
 | SL-GAP-07 | 重要人物与关系的可达人生连续性 | NEEDS_VALIDATION | P2 | OPEN | 已批准 Person-first 语义在活跃内容中是否成立 |
@@ -72,30 +75,31 @@
 - **验收关注：**同一正式时间变更的生命周期结果不应因操作入口而无依据分叉；不得借机新增通用时间/人生引擎。
 - **状态：**OPEN；仅完成只读路径核对。
 
-### SL-GAP-02 — Local 误把合法零效果决定当成无效选择
+### SL-GAP-02 — Local 曾误把合法零效果决定当成无效选择（已随 Runtime 退役）
 
-- **现象/代码证据：**[`useNewGameEngine.handleChoice()` L352–387](../../src/composables/useNewGameEngine.ts) 在 `effectsToExecute.length === 0` 时返回 `false`，不继续结算。活跃目录登记的 [`relationship_life_saving`](../../src/data/lines/relationship.json) 有合法选项 `relationship_life_saving_not_save`，其 `effects: []`；[`src/data/events.json`](../../src/data/events.json) 引用该 line。对照 [Headless 选择执行](../../src/headless/session/HeadlessEngineSessionImpl.ts) L431–445 可执行空 effects。
+- **首次审查基线（已退役源码）：**原 `useNewGameEngine.handleChoice()`（当时 L352–387）在 `effectsToExecute.length === 0` 时返回 `false`，不继续结算。活跃目录登记的 [`relationship_life_saving`](../../src/data/lines/relationship.json) 有合法选项 `relationship_life_saving_not_save`，其 `effects: []`；[`src/data/events.json`](../../src/data/events.json) 引用该 line。对照 [Headless 选择执行](../../src/headless/session/HeadlessEngineSessionImpl.ts) L431–445 可执行空 effects。
 - **正式语义：**PD-030（合法选择一次完成真实阶段）；玩家有权决定不参与、不承诺。无公开状态 delta 不等于无合法决定。
 - **影响：**该事件达到合法触发条件并在 Local 展示时，“继续赶路”会被拒绝，阻断这一决策点。
 - **最小验证：**以合法事件/选项直接复现；验证 Local、Headless、API 对“零效果但合法”的执行、历史与推进一致。
 - **验收关注：**合法空 effects 仍能完成事件；无新增虚构效果、无重复结算、无额外确认页。
-- **状态：**OPEN；代码证据明确，新一轮浏览器复现未做。
+- **状态：**`RETIRED_WITH_RUNTIME`（2026-10-10）。上述行为仅描述首次审查基线；Local 玩家入口、`useNewGameEngine` 与其专属流程已从当前工作树移除，生产 Web 仅走 API／Headless。未将此状态解释为 API 零效果选择已通过独立验证。
 
-### SL-GAP-03 — Local 恢复时重新抽取未完成的事件
+### SL-GAP-03 — Local 曾在恢复时重新抽取未完成的事件（已随 Runtime 退役）
 
-- **现象/代码证据：**Local 当前事件处于 `useNewGameEngine.engineState.currentEvent`；[`loadGameFromSave()` L718–745](../../src/composables/useNewGameEngine.ts) 恢复 Snapshot 后清空事件并调用 `getNextEvent()`。[`HeadlessEngineSessionImpl.serialize()` L502–527](../../src/headless/session/HeadlessEngineSessionImpl.ts) 则使用已有 `pendingStoryEventId` 表示可恢复目录事件；hydrate 重新挂载。
+- **首次审查基线（已退役源码）：**Local 当前事件曾处于 `useNewGameEngine.engineState.currentEvent`；其 `loadGameFromSave()`（当时 L718–745）恢复 Snapshot 后清空事件并调用 `getNextEvent()`。[`HeadlessEngineSessionImpl.serialize()` L502–527](../../src/headless/session/HeadlessEngineSessionImpl.ts) 则使用已有 `pendingStoryEventId` 表示可恢复目录事件；hydrate 重新挂载。
 - **正式语义：**单角色承诺/机会连续性；PD-126 明确覆盖 Headless、P8、API 的决策点行为（其文字不直接宣称 Local 也在同一实施范围）；Snapshot `3.16.0` 的既有字段边界。
 - **影响（推断）：**保存事件 A 后读取，Local 可能重新选择事件 B；至少未可靠保留原决策点。
 - **最小验证：**在同一已选未结算事件处保存、恢复，并比较事件 ID、选项、随机次数、历史与可用行动。额外验证已执行事件、未确认结果、终局的边界。
 - **验收关注：**不静默替换已经进入的决策点；不擅自新增 Snapshot 字段或通用调度状态。
-- **状态：**OPEN；路径不对称已确认，具体玩家表现待复现。
+- **状态：**`RETIRED_WITH_RUNTIME`（2026-10-10）。真实 API Web smoke 在“柜台边的小主意”待选择时保存并重载，恢复了同一事件及两个选项，随后正常结算并继续推进。该证据验证本次被选定 API 事件恢复路径；不把旧 Local 的维护责任移交给其他实现。
 
-### SL-GAP-04 — Local / Headless / API 正式事件调度边界
+### SL-GAP-04 — 正式 Headless/API 调度与行动优先级合规性
 
-- **现象/代码证据：**Local [`getNextEvent()` L125–244](../../src/composables/useNewGameEngine.ts) 在可用主动行动判断前尝试 `gameEngine.selectEvent(age)`；Headless [`getSessionPhase()` L687–715](../../src/headless/session/HeadlessEngineSessionImpl.ts) 及 [`getNextEvent()` L255–301](../../src/headless/session/HeadlessEngineSessionImpl.ts) 对已有行动、强制事件、行动确认/时间推进调度边界作不同处理。
+- **历史路径差异：**首次审查发现的 Local [`getNextEvent()` L125–244] 在判断可用主动行动前尝试调度；浏览器 Local Runtime 已退役，这个差异不再形成并行维护或 parity 要求。
+- **当前正式路径证据：**PD-126 约束 Headless/API 的行动、强制事件、行动确认与时间推进调度；`npm run test:headless`、`npm run test:p6b` 通过，但默认 `npm run gate:playability` 有 8 个 persona frustration / opaque-ratio blockers，尚不足以关闭本项。
 - **正式语义：**PD-126 对 Headless、P8、API 的优先级具有具体约束；PD-030 / PD-033 约束操作与正式结算。不可把 PD-126 未写明的 Local 范围自动扩张为已经裁决的实现细节。
-- **可能影响（推断）：**Local 与 API 的普通事件密度、主动规划可见性和生命周期体验不同；随机选择天然允许不同，不要求相同 seed 的每个事件绝对一致。
-- **最小验证：**合法相同决策点、受控调度机会及真实操作次数对照；确认何时允许 Scheduler 抽取、是否抢占有效主动规划、结果是否重复确认。
+- **可能影响（推断）：**正式 Web 的 API/Headless 决策点可能仍有不合 PD-126 的情况；随机选择天然允许不同，不要求相同 seed 的每个事件绝对一致。
+- **最小验证：**对正式 API/Headless 的合法决策点和受控调度机会核对何时允许 Scheduler 抽取、是否抢占有效主动规划、结果是否重复确认；不再比较浏览器 Local。
 - **状态：**OPEN / NEEDS_VALIDATION；不得仅凭分支顺序直接宣布完整产品缺陷。
 
 ### SL-GAP-05 — Milestone 详细查询入口缺口
@@ -103,7 +107,7 @@
 - **现象/代码证据：**[`deriveMilestoneProjection.ts`](../../src/core/deriveMilestoneProjection.ts) 从当前事实与历史派生已获得/Prospect；[`lifeMemoryFeedback.ts`](../../src/components/lifeMemoryFeedback.ts) 与 [`GameScreen.vue` L306–365](../../src/components/GameScreen.vue) 已有获得卡。[`LifeMemoryPanel.vue`](../../src/components/LifeMemoryPanel.vue) 能展示描述、取得年龄与依据，但当前生产 [`GameScreen.vue` L125–155](../../src/components/GameScreen.vue) 未挂载；主界面仅挂载摘要及属性面板，印记和 Prospect 只显示紧凑内容。
 - **正式语义：**PD-128；Player Model 的 ACQUISITION / POSITION / PROSPECT / CONTINUITY 以及取得依据的只读解释边界。
 - **影响：**长期印记数据存在，但玩家缺少当前主流程内可持续打开的详细历史查询入口。不能误判为“Milestone 完全未实现”。
-- **最小验证：**在生产 Local/API 路径取得里程碑后验证入口、详细内容、已获得依据、Prospect、读档重看及无额外写入。
+- **最小验证：**在正式 Web API 路径取得里程碑后验证入口、详细内容、已获得依据、Prospect、读档重看及无额外写入。
 - **验收关注：**接入现有事实派生和展示能力，不再造 Milestone ledger、奖励、第二套 Achievement 或额外状态。
 - **状态：**OPEN；生产组件树差异已确认，浏览器可达性待实测。
 
@@ -143,9 +147,7 @@
 ## 4. 依赖关系与建议治理节奏
 
 ```text
-SL-GAP-01 / 02 / 04：合法行动与正式时间、调度
-                  ↓
-SL-GAP-03：事件/选择与已形成事实的可靠恢复
+SL-GAP-01 / 04：合法行动与正式时间、调度
                   ↓
 SL-GAP-05 / 06：获得、查询、回顾真实 Milestone
                   ↓
@@ -168,12 +170,14 @@ SL-GAP-07 / 08 / 09：人物长期连续性、价值中立终局与自然完整�
 | Human 决定 | 验证结论、授权或延期；不由本台账自动推断 |
 | 实施结果 | 如后续另行授权，记录变更 commit、测试/实际运行证据与残余风险 |
 
-## 5. 本轮结论与明确未做
+## 5. 当前结论与验证边界
 
 **结论：**当前实现具有单角色人生的关键基础机制，但没有足够当前自然运行证据证明完整、连续、可回顾的单角色人生体验已经达标。已经识别的主要风险集中于**合法选择 → 时间节点 → 正式事件/因果 → 存档恢复 → 长期反馈**的边界，而不是需要提前发明新系统。
 
-**本轮已做：**对远程 `dev` 的代码、权威规范、事件内容、持久化及测试源码作只读差异审查，并将问题以证据等级和独立 ID 登记。
+**首次审查记录：**2026-10-10 对远程 `dev` 的代码、权威规范、事件内容、持久化及测试源码作只读差异审查；当时没有执行自然人生、浏览器/API 联机体验或当前 HEAD 测试。该历史记录不再覆盖上方 PD-130 的新核验结果。
 
-**本轮未做：**不将任何问题标记“已复现/已修复/测试通过”；不实施代码、事件、Schema、Snapshot、UI 或 API 迁移；不新增 Product Decision、Contract 或自动化治理项；不启动 Codex 和 AE。
+**本次 PD-130 结果：**仅退役浏览器 Local 玩家 Runtime 和无消费者 Local 专属脚手架；保留共享 `GameEngineIntegration`、Headless/API、Snapshot 转换、`SaveManager.ts` 的测试/模拟用途及 `GameProcessSimulator.local_direct`。新档、事件选择、主动行动、保存/恢复有真实 API Web 运行证据；正常终局由 Headless 测试覆盖。工作树基线、测试结果和 Headless gate blocker 见上方实施核验记录。
+
+**仍未建立的证据：**完整自然出生至寿终 Web 人生；Headless gate 的 8 个 persona blockers；SL-GAP-01、04–09 的各自验证。退役不自动关闭这些事项，也不授权扩展到 gameplay 修复、Schema/Snapshot 变更或其他阶段。
 
 > 本台账的存在只是保证下一轮可以从既有证据继续调查，而不是要求一次性完成全部事项。更新此文档时，优先修改既有条目状态及证据，不无边界增列工程 TODO。

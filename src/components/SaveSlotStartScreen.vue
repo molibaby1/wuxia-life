@@ -4,7 +4,7 @@
       <h1 class="title">武侠人生</h1>
       <p class="subtitle">选择存档槽位（共 3 个）</p>
 
-      <p v-if="statusMessage" class="status" :class="statusClass">{{ statusMessage }}</p>
+      <p v-if="statusMessage" class="status" :class="statusClass" role="alert">{{ statusMessage }}</p>
 
       <div v-if="flowState === 'loading'" class="card">加载中…</div>
 
@@ -56,7 +56,6 @@
       </template>
 
       <div v-else class="card">
-        <p>{{ statusMessage }}</p>
         <button class="btn btn-primary" @click="$emit('retry')">重试</button>
       </div>
     </div>
@@ -93,6 +92,7 @@ function onNameInput(event: Event): void {
 const statusMessage = computed(() => {
   if (props.flowMessage) return props.flowMessage;
   if (props.flowState === 'loading') return '正在连接服务器…';
+  if (props.flowState === 'configuration_error') return '未配置正式游戏 API 地址';
   if (props.flowState === 'auth_error') return '设备身份验证失败';
   if (props.flowState === 'server_unavailable') return '服务器不可用';
   if (props.flowState === 'compatibility_error') return '存档版本不兼容';

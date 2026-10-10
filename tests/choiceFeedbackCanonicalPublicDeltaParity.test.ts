@@ -4,12 +4,7 @@
  */
 import { generateChoiceFeedback } from '../src/core/ChoiceFeedbackGenerator';
 import { calculatePublicStatDeltas } from '../src/core/activePlanning/periodSummaryBuilder';
-import { cloneCanonicalGameState } from '../src/contracts/validation/canonicalGameStateValidation';
-import { gameEngine } from '../src/core/GameEngineIntegration';
-import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import { EffectType, type PlayerState } from '../src/types/eventTypes';
-import type { GameState } from '../src/types';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -174,81 +169,6 @@ console.log('=== Choice Feedback Canonical Public Delta Parity ===\n');
 }
 
 {
-  const bootstrap = HeadlessEngineSessionImpl.create({
-    playerName: '浏览器快照',
-    gender: 'male',
-    catalogVersion: '1.0.0',
-  });
-  const liveState = cloneCanonicalGameState(bootstrap.serialize().state as unknown as GameState);
-  liveState.player.reputation = 73;
-  liveState.flags = { ...liveState.flags, sect_faction: 'orthodox' };
-  liveState.player.flags = { ...liveState.player.flags, sect_faction: 'orthodox' };
-
-  const engine = useNewGameEngine();
-  const originalGetGameState = gameEngine.getGameState;
-  const originalExecuteChoiceEffects = gameEngine.executeChoiceEffects;
-  const originalRaf = globalThis.requestAnimationFrame;
-
-  globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => {
-    cb(0);
-    return 0;
-  }) as typeof requestAnimationFrame;
-
-  try {
-    (gameEngine as any).getGameState = () => liveState;
-    (gameEngine as any).executeChoiceEffects = async () => {
-      // In-place mutation of the live reactive reference (real engine behavior).
-      liveState.player.reputation = -50;
-      liveState.flags.sect_faction = 'demonic';
-      liveState.player.flags = { ...liveState.player.flags, sect_faction: 'demonic' };
-      return liveState;
-    };
-
-    (engine.engineState as any).currentEvent = {
-      id: 'browser_detached_feedback_event',
-      eventType: 'choice',
-      content: { title: '朝廷的棋局' },
-      choices: [
-        {
-          id: 'accept_court_plot',
-          text: '入局',
-          effects: [],
-          outcomes: [
-            {
-              id: 'court_set_reputation',
-              text: '你的名望被朝廷重新定义。',
-              effects: [
-                { type: EffectType.STAT_MODIFY, target: 'reputation', value: -50 },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-
-    const handled = await engine.handleChoice({ id: 'accept_court_plot' } as any);
-    assert(handled, 'browser choice should execute');
-    const feedback = engine.engineState.lastChoiceFeedback;
-    assert(feedback !== null, 'browser choice must produce feedback');
-    assertEqual(
-      impactDelta(feedback!, 'reputation'),
-      -123,
-      'browser path must use detached before snapshot for actual delta',
-    );
-    assertEqual(liveState.player.reputation, -50, 'live state must reflect settlement');
-  } finally {
-    (gameEngine as any).getGameState = originalGetGameState;
-    (gameEngine as any).executeChoiceEffects = originalExecuteChoiceEffects;
-    globalThis.requestAnimationFrame = originalRaf;
-    (engine.engineState as any).currentEvent = null;
-    engine.engineState.lastOutcomeText = null;
-    engine.engineState.lastEffects = [];
-    (engine.engineState as any).lastChoiceFeedback = null;
-  }
-  console.log('✓ Browser detached-state regression');
-}
-
-{
   const before = basePlayer({ reputation: 73, connections: 20 });
   const after = basePlayer({ reputation: -50, connections: -92 });
   const canonical = calculatePublicStatDeltas(before, after);
@@ -261,24 +181,12 @@ console.log('=== Choice Feedback Canonical Public Delta Parity ===\n');
     beforePlayer: before,
     afterPlayer: after,
   };
-  const browserLike = generateChoiceFeedback(sharedInput);
-  const headlessLike = generateChoiceFeedback(sharedInput);
+  const feedback = generateChoiceFeedback(sharedInput);
 
   for (const [stat, delta] of Object.entries(canonical)) {
-    assertEqual(impactDelta(browserLike, stat), delta, `browser-like ${stat} must match canonical`);
-    assertEqual(impactDelta(headlessLike, stat), delta, `headless-like ${stat} must match canonical`);
+    assertEqual(impactDelta(feedback, stat), delta, `${stat} must match canonical public delta`);
   }
-  assertEqual(
-    impactDelta(browserLike, 'reputation'),
-    impactDelta(headlessLike, 'reputation'),
-    'Browser/Headless reputation parity',
-  );
-  assertEqual(
-    impactDelta(browserLike, 'connections'),
-    impactDelta(headlessLike, 'connections'),
-    'Browser/Headless connections parity',
-  );
-  console.log('✓ canonical generator consistency regression');
+  console.log('✓ canonical public delta consistency regression');
 }
 
 {
@@ -315,4 +223,4 @@ console.log('=== Choice Feedback Canonical Public Delta Parity ===\n');
   console.log('✓ non-stat feedback preserved in actual-delta mode');
 }
 
-console.log('\n=== Choice Feedback Canonical Public Delta Parity Passed ===');
+console.log('\n=== Choice Feedback Canonical Public Delta Passed ===');

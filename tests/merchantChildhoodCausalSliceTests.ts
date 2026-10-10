@@ -1,7 +1,7 @@
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventLoader } from '../src/core/EventLoader';
-import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
+import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { Effect, GameState, PlayerState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
@@ -31,52 +31,34 @@ function hasEffect(effects: Effect[] | undefined, type: string, target: string):
   return Boolean(effects?.some(effect => effect.type === type && (effect.target ?? effect.stat) === target));
 }
 
-async function assertRecognitionRemainsVisible(
+async function assertRecognitionSettlesThroughHeadless(
   eventId: string,
   flags: Record<string, unknown>,
   stats: Partial<PlayerState>,
 ): Promise<void> {
-  const previousAnimationFrame = globalThis.requestAnimationFrame;
-  globalThis.requestAnimationFrame = callback =>
-    setTimeout(() => callback(Date.now()), 0) as unknown as number;
-  const browser = useNewGameEngine();
-  try {
-    const base = new GameEngineIntegration().getGameState();
-    gameEngine.applyGameState({
-      ...base,
-      player: {
-        ...base.player,
-        age: 6,
-        alive: true,
-        businessAcumen: 4,
-        traits: [],
-        connections: 2,
-        flags: { ...flags },
-        ...stats,
-      } as PlayerState,
-      facts: { ...base.facts, birth_background: 'merchant_house' },
-      flags: { ...base.flags, origin_merchant_family: true, origin_id: 'merchant_house', ...flags },
-      currentTime: { year: 7, month: 1, day: 1 },
-      eventHistory: [],
-    } as GameState);
-    browser.engineState.currentEvent = null;
-    browser.engineState.availableChoices = [];
-    browser.engineState.lastOutcomeText = null;
+  const bootstrap = HeadlessEngineSessionImpl.create({
+    playerName: '童年商贾',
+    gender: 'male',
+    catalogVersion: '1.0.0',
+  });
+  const snapshot = bootstrap.serialize();
+  const matchingState = state(flags, stats);
+  snapshot.state.player = { ...snapshot.state.player, ...matchingState.player };
+  snapshot.state.facts = { ...snapshot.state.facts, ...matchingState.facts };
+  snapshot.state.flags = { ...snapshot.state.flags, ...matchingState.flags };
+  snapshot.state.currentTime = { year: 7, month: 1, day: 1 };
+  snapshot.state.eventHistory = [];
+  snapshot.state.pendingStoryEventId = eventId;
 
-    browser.getNextEvent();
-    await new Promise(resolve => setTimeout(resolve, 10));
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+  assert(session.getCurrentEvent()?.id === eventId, `${eventId} must be attached to the Headless session`);
+  const result = await session.progressAutomatic({ maxSteps: 1 });
 
-    assert(
-      browser.engineState.currentEvent?.id === eventId,
-      `${eventId} must remain visible after its automatic effects execute`,
-    );
-    assert(
-      Boolean(gameEngine.getGameState().flags?.merchant_childhood_recognition_done),
-      `${eventId} must still apply recognition effects before presentation`,
-    );
-  } finally {
-    globalThis.requestAnimationFrame = previousAnimationFrame;
-  }
+  assert(result.stepsExecuted === 1, `${eventId} should execute through Headless automatic settlement`);
+  assert(
+    Boolean(session.getRuntimeState().flags?.merchant_childhood_recognition_done),
+    `${eventId} must apply recognition effects through Headless settlement`,
+  );
 }
 
 export async function runMerchantChildhoodCausalSliceTests(): Promise<void> {
@@ -124,12 +106,12 @@ export async function runMerchantChildhoodCausalSliceTests(): Promise<void> {
   );
   assert(Boolean(loader.getEventById('merchant_childhood_seed_milestone')), 'existing age-7 merchant milestone still loads');
 
-  await assertRecognitionRemainsVisible(
+  await assertRecognitionSettlesThroughHeadless(
     'merchant_childhood_recognition_abacus_base',
     { merchant_childhood_abacus_memory: true },
     { businessAcumen: 5 },
   );
-  await assertRecognitionRemainsVisible(
+  await assertRecognitionSettlesThroughHeadless(
     'merchant_childhood_recognition_customer_base',
     { merchant_childhood_customer_memory: true },
     { connections: 3 },

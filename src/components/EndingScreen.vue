@@ -42,19 +42,7 @@
       </div>
       
       <div class="actions">
-        <button
-          v-if="hasLatestSave"
-          class="btn"
-          @click="loadLatestSave"
-        >
-          读取最近存档继续
-        </button>
-        <p v-if="hasLatestSave" class="save-hint">
-          最近存档：{{ latestSaveLabel }}
-        </p>
-        <p v-else class="save-hint">
-          当前无可读取存档，重开不会影响已有存档。
-        </p>
+        <p class="save-hint">可返回选档界面继续已有的人生，或开启新人生。</p>
         <button class="btn btn-primary" @click="share">
           分享给朋友
         </button>
@@ -72,7 +60,7 @@ import { getAffiliationDefinition } from '../core/affiliationCatalog';
 import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { AffiliationId } from '../types/eventTypes';
 
-const emit = defineEmits(['restart', 'load-latest-save']);
+const emit = defineEmits(['restart']);
 const props = defineProps<{
   player: {
     name?: string;
@@ -83,14 +71,10 @@ const props = defineProps<{
     martialPower?: number;
     chivalry?: number;
   } | null;
-  hasLatestSave?: boolean;
-  latestSaveLabel?: string;
   lifeMemory?: LifeMemorySummary | null;
   ending?: { id: string; name: string; description: string; category: string } | null;
 }>();
 const player = props.player;
-const hasLatestSave = props.hasLatestSave ?? false;
-const latestSaveLabel = props.latestSaveLabel ?? '';
 const endingInfo = computed(() => props.ending ?? null);
 const affiliationLabel = computed(() => {
   if (!player?.affiliation) return '';
@@ -118,9 +102,6 @@ const restart = () => {
   emit('restart');
 };
 
-const loadLatestSave = () => {
-  emit('load-latest-save');
-};
 </script>
 
 <style scoped>

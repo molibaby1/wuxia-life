@@ -266,7 +266,7 @@ async function testAutomaticExecutionReturnsCausePreservingResults(): Promise<vo
   }
 }
 
-function testLocalEngineConsumesSharedBuilder(): void {
+function testSharedEngineConsumesSharedBuilder(): void {
   const engine = new GameEngineIntegration();
   const state = engine.getGameState();
   state.player.age = 30;
@@ -276,19 +276,19 @@ function testLocalEngineConsumesSharedBuilder(): void {
   state.flags = {};
   state.player.flags = {};
   const result = engine.executeActiveAction('action_training_basic', { random: () => 0.5 });
-  assert(Boolean(result?.activeActionSummary.resultExplanation?.includes('练功')), 'Local engine must expose shared result explanation');
-  assert(Boolean(result?.activeActionSummary.appliedDeltaSummary?.includes('功力')), 'Local engine must expose actual public delta');
+  assert(Boolean(result?.activeActionSummary.resultExplanation?.includes('练功')), 'GameEngineIntegration must expose shared result explanation');
+  assert(Boolean(result?.activeActionSummary.appliedDeltaSummary?.includes('功力')), 'GameEngineIntegration must expose actual public delta');
 }
 
 async function main(): Promise<void> {
   testApiMapperPreservesSharedSemantics();
-  testLocalEngineConsumesSharedBuilder();
+  testSharedEngineConsumesSharedBuilder();
   await testHeadlessConsumesSharedBuilder();
   testBrowserConsumerRendersSharedFields();
   testProgressionEchoKeepsOnlyNewOutcomeInformation();
   testAutomaticStageResultsKeepIndependentCausesSeparate();
   await testAutomaticExecutionReturnsCausePreservingResults();
-  console.log('activeActionResultParity.test.ts: Local/API/Headless/Browser parity ok');
+  console.log('activeActionResultParity.test.ts: shared-engine/API/Headless/Web consumer coverage ok');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -7,7 +7,6 @@
         </div>
         <div class="save-controls">
           <button class="save-btn" @click="saveGame">保存</button>
-          <button v-if="!apiMode" class="save-btn" @click="loadLatestSave">读档</button>
         </div>
       </div>
 
@@ -159,8 +158,6 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { gameEngine } from '../core/GameEngineIntegration';
-import { useNewGameEngine } from '../composables/useNewGameEngine';
 import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
 import MainScreenStatsPanel from './MainScreenStatsPanel.vue';
 import { buildMainScreenModel, type MainScreenPlayer } from './mainScreenModel';
@@ -169,8 +166,6 @@ import {
   collectNewLifeMemoryFeedback,
   type LifeMemoryFeedbackItem,
 } from './lifeMemoryFeedback';
-import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
-import { getOwnedAssets } from '../core/assetOwnership';
 import type { StoryChoice } from '../types';
 
 import type { DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
@@ -185,13 +180,11 @@ const props = defineProps<{
   currentNode: any;
   availableChoices: StoryChoice[];
   isAutoPlaying: boolean;
-  apiMode?: boolean;
   apiDisturbanceNarrative?: DisturbanceNarrativeDisplay | null;
   apiSessionPhase?: SessionPhase | null;
-  apiStoryEventAutomatic?: boolean;
   apiNeedsProgressionAck?: boolean;
-  apiPlayer?: PlayerSummaryDto | null;
-  apiLifeMemory?: LifeMemorySummary | null;
+  apiPlayer: PlayerSummaryDto;
+  apiLifeMemory: LifeMemorySummary;
   progressionOverlay?: ProgressionOverlayPayload | null;
   apiAutomaticAdvanceError?: string | null;
 }>();
@@ -202,16 +195,9 @@ const emit = defineEmits<{
   (e: 'api-progression-ack'): void;
 }>();
 
-const { engineState, continueProgressionFlow, saveCurrentGame, loadGameFromSave, getAllSaves } =
-  useNewGameEngine();
-
 const disturbanceNarrativeDisplay = computed(() => {
-  if (props.apiMode) {
-    if (props.apiSessionPhase !== 'disturbance_narrative') return null;
-    return props.apiDisturbanceNarrative ?? null;
-  }
-  if (!engineState.showingDisturbanceNarrative) return null;
-  return engineState.pendingDisturbanceNarrative;
+  if (props.apiSessionPhase !== 'disturbance_narrative') return null;
+  return props.apiDisturbanceNarrative ?? null;
 });
 
 const hasCanonicalProgressionCard = computed(() => {
@@ -225,13 +211,7 @@ let continueClickLocked = false;
 const continueToNext = () => {
   if (continueClickLocked || props.isAutoPlaying) return;
   continueClickLocked = true;
-  if (props.apiMode) {
-    if (props.apiNeedsProgressionAck) {
-      emit('api-progression-ack');
-    }
-  } else {
-    continueProgressionFlow();
-  }
+  if (props.apiNeedsProgressionAck) emit('api-progression-ack');
   void nextTick(() => {
     continueClickLocked = false;
   });
@@ -246,77 +226,47 @@ const showContinueButton = computed(() => {
   if (props.isAutoPlaying) return false;
   if (props.apiAutomaticAdvanceError) return false;
   if (props.availableChoices.length > 0) return false;
-  if (props.apiMode) {
-    return props.apiNeedsProgressionAck === true;
-  }
-  if (engineState.isActiveActionMode) return false;
-  return (
-    engineState.isPassiveProgressionMode ||
-    engineState.showingDisturbanceNarrative ||
-    !!props.currentNode
-  );
+  return props.apiNeedsProgressionAck === true;
 });
 
 const isApiPlanningPhase = computed(
-  () => props.apiMode && props.apiSessionPhase === 'active_planning',
+  () => props.apiSessionPhase === 'active_planning',
 );
 
 const showPlanningIntroTitle = computed(() => {
   if (!props.currentNode?.title?.trim()) return false;
   if (props.currentNode.id !== 'active_planning') return false;
-  return isApiPlanningPhase.value || engineState.isActiveActionMode;
+  return isApiPlanningPhase.value;
 });
 
-// 使用 computed 直接获取最新的游戏状态，确保响应式更新
-const player = computed(() => {
-  if (props.apiMode && props.apiPlayer) {
-    return props.apiPlayer;
-  }
-  const state = gameEngine.getGameState();
-  return state.player;
-});
+const player = computed(() => props.apiPlayer);
 
 const attributePanelPlayer = computed((): MainScreenPlayer => {
-  if (props.apiMode && props.apiPlayer) {
-    const p = props.apiPlayer;
-    return {
-      martialPower: p.martialPower,
-      chivalry: p.chivalry,
-      constitution: p.constitution,
-      wealthCapacity: p.wealthCapacity,
-      affiliation: p.affiliation,
-      title: p.title,
-      reputation: p.reputation,
-      knowledge: p.knowledge,
-      charisma: p.charisma,
-      businessAcumen: p.businessAcumen,
-      influence: p.influence,
-      connections: p.connections,
-      ownedAssets: p.ownedAssets,
-      lifeStates: p.lifeStates,
-    };
-  }
-  const state = gameEngine.getGameState();
+  const p = props.apiPlayer;
   return {
-    ...state.player,
-    ownedAssets: getOwnedAssets(state.facts),
+    martialPower: p.martialPower,
+    chivalry: p.chivalry,
+    constitution: p.constitution,
+    wealthCapacity: p.wealthCapacity,
+    affiliation: p.affiliation,
+    title: p.title,
+    reputation: p.reputation,
+    knowledge: p.knowledge,
+    charisma: p.charisma,
+    businessAcumen: p.businessAcumen,
+    influence: p.influence,
+    connections: p.connections,
+    ownedAssets: p.ownedAssets,
+    lifeStates: p.lifeStates,
   };
 });
 
-const lifeMemorySummary = computed(() => {
-  if (props.apiMode && props.apiLifeMemory) {
-    return props.apiLifeMemory;
-  }
-  void engineState.lastChoiceFeedback;
-  void engineState.currentEvent;
-  return deriveLifeMemorySummary(gameEngine.getGameState());
-});
+const lifeMemorySummary = computed(() => props.apiLifeMemory);
 
 const lifeMemoryFeedbackItems = ref<LifeMemoryFeedbackItem[]>([]);
 const lifeMemoryFeedbackCards = ref<ProgressionOverlayCard[]>([]);
 const seenLifeMemoryFeedbackIds = new Set<string>();
 let hasLifeMemoryBaseline = false;
-let suppressNextLifeMemoryFeedback = false;
 
 const progressionEchoCards = computed(() => [
   ...(props.progressionOverlay?.cards ?? []),
@@ -335,16 +285,10 @@ watch(
 watch(
   lifeMemorySummary,
   (current, previous) => {
-    if (!hasLifeMemoryBaseline || suppressNextLifeMemoryFeedback) {
-      if (suppressNextLifeMemoryFeedback) {
-        seenLifeMemoryFeedbackIds.clear();
-        lifeMemoryFeedbackItems.value = [];
-        lifeMemoryFeedbackCards.value = [];
-      }
+    if (!hasLifeMemoryBaseline) {
       for (const item of collectNewLifeMemoryFeedback(null, current)) {
         seenLifeMemoryFeedbackIds.add(item.id);
       }
-      suppressNextLifeMemoryFeedback = false;
       hasLifeMemoryBaseline = true;
       return;
     }
@@ -386,13 +330,8 @@ const openFullStats = async () => {
 };
 
 const getCurrentDate = () => {
-  if (props.apiMode && props.apiPlayer) {
-    const p = props.apiPlayer;
-    return `${p.currentYear}年${p.currentMonth}月${p.currentDay}日`;
-  }
-  const state = gameEngine.getGameState();
-  const time = state.currentTime || { year: 1, month: 1, day: 1 };
-  return `${time.year}年${time.month}月${time.day}日`;
+  const p = props.apiPlayer;
+  return `${p.currentYear}年${p.currentMonth}月${p.currentDay}日`;
 };
 
 const makeChoice = (choice: StoryChoice) => {
@@ -400,46 +339,7 @@ const makeChoice = (choice: StoryChoice) => {
 };
 
 const saveGame = () => {
-  if (props.apiMode) {
-    emit('manual-save');
-    return;
-  }
-  const defaultName = `手动存档-${player.value?.name || '侠客'}-${player.value?.age || 0}岁`;
-  const inputName = window.prompt('请输入存档名称', defaultName);
-  if (inputName === null) {
-    return;
-  }
-  saveCurrentGame(inputName);
-  window.alert('存档完成');
-};
-
-const loadLatestSave = () => {
-  const saves = getAllSaves();
-  if (saves.length === 0) {
-    window.alert('暂无可加载存档');
-    return;
-  }
-  const preview = saves
-    .slice(0, 5)
-    .map((save, index) => `${index + 1}. ${save.name}（${new Date(save.timestamp).toLocaleString('zh-CN')}）`)
-    .join('\n');
-  const selected = window.prompt(`请输入要读取的存档序号（默认 1）:\n${preview}`, '1');
-  if (selected === null) {
-    return;
-  }
-  const parsed = Number.parseInt(selected, 10);
-  const saveIndex = Number.isNaN(parsed) || parsed < 1 ? 0 : parsed - 1;
-  const targetSave = saves[saveIndex] || saves[0];
-  if (!targetSave) {
-    window.alert('未找到对应存档');
-    return;
-  }
-  suppressNextLifeMemoryFeedback = true;
-  const loaded = loadGameFromSave(targetSave.id);
-  if (!loaded) {
-    suppressNextLifeMemoryFeedback = false;
-  }
-  window.alert(loaded ? `已加载：${targetSave.name}` : '读取失败，存档可能不兼容');
+  emit('manual-save');
 };
 </script>
 

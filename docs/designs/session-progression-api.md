@@ -10,7 +10,7 @@
 
 ## Time catch-up
 
-When no story event and no planning actions (mirrors local `useNewGameEngine`):
+When no story event and no planning actions:
 
 - Server reuses `advanceTime(3, 'month')` on hydrated engine, then re-resolves event/planning.
 

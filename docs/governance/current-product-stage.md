@@ -10,8 +10,8 @@
 
 ## 当前导航
 
-- **总体产品工作阶段：**`SINGLE-LIFE IMPLEMENTATION GAP REVIEW / BOUNDED PLAYER RUNTIME CONSOLIDATION`（2026-10-10；PD-127–PD-130）。产品基础决策已收敛，首轮全局差异已登记；Human 已批准**退役浏览器 Local 玩家模式**（PD-130），但 **Runtime 改动与退役验证尚未实施**。当前只准备这一个有界 Codex 工程事项；不据此授权其他领域治理、无限制 BASELINE HARDENING 或 AE 扩张。
-- **Primary objective：**以 [单角色人生实现差异台账](single-life-implementation-gap-register.md) 为审查导航，先完成 PD-130 的浏览器 Local 玩家模式独立退役：正式玩家路径统一为 Web → API → Headless → 共享核心，保留有用的无数据库 Headless 模拟与测试；**旧存档无需迁移／兼容**。本项完成后依证据更新 SL-GAP-02／03／04；共享时间节点、Milestone、人物与终局等其他事项仍须逐项独立确认和授权。
+- **总体产品工作阶段：**`SINGLE-LIFE IMPLEMENTATION GAP REVIEW / BOUNDED PLAYER RUNTIME CONSOLIDATION`（2026-10-10；PD-127–PD-130）。PD-130 的浏览器 Local 玩家 Runtime 已退役并完成 API Web smoke；证据与边界见[单角色人生实现差异台账](single-life-implementation-gap-register.md)。这只收口 Runtime 事项，不代表整体单角色人生体验达标，也不授权其他领域治理、无限制 BASELINE HARDENING 或 AE 扩张。
+- **Primary objective：**PD-130 正式 Web 路径已收敛为 Vue UI → API → Headless → 共享核心；缺少 API 配置或服务不可用时有明确失败反馈。SL-GAP-02／03 已按 `RETIRED_WITH_RUNTIME` 归档；SL-GAP-04 仍保留为正式 Headless/API 合规验证项，当前默认 Headless playability gate 有未解决 blocker。SL-GAP-01、05–09 仍须逐项独立确认和授权；本次未进入其修复或下一阶段。
 - **AE 运行成熟度与历史结果：**AE 仍处于 `RUN / OBSERVE` operating mode，既有两类 bounded contract family、Formal Event Human-direct model-backed shadow → promotion 工程闭环均保留；Natural Effectiveness 仍为 `NOT ESTABLISHED`。目前不主动继续采样、扩展 AE 或优化内容生成器，除非 Human 另行批准。
 - **已完成的 Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。它只验证受控历史 downstream mechanism，不验证 Contract §9 的自主责任推导；历史 tuning 已结束。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。

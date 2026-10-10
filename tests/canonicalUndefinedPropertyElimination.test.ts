@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { gameEngine } from '../src/core/GameEngineIntegration';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
-import { preparePackedPassiveMemory } from '../src/core/activePlanning/annualPassiveMemory';
 import {
   assertCanonicalGameState,
   CanonicalValidationError,
@@ -28,32 +25,6 @@ function assertCanonicalRejects(state: Parameters<typeof assertCanonicalGameStat
     error => error instanceof CanonicalValidationError && /undefined is not valid JSON/.test(error.message),
     label,
   );
-}
-
-function runBrowserPassiveTick(currentTime: { year: number; month: number; day: number } | undefined) {
-  const ui = useNewGameEngine();
-  ui.restartGame();
-  const state = ui.getGameState();
-  state.player.age = 4;
-  if (currentTime) state.currentTime = { ...currentTime };
-  else delete state.currentTime;
-
-  const originalAdvanceTime = gameEngine.advanceTime;
-  gameEngine.advanceTime = (() => undefined) as typeof gameEngine.advanceTime;
-  try {
-    ui.engineState.isPassiveProgressionMode = true;
-    const packed = preparePackedPassiveMemory(state, () => 0);
-    assert.ok(packed, 'age 4 should prepare packed passive memory');
-    ui.engineState.annualPassiveMemory = packed;
-    ui.engineState.passiveNarrative = { title: packed.headline, text: packed.body };
-    ui.continueProgressionFlow();
-  } finally {
-    gameEngine.advanceTime = originalAdvanceTime;
-  }
-
-  const record = state.eventHistory[state.eventHistory.length - 1];
-  assert(record, 'browser passive path should append an EventRecord');
-  return { state, record };
 }
 
 async function runHeadlessPassiveTick(currentTime: { year: number; month: number; day: number } | undefined) {
@@ -128,16 +99,5 @@ assert.equal(Object.prototype.hasOwnProperty.call(timedHeadless.record, 'timesta
 assert.deepEqual(timedHeadless.record.timestamp, { year: 3, month: 4, day: 5 });
 assert.notEqual(timedHeadless.record.timestamp, timedHeadless.state.currentTime);
 assertCanonicalPass(timedHeadless.state, 'headless EventRecord with currentTime must remain canonical');
-
-const noTimeBrowser = runBrowserPassiveTick(undefined);
-assert.equal(Object.prototype.hasOwnProperty.call(noTimeBrowser.record, 'timestamp'), false);
-assertCanonicalPass(noTimeBrowser.state, 'browser EventRecord without currentTime must remain canonical');
-assert.doesNotThrow(() => defaultSnapshotConverter.toSnapshot(noTimeBrowser.state, snapshotOptions('web-browser')));
-
-const timedBrowser = runBrowserPassiveTick({ year: 6, month: 7, day: 8 });
-assert.equal(Object.prototype.hasOwnProperty.call(timedBrowser.record, 'timestamp'), true);
-assert.deepEqual(timedBrowser.record.timestamp, { year: 6, month: 7, day: 8 });
-assert.notEqual(timedBrowser.record.timestamp, timedBrowser.state.currentTime);
-assertCanonicalPass(timedBrowser.state, 'browser EventRecord with currentTime must remain canonical');
 
 console.log('✅ Canonical undefined property elimination tests passed');

@@ -13,8 +13,7 @@ import {
   isNeutralOnlyPreschoolEntry,
 } from '../src/data/preschoolPassiveSpine';
 import { reactive } from 'vue';
-import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
+import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 import type { PassiveNarrativeEntry } from '../src/data/passiveNarrativeTypes';
@@ -115,36 +114,6 @@ async function testAnnualPlanClearsAcrossProgressionResets(): Promise<void> {
   });
   assert(session.getProgressionVolatileState().annualPassiveMemory === null, 'restart clears annual plan');
 
-  const browser = useNewGameEngine();
-  browser.engineState.annualPassiveMemory = prepareAnnualPassiveMemory(merchantInfantState(1), () => 0);
-  browser.restartGame();
-  assert(browser.engineState.annualPassiveMemory === null, 'browser reset clears annual plan');
-}
-
-async function testBrowserAnnualMemoryPreemptsLegacyInfantEvents(): Promise<void> {
-  const previousAnimationFrame = globalThis.requestAnimationFrame;
-  globalThis.requestAnimationFrame = callback =>
-    setTimeout(() => callback(Date.now()), 0) as unknown as number;
-  const browser = useNewGameEngine();
-  try {
-    gameEngine.applyGameState(merchantInfantState(1));
-    browser.engineState.currentEvent = null;
-    browser.engineState.availableChoices = [];
-    browser.engineState.annualPassiveMemory = null;
-    browser.engineState.passiveNarrative = null;
-
-    browser.getNextEvent();
-
-    assert(browser.engineState.isPassiveProgressionMode, 'merchant age 1 enters annual passive progression');
-    assert(browser.engineState.currentEvent === null, 'merchant age 1 does not select a legacy childhood event');
-    assert(browser.engineState.passiveNarrative?.title === '1岁这一年', 'merchant age 1 shows its annual memory');
-
-    browser.continueProgressionFlow();
-    assert(browser.getGameState().player.age === 2, 'one annual acknowledgement reaches age 2');
-    assert(browser.engineState.passiveNarrative?.title === '2岁这一年', 'the next visible node is age 2 annual memory');
-  } finally {
-    globalThis.requestAnimationFrame = previousAnimationFrame;
-  }
 }
 
 export async function runAnnualPassiveMemoryTests(): Promise<void> {
@@ -187,7 +156,6 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(result.entryIds.join(',') === plan.entries.map(entry => entry.id).join(','), 'commit uses the displayed entries');
   await testHeadlessAnnualAdvance();
   await testAnnualPlanClearsAcrossProgressionResets();
-  await testBrowserAnnualMemoryPreemptsLegacyInfantEvents();
   await testHeadlessSeasonAdvance();
 }
 

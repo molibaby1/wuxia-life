@@ -63,6 +63,48 @@ export async function runHeadlessSessionTests(): Promise<void> {
     const response = await session.executeChoice(request);
     assert(response.status === 'success', 'choice execution success');
   }
+
+  const emptyEffectSession = HeadlessEngineSessionImpl.create({
+    playerName: '空效果选择测试',
+    gender: 'male',
+    catalogVersion: '1.0.0',
+  });
+  const emptyEffectState = emptyEffectSession.getRuntimeState();
+  emptyEffectState.player!.age = 25;
+  emptyEffectState.player!.chivalry = 50;
+  emptyEffectState.player!.martialPower = 60;
+  emptyEffectState.pendingStoryEventId = 'relationship_life_saving';
+  await emptyEffectSession.hydrate(emptyEffectSession.serialize());
+
+  const emptyEffectEvent = await emptyEffectSession.getNextEvent();
+  assert(
+    emptyEffectEvent?.eventId === 'relationship_life_saving' && emptyEffectEvent.requiresChoice,
+    'formal Headless session should expose the life-saving choice event',
+  );
+  const emptyEffectChoice = emptyEffectEvent.raw.choices?.find(
+    choice => choice.id === 'relationship_life_saving_not_save',
+  );
+  assert(emptyEffectChoice?.effects?.length === 0, 'non-saving choice is a legal empty-effect choice');
+
+  const emptyEffectResponse = await emptyEffectSession.executeChoice({
+    requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
+    snapshotRef: { snapshot: emptyEffectSession.serialize() },
+    action: {
+      eventId: 'relationship_life_saving',
+      choiceId: 'relationship_life_saving_not_save',
+    },
+  });
+  assert(emptyEffectResponse.status === 'success', 'legal empty-effect choice should execute successfully');
+  assert(
+    emptyEffectSession.getRuntimeState().eventHistory.filter(
+      record => record.eventId === 'relationship_life_saving',
+    ).length === 1,
+    'empty-effect choice should record the event once',
+  );
+  assert(
+    emptyEffectSession.getSessionPhase() === 'period_summary',
+    'empty-effect choice should advance to its result confirmation',
+  );
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

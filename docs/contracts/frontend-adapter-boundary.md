@@ -1,40 +1,34 @@
 # Frontend Adapter Boundary (P4 US-021)
 
-Separation between UI adapters and pure engine contracts before service extraction.
+Separation between player-facing UI, API transport, and shared engine contracts.
 
 ## 1. Responsibility Layers
 
 | Layer | Responsibility | Examples |
 | --- | --- | --- |
-| UI components | Render player-facing state | `GameScreen.vue`, `LifeMemoryPanel.vue` |
-| Composables | Orchestrate engine + session state | `useNewGameEngine.ts` |
-| Persistence adapters | localStorage / export | `SaveManager.ts`, `SaveManager.vue` |
-| Engine contracts | Serializable transport types | `src/contracts/*` |
-| Report/simulation | Headless audit | `GameProcessSimulator.ts`, gate scripts |
+| UI components | Render server-owned player state and emit player intents | `App.vue`, `GameScreen.vue`, `SaveSlotStartScreen.vue` |
+| API composable | Coordinate session state and API commands | `useApiGameEngine.ts` |
+| API adapter | Encode requests and decode server responses | `webApiClient.ts` |
+| Browser platform storage | Retain API device/session credentials | `webPlatformStorage.ts` |
+| Engine contracts | Serializable session, choice, and Snapshot types | `src/contracts/*` |
+| Headless / simulation | Execute canonical game behavior for server, tests, and simulation | `HeadlessEngineSessionImpl.ts`, `GameProcessSimulator.ts` |
 
-## 2. Current Direct Dependencies to Wrap
+## 2. Production Runtime Boundary
 
-| Dependency | Location | Wrap before extraction? |
-| --- | --- | --- |
-| `localStorage` | `SaveManager.ts` | yes — storage adapter |
-| `requestAnimationFrame` | `useNewGameEngine.ts` | yes — scheduler adapter |
-| Vue `reactive`/`ref` | composables, engine integration | yes — session boundary |
-| `window.alert` / DOM | UI components | yes — UI feedback adapter |
-| `Math.random` | engine/simulation | yes — RNG adapter for determinism |
-| Static event JSON import | `EventLoader` | yes — catalog provider interface |
+Formal Web play uses `Vue UI → Server API → Headless Session → shared engine`. The Web client requires `VITE_P6B_API_URL`; missing configuration or an unavailable service is reported in the UI. There is no browser Local gameplay fallback.
 
-## 3. Must Not Cross Into Contracts
+Browser storage contains API credentials, while player saves and session restoration are owned by the API and current Snapshot contract. `SaveManager.ts` remains a canonical persistence utility for tests and simulation, not a Web player save adapter.
 
-- Vue components importing contract validators in hot path
-- Contract types importing composables or `.vue` files
-- Browser APIs inside `src/contracts/`
+`GameProcessSimulator.local_direct` is an independent simulation path and does not select or implement the browser player runtime.
 
-## 4. Non-Goals
+## 3. Boundary Rules
 
-- No UI behavior changes
-- No service extraction in P4
+- Vue components do not execute game event selection or settlement.
+- API transport code does not treat client-provided state deltas as authoritative.
+- Contract types do not import Vue components or composables.
+- Browser APIs stay outside `src/contracts/`.
 
-## 5. References
+## 4. References
 
-- Related contracts in `docs/contracts/`
-- Headless boundary: `docs/contracts/web-runtime-adapter-boundary.md`
+- Web / Headless boundary: `docs/contracts/web-runtime-adapter-boundary.md`
+- Choice transport: `docs/contracts/choice-execution-request-contract.md`

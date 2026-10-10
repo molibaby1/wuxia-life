@@ -252,8 +252,8 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(gameScreenSource.includes(':practice-summary="mainScreenModel.practiceSummary"'), 'GameScreen must pass the shared practice summary');
   assert(gameScreenSource.includes(':milestone-summary="mainScreenModel.milestoneSummary"'), 'GameScreen must pass the shared milestone summary');
   assert(gameScreenSource.includes(':milestone-prospect-summary="mainScreenModel.milestoneProspectSummary"'), 'GameScreen must pass the shared milestone prospect summary');
-  assert(gameScreenSource.includes('buildMainScreenModel(attributePanelPlayer.value, lifeMemorySummary.value)'), 'Local/API must keep the shared main-screen model builder');
-  console.log('✓ keeps formal component rendering and Local/API shared builder');
+  assert(gameScreenSource.includes('buildMainScreenModel(attributePanelPlayer.value, lifeMemorySummary.value)'), 'API screen must keep the shared main-screen model builder');
+  console.log('✓ keeps formal Web component rendering and shared screen model');
 }
 
 {

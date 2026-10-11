@@ -301,24 +301,35 @@
     "choices": [
       {
         "id": "career_martial_arts_conference_choice_1",
-        "text": "参加比武，争夺盟主 (武力检定)",
-        "effects": [
-          {
-            "type": "random",
-            "success": {
-              "type": "stat_modify",
-              "target": "reputation",
-              "value": 50,
-              "operator": "add"
-            },
-            "failure": {
-              "type": "stat_modify",
-              "target": "reputation",
-              "value": -10,
-              "operator": "add"
-            }
+        "text": "登台比武，争夺盟主（失利可能有损名望）",
+        "effects": [],
+        "challenge": {
+          "sceneId": "martial_arts_tournament",
+          "success": {
+            "id": "tournament_success",
+            "text": "你在擂台上连胜数场，最终胜出，名望随之上涨。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": 50,
+                "operator": "add"
+              }
+            ]
+          },
+          "failure": {
+            "id": "tournament_failure",
+            "text": "你在群雄交锋中败下阵来，未能胜出，名望受损。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": -10,
+                "operator": "add"
+              }
+            ]
           }
-        ]
+        }
       },
       {
         "id": "career_martial_arts_conference_choice_2",

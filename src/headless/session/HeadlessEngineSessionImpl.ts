@@ -429,19 +429,20 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     }
 
     const state = this.engine.getGameState();
-    const resolved = resolveChoiceEffects(
-      state,
-      event,
-      choice,
-      condition => this.engine.isChoiceAvailable(condition as EventCondition | undefined),
-    );
-    const effects = resolved?.effects ?? choice.effects ?? [];
     const beforeSnapshot = this.serialize();
     const beforePlayer = beforeSnapshot.state.player as unknown as PlayerState;
     const beforeFlags = beforeSnapshot.state.flags;
 
-    await this.runWithRandomAsync(async () => {
+    const { resolved, effects } = await this.runWithRandomAsync(async () => {
+      const resolved = resolveChoiceEffects(
+        state,
+        event,
+        choice,
+        condition => this.engine.isChoiceAvailable(condition as EventCondition | undefined),
+      );
+      const effects = resolved?.effects ?? choice.effects ?? [];
       await this.engine.executeChoiceEffects(effects, event.id, choice.id);
+      return { resolved, effects };
     });
 
     const afterSnapshot = this.serialize();

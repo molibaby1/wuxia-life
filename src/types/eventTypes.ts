@@ -627,6 +627,21 @@ export interface EventChoice {
   /** 多结果分支（当存在时，优先于 effects） */
   outcomes?: ChoiceOutcome[];
 
+  /** 显式挑战选择：按现有场景规则命中成功或失败分支 */
+  challenge?: {
+    sceneId: string;
+    success: {
+      id: string;
+      text: string;
+      effects: EffectDefinition[];
+    };
+    failure: {
+      id: string;
+      text: string;
+      effects: EffectDefinition[];
+    };
+  };
+
   /** 自动判定权重 */
   weight?: number;
 

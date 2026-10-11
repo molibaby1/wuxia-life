@@ -262,21 +262,26 @@ function assertFormalStatusEffects(): void {
   const loveWithdrawal = findChoiceContaining(values, '暂时退让');
   assert((loveWithdrawal.effects ?? []).some((effect: any) => effect.type === 'status_remove' && effect.status === 'anxious'), 'love withdrawal must retain its anxiety recovery');
 
-  const tournamentRandomEffect = findById('career_martial_arts_conference_choice_1').effects
-    ?.find((effect: any) => effect.type === 'random');
+  const tournamentChallenge = findById('career_martial_arts_conference_choice_1').challenge;
   assert(
-    tournamentRandomEffect?.success?.type === 'stat_modify' &&
-      tournamentRandomEffect.success.target === 'reputation' &&
-      tournamentRandomEffect.success.value === 50 &&
-      tournamentRandomEffect.success.operator === 'add',
-    'tournament choice must retain its original success reputation effect',
+    tournamentChallenge?.sceneId === 'martial_arts_tournament' &&
+      tournamentChallenge.success.effects.some((effect: any) =>
+        effect.type === 'stat_modify' &&
+        effect.target === 'reputation' &&
+        effect.value === 50 &&
+        effect.operator === 'add',
+      ),
+    'tournament choice must use the existing challenge scene and retain its success reputation effect',
   );
   assert(
-    tournamentRandomEffect?.failure?.type === 'stat_modify' &&
-      tournamentRandomEffect.failure.target === 'reputation' &&
-      tournamentRandomEffect.failure.value === -10 &&
-      tournamentRandomEffect.failure.operator === 'add',
-    'tournament choice must retain its original failure reputation effect',
+    tournamentChallenge !== undefined &&
+      tournamentChallenge.failure.effects.some((effect: any) =>
+      effect.type === 'stat_modify' &&
+      effect.target === 'reputation' &&
+      effect.value === -10 &&
+      effect.operator === 'add',
+      ),
+    'tournament choice must retain its failure reputation effect',
   );
 }
 

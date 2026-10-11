@@ -2828,3 +2828,9 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 - Choice `anxious`：`career_sect_expansion / career_sect_expansion_choice_1`、`family_crisis / family_crisis_full_support`、`family_crisis / family_crisis_limited_support`。
 
 保留 `innovate_full` 的 `anxious`，以及 `daily_tight_budget_neg_1`、`daily_home_letter_neg_1`、`daily_shared_meal_neg_1`、`daily_household_burden_neg_1` 的 `anxious`；这五项生产者仍待分别审查，本裁决不确认其长期价值。所有奖励、条件、flags、事件／选择 ID、叙事、恢复路径、Status 类型与生命周期机制保持原义；本次不改变调度、Snapshot、反馈系统或 P8 Gate。Slice C2a 可在完成其自身验证后关闭，Slice C2、PD-131 与 SL-GAP-10 仍保持 OPEN。
+
+### PD-132：最小通用 Choice Challenge 判定
+
+**产品决策（Human accepted：2026-10-11；实施与验证记录见 [单角色人生实现差异台账](single-life-implementation-gap-register.md) 的 SL-GAP-10 收尾）：**需要胜败检定的 Choice 复用现有 ChallengeSystem 与已定义场景；仅显式配置 `choice.challenge` 的 Choice 进入挑战判定，基于当前人物状态和场景规则完成一次受控随机判定，只执行命中的合法效果，并展示与实际结算一致的结果。普通 Choice 保持既有行为。
+
+`career_martial_arts_conference / career_martial_arts_conference_choice_1` 是首个实例，复用 `martial_arts_tournament` 现有规则；成功声望 `+50`，失败声望 `-10`。完整比武／战斗系统延期；不按 Event ID／Choice ID 在核心执行器中硬编码，不重做概率算法或扩展 Random Effect 的 success/failure 语义，也不引入超出这条最小连接所需的抽象、API、Save 或 Snapshot 结构。

@@ -112,6 +112,24 @@ function resolveEffectsForReplay(
     return { effects: [], outcomeText: record.outcomeText ?? null };
   }
 
+  if (choice.challenge !== undefined) {
+    const challenge = choice.challenge;
+    const recordedOutcome = record.outcomeText;
+    if (!challenge || !recordedOutcome) {
+      throw new Error(`Challenge replay result is missing: ${event.id}/${choice.id}`);
+    }
+    const matches = [challenge.success, challenge.failure].filter(
+      result =>
+        typeof result?.text === 'string' &&
+        result.text.length > 0 &&
+        (recordedOutcome === result.text || recordedOutcome.includes(result.text)),
+    );
+    if (matches.length !== 1) {
+      throw new Error(`Challenge replay result is ambiguous or unknown: ${event.id}/${choice.id}`);
+    }
+    return { effects: matches[0]!.effects, outcomeText: recordedOutcome };
+  }
+
   if (record.outcomeText && choice.outcomes?.length) {
     const matched = choice.outcomes.find(
       outcome =>

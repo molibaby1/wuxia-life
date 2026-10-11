@@ -48,7 +48,7 @@ function readChallengeStat(playerStats: PlayerStats, stat: ChallengeModifiableSt
 export function calculateFailureProbability(
   scene: ChallengeScene,
   playerStats: PlayerStats,
-  testModeMultiplier: number = 1.0
+  testModeMultiplier: number = difficultyManager.config.testModeEnabled ? 1.5 : 1.0
 ): ChoiceFailureCheck {
   let baseFailureRate = scene.baseFailureRate;
   const abilityAssessment: ChoiceFailureCheck['abilityAssessment'] = [];
@@ -125,8 +125,7 @@ export function calculateFailureProbabilityForEvent(
     return null;
   }
 
-  const testModeMultiplier = difficultyManager.config.testModeEnabled ? 1.5 : 1.0;
-  return calculateFailureProbability(scene, playerStats, testModeMultiplier);
+  return calculateFailureProbability(scene, playerStats);
 }
 
 /**

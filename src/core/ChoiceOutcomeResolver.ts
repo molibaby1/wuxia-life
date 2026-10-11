@@ -1,4 +1,6 @@
 import { ConditionEvaluator } from './ConditionEvaluator';
+import { calculateFailureProbability } from './ChallengeSystem';
+import { getChallengeScene } from '../data/challengeScenes';
 import type {
   EffectDefinition,
   EventChoice,
@@ -53,9 +55,43 @@ function pickFirstChoice(
 }
 
 function resolveOutcomeEffects(
+  state: GameState,
   choice: EventChoice,
   isConditionMet: ChoiceConditionPredicate
 ): Pick<ResolvedChoiceEffects, 'effects' | 'outcomeId' | 'outcomeText'> {
+  if (choice.challenge !== undefined) {
+    const challenge = choice.challenge;
+    if (!challenge || typeof challenge !== 'object') {
+      throw new Error('Choice challenge configuration is invalid');
+    }
+    if (typeof challenge.sceneId !== 'string' || challenge.sceneId.length === 0) {
+      throw new Error('Choice challenge scene is missing or invalid');
+    }
+    const scene = getChallengeScene(challenge.sceneId);
+    if (!scene || scene.id !== challenge.sceneId) {
+      throw new Error(`Choice challenge scene not found: ${challenge.sceneId}`);
+    }
+
+    const result = calculateFailureProbability(scene, state.player).isFailed
+      ? challenge.failure
+      : challenge.success;
+    if (
+      !result ||
+      typeof result.id !== 'string' ||
+      result.id.length === 0 ||
+      typeof result.text !== 'string' ||
+      result.text.length === 0 ||
+      !Array.isArray(result.effects)
+    ) {
+      throw new Error(`Choice challenge result is invalid for scene: ${challenge.sceneId}`);
+    }
+    return {
+      effects: result.effects,
+      outcomeId: result.id,
+      outcomeText: result.text,
+    };
+  }
+
   let effects = choice.effects || [];
 
   if (!choice.outcomes || choice.outcomes.length === 0) {
@@ -97,6 +133,7 @@ export function resolveChoiceEffects(
   }
 
   const { effects, outcomeId, outcomeText } = resolveOutcomeEffects(
+    state,
     selectedChoice,
     predicate
   );

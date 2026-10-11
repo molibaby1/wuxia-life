@@ -104,6 +104,17 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     description: '普通、非致命的江湖高手比试，点到为止，不是生死决斗。'
   },
 
+  jianghu_faction_skirmish: {
+    id: 'jianghu_faction_skirmish',
+    name: '江湖门派局部交锋',
+    baseFailureRate: 55,
+    relevantStats: ['martialPower'],
+    thresholds: {
+      martialPower: { qualified: 70, excellent: 130, failureRateReduction: 0.3 },
+    },
+    description: '利益、秩序与立场冲突中的一次局部门派交锋；不是友好切磋，也不是生死相搏的决斗。'
+  },
+
   cultivation_breakthrough: {
     id: 'cultivation_breakthrough',
     name: '闭关突破',

@@ -23,7 +23,7 @@ const WEALTH_TIERS = [
 
 const REQUIREMENT_CHOICES = [
   { eventId: 'border_crisis', choiceId: 'border_crisis_ransom', tier: 'comfortable_means' },
-  { eventId: 'jianghu_demon_sect', choiceId: 'fund_expedition', tier: 'comfortable_means' },
+  { eventId: 'jianghu_demon_sect', choiceId: 'relieve_conflict_victims', tier: 'comfortable_means' },
   { eventId: 'family_child_marriage', choiceId: 'family_child_marriage_choice_1', tier: 'comfortable_means' },
   { eventId: 'hero_ally_pays_price', choiceId: 'ally_pay_ransom', tier: 'comfortable_means' },
   { eventId: 'family_crisis', choiceId: 'family_crisis_full_support', tier: 'comfortable_means' },
@@ -253,7 +253,7 @@ function testBorderEndingAuthoring(): void {
 function testStaleNumericWalletWording(): void {
   const surfaces: Array<{ label: string; text: string }> = [
     { label: 'border_crisis_ransom', text: getChoice('border_crisis', 'border_crisis_ransom').text ?? '' },
-    { label: 'fund_expedition', text: getChoice('jianghu_demon_sect', 'fund_expedition').text ?? '' },
+    { label: 'relieve_conflict_victims', text: getChoice('jianghu_demon_sect', 'relieve_conflict_victims').text ?? '' },
     {
       label: 'family_child_marriage_choice_1',
       text: getChoice('family_child_marriage', 'family_child_marriage_choice_1').text ?? '',

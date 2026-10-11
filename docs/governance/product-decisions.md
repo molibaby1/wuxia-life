@@ -2850,3 +2850,13 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 `peace_grudge` 不进入 Challenge，保留基础人脉 `+10`；玩家会联络江湖同道，请其听取双方说法并居中协调。文案不保证对方接受调停或双方和解，不新增人物关系事实。
 
 本裁决仅覆盖该事件的内容、两个 Choice 的效果和定向 Headless 验证，不改变其调度元数据、共享 Challenge／Choice／Replay 语义或 P8 Gate；不关闭 SL-GAP-10 整体、Slice C2 或 P8 Gate。
+
+### PD-135：江湖纷争自主选择与局部交锋结算
+
+**产品决策（Human accepted：2026-10-11；实现与验证记录见[单角色人生实现差异台账](single-life-implementation-gap-register.md)的 SL-GAP-10 / 第四个 PD-132 实例）：**`jianghu_demon_sect` 保留原事件 ID、资格条件和调度元数据，改为玩家自主决定如何回应门派纷争。玩家可协助传统门派或非传统门派的一次局部交锋、实际援助受纷争波及者，或不介入。系统不替玩家决定思想、阵营归属或指挥权，也不据此确定整场江湖纷争的结局。
+
+两项武力选择使用 PD-132 的 Choice Challenge，共用非致命局部交锋场景 `jianghu_faction_skirmish`：基础失败率 `55`，相关属性为功力，合格与优秀阈值分别为 `70`、`130`，优秀能力失败率修正为 `0.3`。任一武力选择成功时基础名望 `+15`；失败分支为空效果，不改变核心属性，不造成长期功力损失、伤势或死亡。双方各自使用唯一的胜败 Outcome ID 与结果叙事；一处交锋的结果不代表整场纷争结束。
+
+`relieve_conflict_victims` 保留 `comfortable_means` 财力资格，实际援助后基础侠义声誉 `+10`；不消耗 Wealth Capacity，也不进行随机检定。`stay_out_of_conflict` 无资格门槛、无效果和随机检定，正常完成选择且不受额外惩罚。原 Choice ID `lead_expedition`、`fund_expedition` 退役，不为新语义建立 alias 或回放兼容层；对应的旧 Karma 奖励移除，支持任一方本身不产生善恶因果。
+
+所有效果继续服从正式 Trait 倍率、属性边界与 canonical 结算。普通 Choice 遵守 PD-112，不为补充结果文案伪造 `narrativeResult`。本决策仅覆盖此事件、局部交锋场景及其定向验证；不建设通用战争或阵营系统，不修改共享 Challenge、Choice、Replay、Karma、Save、Snapshot、API 或 P8 Gate，也不关闭 SL-GAP-10 整体、Slice C2、其他 Random Effect 缺口或 P8 Gate。

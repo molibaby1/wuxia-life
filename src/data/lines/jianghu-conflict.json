@@ -245,7 +245,7 @@
   {
     "id": "jianghu_demon_sect",
     "name": "江湖纷争",
-    "description": "传统门派与非传统门派的矛盾加剧，江湖陷入纷争。",
+    "description": "传统门派与非传统门派因利益、秩序和立场分歧发生冲突，一处局部交锋已经波及普通行人。双方对正邪判断、责任归属和冲突缘由各有说法。你因已有的江湖名望被询问打算；没人替你决定立场，也没有人把整场纷争的指挥权交给你。",
     "version": "1.0.0",
     "category": "jianghu",
     "priority": 90,
@@ -278,45 +278,84 @@
       }
     },
     "content": {
-      "title": "江湖纷争再起",
-      "text": "传统门派与非传统门派的矛盾日益激化，江湖陷入纷争。但你心里清楚：所谓「正邪」，不过是话语权的争夺。朝廷乐于见到江湖自相残杀，而真正的「邪恶」，或许是这场无休止的争斗本身。"
+      "title": "江湖纷争中的一处交锋",
+      "text": "街口一处交手扰乱了行人的去路，受困者仍等着援手。传统门派与非传统门派各自陈述冲突缘由，也各有对正邪、责任的判断。有人认得你的名望，来问你愿意如何应对。眼下只是一处局部交锋，局势并未交由你掌控。"
     },
     "choices": [
       {
-        "id": "lead_expedition",
-        "text": "率众出征，维护传统 (武力检定)",
-        "effects": [
-          {
-            "type": "random",
-            "success": {
-              "reputation": 50,
-              "chivalry": 30
-            },
-            "failure": {
-              "martialPower": -20
-            }
+        "id": "support_traditional_skirmish",
+        "text": "协助传统门派应对眼前的局部交锋（武力检定）",
+        "description": "胜负只关乎眼前这一处交锋，不会决定整场纷争的走向。",
+        "effects": [],
+        "challenge": {
+          "sceneId": "jianghu_faction_skirmish",
+          "success": {
+            "id": "jianghu_demon_sect_traditional_skirmish_success",
+            "text": "你在眼前的交锋中助传统门派稳住阵脚。有人记住了你的出手，但这场纷争仍未因此定局。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": 15,
+                "operator": "add"
+              }
+            ]
           },
-          {
-            "type": "karma_change",
-            "good": 20,
-            "evil": 0
+          "failure": {
+            "id": "jianghu_demon_sect_traditional_skirmish_failure",
+            "text": "传统门派在这处交锋中退让，你看清形势后及时撤出。你输掉这一处交锋，整场纷争却未因此定局。",
+            "effects": []
           }
-        ]
+        }
       },
       {
-        "id": "fund_expedition",
-        "text": "提供资金支持，出资远征",
+        "id": "support_unconventional_skirmish",
+        "text": "协助非传统门派应对眼前的局部交锋（武力检定）",
+        "description": "胜负只关乎眼前这一处交锋，不会决定整场纷争的走向。",
+        "effects": [],
+        "challenge": {
+          "sceneId": "jianghu_faction_skirmish",
+          "success": {
+            "id": "jianghu_demon_sect_unconventional_skirmish_success",
+            "text": "你在眼前的交锋中助非传统门派稳住阵脚。有人记住了你的出手，但这场纷争仍未因此定局。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": 15,
+                "operator": "add"
+              }
+            ]
+          },
+          "failure": {
+            "id": "jianghu_demon_sect_unconventional_skirmish_failure",
+            "text": "非传统门派在这处交锋中退让，你看清形势后及时撤出。你输掉这一处交锋，整场纷争却未因此定局。",
+            "effects": []
+          }
+        }
+      },
+      {
+        "id": "relieve_conflict_victims",
+        "text": "将手边可调度的物资送给受波及的人",
+        "description": "援助会让眼前的人得到实际帮扶，但不保证所有受困者都能脱困，也不能让纷争停息。",
         "condition": {
           "type": "wealth_capacity_at_least",
           "minimum": "comfortable_means"
         },
         "effects": [
           {
-            "type": "karma_change",
-            "good": 10,
-            "evil": 0
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
           }
         ]
+      },
+      {
+        "id": "stay_out_of_conflict",
+        "text": "不介入纷争，沿原路离开",
+        "description": "你不必替任何一方表态，可以选择不卷入此事。",
+        "effects": []
       }
     ]
   },

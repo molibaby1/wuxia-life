@@ -1,8 +1,8 @@
 [
   {
     "id": "jianghu_challenge",
-    "name": "高手挑战",
-    "description": "有江湖高手前来挑战你的武艺。",
+    "name": "江湖高手比试",
+    "description": "一位江湖高手在客栈前当众邀你作非致命的切磋，双方约定点到为止。附近江湖同道逐渐围观，胜负很快会传开。",
     "version": "1.0.0",
     "category": "jianghu",
     "priority": 70,
@@ -35,29 +35,51 @@
       }
     },
     "content": {
-      "title": "高手挑战",
-      "text": "有江湖高手前来挑战你的武艺。"
+      "title": "江湖高手比试",
+      "text": "一位江湖高手在客栈前当众邀你作非致命的切磋，双方约定点到为止。附近江湖同道逐渐围观，胜负很快会传开。"
     },
     "choices": [
       {
         "id": "accept_challenge",
-        "text": "接受挑战，一决高下 (武力检定)",
-        "effects": [
-          {
-            "type": "random",
-            "success": {
-              "reputation": 20,
-              "martialPower": 5
-            },
-            "failure": {
-              "reputation": -10
-            }
+        "text": "接受当众比试；失利可能损及名望",
+        "effects": [],
+        "challenge": {
+          "sceneId": "jianghu_open_challenge",
+          "success": {
+            "id": "jianghu_challenge_accept_success",
+            "text": "你在众人见证下胜过这位高手，交手间也对自己的武学有了新的领悟。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": 20,
+                "operator": "add"
+              },
+              {
+                "type": "stat_modify",
+                "target": "martialPower",
+                "value": 5,
+                "operator": "add"
+              }
+            ]
+          },
+          "failure": {
+            "id": "jianghu_challenge_accept_failure",
+            "text": "交手中你不敌这位高手，围观的江湖同道很快将这场比试传开。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": -10,
+                "operator": "add"
+              }
+            ]
           }
-        ]
+        }
       },
       {
         "id": "decline_challenge",
-        "text": "婉拒，以和为贵 (侠义 +5)",
+        "text": "婉拒挑战，以和为贵",
         "effects": [
           {
             "type": "stat_modify",

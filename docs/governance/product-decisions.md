@@ -2834,3 +2834,9 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 **产品决策（Human accepted：2026-10-11；实施与验证记录见 [单角色人生实现差异台账](single-life-implementation-gap-register.md) 的 SL-GAP-10 收尾）：**需要胜败检定的 Choice 复用现有 ChallengeSystem 与已定义场景；仅显式配置 `choice.challenge` 的 Choice 进入挑战判定，基于当前人物状态和场景规则完成一次受控随机判定，只执行命中的合法效果，并展示与实际结算一致的结果。普通 Choice 保持既有行为。
 
 `career_martial_arts_conference / career_martial_arts_conference_choice_1` 是首个实例，复用 `martial_arts_tournament` 现有规则；成功声望 `+50`，失败声望 `-10`。完整比武／战斗系统延期；不按 Event ID／Choice ID 在核心执行器中硬编码，不重做概率算法或扩展 Random Effect 的 success/failure 语义，也不引入超出这条最小连接所需的抽象、API、Save 或 Snapshot 结构。
+
+### PD-133：江湖高手比试 Choice 胜败结算
+
+**产品决策（Human accepted：2026-10-11；实现与验证记录见[单角色人生实现差异台账](single-life-implementation-gap-register.md)的 SL-GAP-10 / PD-132 第二个实例）：**`jianghu_challenge / accept_challenge` 使用 PD-132 的 Choice Challenge 判定，作为有见证者的普通、非致命比试；接受后胜败均可能传遍江湖，成功者从交锋中有所领悟。使用独立 `jianghu_open_challenge` 场景，初始概率和功力阈值沿用 `jianghu_duel` 当前参数，但不改变该生死决斗场景或武林大会规则。
+
+成功基础效果为名望 `+20`、功力 `+5`；失败基础效果为名望 `-10`。实际变化服从现有 Trait 倍率、边界与正式结算。玩家可婉拒，原侠义 `+5` 保持不变；接受选项须提示失利可能损及名望，不展示概率、阈值或精确奖励。不得产生死亡、伤势、额外 Status 或其他未批准后果。

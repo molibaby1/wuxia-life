@@ -93,6 +93,17 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     description: '江湖上的生死决斗，不成功便成仁'
   },
 
+  jianghu_open_challenge: {
+    id: 'jianghu_open_challenge',
+    name: '江湖高手比试',
+    baseFailureRate: 55,
+    relevantStats: ['martialPower'],
+    thresholds: {
+      martialPower: { qualified: 70, excellent: 130, failureRateReduction: 0.3 },
+    },
+    description: '普通、非致命的江湖高手比试，点到为止，不是生死决斗。'
+  },
+
   cultivation_breakthrough: {
     id: 'cultivation_breakthrough',
     name: '闭关突破',

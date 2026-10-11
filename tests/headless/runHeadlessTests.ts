@@ -17,6 +17,7 @@ import { runP81HeadlessPersonaToAge20Test, runP81HeadlessGatePersonasSmokeTest }
 import { runP81HeadlessLocalParityTest } from './p81HeadlessLocalParity.test';
 import { runPlayerVisibleFeedbackTests } from './playerVisibleFeedback.test';
 import { runMartialArtsConferenceChallengeTests } from './martialArtsConferenceChallenge.test';
+import { runJianghuChallengeTests } from './jianghuChallenge.test';
 
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
   await runP81HeadlessLocalParityTest();
   await runPlayerVisibleFeedbackTests();
   await runMartialArtsConferenceChallengeTests();
+  await runJianghuChallengeTests();
   runParityHarnessTests();
   await runParitySamplesTests();
   console.log('headless test suite: ok');

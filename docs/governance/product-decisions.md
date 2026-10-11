@@ -2840,3 +2840,13 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 **产品决策（Human accepted：2026-10-11；实现与验证记录见[单角色人生实现差异台账](single-life-implementation-gap-register.md)的 SL-GAP-10 / PD-132 第二个实例）：**`jianghu_challenge / accept_challenge` 使用 PD-132 的 Choice Challenge 判定，作为有见证者的普通、非致命比试；接受后胜败均可能传遍江湖，成功者从交锋中有所领悟。使用独立 `jianghu_open_challenge` 场景，初始概率和功力阈值沿用 `jianghu_duel` 当前参数，但不改变该生死决斗场景或武林大会规则。
 
 成功基础效果为名望 `+20`、功力 `+5`；失败基础效果为名望 `-10`。实际变化服从现有 Trait 倍率、边界与正式结算。玩家可婉拒，原侠义 `+5` 保持不变；接受选项须提示失利可能损及名望，不展示概率、阈值或精确奖励。不得产生死亡、伤势、额外 Status 或其他未批准后果。
+
+### PD-134：江湖恩怨 Choice 胜败结算
+
+**产品决策（Human accepted：2026-10-11；实现与验证记录见[单角色人生实现差异台账](single-life-implementation-gap-register.md)的 SL-GAP-10 / 第三个 PD-132 实例）：**`jianghu_grudge / fight_grudge` 使用 PD-132 的 Choice Challenge 判定，并复用既有 `jianghu_open_challenge` 场景。事件是当下发生的纠纷；来人声称与玩家有旧怨，但系统不确认这段过往，也不生成具体仇敌关系。
+
+双方约定点到为止。成功表示玩家赢得此次交手并以克制获得旁观同道认可，基础侠义声誉 `+10`；胜利不证明旧怨属实，也不表示争端已永久化解。失败表示玩家落败，失败效果为空，不扣核心属性或功力，也不引入受伤、死亡等后果。正式 Trait 倍率与 canonical 结算规则继续适用。
+
+`peace_grudge` 不进入 Challenge，保留基础人脉 `+10`；玩家会联络江湖同道，请其听取双方说法并居中协调。文案不保证对方接受调停或双方和解，不新增人物关系事实。
+
+本裁决仅覆盖该事件的内容、两个 Choice 的效果和定向 Headless 验证，不改变其调度元数据、共享 Challenge／Choice／Replay 语义或 P8 Gate；不关闭 SL-GAP-10 整体、Slice C2 或 P8 Gate。

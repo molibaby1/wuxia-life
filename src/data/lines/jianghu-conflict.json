@@ -94,7 +94,7 @@
   {
     "id": "jianghu_grudge",
     "name": "江湖恩怨",
-    "description": "昔日的仇家找上门来。",
+    "description": "一位江湖客声称与你有旧怨，登门讨说法；这段过往是否属实尚无从确认。",
     "version": "1.0.0",
     "category": "jianghu",
     "priority": 75,
@@ -123,27 +123,38 @@
     },
     "content": {
       "title": "江湖恩怨",
-      "text": "昔日的仇家找上门来，要与你了结恩怨。"
+      "text": "一位江湖客声称与你有旧怨，上门要求讨说法。这段过往尚无法核实，你只能决定如何应对眼前争端。"
     },
     "choices": [
       {
         "id": "fight_grudge",
-        "text": "一战泯恩仇 (武力检定)",
-        "effects": [
-          {
-            "type": "random",
-            "success": {
-              "chivalry": 10
-            },
-            "failure": {
-              "martialPower": -10
-            }
+        "text": "与来人约定点到为止，接受胜负难料的比试",
+        "effects": [],
+        "challenge": {
+          "sceneId": "jianghu_open_challenge",
+          "success": {
+            "id": "jianghu_grudge_fight_success",
+            "text": "比试中你胜过来人，随即收势守礼。旁观的江湖同道认可你的克制；这一胜负只说明眼前交手，不能证明对方所说的旧怨属实，也不代表往后再无争端。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "chivalry",
+                "value": 10,
+                "operator": "add"
+              }
+            ]
+          },
+          "failure": {
+            "id": "jianghu_grudge_fight_failure",
+            "text": "比试中你落败，依约点到为止地收手。这次胜负不能证明对方所说的旧怨属实，双方之后如何仍待商议。",
+            "effects": []
           }
-        ]
+        }
       },
       {
         "id": "peace_grudge",
-        "text": "化干戈为玉帛 (人脉 +10)",
+        "text": "联系江湖同道，请其居中协调",
+        "description": "你主动向江湖同道求助并与其往来，请其听取双方说法、居中协调；对方是否接受仍未可知。",
         "effects": [
           {
             "type": "stat_modify",

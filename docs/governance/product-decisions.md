@@ -2860,3 +2860,21 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 `relieve_conflict_victims` 保留 `comfortable_means` 财力资格，实际援助后基础侠义声誉 `+10`；不消耗 Wealth Capacity，也不进行随机检定。`stay_out_of_conflict` 无资格门槛、无效果和随机检定，正常完成选择且不受额外惩罚。原 Choice ID `lead_expedition`、`fund_expedition` 退役，不为新语义建立 alias 或回放兼容层；对应的旧 Karma 奖励移除，支持任一方本身不产生善恶因果。
 
 所有效果继续服从正式 Trait 倍率、属性边界与 canonical 结算。普通 Choice 遵守 PD-112，不为补充结果文案伪造 `narrativeResult`。本决策仅覆盖此事件、局部交锋场景及其定向验证；不建设通用战争或阵营系统，不修改共享 Challenge、Choice、Replay、Karma、Save、Snapshot、API 或 P8 Gate，也不关闭 SL-GAP-10 整体、Slice C2、其他 Random Effect 缺口或 P8 Gate。
+
+### PD-136：江湖非议 Choice 语义与胜败结算
+
+**产品决策（Human accepted：2026-10-12；实现与验证记录见[单角色人生实现差异台账](single-life-implementation-gap-register.md)的 SL-GAP-10 / 第五个 PD-132 实例）：**保留 `jianghu_public_enemy` 的 Event ID、版本、年龄、优先级、权重、类别、资格条件及其余调度元数据，将其定位为“江湖非议”。江湖中出现关于玩家的不同议论；指责尚未经证实；一位江湖客当众提出公开比试，附近有人旁观。系统不得把陷害、幕后黑手、玩家犯错或“成为武林公敌”补写成既成事实。
+
+玩家可以选择三种回应：
+
+- `investigate_truth`：联络江湖同道、查访传言并交换消息，基础人脉 `+10`。不增加学识，不进入 Challenge；该行为不证明指责真假，不得宣称已经找到陷害者、证明传言虚假、洗清嫌疑或取得确凿证据，也不创建 NPC 关系或调查进度事实。
+- `accept_public_challenge`：接受双方约定点到为止、且有旁观者的公开比试；结果不确定，胜负不能证明传言真假。复用既有 `jianghu_open_challenge` 场景及其原有概率、阈值和难度规则。成功使用唯一稳定的 Outcome ID 与真实胜利叙事，基础名望 `+10`；失败使用另一个唯一稳定的 Outcome ID，叙事说明玩家落败且双方依约收手，`effects: []`。不得产生伤势、死亡、长期功力损失或负面 Status。
+- `ignore_rumors`：不接受比试、不查访传言、继续行程；无资格门槛、无 Challenge、`effects: []`，正常完成选择并记录事件历史。不宣称议论已经消失，也不建立长期负面状态。
+
+所有分支均不自动改变侠义声誉或 Karma。成功与失败的正式反馈、事件历史及 Replay 必须对应实际 Outcome 和 canonical before/after；Replay 不重新抽签。查访与不回应均为普通 Choice，按 PD-112 保持 `narrativeResult: null`，不得伪造结果叙事。
+
+**Choice ID 引用审查：**保留 `investigate_truth`，因为查访行动性质不变；将 `fight_doubters` 更名为 `accept_public_challenge`，并新增 `ignore_rumors`。基线全仓审查未发现旧 Choice ID 被运行时代码、测试、脚本或 Replay 消费；`fight_doubters` 除原事件定义外，仅作为历史缺口 ID 记入差异台账。`jianghu_public_enemy` 同时被事件资源清单引用，故保留 Event ID；不建立 Choice 别名或兼容迁移。
+
+**旧 Random Effect 复现与根因：**在基线 `7606a5ce10273a9659eb3f3f1963719f968a2723` 上，通过正式 Headless `executeChoice` 执行旧 `fight_doubters`。受控随机值 `0.99` 与 `0` 均返回成功状态、没有 `sourceOutcomeId`、名望变化均为 `0`，各写入一条事件历史；配置宣称的 `+20 / -20` 胜败效果并未发生。根因是旧 `random` 配置使用同级 `success`／`failure` 字段，而正式 `RandomEffectHandler` 只读取嵌套 `effects` 数组，并在数组缺失或为空时返回原状态。修复使用 PD-132 已批准的 `choice.challenge`，没有修改共享处理器。
+
+**定向验证（2026-10-12）：**新增 `jianghuPublicOpinionChallenge.test.ts` 并注册到 Headless 总入口。新测试沿正式 Headless 路径覆盖事件目录和调度元数据、三种 Choice、查访效果、公开 Challenge 胜败与随机次数、canonical 反馈、事件历史、Karma 边界及胜败 Replay。定向测试 `jianghuPublicOpinionChallenge`、既有 `jianghuChallenge`、`jianghuGrudgeChallenge`、`jianghuFactionConflict`、`martialArtsConferenceChallenge`，以及 `npm run test:headless`、`npm run test:contracts`、`npm run typecheck`、`npm run build`、`git diff --check` 均通过。单项 Random Effect 缺口为 `CLOSED_VERIFIED`；另外两项 Random Effect 缺口、SL-GAP-10 整体、Slice C2 与 P8 Gate 继续 `OPEN`。本次未验证真实 Web/API 玩家界面、自然调度命中或 Trait 修正下的具体增量；未运行 P8 Gate，也未改动 API、Save、Snapshot 或 Schema。

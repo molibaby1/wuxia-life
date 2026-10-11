@@ -361,8 +361,8 @@
   },
   {
     "id": "jianghu_public_enemy",
-    "name": "武林公敌",
-    "description": "你被人陷害，成为武林公敌。",
+    "name": "江湖非议",
+    "description": "关于你的传言在江湖中传开，各方议论不一，指责尚未经证实。",
     "version": "1.0.0",
     "category": "jianghu",
     "priority": 85,
@@ -395,20 +395,15 @@
       }
     },
     "content": {
-      "title": "武林公敌",
-      "text": "你被人陷害，成为武林公敌。"
+      "title": "江湖非议",
+      "text": "茶肆中，一位江湖客当众提起关于你的传言，并向你提出一场公开比试。周围已有旁观者，指责真伪尚未证实。你可以联络江湖同道查访消息、接受这场比试，或不予理会。"
     },
     "choices": [
       {
         "id": "investigate_truth",
-        "text": "查明真相，洗刷冤屈 (学识 +10, 人脉 +10)",
+        "text": "联络江湖同道，查证传言",
+        "description": "你向江湖同道打听各方说法，也在往来中交换消息；这不会立刻证明传言真假。",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "knowledge",
-            "value": 10,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "connections",
@@ -418,19 +413,36 @@
         ]
       },
       {
-        "id": "fight_doubters",
-        "text": "以武服人，打败质疑者 (武力检定)",
-        "effects": [
-          {
-            "type": "random",
-            "success": {
-              "reputation": 20
-            },
-            "failure": {
-              "reputation": -20
-            }
+        "id": "accept_public_challenge",
+        "text": "接受公开比试",
+        "description": "双方约定点到为止，胜负难料。附近旁观者会看到交手；这场比试只能决定当下输赢，不能证明传言真假。",
+        "effects": [],
+        "challenge": {
+          "sceneId": "jianghu_open_challenge",
+          "success": {
+            "id": "jianghu_public_enemy_challenge_success",
+            "text": "你赢得了这场比试，交手表现被附近旁观者看见。这场胜负不能证明传言真假。",
+            "effects": [
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": 10,
+                "operator": "add"
+              }
+            ]
+          },
+          "failure": {
+            "id": "jianghu_public_enemy_challenge_failure",
+            "text": "你在交手中落败，双方依约收手。旁观者看到了这场比试，但输赢不能证明传言真假。",
+            "effects": []
           }
-        ]
+        }
+      },
+      {
+        "id": "ignore_rumors",
+        "text": "不予理会，继续行程",
+        "description": "你不接受这场比试，也不为传言查访，继续自己的行程。",
+        "effects": []
       }
     ]
   },

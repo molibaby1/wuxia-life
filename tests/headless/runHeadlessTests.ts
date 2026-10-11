@@ -20,6 +20,7 @@ import { runMartialArtsConferenceChallengeTests } from './martialArtsConferenceC
 import { runJianghuChallengeTests } from './jianghuChallenge.test';
 import { runJianghuGrudgeChallengeTests } from './jianghuGrudgeChallenge.test';
 import { runJianghuFactionConflictTests } from './jianghuFactionConflict.test';
+import { runJianghuPublicOpinionChallengeTests } from './jianghuPublicOpinionChallenge.test';
 
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
   await runJianghuChallengeTests();
   await runJianghuGrudgeChallengeTests();
   await runJianghuFactionConflictTests();
+  await runJianghuPublicOpinionChallengeTests();
   runParityHarnessTests();
   await runParitySamplesTests();
   console.log('headless test suite: ok');

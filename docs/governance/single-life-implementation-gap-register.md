@@ -68,6 +68,7 @@
 | SL-GAP-08 | 无家庭人物可被推为“壮志未酬” | CONFIRMED_CODE_GAP / 领域冲突 | P2 | OPEN | 评价是否具备实际志向未实现的事实依据 |
 | SL-GAP-09 | 自然出生至终局 / 早逝 / 存档的端到端证据不足 | NEEDS_VALIDATION | P2 验证 | OPEN | 不注入终局年龄时能否正常结束且状态一致 |
 | SL-GAP-10 | Frustration 负面经历、风险提示、结果反馈与 Gate 证据口径混淆 | CONFIRMED_CODE_GAP / SEMANTIC_EVIDENCE_GAP | P1 体验证据 | OPEN / Slice A、D、C1、C2a 已完成；C2 与其他证据仍开放 | 按 PD-131 继续处理未决 Status、文本分类与 Gate 证据口径；最新隔离 P8 Gate 为 4 个 frustration blocker，仍 NO-GO |
+| SL-GAP-11 | 跨领域物品与持有基础能力尚未形成正式完整闭环 | CONFIRMED_CODE_GAP（静态证据，待运行验证） | 战略基础优先，实施范围待裁决 | OPEN / 待核查与设计 | 唯一归属真源与跨领域 Item 获得／持有／失去／后续识别闭环；数量与消耗延期 |
 
 ### SL-GAP-01 — 主动行动与日历推进的年龄节点分叉
 
@@ -198,6 +199,16 @@
 - **第五实例修复后结果：**正式 Headless 定向测试确认目录 ID／调度元数据、三种 Choice 与空效果合法性；查访人脉 canonical delta 和反馈均为 `+10`，学识不变且不抽签；比试成功命中唯一稳定的 success Outcome、名望 canonical delta 与反馈均为 `+10`，失败命中独立 failure Outcome 且完整 `PlayerState` 不变。胜败各抽签一次、事件历史各写入一次；两种 Replay 均保留原胜败叙事与完整人物状态，不重新抽签。三条路径 Karma 不变，不回应不改变人物状态；普通 Choice 的 `narrativeResult` 为 `null`。
 - **第五实例验证命令（2026-10-12）：**`npm exec -- tsx tests/headless/jianghuPublicOpinionChallenge.test.ts`、`npm exec -- tsx tests/headless/jianghuChallenge.test.ts`、`npm exec -- tsx tests/headless/jianghuGrudgeChallenge.test.ts`、`npm exec -- tsx tests/headless/jianghuFactionConflict.test.ts`、`npm exec -- tsx tests/headless/martialArtsConferenceChallenge.test.ts`、`npm run test:headless`、`npm run test:contracts`、`npm run typecheck`、`npm run build`、`git diff --check` 均通过。新定向测试已注册进 Headless 总入口。
 - **第五实例状态与边界：**`jianghu_public_enemy / fight_doubters` 单项缺口为 `CLOSED_VERIFIED`。**另外两项 Random Effect 缺口继续 OPEN：**`jianghu_secret_manual / fight_for_manual`、`career_good_evil_war / career_good_evil_war_choice_1`。SL-GAP-10 整体、Slice C2 与 P8 Gate 均保持 OPEN；本次未运行 P8 Gate。未验证真实 Web/API 玩家界面、自然调度命中或 Trait 修正下的具体增量。本次未修改 ChallengeSystem、ChoiceOutcomeResolver、场景参数、Replay／Karma 共享机制、API、Save、Snapshot 或 Schema。**实现验证阶段记录（提交前）：**当时尚未提交或推送；当前交付状态以 Git 历史和远端 refs 核验结果为准。
+
+### SL-GAP-11 — 跨领域物品与持有基础能力缺口
+
+- **正式产品目标（Human accepted：2026-10-12）：**[PD-137](product-decisions.md) 将跨领域 Item 的具名识别、获得、当前持有、失去、后续条件消费、可靠持久化和真实反馈确认为必备核心。数量及消耗属正式未来扩展范围，**不是**第一阶段必做；普通生活物资的琐碎管理不作为默认目标。本条为独立基础能力缺口，不归入 SL-GAP-10。
+- **代码证据（`dev` / `f808b0fb816540da78d16a460653f1a44b9d55f4`；静态核对）：**`src/types/eventTypes.ts` 已有 `InventoryItem`（`id/name/quantity`）、可选 `GameState.inventory`、`PlayerState.items` 及 `ITEM_ADD` / `ITEM_REMOVE` 类型；`src/core/EventExecutor.ts` 默认处理器未注册 Item Add / Remove，故不能仅凭类型宣称正式物品生命周期成立。`src/types/asset.ts` 当前仅注册 `merchant_shop`，`src/core/assetOwnership.ts` 通过 typed Asset API 和 canonical `GameState.facts` 提供二值获得、持有、移除、查询；`asset_owned` / `asset_add` / `asset_remove` 有对应正式处理路径。这是已批准的 Phase 1B 经济 Asset 能力，不是跨领域 Item 完成证据。
+- **正式边界：**[Game Product Foundation](../product/game-product-foundation.md) 的唯一 canonical fact、事实与历史分离原则；[Player Model](../product/player-model.md) 对物品与故事事实的区分；[Wealth / Economy Contract](../product/wealth-economy-product-contract-design.md) 与 [Phase 1B Asset 规范](../product/wealth-economy-phase-1b-minimal-asset-semantics-design.md) 的经济资产责任；[Snapshot 3.16.0](../contracts/game-state-snapshot-contract.md) 的严格持久化边界，继续有效。不能由现有类型推定某种新的 Item 存储或持久化方案已被批准。
+- **缺口定性和证据限制：**静态代码与 PD-137 的差异足以判定缺少完整的跨领域 Item 正式闭环；本次**没有**在当前 HEAD 实际运行 Item 的获得／失去、保存恢复、API／Web 呈现。数据结构选择、迁移影响、正式消费者分布仍待核对；不据此要求批量迁移旧 Flag 或原有事件。
+- **有界下一步：**核查 Inventory、Asset、Facts、Player.items 与历史记录的现有生产者和消费者；界定唯一归属真源及可复用的最小业务操作；核实事件条件／效果、Headless／API、反馈及 Snapshot／Save 中的必要贯通；根据至少两个不同领域的具体用例确定最小实施 Slice。实施之前单独进行产品边界和 Contract／Schema 影响审查；不在差异台账中预定具体存储、兼容层、数量算法或模块设计。
+- **未来验收：**正式跨领域取得、持有、失去、后续条件及恢复后状态正确；真实事件历史、canonical 前后变化与玩家反馈一致；已批准的 `merchant_shop` Asset、Wealth Capacity 及 Snapshot 不回归。数量／消耗延期不构成第一阶段失败，不得借前瞻扩展性引入琐碎库存。
+- **状态：**`OPEN / CONFIRMED_CODE_GAP`（静态证据，待运行验证及独立实施授权）。PD-137 已获批不等于代码已修复。`jianghu_secret_manual / fight_for_manual` 与 `career_good_evil_war / career_good_evil_war_choice_1` 仍保持 SL-GAP-10 内各自的 OPEN；Slice C2、SL-GAP-10 整体、P8 Gate 及 SL-GAP-01～09 原有状态不变。
 
 ## 4. 依赖关系与建议治理节奏
 

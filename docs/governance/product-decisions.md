@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-10-10
+> 最后更新：2026-10-12
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -2878,3 +2878,19 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 **旧 Random Effect 复现与根因：**在基线 `7606a5ce10273a9659eb3f3f1963719f968a2723` 上，通过正式 Headless `executeChoice` 执行旧 `fight_doubters`。受控随机值 `0.99` 与 `0` 均返回成功状态、没有 `sourceOutcomeId`、名望变化均为 `0`，各写入一条事件历史；配置宣称的 `+20 / -20` 胜败效果并未发生。根因是旧 `random` 配置使用同级 `success`／`failure` 字段，而正式 `RandomEffectHandler` 只读取嵌套 `effects` 数组，并在数组缺失或为空时返回原状态。修复使用 PD-132 已批准的 `choice.challenge`，没有修改共享处理器。
 
 **定向验证（2026-10-12）：**新增 `jianghuPublicOpinionChallenge.test.ts` 并注册到 Headless 总入口。新测试沿正式 Headless 路径覆盖事件目录和调度元数据、三种 Choice、查访效果、公开 Challenge 胜败与随机次数、canonical 反馈、事件历史、Karma 边界及胜败 Replay。定向测试 `jianghuPublicOpinionChallenge`、既有 `jianghuChallenge`、`jianghuGrudgeChallenge`、`jianghuFactionConflict`、`martialArtsConferenceChallenge`，以及 `npm run test:headless`、`npm run test:contracts`、`npm run typecheck`、`npm run build`、`git diff --check` 均通过。单项 Random Effect 缺口为 `CLOSED_VERIFIED`；另外两项 Random Effect 缺口、SL-GAP-10 整体、Slice C2 与 P8 Gate 继续 `OPEN`。本次未验证真实 Web/API 玩家界面、自然调度命中或 Trait 修正下的具体增量；未运行 P8 Gate，也未改动 API、Save、Snapshot 或 Schema。
+
+### PD-137：跨领域物品与持有基础能力
+
+**产品决策（Human accepted：2026-10-12）：**Wuxia-Life 应建立可供武学、生活、医疗、经商、家庭、社交及随机机缘等领域共同使用的物品基础能力。世界可以独立带来物品的取得或损失，事件不需要以服务玩家人生目标为发生前提；物品来源、取得过程和结算结果仍须符合真实因果、已成立的世界事实与事件自身叙事。此项是世界级共享产品能力，不是为了 `jianghu_secret_manual` 一条事件新建专用系统。
+
+**必备核心（产品目标，非已实现声明）：**具名物品须能被正式识别，通过合法行动或事件完成**获得 → 当前持有 → 后续查询／条件消费 → 失去 → 后续状态正确变化**的闭环。当前持有与曾经持有必须区分；状态变化须可通过正式持久化和恢复保留，并与实际结算、重要历史记录及玩家可见反馈一致。相同物品的当前持有只允许一个 canonical source；不得由 Inventory、Asset、Flag 或故事事实分别维护竞争性真源。历史证明曾发生什么，不能替代当前持有状态。
+
+**适用与内容边界：**具体武学、医疗、经营、关系等用途由各领域已批准的规则负责，共享物品层不自动决定效果。获得秘籍不等于习得武功，得到医书不等于精通医术，持有信物不等于建立私人关系或重大承诺；取得物品也不自动改变功力、财力、名望等属性。物品不必昂贵、稀有、附带成长奖励、拥有后续剧情或构成 Milestone；只用于即时叙事且不需要后续识别的普通物件，不强制创建持久物品状态。普通生活物资的琐碎管理不是默认产品目标。
+
+**Item 与既有 Asset 的关系：**Item 表达具体物品的持有；现有 Asset 仍按 Wealth / Economy Contract 表达已批准的具名持久资产或经济基础。两者可在归属行为上复用基础语义，但不自动等价，也不预先规定必须共享数组、字段或实现接口。`merchant_shop` 的既有 Asset 语义、归属真源及 Wealth Capacity 边界保持有效，不自动迁移为 Item，不通过物品价格或数量推导财力。既有 Player Model 中的故事事实、Trait、Status、Achievement、Milestone 各守其责。
+
+**数量与消耗：**Human 批准将数量管理、部分消耗等纳入物品系统的**正式未来发展范围**，但第一阶段不要求物品堆叠、批量增减、消耗机制或完整库存管理。最小核心实现应避免无理由封死后续数量扩展，同时不能以未来可能需要为由提前建设数量系统。
+
+**明确非目标：**本决策不授权完整背包 UI、装备强化、制作、自由交易与价格循环、耐久、重量、容量、稀有度评分、复杂位置与保管者、多方产权、任意可配置规则引擎或通用世界物品模拟；不扩张 AE、不批量重构事件，也不直接修改 Runtime、API、Save、Snapshot 或 Schema。
+
+**验收与治理：**后续有界实施须以正式路径证明不同领域可使用同一套合法物品归属能力；获得、持有、失去及后续识别与 canonical 事实、历史、持久化恢复及公开反馈一致，并且不破坏既有 Asset／经济 Contract。具体数据模型、兼容策略、迁移范围及测试方案须经独立实施设计和授权。本决策只确立产品目标，不宣称代码已交付；实现差异独立登记为 [SL-GAP-11](single-life-implementation-gap-register.md)，不归并到 SL-GAP-10。`jianghu_secret_manual / fight_for_manual`、`career_good_evil_war / career_good_evil_war_choice_1` 与其他已登记缺口继续 OPEN，未获自动修改授权。

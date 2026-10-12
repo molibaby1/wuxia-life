@@ -147,6 +147,12 @@ export function buildChoiceFeedbackOverlayCard(
     );
   }
 
+  for (const change of feedback.player.itemChanges ?? []) {
+    metaLines.push(
+      `${change.change === 'acquired' ? '获得物品' : '失去物品'}：${change.displayName}`,
+    );
+  }
+
   const routeImpact = feedback.player.routeImpact;
   if (
     routeImpact &&

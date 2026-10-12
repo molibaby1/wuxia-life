@@ -138,6 +138,7 @@
         :current-goal-summary="mainScreenModel.currentGoalSummary"
         :affiliation-summary="mainScreenModel.affiliationSummary"
         :asset-summary="mainScreenModel.assetSummary"
+        :item-summary="mainScreenModel.itemSummary"
         :experience-summary="mainScreenModel.experienceSummary"
         :practice-summary="mainScreenModel.practiceSummary"
         :milestone-summary="mainScreenModel.milestoneSummary"
@@ -257,6 +258,7 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
     influence: p.influence,
     connections: p.connections,
     ownedAssets: p.ownedAssets,
+    ownedItems: p.ownedItems,
     lifeStates: p.lifeStates,
   };
 });

@@ -3,6 +3,7 @@ import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { addAsset } from '../src/core/assetOwnership';
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
 import { mapSessionProgression } from '../server/src/services/sessionProgressionMapper';
+import { ITEM_DEFINITIONS } from '../src/types/item';
 import type { GameState } from '../src/types/eventTypes';
 
 function createLifeMemory(): never {
@@ -54,6 +55,7 @@ const legacyPayload = mapSessionProgression(
   lifeMemory,
 );
 assert.deepEqual(legacyPayload.player.ownedAssets, []);
+assert.deepEqual(legacyPayload.player.ownedItems, []);
 
 const canonicalOnly = newState();
 canonicalOnly.facts = addAsset(canonicalOnly.facts, 'merchant_shop');
@@ -66,5 +68,32 @@ const canonicalPayload = mapSessionProgression(
   lifeMemory,
 );
 assert.deepEqual(canonicalPayload.player.ownedAssets, ['merchant_shop']);
+
+const itemState = newState();
+itemState.inventory = [
+  { id: 'item_jade_pendant', name: '家传玉佩', quantity: 1 },
+  { id: ITEM_DEFINITIONS[0]!.id, name: ITEM_DEFINITIONS[0]!.displayName, quantity: 1 },
+];
+const itemPayload = mapSessionProgression(
+  makeSession(itemState) as never,
+  1,
+  'item-presentation',
+  null,
+  lifeMemory,
+);
+assert.deepEqual(itemPayload.player.ownedItems, [{
+  id: ITEM_DEFINITIONS[0]!.id,
+  displayName: ITEM_DEFINITIONS[0]!.displayName,
+}]);
+assert.deepEqual(itemPayload.player.ownedAssets, []);
+assert.equal(
+  buildMainScreenModel(itemPayload.player, lifeMemory).itemSummary,
+  ITEM_DEFINITIONS[0]!.displayName,
+  'API named Item summary should match the player summary display',
+);
+assert.equal(
+  buildMainScreenModel({ ...itemPayload.player, ownedItems: [] }, lifeMemory).itemSummary,
+  '暂无具名物品',
+);
 
 console.log('assetPresentation.test.ts: ok');

@@ -1,5 +1,7 @@
 import type { ChoiceFeedbackModel } from '../types';
-import type { EffectDefinition, PlayerState } from '../types/eventTypes';
+import type { EffectDefinition, InventoryItem, PlayerState } from '../types/eventTypes';
+import { ITEM_DEFINITIONS } from '../types/item';
+import { getOwnedItems } from './itemOwnership';
 import { createChoiceFeedback } from '../types';
 import {
   isPlayerVisibleFlag,
@@ -17,15 +19,21 @@ interface GenerateChoiceFeedbackInput {
   afterPlayer?: PlayerState;
   beforeFlags?: Record<string, unknown>;
   afterFlags?: Record<string, unknown>;
+  beforeInventory?: InventoryItem[];
+  afterInventory?: InventoryItem[];
 }
 
 export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): ChoiceFeedbackModel {
+  const itemChanges = 'beforeInventory' in input && 'afterInventory' in input
+    ? buildItemChanges(input.beforeInventory, input.afterInventory)
+    : [];
   const baseFeedback = createChoiceFeedback({
     narrativeResult: input.narrativeResult,
     sourceEventId: input.sourceEventId,
     sourceChoiceId: input.sourceChoiceId,
     sourceOutcomeId: input.sourceOutcomeId,
     rawEffects: input.effects,
+    itemChanges,
   });
 
   const useActualPublicDelta = input.beforePlayer != null && input.afterPlayer != null;
@@ -143,6 +151,24 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
   }
 
   return baseFeedback;
+}
+
+function buildItemChanges(
+  beforeInventory: InventoryItem[] | undefined,
+  afterInventory: InventoryItem[] | undefined,
+): NonNullable<ChoiceFeedbackModel['player']['itemChanges']> {
+  const beforeOwned = new Set(getOwnedItems(beforeInventory).map(item => item.id));
+  const afterOwned = new Set(getOwnedItems(afterInventory).map(item => item.id));
+  return ITEM_DEFINITIONS.flatMap(item => {
+    const wasOwned = beforeOwned.has(item.id);
+    const isOwned = afterOwned.has(item.id);
+    if (wasOwned === isOwned) return [];
+    return [{
+      itemId: item.id,
+      displayName: item.displayName,
+      change: isOwned ? 'acquired' as const : 'lost' as const,
+    }];
+  });
 }
 
 function resolveRouteImpact(

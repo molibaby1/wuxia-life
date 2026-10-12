@@ -12,13 +12,19 @@ import type { HeadlessLogger } from '../../../src/headless/dependencies/Headless
 import { noopLogger } from '../../../src/headless/dependencies/HeadlessSessionDependencies.js';
 import { SeededRandomSource } from '../../../src/headless/adapters/randomSource.js';
 import { progressUntilChoiceOrTerminal } from '../../../src/headless/progressionLoop.js';
+import type { RuntimeEventCatalog } from '../../../src/core/RuntimeEventCatalog.js';
 import type { BackendEnv } from '../config/env.js';
 
 export { progressUntilChoiceOrTerminal };
 
-function serverSessionDeps(logger?: HeadlessLogger, seed = 1) {
+function serverSessionDeps(
+  logger?: HeadlessLogger,
+  seed = 1,
+  runtimeCatalog?: RuntimeEventCatalog,
+) {
   return {
-    catalog: createDefaultInMemoryCatalogAdapter(),
+    catalog: createDefaultInMemoryCatalogAdapter(runtimeCatalog),
+    runtimeCatalog,
     snapshot: defaultSnapshotConverter,
     logger: logger ?? noopLogger,
     random: new SeededRandomSource(seed),
@@ -42,6 +48,7 @@ export function createHeadlessSessionFromNewGame(params: {
   catalogVersion: string;
   randomSeed?: number;
   logger?: HeadlessLogger;
+  runtimeCatalog?: RuntimeEventCatalog;
 }): HeadlessEngineSession {
   return HeadlessEngineSessionImpl.create(
     {
@@ -50,7 +57,7 @@ export function createHeadlessSessionFromNewGame(params: {
       catalogVersion: params.catalogVersion,
       randomSeed: params.randomSeed ?? Date.now(),
     },
-    serverSessionDeps(params.logger, params.randomSeed ?? 1),
+    serverSessionDeps(params.logger, params.randomSeed ?? 1, params.runtimeCatalog),
   );
 }
 
@@ -59,10 +66,11 @@ export async function createHeadlessSessionFromSnapshot(params: {
   catalogVersion: string;
   randomSeed?: number;
   logger?: HeadlessLogger;
+  runtimeCatalog?: RuntimeEventCatalog;
 }): Promise<HeadlessEngineSession> {
   const session = HeadlessEngineSessionImpl.create(
     { snapshot: params.snapshot },
-    serverSessionDeps(params.logger, params.randomSeed ?? 1),
+    serverSessionDeps(params.logger, params.randomSeed ?? 1, params.runtimeCatalog),
   );
   await session.hydrate(params.snapshot);
   return session;

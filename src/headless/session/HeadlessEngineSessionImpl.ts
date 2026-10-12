@@ -458,6 +458,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       afterPlayer,
       beforeFlags,
       afterFlags: afterSnapshot.state.flags,
+      beforeInventory: beforeSnapshot.state.inventory,
+      afterInventory: afterSnapshot.state.inventory,
     });
     this.volatile.lastFeedback = feedback;
     this.volatile.lastOutcomeText = resolved?.outcomeText ?? null;

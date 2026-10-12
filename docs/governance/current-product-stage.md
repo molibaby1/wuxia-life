@@ -10,8 +10,8 @@
 
 ## 当前导航
 
-- **总体产品工作阶段（2026-10-12）：**`SINGLE-LIFE PRODUCT FOUNDATION / ITEM OWNERSHIP DECISION CONVERGENCE`。Human 已批准 [PD-137](product-decisions.md) 作为跨领域物品与持有基础能力的正式产品目标，[SL-GAP-11](single-life-implementation-gap-register.md) 独立登记 OPEN。当前优先核查共享物品生命周期的最小实施边界，**并未授权 Runtime、Schema、API 的工程实施**。PD-130 浏览器 Local 退役及既有 PD-131 裁决不变，整体人生尚未验收。
-- **Primary objective：**优先以 PD-137 / SL-GAP-11 收敛物品及现有 Asset、Facts、Inventory 的单一真源边界，核查跨领域获得／持有／失去／后续识别、存档恢复及玩家反馈；之后才独立决定实施 Slice。数量与消耗属未来发展范围，不是第一阶段强制交付。**返回路径：**`jianghu_secret_manual / fight_for_manual` 当前暂缓且保持 OPEN，`career_good_evil_war / career_good_evil_war_choice_1` 继续 OPEN；待基础能力边界与实施结果明确后恢复既有事件治理。SL-GAP-10 整体、Slice C2、P8 Gate 和其余 SL-GAP-01～09 状态不变。先前隔离 P8 Gate 的 4 个 frustration blocker、阈值 `0.35` 仍为历史证据，本轮不运行 Gate；SL-GAP-04 调度证据继续独立治理。
+- **总体产品工作阶段（2026-10-12）：**`SINGLE-LIFE PRODUCT FOUNDATION / RETURN TO OPEN GAPS`。Human 已批准 [PD-137](product-decisions.md)，Item 第一阶段以 `GameState.inventory` 为唯一正式持有真源，既有 Asset 继续使用 `GameState.facts`。[SL-GAP-11](single-life-implementation-gap-register.md) 已通过受控 Headless、真实 API → Web、独立数据库 Snapshot 保存／恢复与回归验证，状态为 `CLOSED_VERIFIED`；本次将验证后的成果合入 `dev`。此项完成不构成完整数量／消耗系统交付，也不意味着整体单角色人生已验收。PD-130 浏览器 Local 退役及 PD-131 等既有决策不变。
+- **Primary objective：**在 SL-GAP-11 第一阶段交付后，返回既有 SL-GAP-10 / Slice C2 未完成事项：先恢复 `jianghu_secret_manual / fight_for_manual` 的产品语义与最小修复讨论，再处理 `career_good_evil_war / career_good_evil_war_choice_1`；两项仍 OPEN，未因 Item 完成而自动修复。SL-GAP-10 整体、Slice C2、P8 Gate 以及 SL-GAP-01～09 的原有状态保持不变。Item 数量与消耗属未来阶段，不纳入当前修复。此前隔离 P8 Gate 的 4 个 frustration blocker、阈值 `0.35` 仍仅为历史证据，本轮未重新运行 P8 Gate；SL-GAP-04 调度证据仍独立治理。
 - **AE 运行成熟度与历史结果：**AE 仍处于 `RUN / OBSERVE` operating mode，既有两类 bounded contract family、Formal Event Human-direct model-backed shadow → promotion 工程闭环均保留；Natural Effectiveness 仍为 `NOT ESTABLISHED`。目前不主动继续采样、扩展 AE 或优化内容生成器，除非 Human 另行批准。
 - **已完成的 Human-prioritized milestone：**Layer A — Historical Controlled Downstream Mechanism Proof = `ESTABLISHED / PASS`。它只验证受控历史 downstream mechanism，不验证 Contract `9 的自主责任推导；历史 tuning 已结束。
 - **Artifact-backed 首次 communication reopening gate（在原受测 binding 上）：**`REESTABLISHED`；Probe #1 / #2 均已成功完成。

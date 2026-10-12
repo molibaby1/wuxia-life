@@ -1,4 +1,11 @@
 import type { EffectDefinition, PlayerState } from './eventTypes';
+import type { ItemId } from './item';
+
+export interface ChoiceFeedbackItemChange {
+  itemId: ItemId;
+  displayName: string;
+  change: 'acquired' | 'lost';
+}
 
 /** `player` = default UI; `hidden` = tracked but not shown in player flow; `diagnostic` = dev/debug only */
 export type ChoiceFeedbackVisibility = 'player' | 'hidden' | 'diagnostic';
@@ -46,6 +53,7 @@ export interface ChoiceFeedbackPlayerView {
   routeImpact: ChoiceFeedbackRouteImpact | null;
   longTermFlags: ChoiceFeedbackLongTermFlag[];
   riskHints: ChoiceFeedbackRiskHint[];
+  itemChanges?: ChoiceFeedbackItemChange[];
 }
 
 export interface ChoiceFeedbackDiagnosticView {
@@ -66,6 +74,7 @@ export interface ChoiceFeedbackInput {
   sourceChoiceId?: string;
   sourceOutcomeId?: string;
   rawEffects?: EffectDefinition[];
+  itemChanges?: ChoiceFeedbackItemChange[];
 }
 
 export function createChoiceFeedback(
@@ -84,6 +93,7 @@ export function createChoiceFeedback(
       routeImpact: null,
       longTermFlags: [],
       riskHints: [],
+      ...(input.itemChanges?.length ? { itemChanges: input.itemChanges } : {}),
     },
     diagnostic: {
       sourceEventId: input.sourceEventId,

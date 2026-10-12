@@ -11,6 +11,7 @@ import * as catalogRepo from '../repositories/catalogRepository.js';
 import { createDefaultInMemoryCatalogAdapter } from '../../../src/headless/catalog/InMemoryEventCatalogAdapter.js';
 import { computeContentHash } from '../crypto/tokens.js';
 import type { SessionProgressionPayload } from '../../../src/contracts/sessionProgression.js';
+import type { RuntimeEventCatalog } from '../../../src/core/RuntimeEventCatalog.js';
 
 export interface RouteContext {
   env: BackendEnv;
@@ -67,7 +68,12 @@ function progressionPayloadBody(
   };
 }
 
-export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerRequestHandler {
+export function createRouter(
+  env: BackendEnv,
+  logger: StructuredLogger,
+  // Test harnesses may inject an isolated in-process catalog. Production does not pass this.
+  testDependencies?: { runtimeCatalog: RuntimeEventCatalog },
+): ServerRequestHandler {
   const routes: Array<{
     method: string;
     pattern: RegExp;
@@ -153,7 +159,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           gender: body.gender,
           sourcePlatform: body.sourcePlatform ?? 'web-browser',
           confirmOverwrite: body.confirmOverwrite,
-        });
+        }, testDependencies?.runtimeCatalog);
         sendJson(res, 200, {
           sessionId: result.sessionId,
           sessionToken: result.sessionToken,
@@ -181,7 +187,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
         const result = await gameService.restoreSession(db, ctx.env, {
           deviceToken: deviceToken!,
           slotIndex: body.slotIndex,
-        });
+        }, testDependencies?.runtimeCatalog);
         sendJson(res, 200, {
           sessionId: result.sessionId,
           sessionToken: result.sessionToken,
@@ -220,7 +226,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           expectedSnapshotId: body.expectedSnapshotId,
           eventId: body.eventId,
           choiceId: body.choiceId,
-        });
+        }, testDependencies?.runtimeCatalog);
         sendJson(res, 200, {
           slotVersion: result.slot.version,
           snapshotId: result.snapshot.id,
@@ -251,7 +257,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           expectedSlotVersion: body.expectedSlotVersion,
           expectedSnapshotId: body.expectedSnapshotId,
           actionId: body.actionId,
-        });
+        }, testDependencies?.runtimeCatalog);
         sendJson(res, 200, result);
       },
     },
@@ -279,7 +285,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           expectedSlotVersion: body.expectedSlotVersion,
           expectedSnapshotId: body.expectedSnapshotId,
           ackKind: body.ackKind,
-        });
+        }, testDependencies?.runtimeCatalog);
         sendJson(res, 200, result);
       },
     },
@@ -300,7 +306,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           sessionToken: sessionToken!,
           expectedSlotVersion: body.expectedSlotVersion,
           expectedSnapshotId: body.expectedSnapshotId,
-        });
+        }, testDependencies?.runtimeCatalog);
         sendJson(res, 200, {
           slot: {
             id: result.slot.id,

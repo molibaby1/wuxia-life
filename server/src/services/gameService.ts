@@ -28,6 +28,7 @@ import {
 import { issueSessionToken } from './sessionStore.js';
 import { resolveDevice } from './deviceService.js';
 import { resolveSession } from './sessionStore.js';
+import type { RuntimeEventCatalog } from '../../../src/core/RuntimeEventCatalog.js';
 
 function mapProgressionError(error: unknown): never {
   if (error instanceof HeadlessProgressionError) {
@@ -151,6 +152,7 @@ export async function createNewSession(
     sourcePlatform: string;
     confirmOverwrite?: boolean;
   },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   const { deviceId } = await resolveDevice(db, env, params.deviceToken);
   if (params.slotIndex < 1 || params.slotIndex > 3) {
@@ -171,6 +173,7 @@ export async function createNewSession(
       gender: params.gender,
       catalogVersion: env.eventCatalogVersion,
       logger,
+      runtimeCatalog,
     });
     await progressUntilChoiceOrTerminal(headless);
     const snapshot = headless.serialize();
@@ -240,6 +243,7 @@ export async function restoreSession(
   db: Queryable,
   env: BackendEnv,
   params: { deviceToken: string; slotIndex: number },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   const { deviceId } = await resolveDevice(db, env, params.deviceToken);
   return withTransaction(env.databaseUrl, async client => {
@@ -257,6 +261,7 @@ export async function restoreSession(
       snapshot: snap.snapshot,
       catalogVersion: env.eventCatalogVersion,
       logger,
+      runtimeCatalog,
     });
     const restoredVolatile = getSnapshotVolatileState(snap.id);
     if (restoredVolatile) {
@@ -322,6 +327,7 @@ export async function executeChoice(
     eventId: string;
     choiceId: string;
   },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   const { deviceId } = await resolveDevice(db, env, params.deviceToken);
   return withTransaction(env.databaseUrl, async client => {
@@ -358,6 +364,7 @@ export async function executeChoice(
       snapshot: currentSnap.snapshot,
       catalogVersion: env.eventCatalogVersion,
       logger,
+      runtimeCatalog,
     });
     const hashBefore = currentSnap.content_hash;
     await resolveSessionAfterAutoProgress(headless);
@@ -443,6 +450,7 @@ async function loadHeadlessForMutation(
     expectedSlotVersion: number;
     expectedSnapshotId: string;
   },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   const { deviceId } = await resolveDevice(client, env, params.deviceToken);
   const { session } = await resolveSession(
@@ -477,6 +485,7 @@ async function loadHeadlessForMutation(
     snapshot: currentSnap.snapshot,
     catalogVersion: env.eventCatalogVersion,
     logger,
+    runtimeCatalog,
   });
   const cachedVolatile = resolveVolatileState(session.id, params.expectedSnapshotId);
   if (cachedVolatile) {
@@ -497,9 +506,15 @@ export async function executeActiveAction(
     expectedSnapshotId: string;
     actionId: string;
   },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   return withTransaction(env.databaseUrl, async client => {
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(client, env, params);
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+      client,
+      env,
+      params,
+      runtimeCatalog,
+    );
     const hashBefore = currentSnap.content_hash;
     try {
       await headless.executeActiveAction(params.actionId);
@@ -549,9 +564,15 @@ export async function acknowledgeProgression(
     expectedSnapshotId: string;
     ackKind: ProgressionAckKind;
   },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   return withTransaction(env.databaseUrl, async client => {
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(client, env, params);
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+      client,
+      env,
+      params,
+      runtimeCatalog,
+    );
     const hashBefore = currentSnap.content_hash;
     try {
       await headless.acknowledgeProgression(params.ackKind);
@@ -612,6 +633,7 @@ export async function manualSave(
     expectedSlotVersion: number;
     expectedSnapshotId: string;
   },
+  runtimeCatalog?: RuntimeEventCatalog,
 ) {
   const { deviceId } = await resolveDevice(db, env, params.deviceToken);
   return withTransaction(env.databaseUrl, async client => {
@@ -647,6 +669,7 @@ export async function manualSave(
       snapshot: currentSnap.snapshot,
       catalogVersion: env.eventCatalogVersion,
       logger,
+      runtimeCatalog,
     });
     const serialized = headless.serialize();
     const newIntegrity = snapshotRepo.buildSnapshotIntegrity(serialized);

@@ -20,6 +20,8 @@ import { isStatusId } from '../types/eventTypes';
 import { isWealthCapacity, meetsWealthCapacity } from '../types/wealthCapacity';
 import { isAssetId } from '../types/asset';
 import { hasAsset } from './assetOwnership';
+import { isItemId } from '../types/item';
+import { getItemOwnershipState } from './itemOwnership';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
 import { getCanonicalBirthBackground } from '../p16/canonicalBirthBackground';
 
@@ -77,6 +79,14 @@ export class ConditionEvaluator implements IConditionEvaluator {
     }
     if (condition.type === 'asset_owned') {
       return isAssetId(condition.asset) && hasAsset(state.facts, condition.asset);
+    }
+    if (condition.type === 'item_owned') {
+      return isItemId(condition.item)
+        && getItemOwnershipState(state.inventory, condition.item) === 'owned';
+    }
+    if (condition.type === 'item_not_owned') {
+      return isItemId(condition.item)
+        && getItemOwnershipState(state.inventory, condition.item) === 'not_owned';
     }
     if (condition.type === 'expression') {
       return this.evaluateExpression(condition.expression, state);

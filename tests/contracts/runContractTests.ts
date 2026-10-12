@@ -14,6 +14,7 @@ const tsxBin = join(process.cwd(), 'node_modules', '.bin', 'tsx');
 
 const suites = [
   'snapshotContract.test.ts',
+  'itemPersistence.test.ts',
   'choiceExecutionContract.test.ts',
   'replayContract.test.ts',
   'catalogContract.test.ts',

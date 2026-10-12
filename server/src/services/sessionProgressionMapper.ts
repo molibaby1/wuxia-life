@@ -7,6 +7,7 @@ import type {
 import type { LifeMemorySummary } from '../../../src/types/lifeMemory.js';
 import type { HeadlessTerminalState } from '../../../src/headless/session/sessionTypes.js';
 import { getOwnedAssets } from '../../../src/core/assetOwnership.js';
+import { getOwnedItems } from '../../../src/core/itemOwnership.js';
 
 function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
   const state = session.getRuntimeState();
@@ -20,6 +21,7 @@ function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
     constitution: player?.constitution ?? 0,
     wealthCapacity: player.wealthCapacity,
     ownedAssets: getOwnedAssets(state.facts),
+    ownedItems: getOwnedItems(state.inventory),
     reputation: player?.reputation ?? 0,
     connections: player?.connections ?? 0,
     knowledge: player?.knowledge ?? 0,

@@ -15,6 +15,8 @@ import { isHealthStatus, isStatusId } from '../types/eventTypes';
 import { isWealthCapacity, raiseWealthCapacityTo } from '../types/wealthCapacity';
 import { isAssetId } from '../types/asset';
 import { addAsset, removeAsset } from './assetOwnership';
+import { isItemId } from '../types/item';
+import { addItem, removeItem } from './itemOwnership';
 import type {
   EffectDefinition,
   EffectOperator,
@@ -75,6 +77,9 @@ export class EventExecutor implements IEventExecutor {
         items: [...(state.player.items || [])],
         relationships: [...(state.player.relationships || [])],
       },
+      ...(state.inventory !== undefined
+        ? { inventory: state.inventory.map(item => ({ ...item })) }
+        : {}),
     };
     
     for (const effect of effects) {
@@ -183,6 +188,8 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.WEALTH_CAPACITY_RAISE_TO, new WealthCapacityRaiseToHandler());
     this.handlers.set(EffectType.ASSET_ADD, new AssetAddHandler());
     this.handlers.set(EffectType.ASSET_REMOVE, new AssetRemoveHandler());
+    this.handlers.set(EffectType.ITEM_ADD, new ItemAddHandler());
+    this.handlers.set(EffectType.ITEM_REMOVE, new ItemRemoveHandler());
     // 新增：因果变化处理器
     this.handlers.set(EffectType.KARMA_CHANGE, new KarmaChangeHandler());
     
@@ -391,6 +398,24 @@ class AssetRemoveHandler implements EffectHandler {
       throw new Error(`Invalid asset effect value: ${String(effect.asset)}`);
     }
     return { ...state, facts: removeAsset(state.facts, effect.asset) };
+  }
+}
+
+class ItemAddHandler implements EffectHandler {
+  execute(effect: EffectDefinition, state: GameState): GameState {
+    if (!isItemId(effect.item)) {
+      throw new Error(`Invalid Item effect value: ${String(effect.item)}`);
+    }
+    return { ...state, inventory: addItem(state.inventory, effect.item) };
+  }
+}
+
+class ItemRemoveHandler implements EffectHandler {
+  execute(effect: EffectDefinition, state: GameState): GameState {
+    if (!isItemId(effect.item)) {
+      throw new Error(`Invalid Item effect value: ${String(effect.item)}`);
+    }
+    return { ...state, inventory: removeItem(state.inventory, effect.item) };
   }
 }
 

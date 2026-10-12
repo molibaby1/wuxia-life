@@ -105,6 +105,7 @@ console.log('=== Main Screen Model Tests ===\n');
     'retired wallet must not appear in expanded resource group',
   );
   assert(model.assetSummary === '暂无资产', 'empty canonical asset ownership should use explicit empty copy');
+  assert(model.itemSummary === '暂无具名物品', 'empty registered Item ownership should use explicit empty copy');
   assert(
     model.coreStats.map((item) => item.label).join(',') === '功力,体魄,学识,人脉,名望,侠义声誉',
     'core stats should expose the six canonical attributes with equal priority',

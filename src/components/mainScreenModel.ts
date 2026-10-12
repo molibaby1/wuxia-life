@@ -60,6 +60,7 @@ import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMem
 import { getAffiliationDefinition } from '../core/affiliationCatalog';
 import { WEALTH_CAPACITY_LABELS } from '../types/wealthCapacity';
 import { ASSET_LABELS, ASSET_VALUES, type AssetId } from '../types/asset';
+import type { OwnedItemSummary } from '../types/item';
 import { formatAchievedMilestoneCompactLabel } from './milestonePresentation';
 
 export interface MainScreenStatItem {
@@ -82,6 +83,7 @@ export interface MainScreenModel {
   affiliationSummary: string;
   titleSummary: string;
   assetSummary: string;
+  itemSummary: string;
   experienceSummary: string;
   practiceSummary: string;
   milestoneSummary?: string;
@@ -108,6 +110,7 @@ export type MainScreenPlayer = Pick<
 > &
   Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>> & {
     ownedAssets?: AssetId[];
+    ownedItems?: OwnedItemSummary[];
   };
 
 const MARTIAL_DOMINANT_MIN_TOP = 30;
@@ -176,6 +179,11 @@ function buildAssetSummary(ownedAssets: AssetId[] | undefined): string {
     .filter((assetId) => owned.has(assetId))
     .map((assetId) => ASSET_LABELS[assetId]);
   return labels.length > 0 ? labels.join('、') : '暂无资产';
+}
+
+function buildItemSummary(ownedItems: OwnedItemSummary[] | undefined): string {
+  const names = ownedItems?.map(item => item.displayName) ?? [];
+  return names.length > 0 ? names.join('、') : '暂无具名物品';
 }
 
 function buildExperienceSummary(summary: LifeMemorySummary): string {
@@ -334,6 +342,7 @@ export function buildMainScreenModel(
     affiliationSummary: buildAffiliationSummary(player),
     titleSummary: player.title ?? '暂无正式称号',
     assetSummary: buildAssetSummary(player.ownedAssets),
+    itemSummary: buildItemSummary(player.ownedItems),
     experienceSummary: buildExperienceSummary(lifeMemory),
     practiceSummary: buildPracticeSummary(lifeMemory),
     milestoneSummary: buildMilestoneSummary(lifeMemory),

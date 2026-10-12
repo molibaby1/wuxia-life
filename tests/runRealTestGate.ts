@@ -127,6 +127,7 @@ const suites: Suite[] = [
   { name: 'wealthMerchantVerticalSlice', entry: 'tests/wealthMerchantVerticalSlice.test.ts' },
   { name: 'wealthCapacityPresentation', entry: 'tests/wealthCapacityPresentation.test.ts' },
   { name: 'assetOwnershipSemantics', entry: 'tests/assetOwnershipSemantics.test.ts' },
+  { name: 'itemOwnershipSemantics', entry: 'tests/itemOwnershipSemantics.test.ts' },
   { name: 'assetEventSemantics', entry: 'tests/assetEventSemantics.test.ts' },
   { name: 'merchantShopAssetVertical', entry: 'tests/merchantShopAssetVertical.test.ts' },
   { name: 'merchantShopLegacyMoneyMigration', entry: 'tests/merchantShopLegacyMoneyMigration.test.ts' },

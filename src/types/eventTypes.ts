@@ -2,6 +2,7 @@ import type { ConditionExpression } from './conditionExpression';
 import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
 import type { WealthCapacity } from './wealthCapacity';
 import type { AssetId } from './asset';
+import type { ItemId } from './item';
 import type { PersonEventBinding } from './personArchetype';
 
 /**
@@ -491,6 +492,10 @@ export type EventCondition =
   | {
       type: 'asset_owned';
       asset: AssetId;
+    }
+  | {
+      type: 'item_owned' | 'item_not_owned';
+      item: ItemId;
     };
 
 /**
@@ -522,6 +527,9 @@ export interface EffectDefinition {
 
   /** Canonical asset identifier for asset_add/asset_remove effects. */
   asset?: AssetId;
+
+  /** Canonical Item identifier for item_add/item_remove effects. */
+  item?: ItemId;
 
   /** Minimum canonical Wealth Capacity for wealth_capacity_raise_to. */
   minimum?: WealthCapacity;

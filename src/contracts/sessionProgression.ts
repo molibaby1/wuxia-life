@@ -15,6 +15,7 @@ import type { AffiliationId } from '../types/eventTypes';
 import type { Investments, PlayerLifeStates } from '../types/eventTypes';
 import type { WealthCapacity } from '../types/wealthCapacity';
 import type { AssetId } from '../types/asset';
+import type { OwnedItemSummary } from '../types/item';
 
 /**
  * Authoritative session phase for client UI routing.
@@ -87,6 +88,8 @@ export interface PlayerSummaryDto {
   constitution: number;
   wealthCapacity: WealthCapacity;
   ownedAssets: AssetId[];
+  /** Current registered named Items; excludes unregistered historic inventory rows. */
+  ownedItems?: OwnedItemSummary[];
   reputation: number;
   connections: number;
   knowledge: number;

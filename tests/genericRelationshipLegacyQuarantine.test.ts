@@ -87,9 +87,9 @@ function assertRuntimeMembership(): void {
     assert.equal(runtimeIds.has(id), true, `${id} must remain active`);
   }
 
-  // 392 is the active catalog after canonical birth-background resolution and the approved Medical event split.
+  // 394 is the active catalog after canonical birth-background resolution the approved Medical event split, and the two approved PD-138 events.
   assert.equal(JSON.parse(fs.readFileSync(EVENTS_INDEX_SOURCE, 'utf8')).imports.length, 28);
-  assert.equal(eventLoader.getAllEvents().length, 392);
+  assert.equal(eventLoader.getAllEvents().length, 394);
 }
 
 function assertDeferredMembership(): void {

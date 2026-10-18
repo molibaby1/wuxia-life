@@ -86,6 +86,7 @@ export {
   type ProgressionAckRequest,
   type SessionProgressionPayload,
   type HeadlessTerminalDto,
+  type MarketStallObjectiveProjection,
 } from './sessionProgression';
 
 export {

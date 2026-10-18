@@ -13,6 +13,7 @@ import type {
 import type { SessionPhase } from '../../contracts/sessionProgression';
 import type { EventDefinition } from '../../types/eventTypes';
 import type { AnnualPassiveMemoryPlan } from '../../core/activePlanning/annualPassiveMemory';
+import type { MarketStallOperation } from '../../core/marketStallObjective';
 
 export type HeadlessErrorCode =
   | 'CATALOG_VERSION_UNKNOWN'
@@ -123,5 +124,7 @@ export type ProgressionAckKind =
   | 'story_automatic'
   | 'passive_continue'
   | 'period_summary';
+
+export type { MarketStallOperation };
 
 export type { SessionPhase };

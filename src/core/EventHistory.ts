@@ -7,7 +7,8 @@ export function appendFormalEventHistory(
   gameState: GameState,
   eventId: string,
   age: number,
-  triggeredAtYear?: number
+  triggeredAtYear?: number,
+  eventDate?: { year: number; month: number; day: number },
 ): void {
   if (!gameState.eventHistory) {
     gameState.eventHistory = [];
@@ -22,7 +23,8 @@ export function appendFormalEventHistory(
 
   gameState.eventHistory.push({
     eventId,
-    triggeredAt: triggeredAtYear ?? gameState.currentTime?.year ?? 0,
+    triggeredAt: triggeredAtYear ?? eventDate?.year ?? gameState.currentTime?.year ?? 0,
     age,
+    ...(eventDate ? { timestamp: { ...eventDate } } : {}),
   });
 }

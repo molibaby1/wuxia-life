@@ -8,6 +8,7 @@ import type { LifeMemorySummary } from '../../../src/types/lifeMemory.js';
 import type { HeadlessTerminalState } from '../../../src/headless/session/sessionTypes.js';
 import { getOwnedAssets } from '../../../src/core/assetOwnership.js';
 import { getOwnedItems } from '../../../src/core/itemOwnership.js';
+import { deriveMarketStallObjective } from '../../../src/core/marketStallObjective.js';
 
 function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
   const state = session.getRuntimeState();
@@ -67,6 +68,11 @@ export function mapSessionProgression(
       : null;
   const planningOptions = phase === 'active_planning' ? session.getPlanningOptions() : [];
   const volatile = session.getProgressionVolatileState();
+  const marketStallObjective = deriveMarketStallObjective(session.getRuntimeState());
+  if (marketStallObjective && phase !== 'active_planning') {
+    marketStallObjective.canAttempt = false;
+    marketStallObjective.canAbandon = false;
+  }
 
   return {
     sessionPhase: phase,
@@ -81,5 +87,6 @@ export function mapSessionProgression(
     terminal,
     lifeMemory,
     player: mapPlayerSummary(session),
+    marketStallObjective,
   };
 }

@@ -8,6 +8,7 @@ export type ReplayActionType =
   | 'active_action'
   | 'progression_ack'
   | 'automatic_progression'
+  | 'market_stall_action'
   | 'manual_save'
   | 'terminal';
 

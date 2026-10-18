@@ -132,6 +132,51 @@
       </section>
       </div>
 
+      <section
+        v-if="marketStallObjective"
+        class="accepted-objective-card card"
+        aria-label="我接受的追求"
+      >
+        <header class="accepted-objective-header">
+          <div>
+            <p class="event-kicker">我接受的追求</p>
+            <h3>{{ marketStallObjective.title }}</h3>
+          </div>
+          <span class="accepted-objective-status">{{ marketStallStatusLabel }}</span>
+        </header>
+        <p class="accepted-objective-description">{{ marketStallObjective.description }}</p>
+        <ul class="accepted-objective-facts">
+          <li>邀请日期：{{ formatObjectiveDate(marketStallObjective.invitedAt) }}</li>
+          <li>截止日期：{{ formatObjectiveDate(marketStallObjective.deadline) }}</li>
+          <li>供货筹备：{{ marketStallObjective.supplyPrepared ? '已备妥' : '尚未备妥' }}</li>
+        </ul>
+        <ul v-if="marketStallObjective.diagnostics.length" class="accepted-objective-diagnostics">
+          <li v-for="(diagnostic, index) in marketStallObjective.diagnostics" :key="`${index}-${diagnostic}`">
+            {{ diagnostic }}
+          </li>
+        </ul>
+        <div v-if="marketStallObjective.canAttempt || marketStallObjective.canAbandon" class="accepted-objective-actions">
+          <button
+            v-if="marketStallObjective.canAttempt"
+            class="choice-btn btn"
+            type="button"
+            :disabled="isAutoPlaying"
+            @click="emit('market-stall-action', 'attempt')"
+          >
+            前往集市，试营临时摊位
+          </button>
+          <button
+            v-if="marketStallObjective.canAbandon"
+            class="secondary-btn"
+            type="button"
+            :disabled="isAutoPlaying"
+            @click="emit('market-stall-action', 'abandon')"
+          >
+            不再准备这次集市试摊
+          </button>
+        </div>
+      </section>
+
       <MainScreenLifeSummary
         ref="summarySectionRef"
         class="summary-section"
@@ -172,6 +217,7 @@ import type { StoryChoice } from '../types';
 import type { DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
 import type { SessionPhase, PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { LifeMemorySummary } from '../types/lifeMemory';
+import type { MarketStallObjectiveProjection } from '../core/marketStallObjective';
 import type {
   ProgressionOverlayCard,
   ProgressionOverlayPayload,
@@ -186,6 +232,7 @@ const props = defineProps<{
   apiNeedsProgressionAck?: boolean;
   apiPlayer: PlayerSummaryDto;
   apiLifeMemory: LifeMemorySummary;
+  marketStallObjective?: MarketStallObjectiveProjection | null;
   progressionOverlay?: ProgressionOverlayPayload | null;
   apiAutomaticAdvanceError?: string | null;
 }>();
@@ -193,8 +240,28 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
   (e: 'manual-save'): void;
+  (e: 'market-stall-action', operation: 'attempt' | 'abandon'): void;
   (e: 'api-progression-ack'): void;
 }>();
+
+const marketStallObjective = computed(() => props.marketStallObjective ?? null);
+
+const marketStallStatusLabel = computed(() => {
+  const labels: Record<MarketStallObjectiveProjection['status'], string> = {
+    active: '进行中',
+    completed: '已完成',
+    abandoned: '已放弃',
+    expired: '经营期已结束',
+    insufficient_time: '剩余时间不足',
+    invalid: '状态资料异常',
+  };
+  return marketStallObjective.value ? labels[marketStallObjective.value.status] : '';
+});
+
+function formatObjectiveDate(value: MarketStallObjectiveProjection['invitedAt']): string {
+  if (!value) return '未记录';
+  return `${value.year}年${value.month}月${value.day}日`;
+}
 
 const disturbanceNarrativeDisplay = computed(() => {
   if (props.apiSessionPhase !== 'disturbance_narrative') return null;
@@ -465,6 +532,62 @@ const saveGame = () => {
   flex: 1;
   display: grid;
   gap: 12px;
+}
+
+.accepted-objective-card {
+  padding: 16px;
+  border: 1px solid rgba(139, 105, 20, 0.2);
+  border-radius: 20px;
+  background: #fffaf1;
+}
+
+.accepted-objective-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accepted-objective-header h3 {
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.accepted-objective-status {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: rgba(139, 105, 20, 0.1);
+  color: #765317;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.accepted-objective-description {
+  margin: 12px 0 0;
+  line-height: 1.55;
+}
+
+.accepted-objective-facts,
+.accepted-objective-diagnostics {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: #655a48;
+  font-size: 13px;
+}
+
+.accepted-objective-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.accepted-objective-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .flow-layout {

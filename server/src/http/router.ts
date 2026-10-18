@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import type { BackendEnv } from '../config/env.js';
 import { getPool } from '../db/pool.js';
-import { ApiError } from '../errors/apiError.js';
+import { ApiError, validationError } from '../errors/apiError.js';
 import { StructuredLogger } from '../logging/logger.js';
 import { readJsonBody, getBearerToken } from './request.js';
 import { bootstrapDevice } from '../services/deviceService.js';
@@ -62,9 +62,42 @@ function progressionPayloadBody(
     passiveNarrative: progression.passiveNarrative ?? null,
     terminal: progression.terminal,
     lifeMemory: progression.lifeMemory,
+    marketStallObjective: progression.marketStallObjective,
     player: progression.player,
     slotVersion: progression.slotVersion,
     snapshotId: progression.snapshotId,
+  };
+}
+
+function parseMarketStallActionBody(value: unknown): {
+  expectedSlotVersion: number;
+  expectedSnapshotId: string;
+  operation: 'attempt' | 'abandon';
+} {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw validationError('Request body must be an object');
+  }
+  const body = value as Record<string, unknown>;
+  const keys = Object.keys(body).sort();
+  if (keys.join(',') !== 'expectedSlotVersion,expectedSnapshotId,operation') {
+    throw validationError('Request body must contain only expectedSlotVersion, expectedSnapshotId, and operation');
+  }
+  if (!Number.isSafeInteger(body.expectedSlotVersion) || (body.expectedSlotVersion as number) < 0) {
+    throw validationError('expectedSlotVersion must be a non-negative integer');
+  }
+  if (
+    typeof body.expectedSnapshotId !== 'string' ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.expectedSnapshotId)
+  ) {
+    throw validationError('expectedSnapshotId must be a UUID');
+  }
+  if (body.operation !== 'attempt' && body.operation !== 'abandon') {
+    throw validationError('operation must be attempt or abandon');
+  }
+  return {
+    expectedSlotVersion: body.expectedSlotVersion as number,
+    expectedSnapshotId: body.expectedSnapshotId,
+    operation: body.operation,
   };
 }
 
@@ -234,6 +267,31 @@ export function createRouter(
           feedback: result.response.status === 'success' ? result.response.feedback : undefined,
           diagnostics:
             result.response.status === 'success' ? result.response.diagnostics : result.response.diagnostics,
+          ...progressionPayloadBody(result),
+        });
+      },
+    },
+    {
+      method: 'POST',
+      pattern: /^\/v1\/sessions\/([^/]+)\/market-stall-actions$/,
+      handler: async (req, res, ctx, params) => {
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.sessionId ?? '')) {
+          throw validationError('sessionId must be a UUID');
+        }
+        const deviceToken = getBearerToken(req, 'x-device-token');
+        const sessionToken = getBearerToken(req, 'x-session-token');
+        const body = parseMarketStallActionBody(await readJsonBody<unknown>(req));
+        const db = getPool(env.databaseUrl);
+        const result = await gameService.executeMarketStallAction(db, ctx.env, {
+          deviceToken: deviceToken!,
+          sessionId: params.sessionId!,
+          sessionToken: sessionToken!,
+          ...body,
+        }, testDependencies?.runtimeCatalog);
+        sendJson(res, 200, {
+          slotVersion: result.slot.version,
+          snapshotId: result.snapshot.id,
+          contentHash: result.snapshot.content_hash,
           ...progressionPayloadBody(result),
         });
       },

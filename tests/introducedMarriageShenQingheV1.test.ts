@@ -172,13 +172,13 @@ function ordinaryPlayerState(state: GameState): Record<string, unknown> {
 function testCatalogAddsExactlyThreeEvents(): void {
   const sourcePath = path.resolve('src/data/lines/merchant.json');
   const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8')) as EventDefinition[];
-  assert.equal(source.length, 21, 'merchant source must add exactly three events to its existing 18');
-  assert.deepEqual(source.slice(-3).map(event => event.id), [
+  assert.equal(source.length, 23, 'merchant source keeps its 21 events plus the two approved PD-138 events');
+  assert.deepEqual(source.filter(event => event.id.startsWith('shen_qinghe_')).map(event => event.id), [
     IDS.introduction,
     IDS.sharedMatter,
     IDS.marriageDecision,
   ]);
-  assert.equal(EventLoader.getInstance().getAllEvents().length, 392);
+  assert.equal(EventLoader.getInstance().getAllEvents().length, 394);
   assert.equal(EventLoader.getInstance().getAllEvents().filter(event => event.id.startsWith('shen_qinghe_')).length, 3);
   assert.equal(EventLoader.getInstance().getUndeclaredImportPaths().length, 0);
 }

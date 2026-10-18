@@ -309,6 +309,57 @@ export function useApiGameEngine() {
     }
   }
 
+  async function handleMarketStallAction(operation: 'attempt' | 'abandon'): Promise<void> {
+    if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
+    const objective = activeSession.value.marketStallObjective;
+    if (!objective || (operation === 'attempt' ? !objective.canAttempt : !objective.canAbandon)) return;
+    isProcessing.value = true;
+    try {
+      const sessionId = webPlatformStorage.getSessionId();
+      const sessionToken = webPlatformStorage.getSessionToken();
+      if (!sessionId || !sessionToken) throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
+      const result = await apiClient.executeMarketStallAction({
+        deviceToken: deviceToken.value,
+        sessionId,
+        sessionToken,
+        expectedSlotVersion: activeSession.value.slot.version,
+        expectedSnapshotId: activeSession.value.snapshot.id,
+        operation,
+      });
+      const resultCard = operation === 'attempt' && result.activeActionSummary
+        ? buildActiveActionOverlayCard(
+            `market-stall-attempt-${result.snapshotId}`,
+            result.activeActionSummary,
+          )
+        : {
+            id: `market-stall-${operation}-${result.snapshotId}`,
+            title: result.marketStallObjective?.title ?? objective.title,
+            body: result.marketStallObjective?.description ?? objective.description,
+          };
+      applyProgressionResponse(result);
+      engineState.automaticAdvanceError = null;
+      if (operation === 'attempt' && result.sessionPhase === 'action_summary') {
+        try {
+          const next = await requestProgressionAck('action_summary');
+          applyProgressionResponse(next);
+          flowState.value = 'ready';
+          flowMessage.value = '';
+        } catch (error) {
+          mapApiError(error);
+          engineState.automaticAdvanceError = flowMessage.value || '下一阶段载入失败，请重试';
+        }
+      } else {
+        flowState.value = 'ready';
+        flowMessage.value = '';
+      }
+      engineState.progressionOverlay = { cards: [resultCard] };
+    } catch (error) {
+      mapApiError(error);
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
   async function requestProgressionAck(ackKind: ProgressionAckKind): Promise<SessionProgressionPayload> {
     if (!apiClient || !deviceToken.value || !activeSession.value) {
       throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
@@ -454,6 +505,7 @@ export function useApiGameEngine() {
     continueSlot,
     handleChoice,
     handleActiveAction,
+    handleMarketStallAction,
     handleProgressionAck,
     saveCurrentGame,
   };

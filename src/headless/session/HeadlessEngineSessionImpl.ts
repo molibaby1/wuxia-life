@@ -3,6 +3,8 @@
  */
 
 import { GameEngineIntegration } from '../../core/GameEngineIntegration';
+import { deriveMarketStallObjective, isMarketStallEventEligible } from '../../core/marketStallObjective';
+import type { MarketStallOperation } from '../../core/marketStallObjective';
 import { generateChoiceFeedback } from '../../core/ChoiceFeedbackGenerator';
 import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import { resolveChoiceEffects } from '../../core/ChoiceOutcomeResolver';
@@ -382,6 +384,21 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     }
 
     await this.hydrate(snapshot);
+
+    if (
+      (request.action.eventId === 'p138_market_stall_invitation' ||
+        request.action.eventId === 'p138_market_stall_supply') &&
+      (snapshot.state.pendingStoryEventId !== request.action.eventId ||
+        !isMarketStallEventEligible(request.action.eventId, this.engine.getGameState()))
+    ) {
+      const stale: HeadlessSessionError = {
+        code: 'STALE_EVENT',
+        message: 'Market stall event is not the eligible pending decision point',
+        details: { expected: request.action.eventId, pending: snapshot.state.pendingStoryEventId },
+      };
+      this.lastError = stale;
+      throw new Error(stale.message);
+    }
 
     let event = this.volatile.currentEvent;
     if (!event || event.id !== request.action.eventId) {
@@ -791,6 +808,34 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.pendingActionSummary = result.activeActionSummary;
     this.volatile.pendingDisturbanceNarrative = result.disturbanceNarrative;
     this.volatile.lastOutcomeText = result.feedbackText;
+  }
+
+  async executeMarketStallAction(operation: MarketStallOperation): Promise<void> {
+    this.lastError = null;
+    if (operation !== 'attempt' && operation !== 'abandon') {
+      throw new ProgressionError('INVALID_ACTION', `Unknown market stall operation: ${String(operation)}`);
+    }
+    if (this.getSessionPhase() !== 'active_planning') {
+      throw new ProgressionError(
+        'INVALID_SESSION_PHASE',
+        'Market stall action requires active_planning phase',
+      );
+    }
+    const objective = deriveMarketStallObjective(this.engine.getGameState());
+    if (!objective || (operation === 'attempt' ? !objective.canAttempt : !objective.canAbandon)) {
+      throw new ProgressionError('INVALID_ACTION', `Market stall operation is unavailable: ${operation}`);
+    }
+    const summary = await this.runWithRandomAsync(async () =>
+      this.engine.executeMarketStallOperation(operation),
+    );
+    if (operation === 'abandon') return;
+    if (!summary) {
+      throw new ProgressionError('INVALID_ACTION', 'Market stall attempt did not produce a result summary');
+    }
+    this.volatile.currentEvent = null;
+    this.volatile.pendingActionSummary = summary;
+    this.volatile.pendingDisturbanceNarrative = null;
+    this.volatile.lastOutcomeText = summary.resultExplanation ?? null;
   }
 
   async acknowledgeProgression(ackKind: ProgressionAckKind): Promise<void> {

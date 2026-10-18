@@ -205,6 +205,29 @@ export class WebApiClient {
     );
   }
 
+  async executeMarketStallAction(params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    operation: 'attempt' | 'abandon';
+  }): Promise<SessionProgressionPayload> {
+    return this.request<SessionProgressionPayload>(
+      '/v1/sessions/' + params.sessionId + '/market-stall-actions',
+      {
+        method: 'POST',
+        deviceToken: params.deviceToken,
+        sessionToken: params.sessionToken,
+        body: JSON.stringify({
+          expectedSlotVersion: params.expectedSlotVersion,
+          expectedSnapshotId: params.expectedSnapshotId,
+          operation: params.operation,
+        }),
+      },
+    );
+  }
+
   async acknowledgeProgression(params: {
     deviceToken: string;
     sessionId: string;

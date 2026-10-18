@@ -151,7 +151,7 @@ async function main(): Promise<void> {
   ]) {
     assert(!allIds.has(removed), `${removed} must leave the formal loader`);
   }
-  assert.equal(allIds.size, 392);
+  assert.equal(allIds.size, 394);
 
   assert.equal(goldenLinePayoffMap.entries.length, 10);
   assert.equal(goldenLinePayoffMap.entries.filter(entry => entry.payoffs.length > 0).length, 9);

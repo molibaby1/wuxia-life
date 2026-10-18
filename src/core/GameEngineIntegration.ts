@@ -12,7 +12,7 @@
  */
 
 import { reactive } from 'vue';
-import { EventPriority } from '../types/eventTypes';
+import { EffectType, EventPriority } from '../types/eventTypes';
 import type { CriticalChoices, EventDefinition, GameState, Effect, PlayerLifeStates } from '../types/eventTypes';
 import { createDefaultRuntimeEventCatalog } from './EventLoaderRuntimeCatalog';
 import type { RuntimeEventCatalog } from './RuntimeEventCatalog';
@@ -37,6 +37,11 @@ import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
 import { appendFormalEventHistory } from './EventHistory';
 import {
+  deriveMarketStallObjective,
+  isMarketStallEventEligible,
+  type MarketStallOperation,
+} from './marketStallObjective';
+import {
   buildActiveActionChoices,
   executeActiveActionOnState,
   hasPendingForcedEvent as checkPendingForcedEvent,
@@ -44,6 +49,7 @@ import {
 import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
 import type { AutomaticStageResultDisplay } from '../types/activeActionTypes';
+import type { ActiveActionSummaryDisplay } from '../types/activeActionTypes';
 import { calculatePublicStatDeltas } from './activePlanning/periodSummaryBuilder';
 import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
 import { getLaterLifeLegacyMultiplier } from '../p18/laterLifeLegacySelection';
@@ -362,6 +368,52 @@ export class GameEngineIntegration {
       Object.assign(this.gameState.player, attrs);
     }
   }
+
+  /** Executes the single PD-138 attempt/abandon operation. Session owns phase gating. */
+  public async executeMarketStallOperation(
+    operation: MarketStallOperation,
+  ): Promise<ActiveActionSummaryDisplay | null> {
+    if (operation !== 'attempt' && operation !== 'abandon') {
+      throw new Error(`Unknown market stall operation: ${String(operation)}`);
+    }
+    const objective = deriveMarketStallObjective(this.gameState);
+    if (!objective || (operation === 'attempt' ? !objective.canAttempt : !objective.canAbandon)) {
+      throw new Error(`Market stall operation is not eligible: ${objective?.status ?? 'missing'}`);
+    }
+
+    if (operation === 'abandon') {
+      const updatedState = await this.eventExecutor.executeEffects([
+        { type: EffectType.FLAG_SET, flag: 'p138_market_stall_abandoned', value: true },
+      ], this.gameState);
+      this.applyGameState(updatedState);
+      return null;
+    }
+
+    const delta = objective.supplyPrepared ? 2 : 1;
+    const beforeAcumen = this.gameState.player.businessAcumen;
+    const updatedState = await this.eventExecutor.executeEffects([
+      { type: EffectType.STAT_MODIFY, stat: 'businessAcumen', value: beforeAcumen + delta, operator: 'set' },
+      { type: EffectType.FLAG_SET, flag: 'p138_market_stall_attempted', value: true },
+    ], this.gameState);
+    this.applyGameState(updatedState);
+    const appliedDelta = this.gameState.player.businessAcumen - beforeAcumen;
+    this.advanceTime(1, 'month');
+
+    const resultExplanation = objective.supplyPrepared
+      ? '事前核实的货源在摆摊时派上了用场，少了些临时周转的忙乱。你亲自经营完了这一个月。此次试摊已经完成；经营见识有所增长，但不据此断言盈利。'
+      : '你在备货、摆货和招呼来客之间摸索，虽有磕绊，却亲自经营完了这一个月。此次试摊已经完成；生意盈亏并无保证。';
+    return {
+      sourceLabel: '人生追求',
+      actionName: '前往集市，试营临时摊位',
+      durationLabel: '1个月',
+      rewardSummary: '',
+      costSummary: '投入一个月时间',
+      riskSummary: '',
+      nextStepHint: '这次试摊已经完成。',
+      appliedDeltaSummary: `经营见识+${appliedDelta}`,
+      resultExplanation,
+    };
+  }
   
   /**
    * 根据年龄获取可用事件（加权随机选择）
@@ -379,6 +431,12 @@ export class GameEngineIntegration {
     
     // 过滤满足条件的事件
     const availableEvents = events.filter(event => {
+      // PD-138: keep date-sensitive eligibility out of the expression cache.
+      if ((event.id === 'p138_market_stall_invitation' || event.id === 'p138_market_stall_supply')
+        && !isMarketStallEventEligible(event.id, this.gameState)) {
+        return false;
+      }
+
       // PD-109: Formal setbacks are resolution targets, not ordinary scheduler candidates.
       if (event.isSetbackEvent === true) {
         return false;
@@ -1541,6 +1599,9 @@ export class GameEngineIntegration {
   public async executeChoiceEffects(effects: Effect[], eventId?: string, choiceId?: string): Promise<{ gameState: GameState, triggeredEvent?: EventDefinition }> {
     // 记录事件前的年龄
     const ageBeforeEvent = this.gameState.player?.age || 0;
+    const eventDateBeforeEffects = this.gameState.currentTime
+      ? { ...this.gameState.currentTime }
+      : undefined;
     const updatedState = await this.eventExecutor.executeEffects(effects, this.gameState);
     const eventDefinition = this.getEventDefinition(eventId);
     if (eventDefinition) {
@@ -1568,7 +1629,13 @@ export class GameEngineIntegration {
     }
     
     if (eventId) {
-      appendFormalEventHistory(this.gameState, eventId, ageBeforeEvent);
+      appendFormalEventHistory(
+        this.gameState,
+        eventId,
+        ageBeforeEvent,
+        eventId === 'p138_market_stall_invitation' ? eventDateBeforeEffects?.year : undefined,
+        eventId === 'p138_market_stall_invitation' ? eventDateBeforeEffects : undefined,
+      );
       const choiceEvent = this.getEventDefinition(eventId);
       if (choiceEvent) {
         this.applyP16PostEventHooks(choiceEvent);

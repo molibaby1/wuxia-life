@@ -451,6 +451,7 @@ async function loadHeadlessForMutation(
     expectedSnapshotId: string;
   },
   runtimeCatalog?: RuntimeEventCatalog,
+  resolveAutoProgress = true,
 ) {
   const { deviceId } = await resolveDevice(client, env, params.deviceToken);
   const { session } = await resolveSession(
@@ -491,8 +492,86 @@ async function loadHeadlessForMutation(
   if (cachedVolatile) {
     headless.applyProgressionVolatileState(cachedVolatile);
   }
-  await resolveSessionAfterAutoProgress(headless);
+  if (resolveAutoProgress) {
+    await resolveSessionAfterAutoProgress(headless);
+  }
   return { session, slot, currentSnap, headless, deviceId };
+}
+
+export async function executeMarketStallAction(
+  db: Queryable,
+  env: BackendEnv,
+  params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    operation: 'attempt' | 'abandon';
+  },
+  runtimeCatalog?: RuntimeEventCatalog,
+) {
+  if (params.operation !== 'attempt' && params.operation !== 'abandon') {
+    throw validationError('operation must be attempt or abandon');
+  }
+  return withTransaction(env.databaseUrl, async client => {
+    // This action must inspect the selected state as-is. Auto progression here could
+    // select a story event and make abandon an extra scheduler draw.
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+      client,
+      env,
+      params,
+      runtimeCatalog,
+      false,
+    );
+    if (headless.getSessionPhase() !== 'active_planning') {
+      throw validationError('Market stall actions require active_planning phase', {
+        code: 'INVALID_SESSION_PHASE',
+      });
+    }
+    const hashBefore = currentSnap.content_hash;
+    try {
+      await headless.executeMarketStallAction(params.operation);
+    } catch (error) {
+      mapProgressionError(error);
+    }
+    const newSnapshot = headless.serialize();
+    newSnapshot.metadata.engineVersion = env.engineVersion;
+    newSnapshot.metadata.eventCatalogVersion = env.eventCatalogVersion;
+    const snapRow = await snapshotRepo.insertSnapshot(client, {
+      saveSlotId: slot.id,
+      sessionId: session.id,
+      slotVersion: slot.version + 1,
+      snapshot: newSnapshot,
+      engineVersion: env.engineVersion,
+      eventCatalogVersion: env.eventCatalogVersion,
+    });
+    const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
+    if (!updatedSlot) {
+      throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during market stall action', {
+        currentSlotVersion: slot.version,
+        currentSnapshotId: slot.current_snapshot_id,
+      });
+    }
+    await replayRepo.appendReplayAction(client, {
+      sessionId: session.id,
+      saveSlotId: slot.id,
+      actionType: 'market_stall_action',
+      snapshotHashBefore: hashBefore,
+      snapshotHashAfter: snapRow.content_hash,
+      payload: { operation: params.operation },
+    });
+    if (shouldPersistProgressionVolatile(headless)) {
+      setSessionVolatileState(session.id, snapRow.id, headless.getProgressionVolatileState());
+    } else {
+      clearSessionVolatileState(session.id, snapRow.id);
+    }
+    return {
+      slot: updatedSlot,
+      snapshot: snapRow,
+      ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id),
+    };
+  });
 }
 
 export async function executeActiveAction(

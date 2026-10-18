@@ -16,6 +16,8 @@ import type { Investments, PlayerLifeStates } from '../types/eventTypes';
 import type { WealthCapacity } from '../types/wealthCapacity';
 import type { AssetId } from '../types/asset';
 import type { OwnedItemSummary } from '../types/item';
+import type { MarketStallObjectiveProjection } from '../core/marketStallObjective';
+export type { MarketStallObjectiveProjection } from '../core/marketStallObjective';
 
 /**
  * Authoritative session phase for client UI routing.
@@ -125,4 +127,5 @@ export interface SessionProgressionPayload {
   terminal: HeadlessTerminalDto | null;
   lifeMemory: LifeMemorySummary;
   player: PlayerSummaryDto;
+  marketStallObjective: MarketStallObjectiveProjection | null;
 }

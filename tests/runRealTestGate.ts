@@ -13,6 +13,7 @@ type Suite = {
 };
 
 const suites: Suite[] = [
+  { name: 'marketStallObjectiveTests', entry: 'tests/marketStallObjectiveTests.ts' },
   { name: 'activeActionAttributeBalance', entry: 'tests/activeActionAttributeBalance.test.ts' },
   { name: 'activeActionResultDifferentiation', entry: 'tests/activeActionResultDifferentiation.test.ts' },
   { name: 'activeActionResultParity', entry: 'tests/activeActionResultParity.test.ts' },

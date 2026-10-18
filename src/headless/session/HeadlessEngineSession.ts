@@ -10,6 +10,7 @@ import type { LifeMemorySummary } from '../../types/lifeMemory';
 import type { EventDefinition } from '../../types/eventTypes';
 import type { HeadlessSessionDependencies } from '../dependencies/HeadlessSessionDependencies';
 import type { PlanningOptionDto } from '../../contracts/sessionProgression';
+import type { MarketStallOperation } from '../../core/marketStallObjective';
 import type { ProgressionAckKind, SessionPhase } from './sessionTypes';
 import type {
   HeadlessProgressionVolatileState,
@@ -80,6 +81,9 @@ export interface HeadlessEngineSession {
 
   /** P7.2: execute one active action; mutates engine state and volatile summary. */
   executeActiveAction(actionId: string): Promise<void>;
+
+  /** Execute the single-case market stall operation at a legal planning decision point. */
+  executeMarketStallAction(operation: MarketStallOperation): Promise<void>;
 
   /** P7.2: ack summary or disturbance; may re-resolve story/planning without snapshot write. */
   acknowledgeProgression(ackKind: ProgressionAckKind): Promise<void>;

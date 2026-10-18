@@ -1,5 +1,6 @@
 import { runMigrationTests } from './migration.test.js';
 import { runP6bIntegrationTests } from './integration.test.js';
+import { runMarketStallApiTests } from './marketStall.test.js';
 
 export function requireDatabaseUrl(): string {
   const databaseUrl = process.env.DATABASE_URL?.trim();
@@ -16,6 +17,7 @@ export function requireDatabaseUrl(): string {
 export async function runP6bDbTests(databaseUrl: string): Promise<void> {
   await runMigrationTests(databaseUrl);
   await runP6bIntegrationTests(databaseUrl);
+  await runMarketStallApiTests(databaseUrl);
 }
 
 async function main(): Promise<void> {

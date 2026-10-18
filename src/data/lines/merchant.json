@@ -870,5 +870,65 @@
     },
     "storyLine": "shen_qinghe_character",
     "cooldown": 0
+  },
+  {
+    "id": "p138_market_stall_invitation",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 65,
+    "weight": 40,
+    "ageRange": { "min": 16, "max": 25 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [],
+    "content": {
+      "title": "镇集试摊",
+      "text": "镇上开放了为期半年的临时集市摊位。管事说，愿意的人可以在这段日子里抽出一个月，亲自试做一回生意；货卖得怎样，要看届时的本事与光景。\n\n你愿不愿接下这次机会？",
+      "description": "镇上提供一次限时的临时摊位试营机会。"
+    },
+    "eventType": "choice",
+    "maxTriggers": 1,
+    "choices": [
+      {
+        "id": "accept_market_stall",
+        "text": "接下邀请，择时试做一回摊主。",
+        "effects": [{ "type": "flag_set", "flag": "p138_market_stall_accepted", "value": true }]
+      },
+      {
+        "id": "refuse_market_stall",
+        "text": "这次不接，照旧安排自己的生活。",
+        "effects": [{ "type": "flag_set", "flag": "p138_market_stall_refused", "value": true }]
+      }
+    ],
+    "metadata": { "tags": ["经营", "主动追求", "once"] }
+  },
+  {
+    "id": "p138_market_stall_supply",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 64,
+    "weight": 35,
+    "ageRange": { "min": 16, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [],
+    "content": {
+      "title": "货商过镇",
+      "text": "一位往返邻镇的货商听说你有意在集市试摊，谈起几种适合小摊的寻常货物，也愿意让你核对货源与交货办法。能不能卖得好，他不敢保证。\n\n你打算如何安排？",
+      "description": "货商带来一次可供你选择的临时货源商谈。"
+    },
+    "eventType": "choice",
+    "maxTriggers": 1,
+    "choices": [
+      {
+        "id": "prepare_market_stall_supply",
+        "text": "核对货源，为这次试摊备妥货品。",
+        "effects": [{ "type": "flag_set", "flag": "p138_market_stall_supply_prepared", "value": true }]
+      },
+      {
+        "id": "decline_market_stall_supply",
+        "text": "谢过好意，仍按自己的办法筹备。",
+        "effects": []
+      }
+    ],
+    "metadata": { "tags": ["经营", "主动追求", "once"] }
   }
 ]

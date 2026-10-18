@@ -51,6 +51,7 @@ const {
   continueSlot,
   handleChoice: apiHandleChoice,
   handleActiveAction: apiHandleActiveAction,
+  handleMarketStallAction: apiHandleMarketStallAction,
   handleProgressionAck: apiHandleProgressionAck,
   saveCurrentGame: apiSaveCurrentGame,
   activeSession,
@@ -234,9 +235,11 @@ const onApiManualSave = async () => {
         :api-needs-progression-ack="apiNeedsProgressionAck"
         :api-player="apiPlayer"
         :api-life-memory="apiLifeMemory"
+        :market-stall-objective="activeSession?.marketStallObjective ?? null"
         :progression-overlay="progressionOverlay"
         :api-automatic-advance-error="apiEngineState.automaticAdvanceError"
         @choice="onChoice"
+        @market-stall-action="apiHandleMarketStallAction"
         @manual-save="onApiManualSave"
         @api-progression-ack="onApiProgressionAck"
       />

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-09-11T02:08:08.430Z",
+  "generatedAt": "2026-10-18T00:37:12.377Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -14,12 +14,12 @@
   "summary": {
     "runtimeLoadedFiles": 28,
     "nonLoadedFiles": 43,
-    "totalEventsInRuntime": 391,
+    "totalEventsInRuntime": 394,
     "byStatus": {
       "active": 35,
       "candidate": 70,
-      "broken": 11,
-      "deferred": 275,
+      "broken": 0,
+      "deferred": 289,
       "dead": 0
     },
     "byFileStatus": {
@@ -339,8 +339,8 @@
       "fileName": "merchant.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 21,
-      "goldenLineOverlapCount": 14,
+      "eventCount": 23,
+      "goldenLineOverlapCount": 16,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -435,8 +435,8 @@
       "fileName": "p22-content-expansions.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 13,
-      "goldenLineOverlapCount": 9,
+      "eventCount": 14,
+      "goldenLineOverlapCount": 10,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -2497,12 +2497,12 @@
       "eventId": "elderly_reunion",
       "sourceFile": "elderly-legacy.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 58,
       "ageMax": 68,
       "overlapsGoldenLine": false,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "elderly_write_memoirs",
@@ -2552,12 +2552,12 @@
       "eventId": "elderly_life_review",
       "sourceFile": "elderly-legacy.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 70,
       "ageMax": 90,
       "overlapsGoldenLine": false,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "elderly_final_ending",
@@ -5706,6 +5706,28 @@
       "notes": "File classified deferred for golden line"
     },
     {
+      "eventId": "p138_market_stall_invitation",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 25,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p138_market_stall_supply",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
       "eventId": "career_foundation_sect",
       "sourceFile": "middle-age-career.json",
       "runtimeLoaded": true,
@@ -5775,12 +5797,12 @@
       "eventId": "career_mediate_conflict",
       "sourceFile": "middle-age-career.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 38,
       "ageMax": 50,
       "overlapsGoldenLine": false,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "career_write_book",
@@ -5797,23 +5819,23 @@
       "eventId": "career_sect_leader",
       "sourceFile": "middle-age-career.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 42,
       "ageMax": 55,
       "overlapsGoldenLine": false,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "career_good_evil_war",
       "sourceFile": "middle-age-career.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 45,
       "ageMax": 60,
       "overlapsGoldenLine": false,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "career_jianghu_legend",
@@ -6589,12 +6611,12 @@
       "eventId": "p22_origin_frontier_orphan",
       "sourceFile": "p22-content-expansions.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 1,
       "ageMax": 3,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Failed event quality or loader validation"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "p22_childhood_street_shaping",
@@ -6655,45 +6677,45 @@
       "eventId": "p22_endgame_hermit_memory",
       "sourceFile": "p22-content-expansions.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 58,
       "ageMax": 70,
       "overlapsGoldenLine": false,
       "eventType": "auto",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "p22_wave_early_frontier_growth",
       "sourceFile": "p22-content-expansions.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 12,
       "ageMax": 16,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Failed event quality or loader validation"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "p22_wave_mid_merchant_identity",
       "sourceFile": "p22-content-expansions.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 35,
       "ageMax": 42,
       "overlapsGoldenLine": false,
       "eventType": "auto",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "p22_wave_late_fade_closure",
       "sourceFile": "p22-content-expansions.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 62,
       "ageMax": 72,
       "overlapsGoldenLine": false,
       "eventType": "auto",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "p22_early_martial_route_fork",
@@ -6726,6 +6748,17 @@
       "ageMax": 14,
       "overlapsGoldenLine": true,
       "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_training_business_river_delivery",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
       "notes": "File classified deferred for golden line"
     },
     {
@@ -7128,12 +7161,12 @@
       "eventId": "relationship_life_saving",
       "sourceFile": "relationship.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 20,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "relationship_debt_return",

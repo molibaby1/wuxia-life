@@ -2,17 +2,17 @@ import { runEnvValidationTests } from './envValidation.test.js';
 import { runLoggingTests } from './logging.test.js';
 import { runWebApiClientTests } from '../adapters/webApiClient.test.js';
 
-export function runP6bUnitTests(): void {
+export async function runP6bUnitTests(): Promise<void> {
   runEnvValidationTests();
   runLoggingTests();
-  runWebApiClientTests();
+  await runWebApiClientTests();
 }
 
-function main(): void {
-  runP6bUnitTests();
+async function main(): Promise<void> {
+  await runP6bUnitTests();
   console.log('P6B unit tests passed');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
+  void main();
 }

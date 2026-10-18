@@ -42,8 +42,20 @@ export async function getSlotByDeviceAndIndex(
   slotIndex: number,
 ): Promise<SaveSlotRow | null> {
   const result = await db.query<SaveSlotRow>(
-    'SELECT * FROM save_slots WHERE device_id = $1 AND slot_index = $2',
+    'SELECT * FROM save_slots WHERE device_id = $1 AND slot_index = $2 FOR UPDATE',
     [deviceId, slotIndex],
+  );
+  return result.rows[0] ?? null;
+}
+
+export async function getSlotByDeviceAndId(
+  db: Queryable,
+  deviceId: string,
+  slotId: string,
+): Promise<SaveSlotRow | null> {
+  const result = await db.query<SaveSlotRow>(
+    'SELECT * FROM save_slots WHERE device_id = $1 AND id = $2 FOR UPDATE',
+    [deviceId, slotId],
   );
   return result.rows[0] ?? null;
 }
@@ -69,9 +81,15 @@ export async function clearSlot(
   slotId: string,
 ): Promise<void> {
   await db.query(
-    `UPDATE save_slots
+    `WITH locked_slot AS (
+       SELECT id FROM save_slots WHERE id = $1 FOR UPDATE
+     ), deleted_checkpoint AS (
+       DELETE FROM save_slot_progression_checkpoints
+       WHERE save_slot_id IN (SELECT id FROM locked_slot)
+     )
+     UPDATE save_slots
      SET current_snapshot_id = NULL, version = 0, updated_at = NOW()
-     WHERE id = $1`,
+     WHERE id IN (SELECT id FROM locked_slot)`,
     [slotId],
   );
 }

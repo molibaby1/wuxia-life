@@ -11,6 +11,7 @@ import * as gameService from '../../server/src/services/gameService.js';
 import { bootstrapDevice } from '../../server/src/services/deviceService.js';
 import * as saveSlotRepo from '../../server/src/repositories/saveSlotRepository.js';
 import * as snapshotRepo from '../../server/src/repositories/snapshotRepository.js';
+import * as progressionCheckpointRepo from '../../server/src/repositories/progressionCheckpointRepository.js';
 import type { GameStateSnapshot } from '../../src/contracts/gameStateSnapshot.js';
 
 const schedulerGuardEvent: EventDefinition = {
@@ -104,6 +105,10 @@ async function createAcceptedFixture(
     snapRow.id,
   );
   assert.ok(slot, 'accepted PD-138 fixture becomes the current save');
+  await progressionCheckpointRepo.saveCheckpoint(db, created.slot.id, snapRow.id, {
+    protocolVersion: 1,
+    state: 'clear',
+  });
   return {
     sessionId: created.sessionId,
     sessionToken: created.sessionToken,

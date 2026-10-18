@@ -6,6 +6,7 @@ import * as gameService from '../../server/src/services/gameService.js';
 import { seedActiveCatalog } from '../../server/src/http/router.js';
 import * as saveSlotRepo from '../../server/src/repositories/saveSlotRepository.js';
 import * as snapshotRepo from '../../server/src/repositories/snapshotRepository.js';
+import * as progressionCheckpointRepo from '../../server/src/repositories/progressionCheckpointRepository.js';
 import { hashToken } from '../../server/src/crypto/tokens.js';
 import { ApiError } from '../../server/src/errors/apiError.js';
 import type { SessionProgressionPayload } from '../../src/contracts/sessionProgression.js';
@@ -136,6 +137,10 @@ export async function runP6bIntegrationTests(databaseUrl: string): Promise<void>
     planningSnapRow.id,
   );
   assert(planningSlot !== null, 'age-16 planning snapshot becomes current');
+  await progressionCheckpointRepo.saveCheckpoint(db, planningBase.slot.id, planningSnapRow.id, {
+    protocolVersion: 1,
+    state: 'clear',
+  });
   const restoredPlanning = await gameService.restoreSession(db, env, {
     deviceToken: boot1.deviceToken,
     slotIndex: 2,
@@ -241,6 +246,10 @@ export async function runP6bIntegrationTests(databaseUrl: string): Promise<void>
     pendingEventSnapRow.id,
   );
   assert(pendingEventSlot !== null, 'pending-event snapshot becomes current');
+  await progressionCheckpointRepo.saveCheckpoint(db, pendingEventBase.slot.id, pendingEventSnapRow.id, {
+    protocolVersion: 1,
+    state: 'clear',
+  });
   const restoredPendingEvent = await gameService.restoreSession(db, env, {
     deviceToken: boot1.deviceToken,
     slotIndex: 3,

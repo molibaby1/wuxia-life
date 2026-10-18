@@ -121,6 +121,16 @@ export function useApiGameEngine() {
       flowMessage.value = error.message;
       return;
     }
+    if (error.code === 'PROGRESSION_CHECKPOINT_LEGACY_UNKNOWN') {
+      flowState.value = 'ready';
+      flowMessage.value = '该旧存档仍有无法恢复的旧结果，请返回存档列表选择是否保留旧存档。';
+      return;
+    }
+    if (error.code === 'PROGRESSION_CHECKPOINT_INVALID') {
+      flowState.value = 'ready';
+      flowMessage.value = '该存档的进度检查点缺损，已阻止继续；不能通过放弃旧结果解锁。';
+      return;
+    }
     if (error.category === 'conflict') {
       flowState.value = 'stale_conflict';
       flowMessage.value = '进度已在其他窗口更新，请重新加载存档';
@@ -201,16 +211,12 @@ export function useApiGameEngine() {
           `period-${response.snapshot.id}`,
           response.periodSummary,
         );
-        const next = await requestProgressionAck('period_summary');
-        applyProgressionResponse(next);
         engineState.progressionOverlay = { cards: resultCards };
       } else if (response.sessionPhase === 'action_summary' && response.activeActionSummary) {
         const resultCard = buildActiveActionOverlayCard(
           `active-action-restored-${response.snapshot.id}`,
           response.activeActionSummary,
         );
-        const next = await requestProgressionAck('action_summary');
-        applyProgressionResponse(next);
         engineState.progressionOverlay = { cards: [resultCard] };
       }
       flowState.value = 'ready';
@@ -219,6 +225,51 @@ export function useApiGameEngine() {
     } catch (error) {
       mapApiError(error);
       return false;
+    }
+  }
+
+  async function discardLegacyProgressionAndContinue(slotIndex: number): Promise<boolean> {
+    if (!apiClient || !deviceToken.value || isProcessing.value) return false;
+    const slot = saveSlots.value.find(item => item.slotIndex === slotIndex);
+    if (
+      !slot ||
+      slot.progressionCheckpointState !== 'legacy_unknown' ||
+      slot.slotVersion === undefined ||
+      !slot.snapshotId
+    ) {
+      flowState.value = 'ready';
+      flowMessage.value = '旧存档信息已变化，请刷新存档列表后重试。';
+      return false;
+    }
+    isProcessing.value = true;
+    try {
+      flowState.value = 'loading';
+      await apiClient.discardLegacyProgression({
+        deviceToken: deviceToken.value,
+        slotIndex,
+        expectedSlotVersion: slot.slotVersion,
+        expectedSnapshotId: slot.snapshotId,
+      });
+      const restored = await continueSlot(slotIndex);
+      if (!restored) {
+        try {
+          await refreshSaves();
+        } catch {
+          // Keep the restore error as the user-facing cause.
+        }
+      }
+      return restored;
+    } catch (error) {
+      mapApiError(error);
+      try {
+        await refreshSaves();
+      } catch {
+        // Preserve the checkpoint error as the user-facing cause.
+      }
+      return false;
+    } finally {
+      isProcessing.value = false;
+      if (flowState.value === 'loading') flowState.value = 'ready';
     }
   }
 
@@ -288,20 +339,8 @@ export function useApiGameEngine() {
         : null;
       applyProgressionResponse(result);
       engineState.automaticAdvanceError = null;
-      if (result.sessionPhase === 'action_summary') {
-        try {
-          const next = await requestProgressionAck('action_summary');
-          applyProgressionResponse(next);
-          flowState.value = 'ready';
-          flowMessage.value = '';
-        } catch (error) {
-          mapApiError(error);
-          engineState.automaticAdvanceError = flowMessage.value || '下一阶段载入失败，请重试';
-        }
-      } else {
-        flowState.value = 'ready';
-        flowMessage.value = '';
-      }
+      flowState.value = 'ready';
+      flowMessage.value = '';
     } catch (error) {
       mapApiError(error);
     } finally {
@@ -339,20 +378,8 @@ export function useApiGameEngine() {
           };
       applyProgressionResponse(result);
       engineState.automaticAdvanceError = null;
-      if (operation === 'attempt' && result.sessionPhase === 'action_summary') {
-        try {
-          const next = await requestProgressionAck('action_summary');
-          applyProgressionResponse(next);
-          flowState.value = 'ready';
-          flowMessage.value = '';
-        } catch (error) {
-          mapApiError(error);
-          engineState.automaticAdvanceError = flowMessage.value || '下一阶段载入失败，请重试';
-        }
-      } else {
-        flowState.value = 'ready';
-        flowMessage.value = '';
-      }
+      flowState.value = 'ready';
+      flowMessage.value = '';
       engineState.progressionOverlay = { cards: [resultCard] };
     } catch (error) {
       mapApiError(error);
@@ -411,8 +438,6 @@ export function useApiGameEngine() {
             `period-${periodResult.snapshotId}`,
             periodResult.periodSummary,
           );
-          const next = await requestProgressionAck('period_summary');
-          applyProgressionResponse(next);
           engineState.progressionOverlay = { cards: resultCards };
         }
       } else {
@@ -504,6 +529,7 @@ export function useApiGameEngine() {
     refreshSaves,
     startNewGameInSlot,
     continueSlot,
+    discardLegacyProgressionAndContinue,
     handleChoice,
     handleActiveAction,
     handleMarketStallAction,

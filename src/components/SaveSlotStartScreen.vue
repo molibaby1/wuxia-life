@@ -20,14 +20,20 @@
               <span v-if="slot.terminal">（已终结）</span>
             </p>
             <p v-else class="slot-meta">暂无存档</p>
+            <p v-if="slot.progressionCheckpointState === 'legacy_unknown'" class="checkpoint-warning" role="status">
+              此旧存档的待确认结果无法恢复。默认保留存档；若继续，旧结果展示将无法找回，已保存事实不会撤销或重算。
+            </p>
+            <p v-else-if="slot.progressionCheckpointState === 'invalid'" class="checkpoint-error" role="alert">
+              存档进度检查点缺损，已阻止继续。不能通过放弃旧结果解锁此存档。
+            </p>
             <div class="slot-actions">
               <button
                 v-if="slot.occupied"
                 class="btn btn-secondary"
-                :disabled="busy"
-                @click="$emit('continue-slot', slot.slotIndex)"
+                :disabled="busy || slot.progressionCheckpointState === 'invalid'"
+                @click="slot.progressionCheckpointState === 'legacy_unknown' ? (legacyConfirmationSlot = slot.slotIndex) : $emit('continue-slot', slot.slotIndex)"
               >
-                继续
+                {{ slot.progressionCheckpointState === 'legacy_unknown' ? '查看旧档选择' : '继续' }}
               </button>
               <button
                 class="btn btn-primary"
@@ -39,6 +45,19 @@
             </div>
           </div>
         </div>
+
+        <section v-if="legacyConfirmationSlot !== null" class="legacy-confirmation" role="dialog" aria-modal="true" aria-labelledby="legacy-confirmation-title">
+          <h2 id="legacy-confirmation-title">旧存档的待确认结果无法恢复</h2>
+          <p>继续后，这些旧结果展示将无法找回；已保存的人生事实不会撤销，也不会重新结算。</p>
+          <div class="slot-actions">
+            <button class="btn btn-primary" :disabled="busy" @click="legacyConfirmationSlot = null">
+              保留旧存档、暂不继续
+            </button>
+            <button class="btn btn-secondary" :disabled="busy" @click="$emit('discard-legacy-slot', legacyConfirmationSlot); legacyConfirmationSlot = null">
+              确认放弃无法恢复的旧结果，从已保存事实继续
+            </button>
+          </div>
+        </section>
 
         <div class="card player-form">
           <div class="form-group">
@@ -63,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { ApiFlowState } from '../composables/useApiGameEngine';
 import type { SaveSlotDto } from '../adapters/api/webApiClient';
 
@@ -78,11 +97,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'continue-slot': [slotIndex: number];
+  'discard-legacy-slot': [slotIndex: number];
   'new-game-slot': [slotIndex: number];
   retry: [];
   'update:playerName': [value: string];
   'update:gender': [value: 'male' | 'female'];
 }>();
+
+const legacyConfirmationSlot = ref<number | null>(null);
 
 function onNameInput(event: Event): void {
   const target = event.target as HTMLInputElement;
@@ -140,6 +162,27 @@ const statusClass = computed(() => {
   color: #555;
   font-size: 14px;
 }
+.checkpoint-warning,
+.checkpoint-error {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.checkpoint-warning { color: #75510a; }
+.checkpoint-error { color: #a33; }
+.legacy-confirmation {
+  position: fixed;
+  z-index: 10;
+  inset: 50% auto auto 50%;
+  width: min(92vw, 520px);
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: white;
+  border: 1px solid rgba(139, 69, 19, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.legacy-confirmation .slot-actions { flex-wrap: wrap; }
 .slot-actions {
   display: flex;
   gap: 8px;

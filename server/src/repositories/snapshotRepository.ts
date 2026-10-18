@@ -100,6 +100,25 @@ export async function getSnapshotById(
   return row;
 }
 
+/** Copy persisted facts verbatim for an explicit legacy-results discard. */
+export async function copySnapshotForSlotVersion(
+  db: Queryable,
+  snapshot: GameSnapshotRow,
+  slotVersion: number,
+): Promise<GameSnapshotRow> {
+  const result = await db.query<GameSnapshotRow>(
+    `INSERT INTO game_snapshots (
+       id, save_slot_id, session_id, slot_version, schema_version,
+       engine_version, event_catalog_version, content_hash, snapshot
+     ) SELECT $1, save_slot_id, session_id, $2, schema_version,
+       engine_version, event_catalog_version, content_hash, snapshot
+       FROM game_snapshots WHERE id = $3 AND save_slot_id = $4
+     RETURNING *`,
+    [newId(), slotVersion, snapshot.id, snapshot.save_slot_id],
+  );
+  return result.rows[0]!;
+}
+
 export function assertSnapshotCompatibility(
   snapshot: GameSnapshotRow,
   engineVersion: string,

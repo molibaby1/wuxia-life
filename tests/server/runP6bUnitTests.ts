@@ -1,11 +1,13 @@
 import { runEnvValidationTests } from './envValidation.test.js';
 import { runLoggingTests } from './logging.test.js';
 import { runWebApiClientTests } from '../adapters/webApiClient.test.js';
+import { runProgressionCheckpointRepositoryTests } from './progressionCheckpointRepository.test.js';
 
 export async function runP6bUnitTests(): Promise<void> {
   runEnvValidationTests();
   runLoggingTests();
   await runWebApiClientTests();
+  await runProgressionCheckpointRepositoryTests();
 }
 
 async function main(): Promise<void> {

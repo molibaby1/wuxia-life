@@ -100,16 +100,30 @@ assert(
   'single-path settlement must not route to a standalone result node',
 );
 assert(
-  apiRestoreHandler.includes("requestProgressionAck('period_summary')") &&
-    apiRestoreHandler.includes("requestProgressionAck('action_summary')"),
-  'restoring an internal summary state must consume it inside the load action',
+  !apiRestoreHandler.includes('requestProgressionAck('),
+  'restoring a pending summary must preserve it until the player confirms',
 );
 const apiActionStart = apiEngineSource.indexOf('async function handleActiveAction');
 const apiActionEnd = apiEngineSource.indexOf('async function handleProgressionAck');
 const apiActionHandler = apiEngineSource.slice(apiActionStart, apiActionEnd);
 assert(
-  apiActionHandler.includes("requestProgressionAck('action_summary')"),
-  'API active action must acknowledge its summary inside the original click',
+  !apiActionHandler.includes("requestProgressionAck('action_summary')"),
+  'API active action must leave its result pending for a separate player confirmation',
+);
+const progressionAckHandlerStart = apiEngineSource.indexOf('async function handleProgressionAck');
+const progressionAckHandlerEnd = apiEngineSource.indexOf('async function saveCurrentGame');
+const progressionAckHandler = apiEngineSource.slice(progressionAckHandlerStart, progressionAckHandlerEnd);
+assert(
+  progressionAckHandler.includes("requestProgressionAck('passive_continue')") &&
+    !progressionAckHandler.includes("requestProgressionAck('period_summary')") &&
+    progressionAckHandler.includes('engineState.progressionOverlay = { cards: resultCards }'),
+  'passive progression may produce a pending period result but must not acknowledge it in the same click',
+);
+assert(
+  appSource.includes("apiEngineState.sessionPhase === 'action_summary'") &&
+    apiRestoreHandler.includes('buildActiveActionOverlayCard') &&
+    source.includes('return props.apiNeedsProgressionAck === true;'),
+  'action summary remains visible with the existing player continue control',
 );
 assert(
   appSource.includes("from './composables/useApiGameEngine'") &&
@@ -146,8 +160,8 @@ assert(
 );
 assert(
   ackHandler.includes("requestProgressionAck('passive_continue')") &&
-    ackHandler.includes("requestProgressionAck('period_summary')"),
-  'API single-path progression must consume its internal result state inside the same click',
+    !ackHandler.includes("requestProgressionAck('period_summary')"),
+  'API passive progression must leave a generated period result pending for another click',
 );
 assert(
   source.includes('重试进入下一阶段'),

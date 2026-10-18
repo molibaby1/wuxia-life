@@ -2,11 +2,12 @@ import type { GameStateSnapshot } from '../../../src/contracts/gameStateSnapshot
 import type { BackendEnv } from '../config/env.js';
 import type { Queryable } from '../db/pool.js';
 import { withTransaction } from '../db/transaction.js';
-import { conflict, notFound, validationError } from '../errors/apiError.js';
+import { ApiError, conflict, notFound, validationError } from '../errors/apiError.js';
 import * as saveSlotRepo from '../repositories/saveSlotRepository.js';
 import * as snapshotRepo from '../repositories/snapshotRepository.js';
 import * as sessionRepo from '../repositories/sessionRepository.js';
 import * as replayRepo from '../repositories/replayRepository.js';
+import * as checkpointRepo from '../repositories/progressionCheckpointRepository.js';
 import { HeadlessProgressionError } from '../../../src/headless/session/sessionTypes.js';
 import type { ProgressionAckKind } from '../../../src/contracts/sessionProgression.js';
 import {
@@ -20,10 +21,9 @@ import {
 } from './headlessRuntime.js';
 import { mapSessionProgression } from './sessionProgressionMapper.js';
 import {
-  clearSessionVolatileState,
+  clearSnapshotVolatileState,
   getSnapshotVolatileState,
-  resolveVolatileState,
-  setSessionVolatileState,
+  setSnapshotVolatileState,
 } from './headlessVolatileCache.js';
 import { issueSessionToken } from './sessionStore.js';
 import { resolveDevice } from './deviceService.js';
@@ -49,6 +49,31 @@ export interface SlotListItem {
   terminal?: boolean;
   engineVersion?: string;
   eventCatalogVersion?: string;
+  progressionCheckpointState?: 'clear' | 'pending' | 'legacy_unknown' | 'invalid';
+}
+
+async function restoreProgressionState(
+  client: Queryable,
+  slotId: string,
+  snapshotId: string,
+  headless: Awaited<ReturnType<typeof createHeadlessSessionFromSnapshot>>,
+) {
+  const checkpoint = await checkpointRepo.getCheckpoint(client, slotId, snapshotId);
+  if (checkpoint.state === 'legacy_unknown') {
+    throw new ApiError(409, 'PROGRESSION_CHECKPOINT_LEGACY_UNKNOWN',
+      '此旧存档的待确认结果无法恢复；存档已保留，请先在存档列表明确选择是否放弃旧结果。');
+  }
+  // Only this exact snapshot may supply non-persistent presentation data. The DB
+  // checkpoint always owns settled summaries, even when the cache says otherwise.
+  const volatile = getSnapshotVolatileState(snapshotId) ?? headless.getProgressionVolatileState();
+  headless.applyProgressionVolatileState({
+    ...volatile,
+    pendingActionSummary: null,
+    pendingDisturbanceNarrative: null,
+    pendingPeriodSummary: null,
+    ...(checkpoint.state === 'pending' ? checkpoint.payload : {}),
+  });
+  return checkpoint;
 }
 
 function buildProgressionResponse(
@@ -86,20 +111,19 @@ function shouldPersistProgressionVolatile(
 }
 
 function syncProgressionVolatileCache(
-  sessionId: string,
   snapshotId: string,
   headless: Awaited<ReturnType<typeof createHeadlessSessionFromNewGame>>,
   resolved: Awaited<ReturnType<typeof resolveSessionAfterAutoProgress>>,
 ): void {
   if (headless.getTerminalState()) {
-    clearSessionVolatileState(sessionId, snapshotId);
+    clearSnapshotVolatileState(snapshotId);
     return;
   }
   if (shouldPersistProgressionVolatile(headless, resolved)) {
-    setSessionVolatileState(sessionId, snapshotId, headless.getProgressionVolatileState());
+    setSnapshotVolatileState(snapshotId, headless.getProgressionVolatileState());
     return;
   }
-  clearSessionVolatileState(sessionId, snapshotId);
+  clearSnapshotVolatileState(snapshotId);
 }
 
 export async function listSaves(
@@ -108,37 +132,43 @@ export async function listSaves(
   deviceToken: string,
 ): Promise<SlotListItem[]> {
   const { deviceId } = await resolveDevice(db, env, deviceToken);
-  const slots = await saveSlotRepo.ensureDeviceSlots(db, deviceId);
-  const items: SlotListItem[] = [];
-  for (const slot of slots) {
-    const base: SlotListItem = {
-      slotIndex: slot.slot_index,
-      slotId: slot.id,
-      label: slot.label,
-      occupied: Boolean(slot.current_snapshot_id),
-    };
-    if (!slot.current_snapshot_id) {
-      items.push(base);
-      continue;
+  return withTransaction(env.databaseUrl, async client => {
+    const slots = await saveSlotRepo.ensureDeviceSlots(client, deviceId);
+    const items: SlotListItem[] = [];
+    for (const listedSlot of slots) {
+      const slot = (await saveSlotRepo.getSlotByDeviceAndIndex(client, deviceId, listedSlot.slot_index))!;
+      const base: SlotListItem = {
+        slotIndex: slot.slot_index,
+        slotId: slot.id,
+        label: slot.label,
+        occupied: Boolean(slot.current_snapshot_id),
+      };
+      if (!slot.current_snapshot_id) {
+        items.push(base);
+        continue;
+      }
+      const snap = await snapshotRepo.getSnapshotById(client, slot.current_snapshot_id);
+      let progressionCheckpointState: SlotListItem['progressionCheckpointState'];
+      try {
+        progressionCheckpointState = (await checkpointRepo.getCheckpoint(client, slot.id, slot.current_snapshot_id)).state;
+      } catch (error) {
+        if (!(error instanceof ApiError) || error.code !== 'PROGRESSION_CHECKPOINT_INVALID') throw error;
+        progressionCheckpointState = 'invalid';
+      }
+      items.push({
+        ...base,
+        slotVersion: slot.version,
+        updatedAt: slot.updated_at.toISOString(),
+        snapshotId: slot.current_snapshot_id,
+        age: snap?.snapshot.state.player?.age,
+        terminal: snap ? !snap.snapshot.state.player?.alive : undefined,
+        engineVersion: snap?.engine_version,
+        eventCatalogVersion: snap?.event_catalog_version,
+        progressionCheckpointState: snap ? progressionCheckpointState : 'invalid',
+      });
     }
-    const snap = await snapshotRepo.getSnapshotById(db, slot.current_snapshot_id);
-    if (!snap) {
-      items.push(base);
-      continue;
-    }
-    items.push({
-      ...base,
-      occupied: true,
-      slotVersion: slot.version,
-      updatedAt: slot.updated_at.toISOString(),
-      snapshotId: snap.id,
-      age: snap.snapshot.state.player?.age,
-      terminal: !snap.snapshot.state.player?.alive,
-      engineVersion: snap.engine_version,
-      eventCatalogVersion: snap.event_catalog_version,
-    });
-  }
-  return items;
+    return items;
+  });
 }
 
 export async function createNewSession(
@@ -158,9 +188,10 @@ export async function createNewSession(
   if (params.slotIndex < 1 || params.slotIndex > 3) {
     throw validationError('slotIndex must be 1, 2, or 3');
   }
-  return withTransaction(env.databaseUrl, async client => {
-    const slots = await saveSlotRepo.ensureDeviceSlots(client, deviceId);
-    const slot = slots.find(s => s.slot_index === params.slotIndex);
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
+    await saveSlotRepo.ensureDeviceSlots(client, deviceId);
+    const slot = await saveSlotRepo.getSlotByDeviceAndIndex(client, deviceId, params.slotIndex);
     if (!slot) throw notFound('Save slot not found');
     if (slot.current_snapshot_id && !params.confirmOverwrite) {
       throw conflict('SLOT_OVERWRITE_REQUIRED', 'Slot is occupied; confirm overwrite required', {
@@ -176,6 +207,7 @@ export async function createNewSession(
       runtimeCatalog,
     });
     await progressUntilChoiceOrTerminal(headless);
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     const snapshot = headless.serialize();
     snapshot.metadata.sourcePlatform = params.sourcePlatform as GameStateSnapshot['metadata']['sourcePlatform'];
     snapshot.metadata.engineVersion = env.engineVersion;
@@ -208,6 +240,9 @@ export async function createNewSession(
       throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during new game');
     }
 
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
+      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
+
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -216,7 +251,6 @@ export async function createNewSession(
       payload: { slotIndex: params.slotIndex, sourcePlatform: params.sourcePlatform },
     });
 
-    const resolved = await resolveSessionAfterAutoProgress(headless);
     const terminal = headless.getTerminalState();
     if (terminal) {
       await sessionRepo.updateSessionStatus(client, session.id, 'terminal');
@@ -227,7 +261,7 @@ export async function createNewSession(
         snapshotHashAfter: snapRow.content_hash,
       });
     }
-    syncProgressionVolatileCache(session.id, snapRow.id, headless, resolved);
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
 
     return {
       sessionId: session.id,
@@ -237,6 +271,8 @@ export async function createNewSession(
       ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved),
     };
   });
+  updateCache?.();
+  return result;
 }
 
 export async function restoreSession(
@@ -246,7 +282,8 @@ export async function restoreSession(
   runtimeCatalog?: RuntimeEventCatalog,
 ) {
   const { deviceId } = await resolveDevice(db, env, params.deviceToken);
-  return withTransaction(env.databaseUrl, async client => {
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
     await saveSlotRepo.ensureDeviceSlots(client, deviceId);
     const slot = await saveSlotRepo.getSlotByDeviceAndIndex(client, deviceId, params.slotIndex);
     if (!slot?.current_snapshot_id) {
@@ -263,19 +300,7 @@ export async function restoreSession(
       logger,
       runtimeCatalog,
     });
-    const restoredVolatile = getSnapshotVolatileState(snap.id);
-    if (restoredVolatile) {
-      headless.applyProgressionVolatileState(restoredVolatile);
-    }
-    const restoredPhase = headless.getSessionPhase();
-    if (
-      restoredPhase !== 'action_summary' &&
-      restoredPhase !== 'disturbance_narrative' &&
-      restoredPhase !== 'period_summary' &&
-      restoredPhase !== 'passive_progression'
-    ) {
-      await progressUntilChoiceOrTerminal(headless);
-    }
+    await restoreProgressionState(client, slot.id, snap.id, headless);
 
     const { sessionToken, tokenHash } = issueSessionToken(env);
     const session = await sessionRepo.insertSession(client, {
@@ -296,15 +321,8 @@ export async function restoreSession(
       payload: { slotIndex: params.slotIndex },
     });
 
-    const volatile = headless.getProgressionVolatileState();
     const resolved = await resolveSessionAfterAutoProgress(headless);
-    if (
-      volatile.pendingActionSummary ||
-      volatile.pendingDisturbanceNarrative ||
-      shouldPersistProgressionVolatile(headless, resolved)
-    ) {
-      setSessionVolatileState(session.id, snap.id, headless.getProgressionVolatileState());
-    }
+    updateCache = () => syncProgressionVolatileCache(snap.id, headless, resolved);
     return {
       sessionId: session.id,
       sessionToken,
@@ -313,6 +331,8 @@ export async function restoreSession(
       ...buildProgressionResponse(headless, slot.version, snap.id, resolved),
     };
   });
+  updateCache?.();
+  return result;
 }
 
 export async function executeChoice(
@@ -329,45 +349,18 @@ export async function executeChoice(
   },
   runtimeCatalog?: RuntimeEventCatalog,
 ) {
-  const { deviceId } = await resolveDevice(db, env, params.deviceToken);
-  return withTransaction(env.databaseUrl, async client => {
-    const { session } = await resolveSession(
-      client,
-      env,
-      params.sessionId,
-      params.sessionToken,
-      deviceId,
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+      client, env, params, runtimeCatalog,
     );
-    if (!session.save_slot_id) throw notFound('Session has no save slot');
-    const slot = (await saveSlotRepo.ensureDeviceSlots(client, deviceId)).find(
-      s => s.id === session.save_slot_id,
-    );
-    if (!slot) throw notFound('Save slot not found');
-    if (slot.version !== params.expectedSlotVersion) {
-      throw conflict('STALE_SLOT_VERSION', 'Stale slot version', {
-        currentSlotVersion: slot.version,
-        currentSnapshotId: slot.current_snapshot_id,
-      });
+    if (headless.getSessionPhase() !== 'story_event') {
+      throw validationError('Choices require story_event phase', { code: 'INVALID_SESSION_PHASE' });
     }
-    if (slot.current_snapshot_id !== params.expectedSnapshotId) {
-      throw conflict('STALE_SNAPSHOT', 'Stale snapshot id', {
-        currentSlotVersion: slot.version,
-        currentSnapshotId: slot.current_snapshot_id,
-      });
+    if (headless.describePendingEvent()?.eventId !== params.eventId) {
+      throw validationError('Choice does not belong to the current event', { code: 'STALE_EVENT' });
     }
-    const currentSnap = await snapshotRepo.getSnapshotById(client, params.expectedSnapshotId);
-    if (!currentSnap) throw notFound('Snapshot not found');
-    snapshotRepo.assertSnapshotCompatibility(currentSnap, env.engineVersion, env.eventCatalogVersion);
-
-    const logger = createProductionLogger(env);
-    const headless = await createHeadlessSessionFromSnapshot({
-      snapshot: currentSnap.snapshot,
-      catalogVersion: env.eventCatalogVersion,
-      logger,
-      runtimeCatalog,
-    });
     const hashBefore = currentSnap.content_hash;
-    await resolveSessionAfterAutoProgress(headless);
     const request = buildChoiceRequest({
       snapshot: currentSnap.snapshot,
       snapshotId: currentSnap.id,
@@ -383,6 +376,7 @@ export async function executeChoice(
     if (headless.getSessionPhase() !== 'period_summary') {
       await progressUntilChoiceOrTerminal(headless);
     }
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     const newSnapshot = headless.serialize();
     newSnapshot.metadata.engineVersion = env.engineVersion;
     newSnapshot.metadata.eventCatalogVersion = env.eventCatalogVersion;
@@ -408,6 +402,9 @@ export async function executeChoice(
       });
     }
 
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
+      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
+
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -429,8 +426,7 @@ export async function executeChoice(
       });
     }
 
-    const resolved = await resolveSessionAfterAutoProgress(headless);
-    syncProgressionVolatileCache(session.id, snapRow.id, headless, resolved);
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
     return {
       slot: updatedSlot,
       snapshot: snapRow,
@@ -438,6 +434,8 @@ export async function executeChoice(
       ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved),
     };
   });
+  updateCache?.();
+  return result;
 }
 
 async function loadHeadlessForMutation(
@@ -462,9 +460,7 @@ async function loadHeadlessForMutation(
     deviceId,
   );
   if (!session.save_slot_id) throw notFound('Session has no save slot');
-  const slot = (await saveSlotRepo.ensureDeviceSlots(client, deviceId)).find(
-    s => s.id === session.save_slot_id,
-  );
+  const slot = await saveSlotRepo.getSlotByDeviceAndId(client, deviceId, session.save_slot_id);
   if (!slot) throw notFound('Save slot not found');
   if (slot.version !== params.expectedSlotVersion) {
     throw conflict('STALE_SLOT_VERSION', 'Stale slot version', {
@@ -488,14 +484,11 @@ async function loadHeadlessForMutation(
     logger,
     runtimeCatalog,
   });
-  const cachedVolatile = resolveVolatileState(session.id, params.expectedSnapshotId);
-  if (cachedVolatile) {
-    headless.applyProgressionVolatileState(cachedVolatile);
-  }
+  const checkpoint = await restoreProgressionState(client, slot.id, currentSnap.id, headless);
   if (resolveAutoProgress) {
     await resolveSessionAfterAutoProgress(headless);
   }
-  return { session, slot, currentSnap, headless, deviceId };
+  return { session, slot, currentSnap, headless, deviceId, checkpoint };
 }
 
 export async function executeMarketStallAction(
@@ -514,7 +507,8 @@ export async function executeMarketStallAction(
   if (params.operation !== 'attempt' && params.operation !== 'abandon') {
     throw validationError('operation must be attempt or abandon');
   }
-  return withTransaction(env.databaseUrl, async client => {
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
     // This action must inspect the selected state as-is. Auto progression here could
     // select a story event and make abandon an extra scheduler draw.
     const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
@@ -553,6 +547,9 @@ export async function executeMarketStallAction(
         currentSnapshotId: slot.current_snapshot_id,
       });
     }
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
+      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
+
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -561,17 +558,16 @@ export async function executeMarketStallAction(
       snapshotHashAfter: snapRow.content_hash,
       payload: { operation: params.operation },
     });
-    if (shouldPersistProgressionVolatile(headless)) {
-      setSessionVolatileState(session.id, snapRow.id, headless.getProgressionVolatileState());
-    } else {
-      clearSessionVolatileState(session.id, snapRow.id);
-    }
+    const resolved = { nextEvent: null, phase: headless.getSessionPhase() };
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
     return {
       slot: updatedSlot,
       snapshot: snapRow,
       ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id),
     };
   });
+  updateCache?.();
+  return result;
 }
 
 export async function executeActiveAction(
@@ -587,7 +583,8 @@ export async function executeActiveAction(
   },
   runtimeCatalog?: RuntimeEventCatalog,
 ) {
-  return withTransaction(env.databaseUrl, async client => {
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
     const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
       client,
       env,
@@ -600,6 +597,7 @@ export async function executeActiveAction(
     } catch (error) {
       mapProgressionError(error);
     }
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     const newSnapshot = headless.serialize();
     newSnapshot.metadata.engineVersion = env.engineVersion;
     newSnapshot.metadata.eventCatalogVersion = env.eventCatalogVersion;
@@ -618,6 +616,9 @@ export async function executeActiveAction(
         currentSnapshotId: slot.current_snapshot_id,
       });
     }
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
+      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
+
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -626,10 +627,11 @@ export async function executeActiveAction(
       snapshotHashAfter: snapRow.content_hash,
       payload: { actionId: params.actionId },
     });
-    setSessionVolatileState(session.id, snapRow.id, headless.getProgressionVolatileState());
-    const resolved = await resolveSessionAfterAutoProgress(headless);
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
     return buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved);
   });
+  updateCache?.();
+  return result;
 }
 
 export async function acknowledgeProgression(
@@ -645,7 +647,8 @@ export async function acknowledgeProgression(
   },
   runtimeCatalog?: RuntimeEventCatalog,
 ) {
-  return withTransaction(env.databaseUrl, async client => {
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
     const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
       client,
       env,
@@ -658,28 +661,27 @@ export async function acknowledgeProgression(
     } catch (error) {
       mapProgressionError(error);
     }
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     const serialized = headless.serialize();
-    const newIntegrity = snapshotRepo.buildSnapshotIntegrity(serialized);
-    let snapRow = currentSnap;
-    let updatedSlot = slot;
-    if (newIntegrity.contentHash !== hashBefore) {
-      snapRow = await snapshotRepo.insertSnapshot(client, {
-        saveSlotId: slot.id,
-        sessionId: session.id,
-        slotVersion: slot.version + 1,
-        snapshot: serialized,
-        engineVersion: env.engineVersion,
-        eventCatalogVersion: env.eventCatalogVersion,
+    // Confirmation consumes a decision point even when canonical facts/hash stay
+    // identical. Reuse the public slot/snapshot CAS token for exactly-once ACK.
+    const snapRow = await snapshotRepo.insertSnapshot(client, {
+      saveSlotId: slot.id,
+      sessionId: session.id,
+      slotVersion: slot.version + 1,
+      snapshot: serialized,
+      engineVersion: env.engineVersion,
+      eventCatalogVersion: env.eventCatalogVersion,
+    });
+    const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
+    if (!updatedSlot) {
+      throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during progression ack', {
+        currentSlotVersion: slot.version,
+        currentSnapshotId: slot.current_snapshot_id,
       });
-      const swapped = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
-      if (!swapped) {
-        throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during progression ack', {
-          currentSlotVersion: slot.version,
-          currentSnapshotId: slot.current_snapshot_id,
-        });
-      }
-      updatedSlot = swapped;
     }
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
+      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -692,14 +694,11 @@ export async function acknowledgeProgression(
     if (terminal) {
       await sessionRepo.updateSessionStatus(client, session.id, 'terminal');
     }
-    const resolved = await resolveSessionAfterAutoProgress(headless);
-    if (terminal) {
-      clearSessionVolatileState(session.id, snapRow.id);
-    } else {
-      syncProgressionVolatileCache(session.id, snapRow.id, headless, resolved);
-    }
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
     return buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved);
   });
+  updateCache?.();
+  return result;
 }
 
 export async function manualSave(
@@ -714,42 +713,11 @@ export async function manualSave(
   },
   runtimeCatalog?: RuntimeEventCatalog,
 ) {
-  const { deviceId } = await resolveDevice(db, env, params.deviceToken);
-  return withTransaction(env.databaseUrl, async client => {
-    const { session } = await resolveSession(
-      client,
-      env,
-      params.sessionId,
-      params.sessionToken,
-      deviceId,
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
+    const { session, slot, currentSnap, headless, checkpoint } = await loadHeadlessForMutation(
+      client, env, params, runtimeCatalog, false,
     );
-    if (!session.save_slot_id) throw notFound('Session has no save slot');
-    const slot = (await saveSlotRepo.ensureDeviceSlots(client, deviceId)).find(
-      s => s.id === session.save_slot_id,
-    );
-    if (!slot) throw notFound('Save slot not found');
-    if (slot.version !== params.expectedSlotVersion) {
-      throw conflict('STALE_SLOT_VERSION', 'Stale slot version', {
-        currentSlotVersion: slot.version,
-        currentSnapshotId: slot.current_snapshot_id,
-      });
-    }
-    if (slot.current_snapshot_id !== params.expectedSnapshotId) {
-      throw conflict('STALE_SNAPSHOT', 'Stale snapshot id', {
-        currentSlotVersion: slot.version,
-        currentSnapshotId: slot.current_snapshot_id,
-      });
-    }
-    const currentSnap = await snapshotRepo.getSnapshotById(client, params.expectedSnapshotId);
-    if (!currentSnap) throw notFound('Snapshot not found');
-
-    const logger = createProductionLogger(env);
-    const headless = await createHeadlessSessionFromSnapshot({
-      snapshot: currentSnap.snapshot,
-      catalogVersion: env.eventCatalogVersion,
-      logger,
-      runtimeCatalog,
-    });
     const serialized = headless.serialize();
     const newIntegrity = snapshotRepo.buildSnapshotIntegrity(serialized);
     let snapRow = currentSnap;
@@ -778,6 +746,7 @@ export async function manualSave(
       updatedSlot = swapped;
     }
 
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id, checkpoint);
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -786,6 +755,60 @@ export async function manualSave(
       snapshotHashAfter: snapRow.content_hash,
     });
 
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless,
+      { nextEvent: null, phase: headless.getSessionPhase() });
     return { slot: updatedSlot, snapshot: snapRow };
+  });
+  updateCache?.();
+  return result;
+}
+
+export async function discardLegacyProgression(
+  db: Queryable,
+  env: BackendEnv,
+  params: {
+    deviceToken: string;
+    slotIndex: number;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+  },
+) {
+  const { deviceId } = await resolveDevice(db, env, params.deviceToken);
+  return withTransaction(env.databaseUrl, async client => {
+    const slot = await saveSlotRepo.getSlotByDeviceAndIndex(client, deviceId, params.slotIndex);
+    if (!slot?.current_snapshot_id) throw notFound('Save slot is empty');
+    if (slot.version !== params.expectedSlotVersion) {
+      throw conflict('STALE_SLOT_VERSION', 'Stale slot version');
+    }
+    if (slot.current_snapshot_id !== params.expectedSnapshotId) {
+      throw conflict('STALE_SNAPSHOT', 'Stale snapshot id');
+    }
+    const checkpoint = await checkpointRepo.getCheckpoint(client, slot.id, slot.current_snapshot_id);
+    if (checkpoint.state !== 'legacy_unknown') {
+      throw new ApiError(422, 'PROGRESSION_CHECKPOINT_INVALID', '只有已标记的旧存档可以放弃无法恢复的结果。');
+    }
+    const snapshot = await snapshotRepo.getSnapshotById(client, slot.current_snapshot_id);
+    if (!snapshot) throw notFound('Snapshot not found');
+    snapshotRepo.assertSnapshotCompatibility(snapshot, env.engineVersion, env.eventCatalogVersion);
+    snapshotRepo.buildSnapshotIntegrity(snapshot.snapshot);
+    // No Headless execution: preserve every canonical fact and pending event,
+    // retain the original row/hash, and never grant an extra scheduler draw.
+    const copied = await snapshotRepo.copySnapshotForSlotVersion(client, snapshot, slot.version + 1);
+    const swapped = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, copied.id);
+    if (!swapped) throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during legacy discard');
+    await checkpointRepo.saveCheckpoint(client, slot.id, copied.id, { protocolVersion: 1, state: 'clear' });
+    await replayRepo.appendReplayAction(client, {
+      sessionId: snapshot.session_id,
+      saveSlotId: slot.id,
+      actionType: 'legacy_progression_discarded',
+      snapshotHashBefore: snapshot.content_hash,
+      snapshotHashAfter: copied.content_hash,
+      payload: {
+        previousSnapshotId: snapshot.id,
+        newSnapshotId: copied.id,
+        reason: 'player_discarded_unrecoverable_legacy_results',
+      },
+    });
+    return { slotVersion: swapped.version, snapshotId: copied.id };
   });
 }

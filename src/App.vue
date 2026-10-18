@@ -49,6 +49,7 @@ const {
   bootstrap,
   startNewGameInSlot,
   continueSlot,
+  discardLegacyProgressionAndContinue,
   handleChoice: apiHandleChoice,
   handleActiveAction: apiHandleActiveAction,
   handleMarketStallAction: apiHandleMarketStallAction,
@@ -92,6 +93,11 @@ const onApiContinueSlot = async (slotIndex: number) => {
   if (ok) gameStarted.value = true;
 };
 
+const onDiscardLegacySlot = async (slotIndex: number) => {
+  const ok = await discardLegacyProgressionAndContinue(slotIndex);
+  if (ok) gameStarted.value = true;
+};
+
 const handleRestart = () => {
   apiEngine.activeSession.value = null;
   webPlatformStorage.clearSessionAuth();
@@ -103,8 +109,8 @@ const currentNode = computed(() => {
   if (apiEngineState.sessionPhase === 'period_summary' && apiEngineState.periodSummary) {
     return {
       id: 'automatic_advance_status',
-      text: apiEngineState.automaticAdvanceError || '阶段已经结算，正在进入下一阶段。',
-      title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
+      text: apiEngineState.automaticAdvanceError || '阶段结果已经结算，请确认后继续。',
+      title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '阶段结果',
       choices: [],
     };
   }
@@ -124,8 +130,8 @@ const currentNode = computed(() => {
   if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
     return {
       id: 'automatic_advance_status',
-      text: apiEngineState.automaticAdvanceError || '行动已经结算，正在进入下一阶段。',
-      title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
+      text: apiEngineState.automaticAdvanceError || '行动结果已经结算，请确认后继续。',
+      title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '行动结果',
       choices: [],
     };
   }
@@ -161,6 +167,7 @@ const apiStoryEventAutomatic = computed(
 
 const apiNeedsProgressionAck = computed(
   () =>
+    apiEngineState.sessionPhase === 'action_summary' ||
     apiEngineState.sessionPhase === 'disturbance_narrative' ||
     apiEngineState.sessionPhase === 'period_summary' ||
     apiEngineState.sessionPhase === 'passive_progression' ||
@@ -220,6 +227,7 @@ const onApiManualSave = async () => {
       :flow-message="flowMessage"
       :busy="apiIsProcessing"
       @continue-slot="onApiContinueSlot"
+      @discard-legacy-slot="onDiscardLegacySlot"
       @new-game-slot="onApiNewGameSlot"
       @retry="bootstrap"
     />

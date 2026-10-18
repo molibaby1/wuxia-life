@@ -52,6 +52,12 @@ export interface SaveSlotDto {
   snapshotId?: string;
   age?: number;
   terminal?: boolean;
+  progressionCheckpointState?: 'clear' | 'pending' | 'legacy_unknown' | 'invalid';
+}
+
+export interface LegacyProgressionDiscardResponse {
+  slotVersion: number;
+  snapshotId: string;
 }
 
 export interface SessionStartResponse extends SessionProgressionPayload {
@@ -158,6 +164,25 @@ export class WebApiClient {
     });
     webPlatformStorage.setSessionAuth(body.sessionId, body.sessionToken);
     return body;
+  }
+
+  async discardLegacyProgression(params: {
+    deviceToken: string;
+    slotIndex: number;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+  }): Promise<LegacyProgressionDiscardResponse> {
+    return this.request<LegacyProgressionDiscardResponse>(
+      `/v1/saves/${params.slotIndex}/legacy-progression-discard`,
+      {
+        method: 'POST',
+        deviceToken: params.deviceToken,
+        body: JSON.stringify({
+          expectedSlotVersion: params.expectedSlotVersion,
+          expectedSnapshotId: params.expectedSnapshotId,
+        }),
+      },
+    );
   }
 
   async executeChoice(params: {

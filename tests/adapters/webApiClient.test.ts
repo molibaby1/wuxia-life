@@ -47,6 +47,57 @@ export async function runWebApiClientTests(): Promise<void> {
       'market stall action request body',
     );
     assert(response.sessionPhase === 'active_planning', 'market stall action response');
+
+    requestUrl = '';
+    requestInit = undefined;
+    globalThis.fetch = async (input, init) => {
+      requestUrl = String(input);
+      requestInit = init;
+      return new Response(JSON.stringify({ slotVersion: 9, snapshotId: 'snapshot-next' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    };
+    const discarded = await client.discardLegacyProgression({
+      deviceToken: 'device-token',
+      slotIndex: 2,
+      expectedSlotVersion: 8,
+      expectedSnapshotId: 'snapshot-old',
+    });
+    assert(
+      requestUrl === 'https://api.example.test/v1/saves/2/legacy-progression-discard',
+      'legacy progression discard route',
+    );
+    assert(requestInit?.method === 'POST', 'legacy progression discard method');
+    assert(
+      requestInit?.body === JSON.stringify({
+        expectedSlotVersion: 8,
+        expectedSnapshotId: 'snapshot-old',
+      }),
+      'legacy progression discard body matches the closed request schema',
+    );
+    assert(discarded.slotVersion === 9 && discarded.snapshotId === 'snapshot-next', 'discard CAS response');
+
+    for (const [status, code] of [
+      [409, 'PROGRESSION_CHECKPOINT_LEGACY_UNKNOWN'],
+      [422, 'PROGRESSION_CHECKPOINT_INVALID'],
+    ] as const) {
+      globalThis.fetch = async () =>
+        new Response(JSON.stringify({ error: { code, message: 'checkpoint status' } }), {
+          status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      let received: unknown;
+      try {
+        await client.restoreSession('device-token', 2);
+      } catch (cause) {
+        received = cause;
+      }
+      if (!(received instanceof WebApiClientError)) {
+        throw new Error(`${code} is consumed as WebApiClientError`);
+      }
+      assert(received.code === code && received.status === status, `${code} and HTTP status are preserved`);
+    }
   } finally {
     globalThis.fetch = originalFetch;
   }

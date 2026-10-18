@@ -174,6 +174,31 @@ export function createRouter(
     },
     {
       method: 'POST',
+      pattern: /^\/v1\/saves\/([1-3])\/legacy-progression-discard$/,
+      handler: async (req, res, ctx, params) => {
+        const value = await readJsonBody<unknown>(req);
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+          throw validationError('Request body must be an object');
+        }
+        const body = value as Record<string, unknown>;
+        if (Object.keys(body).sort().join(',') !== 'expectedSlotVersion,expectedSnapshotId'
+          || !Number.isSafeInteger(body.expectedSlotVersion) || (body.expectedSlotVersion as number) < 0
+          || typeof body.expectedSnapshotId !== 'string'
+          || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.expectedSnapshotId)) {
+          throw validationError('Expected only a valid expectedSlotVersion and expectedSnapshotId');
+        }
+        const deviceToken = getBearerToken(req, 'x-device-token');
+        const result = await gameService.discardLegacyProgression(getPool(env.databaseUrl), ctx.env, {
+          deviceToken: deviceToken!,
+          slotIndex: Number(params.slotIndex),
+          expectedSlotVersion: body.expectedSlotVersion as number,
+          expectedSnapshotId: body.expectedSnapshotId,
+        });
+        sendJson(res, 200, result);
+      },
+    },
+    {
+      method: 'POST',
       pattern: /^\/v1\/sessions$/,
       handler: async (req, res, ctx) => {
         const deviceToken = getBearerToken(req, 'x-device-token');
@@ -394,7 +419,10 @@ export function createRouter(
         const match = pathname.match(route.pattern);
         if (!match) continue;
         const params: Record<string, string> = {};
-        if (match[1]) params.sessionId = match[1];
+        if (match[1]) {
+          if (pathname.startsWith('/v1/saves/')) params.slotIndex = match[1];
+          else params.sessionId = match[1];
+        }
         await route.handler(req, res, ctx, params);
         logger.request({
           requestId,

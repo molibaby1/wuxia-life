@@ -7,6 +7,7 @@ export type ReplayActionType =
   | 'choice_executed'
   | 'active_action'
   | 'progression_ack'
+  | 'legacy_progression_discarded'
   | 'automatic_progression'
   | 'market_stall_action'
   | 'manual_save'

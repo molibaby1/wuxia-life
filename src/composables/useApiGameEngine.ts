@@ -311,6 +311,7 @@ export function useApiGameEngine() {
 
   async function handleMarketStallAction(operation: 'attempt' | 'abandon'): Promise<void> {
     if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
+    if (engineState.sessionPhase !== 'active_planning') return;
     const objective = activeSession.value.marketStallObjective;
     if (!objective || (operation === 'attempt' ? !objective.canAttempt : !objective.canAbandon)) return;
     isProcessing.value = true;

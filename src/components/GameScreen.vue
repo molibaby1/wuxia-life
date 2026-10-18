@@ -155,7 +155,10 @@
             {{ diagnostic }}
           </li>
         </ul>
-        <div v-if="marketStallObjective.canAttempt || marketStallObjective.canAbandon" class="accepted-objective-actions">
+        <div
+          v-if="apiSessionPhase === 'active_planning' && (marketStallObjective.canAttempt || marketStallObjective.canAbandon)"
+          class="accepted-objective-actions"
+        >
           <button
             v-if="marketStallObjective.canAttempt"
             class="choice-btn btn"

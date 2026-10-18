@@ -21,6 +21,29 @@ assert(
   source.includes('v-if="disturbanceNarrativeDisplay"'),
   'disturbance narrative must remain conditionally visible',
 );
+assert(
+  source.includes('v-if="marketStallObjective"') &&
+    source.includes(
+      'v-if="apiSessionPhase === \'active_planning\' && (marketStallObjective.canAttempt || marketStallObjective.canAbandon)"',
+    ) &&
+    source.includes('v-if="marketStallObjective.canAttempt"') &&
+    source.includes('v-if="marketStallObjective.canAbandon"'),
+  'accepted objective stays visible across phases while eligible actions require active planning',
+);
+const marketActionHandlerStart = apiEngineSource.indexOf('async function handleMarketStallAction');
+const marketActionHandlerEnd = apiEngineSource.indexOf(
+  'async function requestProgressionAck',
+  marketActionHandlerStart,
+);
+const marketActionHandler = apiEngineSource.slice(marketActionHandlerStart, marketActionHandlerEnd);
+const marketActionPhaseGuard = marketActionHandler.indexOf(
+  "if (engineState.sessionPhase !== 'active_planning') return;",
+);
+const marketActionRequest = marketActionHandler.indexOf('apiClient.executeMarketStallAction');
+assert(
+  marketActionPhaseGuard >= 0 && marketActionPhaseGuard < marketActionRequest,
+  'market stall handler must reject non-planning phases before sending its API mutation',
+);
 assert(!source.includes('false && disturbanceNarrativeDisplay'), 'disturbance narrative must not be hard-disabled');
 assert(!source.includes('setTimeout(() => {\n    progressionTimer'), 'progression must not use the old auto-continue timer');
 assert(!source.includes('progressionFeedbackToast'), 'progression result must not be duplicated in a toast');

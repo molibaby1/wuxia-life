@@ -23,6 +23,7 @@ import { runJianghuFactionConflictTests } from './jianghuFactionConflict.test';
 import { runJianghuPublicOpinionChallengeTests } from './jianghuPublicOpinionChallenge.test';
 import { runSharedItemVerticalTests } from './sharedItemVertical.test';
 import { runMarketStallSessionTests } from './marketStallSession.test';
+import { runScholarOfficialPursuitHeadlessPersistenceTests } from './scholarOfficialPursuitPersistence.test';
 
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -46,6 +47,7 @@ async function main(): Promise<void> {
   await runJianghuPublicOpinionChallengeTests();
   await runSharedItemVerticalTests();
   await runMarketStallSessionTests();
+  await runScholarOfficialPursuitHeadlessPersistenceTests();
   runParityHarnessTests();
   await runParitySamplesTests();
   console.log('headless test suite: ok');

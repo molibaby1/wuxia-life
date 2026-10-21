@@ -13,6 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const tsxBin = join(process.cwd(), 'node_modules', '.bin', 'tsx');
 
 const suites = [
+  'scholarOfficialPursuitPersistence.test.ts',
   'snapshotContract.test.ts',
   'itemPersistence.test.ts',
   'choiceExecutionContract.test.ts',

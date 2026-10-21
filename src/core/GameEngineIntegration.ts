@@ -36,6 +36,7 @@ import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingConte
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
 import { appendFormalEventHistory } from './EventHistory';
+import { prepareScholarOfficialPursuitState } from './scholarOfficialPursuit';
 import {
   deriveMarketStallObjective,
   isMarketStallEventEligible,
@@ -342,7 +343,7 @@ export class GameEngineIntegration {
   }
 
   public loadGameState(savedState: GameState): void {
-    const detachedState = cloneCanonicalGameState(savedState);
+    const detachedState = cloneCanonicalGameState(prepareScholarOfficialPursuitState(savedState));
     this.applyGameState(detachedState);
     const currentAge = this.gameState.player?.age || 0;
     const currentYearEvents = (this.gameState.eventHistory || []).filter(

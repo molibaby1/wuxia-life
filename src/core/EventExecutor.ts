@@ -45,6 +45,10 @@ import { getBoundPersonDisplayName } from './SexVariantPersonArchetype';
 import { isPersonArchetypeId } from '../data/personArchetypeCatalog';
 import type { PersonArchetypeId } from '../types/personArchetype';
 import {
+  prepareScholarOfficialPursuitState,
+  SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY,
+} from './scholarOfficialPursuit';
+import {
   isBirthBackgroundId,
   resolveBirthBackground,
 } from '../p16/canonicalBirthBackground';
@@ -313,12 +317,17 @@ export class FlagSetHandler implements EffectHandler {
       console.warn('[FlagSetHandler] 未找到 flag 名称，跳过');
       return state;
     }
+    if (flagName === SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY) {
+      throw new Error('The scholar official pursuit ledger is protected; use its domain append operation.');
+    }
+
+    const checkedState = prepareScholarOfficialPursuitState(state);
     
     
     // 同步维护顶层与 player 下的 flags，避免读取路径不一致导致状态丢失
     let newFlags = {
-      ...(state.flags || {}),
-      ...(state.player?.flags || {}),
+      ...(checkedState.flags || {}),
+      ...(checkedState.player?.flags || {}),
       [flagName]: flagValue,
     };
 
@@ -357,10 +366,10 @@ export class FlagSetHandler implements EffectHandler {
     }
 
     let result: GameState = {
-      ...state,
+      ...checkedState,
       flags: newFlags,
       player: {
-        ...state.player,
+        ...checkedState.player,
         flags: newFlags,
       },
     };
@@ -526,18 +535,23 @@ export class FlagUnsetHandler implements EffectHandler {
     if (!flagName) {
       return state;
     }
+    if (flagName === SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY) {
+      throw new Error('The scholar official pursuit ledger is protected; use its domain append operation.');
+    }
+
+    const checkedState = prepareScholarOfficialPursuitState(state);
 
     const newFlags = {
-      ...(state.flags || {}),
-      ...(state.player?.flags || {}),
+      ...(checkedState.flags || {}),
+      ...(checkedState.player?.flags || {}),
     };
     delete newFlags[flagName];
 
     const result = {
-      ...state,
+      ...checkedState,
       flags: newFlags,
       player: {
-        ...state.player,
+        ...checkedState.player,
         flags: newFlags,
       },
     };

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-10-18T00:37:12.377Z",
+  "generatedAt": "2026-10-21T12:34:54.295Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -12,21 +12,21 @@
     ]
   },
   "summary": {
-    "runtimeLoadedFiles": 28,
+    "runtimeLoadedFiles": 29,
     "nonLoadedFiles": 43,
-    "totalEventsInRuntime": 394,
+    "totalEventsInRuntime": 395,
     "byStatus": {
       "active": 35,
       "candidate": 70,
       "broken": 0,
-      "deferred": 289,
+      "deferred": 290,
       "dead": 0
     },
     "byFileStatus": {
       "active": 0,
       "candidate": 12,
       "broken": 0,
-      "deferred": 59,
+      "deferred": 60,
       "dead": 0
     }
   },
@@ -509,6 +509,14 @@
       "status": "deferred",
       "eventCount": 79,
       "goldenLineOverlapCount": 19,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
+    },
+    {
+      "fileName": "scholar-official-pursuit.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "eventCount": 1,
+      "goldenLineOverlapCount": 1,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -8407,6 +8415,17 @@
       "status": "deferred",
       "ageMin": 20,
       "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p138_scholar_official_invitation",
+      "sourceFile": "scholar-official-pursuit.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "File classified deferred for golden line"

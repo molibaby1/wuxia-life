@@ -63,6 +63,7 @@ function progressionPayloadBody(
     terminal: progression.terminal,
     lifeMemory: progression.lifeMemory,
     marketStallObjective: progression.marketStallObjective,
+    scholarOfficialPursuit: progression.scholarOfficialPursuit,
     player: progression.player,
     slotVersion: progression.slotVersion,
     snapshotId: progression.snapshotId,
@@ -93,6 +94,38 @@ function parseMarketStallActionBody(value: unknown): {
   }
   if (body.operation !== 'attempt' && body.operation !== 'abandon') {
     throw validationError('operation must be attempt or abandon');
+  }
+  return {
+    expectedSlotVersion: body.expectedSlotVersion as number,
+    expectedSnapshotId: body.expectedSnapshotId,
+    operation: body.operation,
+  };
+}
+
+function parseScholarOfficialPursuitActionBody(value: unknown): {
+  expectedSlotVersion: number;
+  expectedSnapshotId: string;
+  operation: 'take_exam' | 'abandon';
+} {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw validationError('Request body must be an object');
+  }
+  const body = value as Record<string, unknown>;
+  const keys = Object.keys(body).sort();
+  if (keys.join(',') !== 'expectedSlotVersion,expectedSnapshotId,operation') {
+    throw validationError('Request body must contain only expectedSlotVersion, expectedSnapshotId, and operation');
+  }
+  if (!Number.isSafeInteger(body.expectedSlotVersion) || (body.expectedSlotVersion as number) < 0) {
+    throw validationError('expectedSlotVersion must be a non-negative integer');
+  }
+  if (
+    typeof body.expectedSnapshotId !== 'string' ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.expectedSnapshotId)
+  ) {
+    throw validationError('expectedSnapshotId must be a UUID');
+  }
+  if (body.operation !== 'take_exam' && body.operation !== 'abandon') {
+    throw validationError('operation must be take_exam or abandon');
   }
   return {
     expectedSlotVersion: body.expectedSlotVersion as number,
@@ -317,6 +350,32 @@ export function createRouter(
           slotVersion: result.slot.version,
           snapshotId: result.snapshot.id,
           contentHash: result.snapshot.content_hash,
+          ...progressionPayloadBody(result),
+        });
+      },
+    },
+    {
+      method: 'POST',
+      pattern: /^\/v1\/sessions\/([^/]+)\/scholar-official-pursuit-actions$/,
+      handler: async (req, res, ctx, params) => {
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.sessionId ?? '')) {
+          throw validationError('sessionId must be a UUID');
+        }
+        const deviceToken = getBearerToken(req, 'x-device-token');
+        const sessionToken = getBearerToken(req, 'x-session-token');
+        const body = parseScholarOfficialPursuitActionBody(await readJsonBody<unknown>(req));
+        const db = getPool(env.databaseUrl);
+        const result = await gameService.executeScholarOfficialPursuitAction(db, ctx.env, {
+          deviceToken: deviceToken!,
+          sessionId: params.sessionId!,
+          sessionToken: sessionToken!,
+          ...body,
+        }, testDependencies?.runtimeCatalog);
+        sendJson(res, 200, {
+          slotVersion: result.slot.version,
+          snapshotId: result.snapshot.id,
+          contentHash: result.snapshot.content_hash,
+          replayAction: result.replayAction,
           ...progressionPayloadBody(result),
         });
       },

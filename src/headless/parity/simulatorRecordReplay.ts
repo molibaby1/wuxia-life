@@ -4,6 +4,7 @@
 
 import type { GameEngineIntegration } from '../../core/GameEngineIntegration';
 import { resolveChoiceEffects } from '../../core/ChoiceOutcomeResolver';
+import { SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID } from '../../core/scholarOfficialPursuit';
 import { dailyEvents } from '../../data/life/dailyEvents';
 import type { EventCatalogReadService } from '../catalog/EventCatalogReadService';
 import {
@@ -263,11 +264,22 @@ export async function replaySimulatorRecords(
         record,
         engine,
       );
-      await engine.executeChoiceEffects(
-        effectsToExecute,
-        event.id,
-        record.selectedChoice.id,
-      );
+      const replayState = engine.getGameState() as GameState & { pendingStoryEventId?: string };
+      if (event.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+        replayState.pendingStoryEventId = event.id;
+      }
+      try {
+        await engine.executeChoiceEffects(
+          effectsToExecute,
+          event.id,
+          record.selectedChoice.id,
+        );
+      } finally {
+        if (event.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
+          && replayState.pendingStoryEventId === event.id) {
+          delete replayState.pendingStoryEventId;
+        }
+      }
       engine.consumeLastEventOutcomeNote();
       enforceRouteTrackIsolation(engine.getGameState(), options.routeTrack);
       if (!engine.getGameState().player?.alive || hasGameEnded(engine.getGameState())) {

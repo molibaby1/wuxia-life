@@ -32,6 +32,12 @@ import demonEventsJson from '../src/data/lines/identity-demon.json';
 import identityYearEventsJson from '../src/data/lines/identity-year-events.json';
 import factionEventsJson from '../src/data/lines/faction-revelation.json';
 import setbackEventsJson from '../src/data/lines/setback-events.json';
+import scholarOfficialPursuitEventsJson from '../src/data/lines/scholar-official-pursuit.json';
+import {
+  SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID,
+  SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID,
+  SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
+} from '../src/core/scholarOfficialPursuit';
 
 export interface EventQualityIssue {
   eventId: string;
@@ -263,6 +269,30 @@ function hasExecutableEffects(event: EventDefinition): boolean {
   return false;
 }
 
+function hasScholarOfficialPursuitLedgerSettlement(event: EventDefinition): boolean {
+  if (event.id !== SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID || event.eventType !== 'choice') {
+    return false;
+  }
+
+  const choices = event.choices;
+  if (!Array.isArray(choices) || choices.length !== 2 || collectEffects(event).length > 0) {
+    return false;
+  }
+
+  if (choices.some(choice => !Array.isArray(choice.effects)
+    || choice.effects.length !== 0
+    || (choice.outcomes?.length ?? 0) !== 0)) {
+    return false;
+  }
+
+  // GameEngineIntegration.executeChoiceEffects validates this pending invitation and its two fixed choices,
+  // then appends the response through appendScholarOfficialPursuitEntry.
+  const choiceIds = new Set(choices.map(choice => choice.id));
+  return choiceIds.size === 2
+    && choiceIds.has(SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID)
+    && choiceIds.has(SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID);
+}
+
 function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, string> {
   const sourceMap = new Map<string, string>();
   const loadedIds = new Set(loadedEvents.map((event) => event.id));
@@ -287,6 +317,7 @@ function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, str
     { source: './lines/identity-year-events.json', events: identityYearEventsJson as EventDefinition[] },
     { source: './lines/faction-revelation.json', events: factionEventsJson as EventDefinition[] },
     { source: './lines/setback-events.json', events: setbackEventsJson as EventDefinition[] },
+    { source: './lines/scholar-official-pursuit.json', events: scholarOfficialPursuitEventsJson as EventDefinition[] },
   ];
 
   for (const { source, events } of lineMap) {
@@ -430,7 +461,7 @@ export function validateEventQuality(events: EventDefinition[]): ValidationResul
       issues.push(createIssue(event.id, source, 'empty_content', 'Event content.text is empty.'));
     }
 
-    if (!hasExecutableEffects(event)) {
+    if (!hasExecutableEffects(event) && !hasScholarOfficialPursuitLedgerSettlement(event)) {
       issues.push(
         createIssue(
           event.id,

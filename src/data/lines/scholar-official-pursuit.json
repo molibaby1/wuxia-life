@@ -1,0 +1,32 @@
+[
+  {
+    "id": "p138_scholar_official_invitation",
+    "version": "1.0",
+    "category": "side_quest",
+    "priority": 2,
+    "weight": 35,
+    "ageRange": { "min": 16, "max": 30 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [],
+    "content": {
+      "title": "一封求仕书讯",
+      "text": "府学传来消息，州试将择期开考。办事的书吏见你年纪尚轻，托人问你是否愿意赴考一试。能否合格，要看临场学识与考场发挥；即便合格，也只是取得考选资格，并不等于授官。\n\n你愿意把赴考求仕作为自己的打算吗？",
+      "description": "一封正式书讯邀请你考虑赴考。是否接受，由你决定。"
+    },
+    "eventType": "choice",
+    "maxTriggers": 1,
+    "choices": [
+      {
+        "id": "accept_scholar_official_pursuit",
+        "text": "接受书讯，日后择机赴考。",
+        "effects": []
+      },
+      {
+        "id": "decline_scholar_official_pursuit",
+        "text": "谢过书讯，仍按自己的打算生活。",
+        "effects": []
+      }
+    ],
+    "metadata": { "tags": ["科举", "求仕", "主动目标", "once"] }
+  }
+]

@@ -9,6 +9,10 @@ import type { HeadlessTerminalState } from '../../../src/headless/session/sessio
 import { getOwnedAssets } from '../../../src/core/assetOwnership.js';
 import { getOwnedItems } from '../../../src/core/itemOwnership.js';
 import { deriveMarketStallObjective } from '../../../src/core/marketStallObjective.js';
+import {
+  deriveScholarOfficialPursuit,
+  getLatestScholarOfficialPursuitExam,
+} from '../../../src/core/scholarOfficialPursuit.js';
 
 function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
   const state = session.getRuntimeState();
@@ -69,6 +73,11 @@ export function mapSessionProgression(
   const planningOptions = phase === 'active_planning' ? session.getPlanningOptions() : [];
   const volatile = session.getProgressionVolatileState();
   const marketStallObjective = deriveMarketStallObjective(session.getRuntimeState());
+  const scholarOfficialPursuit = deriveScholarOfficialPursuit(session.getRuntimeState());
+  if (phase !== 'active_planning') {
+    scholarOfficialPursuit.canTakeExam = false;
+    scholarOfficialPursuit.canAbandon = false;
+  }
   if (marketStallObjective && phase !== 'active_planning') {
     marketStallObjective.canAttempt = false;
     marketStallObjective.canAbandon = false;
@@ -88,5 +97,9 @@ export function mapSessionProgression(
     lifeMemory,
     player: mapPlayerSummary(session),
     marketStallObjective,
+    scholarOfficialPursuit: {
+      ...scholarOfficialPursuit,
+      latestExam: getLatestScholarOfficialPursuitExam(session.getRuntimeState()),
+    },
   };
 }

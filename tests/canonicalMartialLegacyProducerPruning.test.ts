@@ -46,8 +46,8 @@ function collectBranches(events: EventDefinition[]): Branch[] {
 }
 
 function testFinalInventory(events: EventDefinition[], branches: Branch[]): void {
-  assert(eventsIndexJson.imports.length === 28, `formal EventLoader file count must be 28, got ${eventsIndexJson.imports.length}`);
-  assert(events.length === 394, `formal EventLoader event count must be 394, got ${events.length}`);
+  assert(eventsIndexJson.imports.length === 29, `formal EventLoader file count must be 29, got ${eventsIndexJson.imports.length}`);
+  assert(events.length === 395, `formal EventLoader event count must be 395, got ${events.length}`);
   assert(branches.length === 0, `formal EventLoader must have 0 legacy producer branches, got ${branches.length}`);
   assert(branches.reduce((count, branch) => count + branch.effects.length, 0) === 0, 'formal EventLoader must have 0 legacy effects');
   assert(new Set(branches.map(branch => branch.eventId)).size === 0, 'formal EventLoader must have 0 legacy producer events');

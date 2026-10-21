@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { GameStateSnapshot } from '../../../src/contracts/gameStateSnapshot.js';
 import type { BackendEnv } from '../config/env.js';
 import type { Queryable } from '../db/pool.js';
@@ -20,6 +21,7 @@ import {
   resolveSessionAfterAutoProgress,
 } from './headlessRuntime.js';
 import { mapSessionProgression } from './sessionProgressionMapper.js';
+import { getLatestScholarOfficialPursuitExam } from '../../../src/core/scholarOfficialPursuit.js';
 import {
   clearSnapshotVolatileState,
   getSnapshotVolatileState,
@@ -450,6 +452,7 @@ async function loadHeadlessForMutation(
   },
   runtimeCatalog?: RuntimeEventCatalog,
   resolveAutoProgress = true,
+  randomSeed?: number,
 ) {
   const { deviceId } = await resolveDevice(client, env, params.deviceToken);
   const { session } = await resolveSession(
@@ -481,6 +484,7 @@ async function loadHeadlessForMutation(
   const headless = await createHeadlessSessionFromSnapshot({
     snapshot: currentSnap.snapshot,
     catalogVersion: env.eventCatalogVersion,
+    randomSeed,
     logger,
     runtimeCatalog,
   });
@@ -563,6 +567,97 @@ export async function executeMarketStallAction(
     return {
       slot: updatedSlot,
       snapshot: snapRow,
+      ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id),
+    };
+  });
+  updateCache?.();
+  return result;
+}
+
+function scholarPursuitRandomSeed(sessionId: string, snapshotId: string): number {
+  return createHash('sha256').update(`${sessionId}:${snapshotId}`).digest().readUInt32BE(0);
+}
+
+export async function executeScholarOfficialPursuitAction(
+  db: Queryable,
+  env: BackendEnv,
+  params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    operation: 'take_exam' | 'abandon';
+  },
+  runtimeCatalog?: RuntimeEventCatalog,
+) {
+  if (params.operation !== 'take_exam' && params.operation !== 'abandon') {
+    throw validationError('operation must be take_exam or abandon');
+  }
+  let updateCache: (() => void) | undefined;
+  const result = await withTransaction(env.databaseUrl, async client => {
+    // The action works from this exact selected snapshot and never auto-runs Scheduler.
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+      client,
+      env,
+      params,
+      runtimeCatalog,
+      false,
+      scholarPursuitRandomSeed(params.sessionId, params.expectedSnapshotId),
+    );
+    if (headless.getSessionPhase() !== 'active_planning') {
+      throw validationError('Scholar official pursuit actions require active_planning phase', {
+        code: 'INVALID_SESSION_PHASE',
+      });
+    }
+    const hashBefore = currentSnap.content_hash;
+    try {
+      await headless.executeScholarOfficialPursuitAction(params.operation);
+    } catch (error) {
+      mapProgressionError(error);
+    }
+    const newSnapshot = headless.serialize();
+    newSnapshot.metadata.engineVersion = env.engineVersion;
+    newSnapshot.metadata.eventCatalogVersion = env.eventCatalogVersion;
+    const snapRow = await snapshotRepo.insertSnapshot(client, {
+      saveSlotId: slot.id,
+      sessionId: session.id,
+      slotVersion: slot.version + 1,
+      snapshot: newSnapshot,
+      engineVersion: env.engineVersion,
+      eventCatalogVersion: env.eventCatalogVersion,
+    });
+    const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
+    if (!updatedSlot) {
+      throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during scholar official pursuit action', {
+        currentSlotVersion: slot.version,
+        currentSnapshotId: slot.current_snapshot_id,
+      });
+    }
+    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
+      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
+
+    const latestExam = getLatestScholarOfficialPursuitExam(headless.getRuntimeState());
+    const replayAction = await replayRepo.appendReplayAction(client, {
+      sessionId: session.id,
+      saveSlotId: slot.id,
+      actionType: 'scholar_official_pursuit_action',
+      snapshotHashBefore: hashBefore,
+      snapshotHashAfter: snapRow.content_hash,
+      payload: params.operation === 'take_exam'
+        ? { operation: params.operation, exam: latestExam }
+        : { operation: params.operation },
+    });
+    const resolved = { nextEvent: null, phase: headless.getSessionPhase() };
+    updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
+    return {
+      slot: updatedSlot,
+      snapshot: snapRow,
+      replayAction: {
+        id: replayAction.id,
+        snapshotHashBefore: replayAction.snapshot_hash_before,
+        snapshotHashAfter: replayAction.snapshot_hash_after,
+      },
       ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id),
     };
   });

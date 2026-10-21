@@ -24,6 +24,14 @@ import { runJianghuPublicOpinionChallengeTests } from './jianghuPublicOpinionCha
 import { runSharedItemVerticalTests } from './sharedItemVertical.test';
 import { runMarketStallSessionTests } from './marketStallSession.test';
 import { runScholarOfficialPursuitHeadlessPersistenceTests } from './scholarOfficialPursuitPersistence.test';
+import {
+  runScholarOfficialPursuitBTests,
+  runScholarOfficialPursuitAbandonTests,
+  runScholarOfficialPursuitEligibilityAndCooldownTests,
+  runScholarOfficialPursuitExamActionTests,
+  runScholarOfficialPursuitInvitationChoiceTests,
+  runScholarOfficialPursuitProbabilityTests,
+} from './scholarOfficialPursuitB.test';
 
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -48,6 +56,12 @@ async function main(): Promise<void> {
   await runSharedItemVerticalTests();
   await runMarketStallSessionTests();
   await runScholarOfficialPursuitHeadlessPersistenceTests();
+  runScholarOfficialPursuitBTests();
+  await runScholarOfficialPursuitInvitationChoiceTests();
+  await runScholarOfficialPursuitExamActionTests();
+  runScholarOfficialPursuitProbabilityTests();
+  await runScholarOfficialPursuitEligibilityAndCooldownTests();
+  await runScholarOfficialPursuitAbandonTests();
   runParityHarnessTests();
   await runParitySamplesTests();
   console.log('headless test suite: ok');

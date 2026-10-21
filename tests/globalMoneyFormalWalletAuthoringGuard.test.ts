@@ -57,7 +57,7 @@ function testFormalCatalogHasZeroWalletAuthoring(): void {
 
   // Authority is EventLoader/events.json, not a generated asset report.
   assert.equal(typeof formalEvents.length, 'number');
-  assert.equal(formalEvents.length, 394, 'formal EventLoader catalog must remain the current 394-event source');
+  assert.equal(formalEvents.length, 395, 'formal EventLoader catalog must remain the current 395-event source');
 
   const errors = collectFormalWalletAuthoringErrors(formalEvents);
   assert.deepEqual(errors, [], `formal wallet authoring must be zero; got: ${errors.join(' | ')}`);

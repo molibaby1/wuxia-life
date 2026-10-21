@@ -18,6 +18,14 @@ import type { AssetId } from '../types/asset';
 import type { OwnedItemSummary } from '../types/item';
 import type { MarketStallObjectiveProjection } from '../core/marketStallObjective';
 export type { MarketStallObjectiveProjection } from '../core/marketStallObjective';
+import type {
+  ScholarOfficialPursuitExamSummary,
+  ScholarOfficialPursuitProjection,
+} from '../core/scholarOfficialPursuit';
+
+export interface ScholarOfficialPursuitSessionView extends ScholarOfficialPursuitProjection {
+  latestExam: ScholarOfficialPursuitExamSummary | null;
+}
 
 /**
  * Authoritative session phase for client UI routing.
@@ -128,4 +136,5 @@ export interface SessionProgressionPayload {
   lifeMemory: LifeMemorySummary;
   player: PlayerSummaryDto;
   marketStallObjective: MarketStallObjectiveProjection | null;
+  scholarOfficialPursuit: ScholarOfficialPursuitSessionView;
 }

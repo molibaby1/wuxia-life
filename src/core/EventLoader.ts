@@ -47,6 +47,7 @@ import p22ContentExpansionsJson from '../data/lines/p22-content-expansions.json'
 import medicalEventsJson from '../data/lines/medical.json';
 import relationshipEventsJson from '../data/lines/relationship.json';
 import merchantLineEventsJson from '../data/lines/merchant.json';
+import scholarOfficialPursuitEventsJson from '../data/lines/scholar-official-pursuit.json';
 import sampleLinesSpineEventsJson from '../data/lines/sample-lines-spine.json';
 
 // import pathExamplesJson from '../data/lines/path-examples.json';
@@ -85,6 +86,7 @@ const p22ContentExpansions = p22ContentExpansionsJson as EventDefinition[];
 const medicalEvents = medicalEventsJson as EventDefinition[];
 const relationshipEvents = relationshipEventsJson as EventDefinition[];
 const merchantLineEvents = merchantLineEventsJson as EventDefinition[];
+const scholarOfficialPursuitEvents = scholarOfficialPursuitEventsJson as EventDefinition[];
 const sampleLinesSpineEvents = sampleLinesSpineEventsJson as EventDefinition[];
 
 const eventsIndex = eventsIndexJson as {
@@ -310,6 +312,7 @@ export class EventLoader {
       './lines/medical.json': medicalEvents,
       './lines/relationship.json': relationshipEvents,
       './lines/merchant.json': merchantLineEvents,
+      './lines/scholar-official-pursuit.json': scholarOfficialPursuitEvents,
       './lines/sample-lines-spine.json': sampleLinesSpineEvents,
     };
     

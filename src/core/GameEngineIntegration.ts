@@ -36,7 +36,18 @@ import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingConte
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
 import { appendFormalEventHistory } from './EventHistory';
-import { prepareScholarOfficialPursuitState } from './scholarOfficialPursuit';
+import {
+  appendScholarOfficialPursuitEntry,
+  calculateScholarOfficialExamPassRate,
+  deriveScholarOfficialPursuit,
+  isScholarOfficialPursuitInvitationEligible,
+  prepareScholarOfficialPursuitState,
+  SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID,
+  SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID,
+  SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION,
+  SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
+  type ScholarOfficialPursuitOperation,
+} from './scholarOfficialPursuit';
 import {
   deriveMarketStallObjective,
   isMarketStallEventEligible,
@@ -415,6 +426,86 @@ export class GameEngineIntegration {
       resultExplanation,
     };
   }
+
+  public async executeScholarOfficialPursuitOperation(
+    operation: ScholarOfficialPursuitOperation,
+  ): Promise<ActiveActionSummaryDisplay | null> {
+    if (operation !== 'take_exam' && operation !== 'abandon') {
+      throw new Error(`Unknown scholar official pursuit operation: ${String(operation)}`);
+    }
+    const pursuit = deriveScholarOfficialPursuit(this.gameState);
+    if (pursuit.status !== 'active' || (operation === 'take_exam' ? !pursuit.canTakeExam : !pursuit.canAbandon)) {
+      throw new Error(`Scholar official pursuit operation is not eligible: ${pursuit.status}`);
+    }
+
+    const currentDate = this.gameState.currentTime;
+    if (!currentDate) throw new Error('Scholar official pursuit requires a valid current date.');
+    if (operation === 'abandon') {
+      this.applyGameState(appendScholarOfficialPursuitEntry(this.gameState, {
+        type: 'abandon',
+        date: { ...currentDate },
+      }));
+      return null;
+    }
+
+    const startedAt = { ...currentDate };
+    const ageAtStart = this.gameState.player.age;
+    const knowledgeAtStart = this.gameState.player.knowledge;
+    const adoptedPassRate = calculateScholarOfficialExamPassRate(knowledgeAtStart);
+    const completedAt = {
+      year: currentDate.year + (currentDate.month === 12 ? 1 : 0),
+      month: currentDate.month === 12 ? 1 : currentDate.month + 1,
+      day: currentDate.day,
+    };
+    const completedAge = ageAtStart + (currentDate.month === 12 ? 1 : 0);
+    const attemptNumber = pursuit.examAttempts + 1;
+    const nextStateBeforeRoll = cloneCanonicalGameState(this.gameState);
+    nextStateBeforeRoll.currentTime = completedAt;
+    nextStateBeforeRoll.player.age = completedAge;
+
+    const failedDraft = {
+      type: 'exam_attempt' as const,
+      attemptNumber,
+      startedAt,
+      completedAt,
+      ageAtStart,
+      knowledgeAtStart,
+      rulesVersion: SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION,
+      adoptedPassRate,
+      result: 'failed' as const,
+    };
+    const passedDraft = { ...failedDraft, result: 'passed' as const };
+    appendScholarOfficialPursuitEntry(nextStateBeforeRoll, failedDraft);
+    appendScholarOfficialPursuitEntry(nextStateBeforeRoll, passedDraft);
+
+    const beforeAdvance = cloneCanonicalGameState(this.gameState);
+    const result = Math.random() < adoptedPassRate ? 'passed' : 'failed';
+    try {
+      this.advanceTime(1, 'month');
+      const nextState = appendScholarOfficialPursuitEntry(this.gameState, {
+        ...failedDraft,
+        result,
+      });
+      this.applyGameState(nextState);
+    } catch (error) {
+      this.loadGameState(beforeAdvance);
+      throw error;
+    }
+
+    const resultLabel = result === 'passed' ? '合格' : '落选';
+    const percent = (adoptedPassRate * 100).toFixed(2).replace(/\.00$/, '');
+    return {
+      sourceLabel: '人生追求',
+      actionName: '赴考应试',
+      durationLabel: '1个月',
+      rewardSummary: '',
+      costSummary: '投入一个月时间',
+      riskSummary: '',
+      nextStepHint: result === 'passed' ? '你取得了考选资格；尚未获得官职。' : '十二个完整游戏月后方可再次报名。',
+      appliedDeltaSummary: `开考学识${knowledgeAtStart}；合格概率${percent}%；规则${SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION}`,
+      resultExplanation: `本次考试结论：${resultLabel}。开考学识${knowledgeAtStart}，按${SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION}规则，合格概率为${percent}%。${result === 'passed' ? '你取得了考选资格，但尚未授官。' : '追求仍然有效，十二个完整游戏月后可以再次报名。'}`,
+    };
+  }
   
   /**
    * 根据年龄获取可用事件（加权随机选择）
@@ -432,6 +523,11 @@ export class GameEngineIntegration {
     
     // 过滤满足条件的事件
     const availableEvents = events.filter(event => {
+      if (event.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
+        && !isScholarOfficialPursuitInvitationEligible(this.gameState)) {
+        return false;
+      }
+
       // PD-138: keep date-sensitive eligibility out of the expression cache.
       if ((event.id === 'p138_market_stall_invitation' || event.id === 'p138_market_stall_supply')
         && !isMarketStallEventEligible(event.id, this.gameState)) {
@@ -1382,18 +1478,22 @@ export class GameEngineIntegration {
   }
 
   private materializeSelectedEvent(event: EventDefinition | null): EventDefinition | null {
-    if (!event?.personBinding) {
-      return event;
+    let selectedEvent = event;
+    if (event?.personBinding) {
+      const result = materializePersonBoundEvent(this.gameState, event, { allowCreate: true });
+      if (!result.event) {
+        return null;
+      }
+      if (result.state !== this.gameState) {
+        this.applyGameState(result.state);
+      }
+      selectedEvent = result.event;
     }
 
-    const result = materializePersonBoundEvent(this.gameState, event, { allowCreate: true });
-    if (!result.event) {
-      return null;
+    if (selectedEvent?.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+      (this.gameState as GameState & { pendingStoryEventId?: string }).pendingStoryEventId = selectedEvent.id;
     }
-    if (result.state !== this.gameState) {
-      this.applyGameState(result.state);
-    }
-    return result.event;
+    return selectedEvent;
   }
 
   public materializeEventForExecution(event: EventDefinition): EventDefinition {
@@ -1603,7 +1703,30 @@ export class GameEngineIntegration {
     const eventDateBeforeEffects = this.gameState.currentTime
       ? { ...this.gameState.currentTime }
       : undefined;
-    const updatedState = await this.eventExecutor.executeEffects(effects, this.gameState);
+    let effectsToApply = effects;
+    if (eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+      const pendingEventId = (this.gameState as GameState & { pendingStoryEventId?: string }).pendingStoryEventId;
+      const invitation = this.getEventDefinition(eventId);
+      const invitationChoice = invitation?.choices?.find(choice => choice.id === choiceId);
+      if (pendingEventId !== eventId || !isScholarOfficialPursuitInvitationEligible(this.gameState)
+        || (choiceId !== SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID
+          && choiceId !== SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID)
+        || !invitationChoice) {
+        throw new Error('Scholar official pursuit invitation is not the eligible pending decision point.');
+      }
+      effectsToApply = invitationChoice.effects ?? [];
+    }
+    let updatedState = await this.eventExecutor.executeEffects(effectsToApply, this.gameState);
+    if (eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+      if (!eventDateBeforeEffects) throw new Error('Scholar official pursuit invitation requires a valid current date.');
+      updatedState = appendScholarOfficialPursuitEntry(updatedState, {
+        type: 'invitation_response',
+        date: eventDateBeforeEffects,
+        age: ageBeforeEvent,
+        sourceEventId: eventId,
+        response: choiceId === SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID ? 'accepted' : 'declined',
+      });
+    }
     const eventDefinition = this.getEventDefinition(eventId);
     if (eventDefinition) {
       this.pendingEventOutcomeNote = null;
@@ -1611,6 +1734,12 @@ export class GameEngineIntegration {
     const adjustedState = updatedState;
     
     this.applyGameState(adjustedState);
+    if (eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+      const stateWithPendingEvent = this.gameState as GameState & { pendingStoryEventId?: string };
+      if (stateWithPendingEvent.pendingStoryEventId === eventId) {
+        delete stateWithPendingEvent.pendingStoryEventId;
+      }
+    }
     
     // 新增：确保 flags 已更新（响应式对象需要特殊处理）
     if (this.gameState.player && updatedState.player) {

@@ -1,6 +1,7 @@
 import { runMigrationTests } from './migration.test.js';
 import { runP6bIntegrationTests } from './integration.test.js';
 import { runMarketStallApiTests } from './marketStall.test.js';
+import { runScholarOfficialPursuitApiTests } from './scholarOfficialPursuit.test.js';
 import { runProgressionCheckpointRestartTest } from './progressionCheckpointRestart.test.js';
 import { runProgressionCheckpointLegacyTests } from './progressionCheckpointLegacy.test.js';
 
@@ -20,6 +21,7 @@ export async function runP6bDbTests(databaseUrl: string): Promise<void> {
   await runMigrationTests(databaseUrl);
   await runP6bIntegrationTests(databaseUrl);
   await runMarketStallApiTests(databaseUrl);
+  await runScholarOfficialPursuitApiTests(databaseUrl);
   await runProgressionCheckpointRestartTest(databaseUrl);
   await runProgressionCheckpointLegacyTests(databaseUrl);
 }

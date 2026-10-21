@@ -10,6 +10,7 @@ export type ReplayActionType =
   | 'legacy_progression_discarded'
   | 'automatic_progression'
   | 'market_stall_action'
+  | 'scholar_official_pursuit_action'
   | 'manual_save'
   | 'terminal';
 

@@ -5,6 +5,12 @@
 import { GameEngineIntegration } from '../../core/GameEngineIntegration';
 import { deriveMarketStallObjective, isMarketStallEventEligible } from '../../core/marketStallObjective';
 import type { MarketStallOperation } from '../../core/marketStallObjective';
+import {
+  deriveScholarOfficialPursuit,
+  isScholarOfficialPursuitInvitationEligible,
+  SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
+  type ScholarOfficialPursuitOperation,
+} from '../../core/scholarOfficialPursuit';
 import { generateChoiceFeedback } from '../../core/ChoiceFeedbackGenerator';
 import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import { resolveChoiceEffects } from '../../core/ChoiceOutcomeResolver';
@@ -400,6 +406,21 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       throw new Error(stale.message);
     }
 
+    if (request.action.eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
+      && (snapshot.state.pendingStoryEventId !== SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
+        || !isScholarOfficialPursuitInvitationEligible(this.engine.getGameState()))) {
+      const stale: HeadlessSessionError = {
+        code: 'STALE_EVENT',
+        message: 'Scholar official pursuit invitation is not the eligible pending decision point',
+        details: {
+          expected: request.action.eventId,
+          pending: snapshot.state.pendingStoryEventId,
+        },
+      };
+      this.lastError = stale;
+      throw new Error(stale.message);
+    }
+
     let event = this.volatile.currentEvent;
     if (!event || event.id !== request.action.eventId) {
       try {
@@ -450,17 +471,28 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     const beforePlayer = beforeSnapshot.state.player as unknown as PlayerState;
     const beforeFlags = beforeSnapshot.state.flags;
 
-    const { resolved, effects } = await this.runWithRandomAsync(async () => {
-      const resolved = resolveChoiceEffects(
-        state,
-        event,
-        choice,
-        condition => this.engine.isChoiceAvailable(condition as EventCondition | undefined),
-      );
-      const effects = resolved?.effects ?? choice.effects ?? [];
-      await this.engine.executeChoiceEffects(effects, event.id, choice.id);
-      return { resolved, effects };
-    });
+    const stateWithPendingEvent = state as GameState & { pendingStoryEventId?: string };
+    const scholarInvitation = event.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID;
+    if (scholarInvitation) stateWithPendingEvent.pendingStoryEventId = event.id;
+    let resolvedAndEffects: { resolved: ReturnType<typeof resolveChoiceEffects>; effects: EventChoice['effects'] };
+    try {
+      resolvedAndEffects = await this.runWithRandomAsync(async () => {
+        const resolved = resolveChoiceEffects(
+          state,
+          event,
+          choice,
+          condition => this.engine.isChoiceAvailable(condition as EventCondition | undefined),
+        );
+        const effects = resolved?.effects ?? choice.effects ?? [];
+        await this.engine.executeChoiceEffects(effects, event.id, choice.id);
+        return { resolved, effects };
+      });
+    } finally {
+      if (scholarInvitation && stateWithPendingEvent.pendingStoryEventId === event.id) {
+        delete stateWithPendingEvent.pendingStoryEventId;
+      }
+    }
+    const { resolved, effects } = resolvedAndEffects;
 
     const afterSnapshot = this.serialize();
     const afterPlayer = afterSnapshot.state.player as unknown as PlayerState;
@@ -480,7 +512,6 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     });
     this.volatile.lastFeedback = feedback;
     this.volatile.lastOutcomeText = resolved?.outcomeText ?? null;
-    const stateWithPendingEvent = state as GameState & { pendingStoryEventId?: string };
     if (stateWithPendingEvent.pendingStoryEventId === event.id) {
       delete stateWithPendingEvent.pendingStoryEventId;
     }
@@ -831,6 +862,38 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     if (operation === 'abandon') return;
     if (!summary) {
       throw new ProgressionError('INVALID_ACTION', 'Market stall attempt did not produce a result summary');
+    }
+    this.volatile.currentEvent = null;
+    this.volatile.pendingActionSummary = summary;
+    this.volatile.pendingDisturbanceNarrative = null;
+    this.volatile.lastOutcomeText = summary.resultExplanation ?? null;
+  }
+
+  async executeScholarOfficialPursuitAction(operation: ScholarOfficialPursuitOperation): Promise<void> {
+    this.lastError = null;
+    if (operation !== 'take_exam' && operation !== 'abandon') {
+      throw new ProgressionError('INVALID_ACTION', `Unknown scholar official pursuit operation: ${String(operation)}`);
+    }
+    if (this.getSessionPhase() !== 'active_planning') {
+      throw new ProgressionError(
+        'INVALID_SESSION_PHASE',
+        'Scholar official pursuit action requires active_planning phase',
+      );
+    }
+    const pursuit = deriveScholarOfficialPursuit(this.engine.getGameState());
+    if (pursuit.status !== 'active' || (operation === 'take_exam' ? !pursuit.canTakeExam : !pursuit.canAbandon)) {
+      throw new ProgressionError(
+        'INVALID_ACTION',
+        `Scholar official pursuit action is unavailable: ${operation}`,
+      );
+    }
+
+    const summary = await this.runWithRandomAsync(() =>
+      this.engine.executeScholarOfficialPursuitOperation(operation),
+    );
+    if (operation === 'abandon') return;
+    if (!summary) {
+      throw new ProgressionError('INVALID_ACTION', 'Scholar official pursuit exam did not produce a result summary');
     }
     this.volatile.currentEvent = null;
     this.volatile.pendingActionSummary = summary;

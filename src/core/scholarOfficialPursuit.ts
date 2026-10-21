@@ -1,6 +1,12 @@
 import type { GameState } from '../types/eventTypes';
 
 export const SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY = 'p138_scholar_official_pursuit_ledger';
+export const SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID = 'p138_scholar_official_invitation';
+export const SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID = 'accept_scholar_official_pursuit';
+export const SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID = 'decline_scholar_official_pursuit';
+export const SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION = 'curve-a-v1';
+
+export type ScholarOfficialPursuitOperation = 'take_exam' | 'abandon';
 
 export interface PursuitDate {
   year: number;
@@ -59,6 +65,8 @@ export type ScholarOfficialPursuitEntryDraft =
   | Omit<ExamAttemptEntry, 'sequence'>
   | Omit<AbandonEntry, 'sequence'>
   | Omit<AppointmentDecisionEntry, 'sequence'>;
+
+export type ScholarOfficialPursuitExamSummary = Omit<ExamAttemptEntry, 'sequence'>;
 
 export interface ScholarOfficialPursuitLedger {
   schemaVersion: 1;
@@ -567,6 +575,42 @@ export function deriveScholarOfficialPursuit(state: GameState): ScholarOfficialP
     canAbandon: !acceptedAppointment,
     appointmentAccepted: Boolean(acceptedAppointment),
   };
+}
+
+export function getLatestScholarOfficialPursuitExam(
+  state: GameState,
+): ScholarOfficialPursuitExamSummary | null {
+  const stateRead = validateStateLedger(state);
+  if (stateRead.diagnostics.length > 0 || !stateRead.ledger) return null;
+  const exam = [...stateRead.ledger.entries].reverse().find(
+    (entry): entry is ExamAttemptEntry => entry.type === 'exam_attempt',
+  );
+  if (!exam) return null;
+  const { sequence: _sequence, ...summary } = exam;
+  return {
+    ...summary,
+    startedAt: { ...summary.startedAt },
+    completedAt: { ...summary.completedAt },
+  };
+}
+
+export function calculateScholarOfficialExamPassRate(knowledge: number): number {
+  if (!Number.isFinite(knowledge) || knowledge < 20) {
+    throw new Error('Scholar official exam probability requires finite knowledge of at least 20.');
+  }
+  const probability = 0.25 + 0.60 * (1 - Math.exp(-(knowledge - 20) / 25));
+  return Math.max(0, Math.min(1, probability));
+}
+
+export function isScholarOfficialPursuitInvitationEligible(state: GameState): boolean {
+  const age = state.player?.age;
+  const projection = deriveScholarOfficialPursuit(state);
+  return Number.isSafeInteger(age) && age >= 16 && age <= 30
+    && isValidDate(state.currentTime)
+    && state.player?.alive === true
+    && !state.ending
+    && projection.status === 'none'
+    && projection.invitationResponse === null;
 }
 
 function draftDate(draft: ScholarOfficialPursuitEntryDraft): PursuitDate {

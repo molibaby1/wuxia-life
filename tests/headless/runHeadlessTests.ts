@@ -25,6 +25,11 @@ import { runSharedItemVerticalTests } from './sharedItemVertical.test';
 import { runMarketStallSessionTests } from './marketStallSession.test';
 import { runScholarOfficialPursuitHeadlessPersistenceTests } from './scholarOfficialPursuitPersistence.test';
 import {
+  runScholarOfficialPursuitCTests,
+  runScholarOfficialPursuitCChoiceTests,
+  runScholarOfficialPursuitCLegacyTests,
+} from './scholarOfficialPursuitC.test';
+import {
   runScholarOfficialPursuitBTests,
   runScholarOfficialPursuitAbandonTests,
   runScholarOfficialPursuitEligibilityAndCooldownTests,
@@ -56,6 +61,9 @@ async function main(): Promise<void> {
   await runSharedItemVerticalTests();
   await runMarketStallSessionTests();
   await runScholarOfficialPursuitHeadlessPersistenceTests();
+  runScholarOfficialPursuitCTests();
+  await runScholarOfficialPursuitCChoiceTests();
+  await runScholarOfficialPursuitCLegacyTests();
   runScholarOfficialPursuitBTests();
   await runScholarOfficialPursuitInvitationChoiceTests();
   await runScholarOfficialPursuitExamActionTests();

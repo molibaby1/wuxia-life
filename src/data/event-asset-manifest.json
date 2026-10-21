@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-10-21T12:34:54.295Z",
+  "generatedAt": "2026-10-21T20:56:19.425Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -14,12 +14,12 @@
   "summary": {
     "runtimeLoadedFiles": 29,
     "nonLoadedFiles": 43,
-    "totalEventsInRuntime": 395,
+    "totalEventsInRuntime": 396,
     "byStatus": {
       "active": 35,
       "candidate": 70,
       "broken": 0,
-      "deferred": 290,
+      "deferred": 291,
       "dead": 0
     },
     "byFileStatus": {
@@ -515,8 +515,8 @@
       "fileName": "scholar-official-pursuit.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 1,
-      "goldenLineOverlapCount": 1,
+      "eventCount": 2,
+      "goldenLineOverlapCount": 2,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -8426,6 +8426,17 @@
       "status": "deferred",
       "ageMin": 16,
       "ageMax": 30,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p138_zhoufu_vacancy",
+      "sourceFile": "scholar-official-pursuit.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 18,
+      "ageMax": 18,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "File classified deferred for golden line"

@@ -373,7 +373,7 @@ const dataConsistencySuite: TestSuite = {
         const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         const youthAges = youthEvents.map(e => e.ageRange);
         const minYouthAge = Math.min(...youthAges.map(a => a.min));
-        const maxYouthAge = Math.max(...youthAges.map(a => a.max));
+        const maxYouthAge = Math.max(...youthAges.map(a => a.max ?? a.min));
         assert(minYouthAge === 13, '青年应该从 13 岁开始');
         assert(maxYouthAge === 18, '青年应该到 18 岁结束');
         

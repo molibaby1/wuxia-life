@@ -5,6 +5,11 @@ export const SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID = 'p138_scholar_offici
 export const SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID = 'accept_scholar_official_pursuit';
 export const SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID = 'decline_scholar_official_pursuit';
 export const SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION = 'curve-a-v1';
+export const SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID = 'p138_zhoufu_vacancy';
+export const SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID = 'accept_zhoufu_vacancy';
+export const SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID = 'decline_zhoufu_vacancy';
+export const SCHOLAR_OFFICIAL_APPOINTMENT_OFFICE_ID = 'zhoufu_sihu_canjun';
+export const SCHOLAR_OFFICIAL_APPOINTMENT_AUTHORITY_ID = 'court_selection_authority';
 
 export type ScholarOfficialPursuitOperation = 'take_exam' | 'abandon';
 
@@ -611,6 +616,37 @@ export function isScholarOfficialPursuitInvitationEligible(state: GameState): bo
     && !state.ending
     && projection.status === 'none'
     && projection.invitationResponse === null;
+}
+
+export function isScholarOfficialAppointmentEligible(state: GameState): boolean {
+  const stateRead = validateStateLedger(state);
+  if (stateRead.diagnostics.length > 0 || !stateRead.ledger
+    || !state.player || state.player.alive !== true || state.ending
+    || !isValidDate(state.currentTime)) {
+    return false;
+  }
+
+  const entries = stateRead.ledger.entries;
+  const invitation = entries.find(
+    (entry): entry is InvitationResponseEntry => entry.type === 'invitation_response',
+  );
+  const passedExam = entries.find(
+    (entry): entry is ExamAttemptEntry => entry.type === 'exam_attempt' && entry.result === 'passed',
+  );
+  if (!invitation || invitation.response !== 'accepted' || !passedExam) return false;
+
+  const appointmentDecisions = entries.filter(
+    (entry): entry is AppointmentDecisionEntry => entry.type === 'appointment_decision',
+  );
+  if (appointmentDecisions.some(entry => entry.response === 'accepted')) return false;
+
+  const latestDeclined = [...appointmentDecisions].reverse().find(entry => entry.response === 'declined');
+  if (latestDeclined) {
+    const eligibleAt = addMonths(latestDeclined.decidedAt, 24);
+    if (!eligibleAt || compareDate(state.currentTime, eligibleAt) < 0) return false;
+  }
+
+  return compareDate(state.currentTime, passedExam.completedAt) >= 0;
 }
 
 function draftDate(draft: ScholarOfficialPursuitEntryDraft): PursuitDate {

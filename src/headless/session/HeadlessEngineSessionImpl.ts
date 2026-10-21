@@ -7,7 +7,9 @@ import { deriveMarketStallObjective, isMarketStallEventEligible } from '../../co
 import type { MarketStallOperation } from '../../core/marketStallObjective';
 import {
   deriveScholarOfficialPursuit,
+  isScholarOfficialAppointmentEligible,
   isScholarOfficialPursuitInvitationEligible,
+  SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID,
   SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
   type ScholarOfficialPursuitOperation,
 } from '../../core/scholarOfficialPursuit';
@@ -421,6 +423,21 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       throw new Error(stale.message);
     }
 
+    if (request.action.eventId === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID
+      && (snapshot.state.pendingStoryEventId !== SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID
+        || !isScholarOfficialAppointmentEligible(this.engine.getGameState()))) {
+      const stale: HeadlessSessionError = {
+        code: 'STALE_EVENT',
+        message: 'Scholar official appointment is not the eligible pending decision point',
+        details: {
+          expected: request.action.eventId,
+          pending: snapshot.state.pendingStoryEventId,
+        },
+      };
+      this.lastError = stale;
+      throw new Error(stale.message);
+    }
+
     let event = this.volatile.currentEvent;
     if (!event || event.id !== request.action.eventId) {
       try {
@@ -473,7 +490,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
     const stateWithPendingEvent = state as GameState & { pendingStoryEventId?: string };
     const scholarInvitation = event.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID;
-    if (scholarInvitation) stateWithPendingEvent.pendingStoryEventId = event.id;
+    const scholarAppointment = event.id === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID;
+    if (scholarInvitation || scholarAppointment) stateWithPendingEvent.pendingStoryEventId = event.id;
     let resolvedAndEffects: { resolved: ReturnType<typeof resolveChoiceEffects>; effects: EventChoice['effects'] };
     try {
       resolvedAndEffects = await this.runWithRandomAsync(async () => {
@@ -488,7 +506,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         return { resolved, effects };
       });
     } finally {
-      if (scholarInvitation && stateWithPendingEvent.pendingStoryEventId === event.id) {
+      if ((scholarInvitation || scholarAppointment) && stateWithPendingEvent.pendingStoryEventId === event.id) {
         delete stateWithPendingEvent.pendingStoryEventId;
       }
     }

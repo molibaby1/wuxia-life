@@ -40,12 +40,19 @@ import {
   appendScholarOfficialPursuitEntry,
   calculateScholarOfficialExamPassRate,
   deriveScholarOfficialPursuit,
+  isScholarOfficialAppointmentEligible,
   isScholarOfficialPursuitInvitationEligible,
   prepareScholarOfficialPursuitState,
+  SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_AUTHORITY_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_OFFICE_ID,
   SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID,
   SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID,
   SCHOLAR_OFFICIAL_PURSUIT_EXAM_RULES_VERSION,
   SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
+  SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY,
   type ScholarOfficialPursuitOperation,
 } from './scholarOfficialPursuit';
 import {
@@ -523,6 +530,17 @@ export class GameEngineIntegration {
     
     // 过滤满足条件的事件
     const availableEvents = events.filter(event => {
+      if ((event.id === 'official_entry' || event.id === 'official_first_post')
+        && deriveScholarOfficialPursuit(this.gameState).appointmentAccepted) {
+        return false;
+      }
+
+      if (event.id === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID
+        && (age !== this.gameState.player.age
+          || !isScholarOfficialAppointmentEligible(this.gameState))) {
+        return false;
+      }
+
       if (event.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
         && !isScholarOfficialPursuitInvitationEligible(this.gameState)) {
         return false;
@@ -578,7 +596,7 @@ export class GameEngineIntegration {
       }
       
       // 6. 检查事件冷却时间（新增）
-      if (!this.checkEventCooldown(event)) {
+      if (event.id !== SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID && !this.checkEventCooldown(event)) {
         return false;
       }
       
@@ -1361,6 +1379,11 @@ export class GameEngineIntegration {
     const eventHistory = this.gameState.eventHistory || [];
     const triggeredEventIds = new Set(eventHistory.map(e => e.eventId));
     const untriggeredEvents = availableEvents.filter(event => {
+      if (event.id === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID) {
+        return currentAge === this.gameState.player.age
+          && isScholarOfficialAppointmentEligible(this.gameState);
+      }
+
       // 如果事件已经触发过，检查是否允许重复触发
       if (triggeredEventIds.has(event.id)) {
         // 获取最大触发次数（默认1次，即只触发一次）
@@ -1490,7 +1513,8 @@ export class GameEngineIntegration {
       selectedEvent = result.event;
     }
 
-    if (selectedEvent?.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+    if (selectedEvent?.id === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
+      || selectedEvent?.id === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID) {
       (this.gameState as GameState & { pendingStoryEventId?: string }).pendingStoryEventId = selectedEvent.id;
     }
     return selectedEvent;
@@ -1546,6 +1570,11 @@ export class GameEngineIntegration {
     event: EventDefinition;
     stageResults: AutomaticStageResultDisplay[];
   }> {
+    if (event.id === 'official_first_post'
+      && deriveScholarOfficialPursuit(this.gameState).appointmentAccepted) {
+      throw new Error('Legacy official first-post event is unavailable after the scholar official appointment.');
+    }
+
     const ageBeforeEvent = this.gameState.player?.age || 0;
     const playerBeforeEvent = {
       ...this.gameState.player,
@@ -1698,6 +1727,11 @@ export class GameEngineIntegration {
    * @param choiceId 选择 ID（可选）
    */
   public async executeChoiceEffects(effects: Effect[], eventId?: string, choiceId?: string): Promise<{ gameState: GameState, triggeredEvent?: EventDefinition }> {
+    if ((eventId === 'official_entry' || eventId === 'official_first_post')
+      && deriveScholarOfficialPursuit(this.gameState).appointmentAccepted) {
+      throw new Error('Legacy official entry is unavailable after the scholar official appointment.');
+    }
+
     // 记录事件前的年龄
     const ageBeforeEvent = this.gameState.player?.age || 0;
     const eventDateBeforeEffects = this.gameState.currentTime
@@ -1716,6 +1750,18 @@ export class GameEngineIntegration {
       }
       effectsToApply = invitationChoice.effects ?? [];
     }
+    if (eventId === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID) {
+      const pendingEventId = (this.gameState as GameState & { pendingStoryEventId?: string }).pendingStoryEventId;
+      const appointment = this.getEventDefinition(eventId);
+      const appointmentChoice = appointment?.choices?.find(choice => choice.id === choiceId);
+      if (pendingEventId !== eventId || !isScholarOfficialAppointmentEligible(this.gameState)
+        || (choiceId !== SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID
+          && choiceId !== SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID)
+        || !appointmentChoice) {
+        throw new Error('Scholar official appointment is not the eligible pending decision point.');
+      }
+      effectsToApply = appointmentChoice.effects ?? [];
+    }
     let updatedState = await this.eventExecutor.executeEffects(effectsToApply, this.gameState);
     if (eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
       if (!eventDateBeforeEffects) throw new Error('Scholar official pursuit invitation requires a valid current date.');
@@ -1727,6 +1773,23 @@ export class GameEngineIntegration {
         response: choiceId === SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID ? 'accepted' : 'declined',
       });
     }
+    if (eventId === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID) {
+      if (!eventDateBeforeEffects) throw new Error('Scholar official appointment requires a valid current date.');
+      const ledger = this.gameState.flags[SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY] as { entries: unknown[] };
+      const datePart = `${eventDateBeforeEffects.year}-${String(eventDateBeforeEffects.month).padStart(2, '0')}-${String(eventDateBeforeEffects.day).padStart(2, '0')}`;
+      const opportunityId = `${SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID}:${datePart}:${ledger.entries.length + 1}`;
+      const response = choiceId === SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID ? 'accepted' : 'declined';
+      updatedState = appendScholarOfficialPursuitEntry(updatedState, {
+        type: 'appointment_decision',
+        opportunityId,
+        offeredAt: eventDateBeforeEffects,
+        decidedAt: eventDateBeforeEffects,
+        officeId: SCHOLAR_OFFICIAL_APPOINTMENT_OFFICE_ID,
+        authorityId: SCHOLAR_OFFICIAL_APPOINTMENT_AUTHORITY_ID,
+        response,
+        ...(response === 'accepted' ? { effectiveAt: eventDateBeforeEffects } : {}),
+      });
+    }
     const eventDefinition = this.getEventDefinition(eventId);
     if (eventDefinition) {
       this.pendingEventOutcomeNote = null;
@@ -1734,7 +1797,8 @@ export class GameEngineIntegration {
     const adjustedState = updatedState;
     
     this.applyGameState(adjustedState);
-    if (eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID) {
+    if (eventId === SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID
+      || eventId === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID) {
       const stateWithPendingEvent = this.gameState as GameState & { pendingStoryEventId?: string };
       if (stateWithPendingEvent.pendingStoryEventId === eventId) {
         delete stateWithPendingEvent.pendingStoryEventId;

@@ -28,5 +28,34 @@
       }
     ],
     "metadata": { "tags": ["科举", "求仕", "主动目标", "once"] }
+  },
+  {
+    "id": "p138_zhoufu_vacancy",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 2,
+    "weight": 35,
+    "ageRange": { "min": 18 },
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "conditions": [],
+    "content": {
+      "title": "州府补缺",
+      "text": "朝廷选官机构核验了你此前考选合格的记录。恰逢州府司户参军出缺，州府转达正式任命，询问你是否愿意就任。接受后，任命即日生效；婉拒也不会抹去你已取得的考选资格。",
+      "description": "一项正式任用机会由世界提出，是否接受由你决定。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_zhoufu_vacancy",
+        "text": "接受州府司户参军任命。",
+        "effects": []
+      },
+      {
+        "id": "decline_zhoufu_vacancy",
+        "text": "婉拒此次任命，保留考选资格。",
+        "effects": []
+      }
+    ],
+    "metadata": { "tags": ["州府任用", "正式任命"] }
   }
 ]

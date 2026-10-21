@@ -49,6 +49,7 @@ import relationshipEventsJson from '../data/lines/relationship.json';
 import merchantLineEventsJson from '../data/lines/merchant.json';
 import scholarOfficialPursuitEventsJson from '../data/lines/scholar-official-pursuit.json';
 import sampleLinesSpineEventsJson from '../data/lines/sample-lines-spine.json';
+import { SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID } from './scholarOfficialPursuit';
 
 // import pathExamplesJson from '../data/lines/path-examples.json';
 
@@ -366,6 +367,10 @@ export class EventLoader {
    * 获取事件在指定年龄下的权重
    */
   public getWeightForAge(event: EventDefinition, age: number): number {
+    if (event.id === SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID) {
+      return age >= event.ageRange.min ? event.weight ?? 0 : 0;
+    }
+
     if (event.ageWeights && event.ageWeights.length > 0) {
       let maxWeight = 0;
       for (const rule of event.ageWeights) {

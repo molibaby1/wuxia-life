@@ -2,8 +2,12 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { createServer } from 'node:http';
 import type { RuntimeEventCatalog } from '../../src/core/RuntimeEventCatalog.js';
+import { EventLoader } from '../../src/core/EventLoader.js';
 import {
   appendScholarOfficialPursuitEntry,
+  SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID,
   SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
   SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY,
 } from '../../src/core/scholarOfficialPursuit.js';
@@ -34,10 +38,13 @@ const schedulerGuardEvent: EventDefinition = {
   choices: [{ id: 'continue', text: '继续', effects: [] }],
 };
 
+const appointmentEvent = EventLoader.getInstance().getEventById(SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID)!;
+const runtimeEvents = [schedulerGuardEvent, appointmentEvent];
+
 const runtimeCatalog: RuntimeEventCatalog = {
-  getAllEvents: () => [schedulerGuardEvent],
-  getEventsByAge: age => age >= 16 && age <= 100 ? [schedulerGuardEvent] : [],
-  getEventById: id => id === schedulerGuardEvent.id ? schedulerGuardEvent : undefined,
+  getAllEvents: () => runtimeEvents,
+  getEventsByAge: age => age >= 16 && age <= 100 ? runtimeEvents : [],
+  getEventById: id => runtimeEvents.find(event => event.id === id),
   getWeightForAge: event => event.weight,
 };
 
@@ -60,7 +67,8 @@ async function createAcceptedFixture(
   deviceToken: string,
   slotIndex: number,
   playerName: string,
-  pendingEvent = false,
+  pendingEvent: boolean | 'appointment' = false,
+  passingExam = false,
 ): Promise<PursuitCursor> {
   const created = await gameService.createNewSession(db, env, {
     deviceToken,
@@ -75,16 +83,37 @@ async function createAcceptedFixture(
   snapshot.state.player.knowledge = 20;
   snapshot.state.currentTime = { ...invitationDate };
   delete snapshot.state.pendingStoryEventId;
-  const acceptedState = appendScholarOfficialPursuitEntry(snapshot.state as unknown as GameState, {
+  let acceptedState = appendScholarOfficialPursuitEntry(snapshot.state as unknown as GameState, {
     type: 'invitation_response',
     date: { ...invitationDate },
     age: 20,
     sourceEventId: SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
     response: 'accepted',
   });
+  let fixtureDate = invitationDate;
+  if (passingExam) {
+    const examStart = { year: 4, month: 6, day: 3 };
+    fixtureDate = { year: 4, month: 7, day: 3 };
+    acceptedState = appendScholarOfficialPursuitEntry({ ...acceptedState, currentTime: fixtureDate }, {
+      type: 'exam_attempt',
+      attemptNumber: 1,
+      startedAt: examStart,
+      completedAt: fixtureDate,
+      ageAtStart: 20,
+      knowledgeAtStart: 20,
+      rulesVersion: 'curve-a-v1',
+      adoptedPassRate: 0.25,
+      result: 'passed',
+    });
+    snapshot.state.currentTime = { ...fixtureDate };
+  }
   snapshot.state.flags = structuredClone(acceptedState.flags);
   snapshot.state.player.flags = structuredClone(acceptedState.player.flags);
-  if (pendingEvent) snapshot.state.pendingStoryEventId = schedulerGuardEvent.id;
+  if (pendingEvent) {
+    snapshot.state.pendingStoryEventId = pendingEvent === 'appointment'
+      ? SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID
+      : schedulerGuardEvent.id;
+  }
 
   const snapRow = await snapshotRepo.insertSnapshot(db, {
     saveSlotId: created.slot.id,
@@ -114,7 +143,7 @@ async function createAcceptedFixture(
     slotVersion: slot.version,
     snapshotId: snapRow.id,
     contentHash: snapRow.content_hash,
-    date: invitationDate,
+    date: fixtureDate,
     titleBefore: snapshot.state.player.title ?? null,
   };
 }
@@ -144,6 +173,18 @@ async function run(): Promise<void> {
     const abandon = await createAcceptedFixture(db, env, abandonDevice.deviceToken, 1, '求仕放弃侠');
     const pendingDevice = await bootstrapDevice(db, env);
     const pending = await createAcceptedFixture(db, env, pendingDevice.deviceToken, 1, '待决事件侠', true);
+    const appointmentDevice = await bootstrapDevice(db, env);
+    const appointment = await createAcceptedFixture(
+      db, env, appointmentDevice.deviceToken, 1, '州府任用侠', 'appointment', true,
+    );
+    const refusalDevice = await bootstrapDevice(db, env);
+    const refusal = await createAcceptedFixture(
+      db, env, refusalDevice.deviceToken, 1, '婉拒州府任用侠', 'appointment', true,
+    );
+    const rollbackAppointmentDevice = await bootstrapDevice(db, env);
+    const rollbackAppointment = await createAcceptedFixture(
+      db, env, rollbackAppointmentDevice.deviceToken, 1, '任用回滚侠', 'appointment', true,
+    );
 
     const request = (
       cursor: PursuitCursor,
@@ -165,6 +206,147 @@ async function run(): Promise<void> {
       expectedSnapshotId: cursor.snapshotId,
       operation,
     });
+    const choiceRequest = (cursor: PursuitCursor, choiceId: string) => fetch(
+      `${baseUrl}/v1/sessions/${cursor.sessionId}/choices`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-device-token': cursor.deviceToken,
+          'x-session-token': cursor.sessionToken,
+        },
+        body: JSON.stringify({
+          expectedSlotVersion: cursor.slotVersion,
+          expectedSnapshotId: cursor.snapshotId,
+          eventId: SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID,
+          choiceId,
+        }),
+      },
+    );
+
+    const acceptedAppointmentResponses = await Promise.all([
+      choiceRequest(appointment, SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID),
+      choiceRequest(appointment, SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID),
+    ]);
+    assert.deepEqual(acceptedAppointmentResponses.map(response => response.status).sort(), [200, 409],
+      'Server CAS admits exactly one concurrent appointment acceptance');
+    const appointmentResponse = acceptedAppointmentResponses.find(response => response.status === 200);
+    assert.ok(appointmentResponse);
+    const appointmentResult = await appointmentResponse.json() as {
+      slotVersion: number;
+      snapshotId: string;
+      contentHash: string;
+      sessionPhase: string;
+      scholarOfficialPursuit: { status: string; appointmentAccepted: boolean };
+    };
+    assert.equal(appointmentResult.slotVersion, appointment.slotVersion + 1);
+    assert.equal(appointmentResult.scholarOfficialPursuit.status, 'completed');
+    assert.equal(appointmentResult.scholarOfficialPursuit.appointmentAccepted, true);
+    const persistedAppointment = await snapshotRepo.getSnapshotById(db, appointmentResult.snapshotId);
+    assert.ok(persistedAppointment);
+    assert.deepEqual(persistedAppointment.snapshot.state.currentTime, appointment.date,
+      'the real Server Choice leaves the offer and decision on the same game date');
+    const appointmentLedger = persistedAppointment.snapshot.state.flags[SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY] as {
+      entries: Array<Record<string, unknown>>;
+    };
+    const acceptedAppointmentEntry = appointmentLedger.entries[appointmentLedger.entries.length - 1];
+    assert.equal(appointmentLedger.entries.length, 3, 'the Server transaction persists exactly one appointment decision');
+    assert.equal(acceptedAppointmentEntry?.type, 'appointment_decision');
+    assert.equal(acceptedAppointmentEntry?.response, 'accepted');
+    assert.deepEqual(acceptedAppointmentEntry?.offeredAt, appointment.date);
+    assert.deepEqual(acceptedAppointmentEntry?.decidedAt, appointment.date);
+    assert.deepEqual(acceptedAppointmentEntry?.effectiveAt, appointment.date);
+    const appointmentReplay = await db.query<{
+      action_type: string;
+      event_id: string | null;
+      choice_id: string | null;
+      snapshot_hash_before: string;
+      snapshot_hash_after: string;
+    }>(
+      `SELECT action_type, event_id, choice_id, snapshot_hash_before, snapshot_hash_after
+       FROM replay_actions WHERE session_id = $1 AND action_type = 'choice_executed'`,
+      [appointment.sessionId],
+    );
+    assert.equal(appointmentReplay.rows.length, 1, 'the accepted appointment has one persisted replay action');
+    assert.equal(appointmentReplay.rows[0]?.event_id, SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID);
+    assert.equal(appointmentReplay.rows[0]?.choice_id, SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID);
+    assert.equal(appointmentReplay.rows[0]?.snapshot_hash_before, appointment.contentHash);
+    assert.equal(appointmentReplay.rows[0]?.snapshot_hash_after, appointmentResult.contentHash);
+    const appointmentCheckpoint = await db.query<{ snapshot_id: string; checkpoint_state: string; phase: string | null }>(
+      'SELECT snapshot_id, checkpoint_state, phase FROM save_slot_progression_checkpoints WHERE save_slot_id = $1',
+      [appointment.slotId],
+    );
+    assert.equal(appointmentCheckpoint.rows[0]?.snapshot_id, appointmentResult.snapshotId,
+      'the checkpoint advances atomically with the appointment Snapshot');
+    assert.equal(appointmentCheckpoint.rows[0]?.checkpoint_state, 'pending');
+    assert.equal(appointmentCheckpoint.rows[0]?.phase, appointmentResult.sessionPhase,
+      'the checkpoint preserves the post-choice progression phase for recovery');
+    const restoredAppointment = await gameService.restoreSession(db, env, {
+      deviceToken: appointment.deviceToken,
+      slotIndex: appointment.slotIndex,
+    }, runtimeCatalog);
+    assert.equal(restoredAppointment.scholarOfficialPursuit.status, 'completed',
+      'database recovery retains the accepted appointment and completed objective');
+    assert.equal(restoredAppointment.scholarOfficialPursuit.appointmentAccepted, true,
+      'database recovery retains the appointment acceptance in the existing read-only projection');
+    assert.equal((await choiceRequest(appointment, SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID)).status, 409,
+      'a stale replay of the appointment Choice is rejected by slot and Snapshot CAS');
+
+    const refusalResponse = await choiceRequest(refusal, SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID);
+    assert.equal(refusalResponse.status, 200, 'the real Server Choice path accepts an appointment refusal');
+    const refusalResult = await refusalResponse.json() as {
+      snapshotId: string;
+      scholarOfficialPursuit: { status: string; appointmentAccepted: boolean };
+    };
+    assert.equal(refusalResult.scholarOfficialPursuit.status, 'active');
+    assert.equal(refusalResult.scholarOfficialPursuit.appointmentAccepted, false);
+    const persistedRefusal = await snapshotRepo.getSnapshotById(db, refusalResult.snapshotId);
+    assert.ok(persistedRefusal);
+    const refusalLedger = persistedRefusal.snapshot.state.flags[SCHOLAR_OFFICIAL_PURSUIT_LEDGER_KEY] as {
+      entries: Array<Record<string, unknown>>;
+    };
+    const declinedAppointmentEntry = refusalLedger.entries[refusalLedger.entries.length - 1];
+    assert.equal(declinedAppointmentEntry?.response, 'declined');
+    assert.equal(Object.prototype.hasOwnProperty.call(declinedAppointmentEntry, 'effectiveAt'), false);
+    assert.deepEqual(declinedAppointmentEntry?.decidedAt, refusal.date);
+
+    const appointmentTriggerName = `fail_zhoufu_audit_${randomUUID().replace(/-/g, '').slice(0, 12)}`;
+    const appointmentFunctionName = `${appointmentTriggerName}_fn`;
+    await db.query(`CREATE FUNCTION ${appointmentFunctionName}() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.action_type = 'choice_executed' AND NEW.event_id = '${SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID}' THEN RAISE EXCEPTION 'forced appointment audit failure'; END IF; RETURN NEW; END $$`);
+    await db.query(`CREATE TRIGGER ${appointmentTriggerName} BEFORE INSERT ON replay_actions FOR EACH ROW EXECUTE FUNCTION ${appointmentFunctionName}()`);
+    try {
+      const failedAppointment = await choiceRequest(rollbackAppointment, SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID);
+      assert.equal(failedAppointment.status, 500, 'replay audit failure aborts the appointment transaction');
+    } finally {
+      await db.query(`DROP TRIGGER IF EXISTS ${appointmentTriggerName} ON replay_actions`);
+      await db.query(`DROP FUNCTION IF EXISTS ${appointmentFunctionName}()`);
+    }
+    const appointmentRollbackSlot = await db.query<{ current_snapshot_id: string; version: number }>(
+      'SELECT current_snapshot_id, version FROM save_slots WHERE id = $1', [rollbackAppointment.slotId],
+    );
+    assert.deepEqual(appointmentRollbackSlot.rows[0], {
+      current_snapshot_id: rollbackAppointment.snapshotId,
+      version: rollbackAppointment.slotVersion,
+    }, 'failed appointment persistence rolls back the slot and Snapshot CAS');
+    const appointmentRollbackCheckpoint = await db.query<{ checkpoint_state: string; snapshot_id: string }>(
+      'SELECT checkpoint_state, snapshot_id FROM save_slot_progression_checkpoints WHERE save_slot_id = $1',
+      [rollbackAppointment.slotId],
+    );
+    assert.deepEqual(appointmentRollbackCheckpoint.rows[0], {
+      checkpoint_state: 'clear',
+      snapshot_id: rollbackAppointment.snapshotId,
+    });
+    const appointmentRollbackReplay = await db.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM replay_actions WHERE session_id = $1 AND event_id = $2`,
+      [rollbackAppointment.sessionId, SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID],
+    );
+    assert.equal(appointmentRollbackReplay.rows[0]?.count, '0', 'failed appointment persistence leaves no replay row');
+    const appointmentRollbackSnapshots = await db.query<{ count: string }>(
+      'SELECT COUNT(*)::text AS count FROM game_snapshots WHERE save_slot_id = $1', [rollbackAppointment.slotId],
+    );
+    assert.equal(appointmentRollbackSnapshots.rows[0]?.count, '2',
+      'failed appointment persistence leaves no orphan Snapshot');
 
     assert.equal((await request(exam, bodyFor(exam, 'pass'))).status, 422, 'unknown operations are rejected');
     assert.equal((await request(exam, { ...bodyFor(exam, 'take_exam'), passRate: 1 })).status, 422,

@@ -34,6 +34,9 @@ import factionEventsJson from '../src/data/lines/faction-revelation.json';
 import setbackEventsJson from '../src/data/lines/setback-events.json';
 import scholarOfficialPursuitEventsJson from '../src/data/lines/scholar-official-pursuit.json';
 import {
+  SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID,
+  SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID,
   SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID,
   SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID,
   SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID,
@@ -270,7 +273,18 @@ function hasExecutableEffects(event: EventDefinition): boolean {
 }
 
 function hasScholarOfficialPursuitLedgerSettlement(event: EventDefinition): boolean {
-  if (event.id !== SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID || event.eventType !== 'choice') {
+  const ledgerBackedChoices = new Map<string, readonly [string, string]>([
+    [SCHOLAR_OFFICIAL_PURSUIT_INVITATION_EVENT_ID, [
+      SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID,
+      SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID,
+    ]],
+    [SCHOLAR_OFFICIAL_APPOINTMENT_EVENT_ID, [
+      SCHOLAR_OFFICIAL_APPOINTMENT_ACCEPT_CHOICE_ID,
+      SCHOLAR_OFFICIAL_APPOINTMENT_DECLINE_CHOICE_ID,
+    ]],
+  ]);
+  const expectedChoiceIds = ledgerBackedChoices.get(event.id);
+  if (!expectedChoiceIds || event.eventType !== 'choice') {
     return false;
   }
 
@@ -285,12 +299,11 @@ function hasScholarOfficialPursuitLedgerSettlement(event: EventDefinition): bool
     return false;
   }
 
-  // GameEngineIntegration.executeChoiceEffects validates this pending invitation and its two fixed choices,
+  // GameEngineIntegration.executeChoiceEffects validates the pending case event and its fixed choices,
   // then appends the response through appendScholarOfficialPursuitEntry.
   const choiceIds = new Set(choices.map(choice => choice.id));
   return choiceIds.size === 2
-    && choiceIds.has(SCHOLAR_OFFICIAL_PURSUIT_ACCEPT_CHOICE_ID)
-    && choiceIds.has(SCHOLAR_OFFICIAL_PURSUIT_DECLINE_CHOICE_ID);
+    && expectedChoiceIds.every(choiceId => choiceIds.has(choiceId));
 }
 
 function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, string> {

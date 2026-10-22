@@ -53,6 +53,7 @@ const {
   handleChoice: apiHandleChoice,
   handleActiveAction: apiHandleActiveAction,
   handleMarketStallAction: apiHandleMarketStallAction,
+  handleScholarOfficialPursuitAction: apiHandleScholarOfficialPursuitAction,
   handleProgressionAck: apiHandleProgressionAck,
   saveCurrentGame: apiSaveCurrentGame,
   activeSession,
@@ -244,10 +245,12 @@ const onApiManualSave = async () => {
         :api-player="apiPlayer"
         :api-life-memory="apiLifeMemory"
         :market-stall-objective="activeSession?.marketStallObjective ?? null"
+        :scholar-official-pursuit="activeSession?.scholarOfficialPursuit ?? null"
         :progression-overlay="progressionOverlay"
         :api-automatic-advance-error="apiEngineState.automaticAdvanceError"
         @choice="onChoice"
         @market-stall-action="apiHandleMarketStallAction"
+        @scholar-official-pursuit-action="apiHandleScholarOfficialPursuitAction"
         @manual-save="onApiManualSave"
         @api-progression-ack="onApiProgressionAck"
       />
@@ -257,6 +260,7 @@ const onApiManualSave = async () => {
       v-else
       :player="endingPlayer"
       :life-memory="endingLifeMemory"
+      :scholar-official-pursuit="activeSession?.scholarOfficialPursuit ?? null"
       :ending="endingInfo"
       @restart="handleRestart"
     />

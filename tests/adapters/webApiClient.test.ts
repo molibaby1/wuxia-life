@@ -48,6 +48,102 @@ export async function runWebApiClientTests(): Promise<void> {
     );
     assert(response.sessionPhase === 'active_planning', 'market stall action response');
 
+    const scholarPayload = {
+      sessionPhase: 'action_summary',
+      slotVersion: 5,
+      snapshotId: 'snapshot-scholar-next',
+      scholarOfficialPursuit: {
+        status: 'active',
+        stage: 'qualified_waiting_appointment',
+        examAttempts: 1,
+        latestExamResult: 'passed',
+        latestExam: { result: 'passed', completedAt: { year: 5, month: 2, day: 3 } },
+      },
+    };
+    globalThis.fetch = async (input, init) => {
+      requestUrl = String(input);
+      requestInit = init;
+      return new Response(JSON.stringify(scholarPayload), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    };
+    const scholarResponse = await client.executeScholarOfficialPursuitAction({
+      deviceToken: 'device-token',
+      sessionId: 'session-id',
+      sessionToken: 'session-token',
+      expectedSlotVersion: 4,
+      expectedSnapshotId: 'snapshot-id',
+      operation: 'take_exam',
+    });
+    assert(
+      requestUrl === 'https://api.example.test/v1/sessions/session-id/scholar-official-pursuit-actions',
+      'scholar pursuit action route',
+    );
+    assert(requestInit?.method === 'POST', 'scholar pursuit action method');
+    const scholarHeaders = new Headers(requestInit?.headers);
+    assert(scholarHeaders.get('X-Device-Token') === 'device-token', 'scholar device token header');
+    assert(scholarHeaders.get('X-Session-Token') === 'session-token', 'scholar session token header');
+    assert(
+      requestInit?.body === JSON.stringify({
+        expectedSlotVersion: 4,
+        expectedSnapshotId: 'snapshot-id',
+        operation: 'take_exam',
+      }),
+      'scholar pursuit action sends only CAS identifiers and operation',
+    );
+    assert(
+      scholarResponse.scholarOfficialPursuit.latestExam?.result === 'passed',
+      'scholar pursuit action returns the server projection',
+    );
+
+    for (const [status, code, category] of [
+      [401, 'UNAUTHORIZED', 'auth'],
+      [409, 'STALE_SLOT_VERSION', 'conflict'],
+    ] as const) {
+      globalThis.fetch = async () => new Response(
+        JSON.stringify({ error: { code, message: 'request rejected' } }),
+        { status, headers: { 'Content-Type': 'application/json' } },
+      );
+      let received: unknown;
+      try {
+        await client.executeScholarOfficialPursuitAction({
+          deviceToken: 'device-token',
+          sessionId: 'session-id',
+          sessionToken: 'session-token',
+          expectedSlotVersion: 4,
+          expectedSnapshotId: 'snapshot-id',
+          operation: 'abandon',
+        });
+      } catch (cause) {
+        received = cause;
+      }
+      assert(
+        received instanceof WebApiClientError &&
+          received.code === code && received.category === category,
+        `scholar pursuit ${code} keeps the existing API error mapping`,
+      );
+    }
+
+    globalThis.fetch = async () => { throw new Error('offline'); };
+    let networkError: unknown;
+    try {
+      await client.executeScholarOfficialPursuitAction({
+        deviceToken: 'device-token',
+        sessionId: 'session-id',
+        sessionToken: 'session-token',
+        expectedSlotVersion: 4,
+        expectedSnapshotId: 'snapshot-id',
+        operation: 'abandon',
+      });
+    } catch (cause) {
+      networkError = cause;
+    }
+    assert(
+      networkError instanceof WebApiClientError && networkError.category === 'network',
+      'scholar pursuit network failure keeps the existing API error mapping',
+    );
+
     requestUrl = '';
     requestInit = undefined;
     globalThis.fetch = async (input, init) => {

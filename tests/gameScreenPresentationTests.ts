@@ -168,4 +168,107 @@ assert(
   'failed API auto-advance must offer retry instead of restoring the ordinary continue step',
 );
 
+assert(
+  source.includes('v-if="scholarOfficialPursuit"') &&
+    source.includes("projection?.status === 'none'") &&
+    source.includes('scholarOfficialPursuit.status'),
+  'a declined or absent invitation must not render as an accepted pursuit',
+);
+assert(
+  source.includes('scholarOfficialPursuit.latestExam') &&
+    source.includes('scholarOfficialPursuit.examAttempts') &&
+    source.includes('scholarOfficialPursuit.nextExamEligibleAt'),
+  'the pursuit card must show authoritative exam history and eligibility dates',
+);
+assert(
+  source.includes("'waiting_for_exam_age'") &&
+    source.includes("'waiting_for_knowledge'") &&
+    source.includes("'exam_cooldown'") &&
+    source.includes("'ready_to_take_exam'") &&
+    source.includes("'qualified_waiting_appointment'") &&
+    source.includes("'death_unfinished'") &&
+    source.includes("'terminal_unfinished'") &&
+    source.includes("'abandoned'") &&
+    source.includes("'completed'") &&
+    source.includes("'invalid'"),
+  'every authoritative pursuit state must have an explicit player-facing explanation',
+);
+assert(
+  source.includes('scholarOfficialPursuit.canTakeExam') &&
+    source.includes('scholarOfficialPursuit.canAbandon') &&
+    source.includes("apiSessionPhase === 'active_planning'") &&
+    source.includes("emit('scholar-official-pursuit-action', 'take_exam')") &&
+    source.includes("emit('scholar-official-pursuit-action', 'abandon')"),
+  'exam and abandon buttons must use server permissions and the existing planning phase',
+);
+assert(
+  source.includes('ScholarOfficialPursuitSessionView') &&
+    !source.includes('p138_scholar_official_pursuit_ledger'),
+  'the client must use the official read-only DTO without referring to the authoritative ledger',
+);
+assert(
+  appSource.includes(':scholar-official-pursuit="activeSession?.scholarOfficialPursuit ?? null"') &&
+    appSource.includes('@scholar-official-pursuit-action="apiHandleScholarOfficialPursuitAction"'),
+  'App must pass the server projection and bind the API operation handler',
+);
+const scholarHandlerStart = apiEngineSource.indexOf('async function handleScholarOfficialPursuitAction');
+const scholarHandlerEnd = apiEngineSource.indexOf('async function requestProgressionAck', scholarHandlerStart);
+const scholarHandler = apiEngineSource.slice(scholarHandlerStart, scholarHandlerEnd);
+assert(
+  scholarHandler.includes("engineState.sessionPhase !== 'active_planning'") &&
+    scholarHandler.includes('canTakeExam') &&
+    scholarHandler.includes('canAbandon') &&
+    scholarHandler.includes('apiClient.executeScholarOfficialPursuitAction') &&
+    scholarHandler.includes('applyProgressionResponse(result)'),
+  'the API handler must guard phase and server projection, then refresh from the returned progression',
+);
+assert(
+  scholarHandler.includes('result.activeActionSummary?.actionName') &&
+    scholarHandler.includes('buildScholarExamResultOverlayCard') &&
+    !scholarHandler.includes('requestProgressionAck('),
+  'exam feedback must use the safe server action name and official projection without auto-confirming it',
+);
+const scholarResultCardStart = apiEngineSource.indexOf('function buildScholarExamResultOverlayCard');
+const scholarResultCardEnd = apiEngineSource.indexOf('function applyProgressionToEngine', scholarResultCardStart);
+const scholarResultCard = apiEngineSource.slice(scholarResultCardStart, scholarResultCardEnd);
+assert(
+  scholarResultCard.includes('pursuit.latestExam') &&
+    scholarResultCard.includes('pursuit.nextExamEligibleAt') &&
+    !scholarResultCard.includes('resultExplanation?.trim()'),
+  'exam feedback must be rebuilt from authoritative exam facts instead of leaking internal action-summary details',
+);
+assert(
+  /<p\s+v-if="scholarOfficialPursuit\.status === 'invalid'"\s+class="event-kicker"\s*>\s*求仕记录异常\s*<\/p>\s*<p\s+v-else\s+class="event-kicker">我接受的追求<\/p>/.test(source),
+  'an invalid pursuit projection must use neutral wording instead of claiming the player accepted the pursuit',
+);
+assert(
+  /<ul\s+v-if="scholarOfficialPursuit\.status !== 'invalid'"\s+class="accepted-objective-facts"\s*>[\s\S]*?接受日期：/.test(source),
+  'acceptance date and pursuit facts must only appear when the official projection confirms a valid pursuit',
+);
+assert(
+  source.includes("v-if=\"apiSessionPhase === 'active_planning' && scholarOfficialPursuit.status === 'active'") &&
+    source.includes("v-if=\"scholarOfficialPursuit.status === 'invalid'\""),
+  'an invalid pursuit projection must remain non-actionable',
+);
+assert(
+  apiEngineSource.includes("response.activeActionSummary.actionName === '赴考应试'") &&
+    apiEngineSource.includes('scholar-exam-restored-'),
+  'restored exam results must retain the safe presentation through explicit confirmation',
+);
+const scholarProjectionBinding = ':scholar-official-pursuit="activeSession?.scholarOfficialPursuit ?? null"';
+assert(
+  appSource.split(scholarProjectionBinding).length - 1 >= 2,
+  'the same authoritative projection must remain available to the terminal view',
+);
+const endingSource = readFileSync(resolve(process.cwd(), 'src/components/EndingScreen.vue'), 'utf8');
+assert(
+  endingSource.includes('scholarOfficialPursuit') &&
+    endingSource.includes("pursuit.status !== 'none'") &&
+    endingSource.includes("case 'completed'") &&
+    endingSource.includes("case 'abandoned'") &&
+    !endingSource.includes('canTakeExam') &&
+    !endingSource.includes('take_exam'),
+  'terminal review must preserve scholar pursuit history without exposing actions',
+);
+
 console.log('gameScreenPresentationTests: ok');

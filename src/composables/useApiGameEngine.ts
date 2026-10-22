@@ -1,5 +1,8 @@
 import { computed, reactive, ref } from 'vue';
-import type { SessionProgressionPayload } from '../contracts/sessionProgression';
+import type {
+  ScholarOfficialPursuitSessionView,
+  SessionProgressionPayload,
+} from '../contracts/sessionProgression';
 import {
   createWebApiClient,
   WebApiClientError,
@@ -14,6 +17,7 @@ import {
   buildPeriodSummaryOverlayCards,
   buildPlayerDeltaOverlayCard,
   buildStageResultOverlayCard,
+  type ProgressionOverlayCard,
   type ProgressionOverlayPayload,
 } from '../types/progressionOverlay';
 import type { ProgressionAckKind } from '../contracts/sessionProgression';
@@ -29,6 +33,36 @@ export type ApiFlowState =
   | 'ready';
 
 const apiClient = createWebApiClient();
+
+function buildScholarExamResultOverlayCard(
+  id: string,
+  actionName: string,
+  pursuit: ScholarOfficialPursuitSessionView,
+): ProgressionOverlayCard {
+  const exam = pursuit.latestExam;
+  const completedDate = exam
+    ? `${exam.completedAt.year}年${exam.completedAt.month}月${exam.completedAt.day}日`
+    : null;
+  const resultExplanation = exam?.result === 'passed'
+    ? '此次考中，你取得了考选资格，仍需等待官府可能提供的任用机会；这不代表已经授官。'
+    : exam?.result === 'failed'
+      ? `此次未能考中，仍可继续求仕；最早可于${pursuit.nextExamEligibleAt
+          ? `${pursuit.nextExamEligibleAt.year}年${pursuit.nextExamEligibleAt.month}月${pursuit.nextExamEligibleAt.day}日`
+          : '满12个月后'}再次报考。`
+      : '服务器尚未返回可核实的考试结果，请重新载入存档查看当前状态。';
+
+  return {
+    id,
+    title: actionName,
+    body: resultExplanation,
+    metaLines: exam && completedDate
+      ? [
+          `本次考试：${exam.result === 'passed' ? '考中' : '落选'}（${completedDate}）`,
+          `累计报考：${pursuit.examAttempts} 次`,
+        ]
+      : [],
+  };
+}
 
 function applyProgressionToEngine(
   engineState: {
@@ -213,10 +247,16 @@ export function useApiGameEngine() {
         );
         engineState.progressionOverlay = { cards: resultCards };
       } else if (response.sessionPhase === 'action_summary' && response.activeActionSummary) {
-        const resultCard = buildActiveActionOverlayCard(
-          `active-action-restored-${response.snapshot.id}`,
-          response.activeActionSummary,
-        );
+        const resultCard = response.activeActionSummary.actionName === '赴考应试'
+          ? buildScholarExamResultOverlayCard(
+              `scholar-exam-restored-${response.snapshot.id}`,
+              response.activeActionSummary.actionName,
+              response.scholarOfficialPursuit,
+            )
+          : buildActiveActionOverlayCard(
+              `active-action-restored-${response.snapshot.id}`,
+              response.activeActionSummary,
+            );
         engineState.progressionOverlay = { cards: [resultCard] };
       }
       flowState.value = 'ready';
@@ -388,6 +428,66 @@ export function useApiGameEngine() {
     }
   }
 
+  async function handleScholarOfficialPursuitAction(
+    operation: 'take_exam' | 'abandon',
+  ): Promise<void> {
+    if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
+    if (engineState.sessionPhase !== 'active_planning') return;
+    const currentSession = activeSession.value;
+    const pursuit = currentSession.scholarOfficialPursuit;
+    const canPerform = operation === 'take_exam' ? pursuit.canTakeExam : pursuit.canAbandon;
+    if (pursuit.status !== 'active' || !canPerform) return;
+
+    isProcessing.value = true;
+    try {
+      const sessionId = webPlatformStorage.getSessionId();
+      const sessionToken = webPlatformStorage.getSessionToken();
+      if (!sessionId || !sessionToken) {
+        throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
+      }
+      const result = await apiClient.executeScholarOfficialPursuitAction({
+        deviceToken: deviceToken.value,
+        sessionId,
+        sessionToken,
+        expectedSlotVersion: currentSession.slot.version,
+        expectedSnapshotId: currentSession.snapshot.id,
+        operation,
+      });
+      applyProgressionResponse(result);
+      engineState.automaticAdvanceError = null;
+      flowState.value = 'ready';
+      flowMessage.value = '';
+
+      if (operation === 'take_exam') {
+        const actionName = result.activeActionSummary?.actionName ?? '赴考应试';
+        engineState.progressionOverlay = {
+          cards: [buildScholarExamResultOverlayCard(
+            `scholar-exam-${result.snapshotId}`,
+            actionName,
+            result.scholarOfficialPursuit,
+          )],
+        };
+      } else {
+        const wasAbandoned = result.scholarOfficialPursuit.status === 'abandoned';
+        engineState.progressionOverlay = {
+          cards: [{
+            id: `scholar-abandon-${result.snapshotId}`,
+            title: wasAbandoned ? '求仕志向已放弃' : '求仕状态已更新',
+            body: wasAbandoned
+              ? result.scholarOfficialPursuit.appointmentAccepted
+                ? '你已收回求仕志向；后来接受的正式任职仍然成立，这项追求依旧记录为已放弃。'
+                : '你已收回这项求仕志向；之后不能再通过这项追求报考。'
+              : '服务器尚未确认这项志向已放弃，请重新载入存档核对。',
+          }],
+        };
+      }
+    } catch (error) {
+      mapApiError(error);
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
   async function requestProgressionAck(ackKind: ProgressionAckKind): Promise<SessionProgressionPayload> {
     if (!apiClient || !deviceToken.value || !activeSession.value) {
       throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
@@ -533,6 +633,7 @@ export function useApiGameEngine() {
     handleChoice,
     handleActiveAction,
     handleMarketStallAction,
+    handleScholarOfficialPursuitAction,
     handleProgressionAck,
     saveCurrentGame,
   };

@@ -180,6 +180,72 @@
         </div>
       </section>
 
+      <section
+        v-if="scholarOfficialPursuit"
+        class="accepted-objective-card card"
+        aria-label="求仕志向"
+      >
+        <header class="accepted-objective-header">
+          <div>
+            <p
+              v-if="scholarOfficialPursuit.status === 'invalid'"
+              class="event-kicker"
+            >
+              求仕记录异常
+            </p>
+            <p v-else class="event-kicker">我接受的追求</p>
+            <h3>寒窗求仕</h3>
+          </div>
+          <span class="accepted-objective-status">{{ scholarOfficialPursuitStatusLabel }}</span>
+        </header>
+        <p class="accepted-objective-description">{{ scholarOfficialPursuitDescription }}</p>
+        <ul
+          v-if="scholarOfficialPursuit.status !== 'invalid'"
+          class="accepted-objective-facts"
+        >
+          <li>接受日期：{{ formatObjectiveDate(scholarOfficialPursuit.invitationDate) }}</li>
+          <li>报考次数：{{ scholarOfficialPursuit.examAttempts }} 次</li>
+          <li v-if="scholarOfficialPursuit.latestExam">
+            最近一次考试：{{ scholarOfficialPursuit.latestExam.result === 'passed' ? '考中' : '落选' }}（{{ formatObjectiveDate(scholarOfficialPursuit.latestExam.completedAt) }}）
+          </li>
+          <li
+            v-if="scholarOfficialPursuit.status === 'active' && scholarOfficialPursuit.stage === 'exam_cooldown' && scholarOfficialPursuit.nextExamEligibleAt"
+          >
+            最早可重考日期：{{ formatObjectiveDate(scholarOfficialPursuit.nextExamEligibleAt) }}
+          </li>
+        </ul>
+        <p
+          v-if="scholarOfficialPursuit.status === 'invalid'"
+          class="accepted-objective-diagnostics"
+          role="status"
+        >
+          已检测到 {{ scholarOfficialPursuit.diagnostics.length }} 项记录异常，当前不能进行求仕操作。请重新载入存档后查看。
+        </p>
+        <div
+          v-if="apiSessionPhase === 'active_planning' && scholarOfficialPursuit.status === 'active' && (scholarOfficialPursuit.canTakeExam || scholarOfficialPursuit.canAbandon)"
+          class="accepted-objective-actions"
+        >
+          <button
+            v-if="scholarOfficialPursuit.canTakeExam"
+            class="choice-btn btn"
+            type="button"
+            :disabled="isAutoPlaying"
+            @click="emit('scholar-official-pursuit-action', 'take_exam')"
+          >
+            赴考应试
+          </button>
+          <button
+            v-if="scholarOfficialPursuit.canAbandon"
+            class="secondary-btn"
+            type="button"
+            :disabled="isAutoPlaying"
+            @click="emit('scholar-official-pursuit-action', 'abandon')"
+          >
+            放弃求仕
+          </button>
+        </div>
+      </section>
+
       <MainScreenLifeSummary
         ref="summarySectionRef"
         class="summary-section"
@@ -218,7 +284,11 @@ import {
 import type { StoryChoice } from '../types';
 
 import type { DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
-import type { SessionPhase, PlayerSummaryDto } from '../contracts/sessionProgression';
+import type {
+  ScholarOfficialPursuitSessionView,
+  SessionPhase,
+  PlayerSummaryDto,
+} from '../contracts/sessionProgression';
 import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { MarketStallObjectiveProjection } from '../core/marketStallObjective';
 import type {
@@ -236,6 +306,7 @@ const props = defineProps<{
   apiPlayer: PlayerSummaryDto;
   apiLifeMemory: LifeMemorySummary;
   marketStallObjective?: MarketStallObjectiveProjection | null;
+  scholarOfficialPursuit?: ScholarOfficialPursuitSessionView | null;
   progressionOverlay?: ProgressionOverlayPayload | null;
   apiAutomaticAdvanceError?: string | null;
 }>();
@@ -244,10 +315,78 @@ const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
   (e: 'manual-save'): void;
   (e: 'market-stall-action', operation: 'attempt' | 'abandon'): void;
+  (e: 'scholar-official-pursuit-action', operation: 'take_exam' | 'abandon'): void;
   (e: 'api-progression-ack'): void;
 }>();
 
 const marketStallObjective = computed(() => props.marketStallObjective ?? null);
+
+const scholarOfficialPursuit = computed(() => {
+  const projection = props.scholarOfficialPursuit ?? null;
+  return projection?.status === 'none' ? null : projection;
+});
+
+const scholarOfficialPursuitStatusLabel = computed(() => {
+  const pursuit = scholarOfficialPursuit.value;
+  if (!pursuit) return '';
+  if (pursuit.status === 'active') {
+    switch (pursuit.stage) {
+      case 'waiting_for_exam_age': return '等待报考年龄';
+      case 'waiting_for_knowledge': return '等待学识达标';
+      case 'exam_cooldown': return '等待再次报考';
+      case 'ready_to_take_exam': return '可以赴考';
+      case 'qualified_waiting_appointment': return '等待官府任用';
+      default: return '进行中';
+    }
+  }
+  const labels: Record<Exclude<ScholarOfficialPursuitSessionView['status'], 'active' | 'none'>, string> = {
+    abandoned: '已放弃',
+    completed: '已完成',
+    death_unfinished: '离世时未完成',
+    terminal_unfinished: '人生终局未完成',
+    invalid: '记录异常',
+  };
+  return labels[pursuit.status];
+});
+
+const scholarOfficialPursuitDescription = computed(() => {
+  const pursuit = scholarOfficialPursuit.value;
+  if (!pursuit) return '';
+  if (pursuit.status === 'active') {
+    switch (pursuit.stage) {
+      case 'waiting_for_exam_age':
+        return `你目前 ${props.apiPlayer.age} 岁，年满 18 岁后才可报考。`;
+      case 'waiting_for_knowledge':
+        return `你目前学识为 ${props.apiPlayer.knowledge}，达到 20 后才可报考。`;
+      case 'exam_cooldown':
+        return pursuit.nextExamEligibleAt
+          ? `上次落选后须等满 12 个月，最早可于${formatObjectiveDate(pursuit.nextExamEligibleAt)}再次报考。`
+          : '上次落选后须等满 12 个月，之后才可再次报考。';
+      case 'ready_to_take_exam':
+        return '你已达到报考条件。赴考耗时一个游戏月；考中只取得考选资格，仍需等待官府可能提供任用机会。';
+      case 'qualified_waiting_appointment':
+        return '你已考中并取得考选资格，正在等待官府是否提供任用机会；考中不等于已经授官。';
+      default:
+        return '求仕志向仍在继续，当前状态暂不可操作。';
+    }
+  }
+  switch (pursuit.status) {
+    case 'abandoned':
+      return pursuit.appointmentAccepted
+        ? '你已放弃这项求仕志向；后来接受的正式任职仍然成立，但求仕目标保持已放弃。'
+        : '你已主动放弃这项求仕志向，不能再通过它报考。';
+    case 'completed':
+      return '你已接受正式任命，这项求仕目标已经完成。';
+    case 'death_unfinished':
+      return '离世时，这项求仕志向尚未完成。';
+    case 'terminal_unfinished':
+      return '人生走到终局时，这项求仕志向尚未完成。';
+    case 'invalid':
+      return '这项求仕记录暂时无法核实，当前不能进行求仕操作。';
+    default:
+      return '';
+  }
+});
 
 const marketStallStatusLabel = computed(() => {
   const labels: Record<MarketStallObjectiveProjection['status'], string> = {

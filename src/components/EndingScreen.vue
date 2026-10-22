@@ -21,6 +21,24 @@
           <p><strong>终局原型：</strong>{{ endingInfo?.name || '人生落幕' }}</p>
           <p v-if="endingInfo?.description">{{ endingInfo.description }}</p>
         </div>
+
+        <section
+          v-if="showScholarOfficialPursuit"
+          class="scholar-pursuit-review"
+          aria-label="求仕志向回顾"
+        >
+          <p><strong>求仕志向：</strong>{{ scholarOfficialPursuitStatus }}</p>
+          <p>{{ scholarOfficialPursuitSummary }}</p>
+          <ul>
+            <li v-if="scholarOfficialPursuit?.invitationDate">
+              接受日期：{{ formatPursuitDate(scholarOfficialPursuit.invitationDate) }}
+            </li>
+            <li>报考次数：{{ scholarOfficialPursuit?.examAttempts ?? 0 }} 次</li>
+            <li v-if="scholarOfficialPursuit?.latestExam">
+              最近一次考试：{{ scholarOfficialPursuit.latestExam.result === 'passed' ? '考中' : '落选' }}（{{ formatPursuitDate(scholarOfficialPursuit.latestExam.completedAt) }}）
+            </li>
+          </ul>
+        </section>
         
         <div class="final-stats">
           <h3>人生回顾</h3>
@@ -57,6 +75,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { getAffiliationDefinition } from '../core/affiliationCatalog';
+import type { ScholarOfficialPursuitSessionView } from '../contracts/sessionProgression';
 import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { AffiliationId } from '../types/eventTypes';
 
@@ -72,14 +91,51 @@ const props = defineProps<{
     chivalry?: number;
   } | null;
   lifeMemory?: LifeMemorySummary | null;
+  scholarOfficialPursuit?: ScholarOfficialPursuitSessionView | null;
   ending?: { id: string; name: string; description: string; category: string } | null;
 }>();
 const player = props.player;
 const endingInfo = computed(() => props.ending ?? null);
+const scholarOfficialPursuit = computed(() => props.scholarOfficialPursuit ?? null);
+const showScholarOfficialPursuit = computed(() => {
+  const pursuit = scholarOfficialPursuit.value;
+  return pursuit !== null && pursuit.status !== 'none';
+});
+const scholarOfficialPursuitStatus = computed(() => {
+  const pursuit = scholarOfficialPursuit.value;
+  if (!pursuit) return '';
+  switch (pursuit.status) {
+    case 'abandoned': return '已放弃';
+    case 'completed': return '已完成';
+    case 'death_unfinished': return '离世时未完成';
+    case 'terminal_unfinished': return '人生终局未完成';
+    case 'invalid': return '记录异常';
+    default: return '仍在进行';
+  }
+});
+const scholarOfficialPursuitSummary = computed(() => {
+  const pursuit = scholarOfficialPursuit.value;
+  if (!pursuit) return '';
+  switch (pursuit.status) {
+    case 'abandoned':
+      return pursuit.appointmentAccepted
+        ? '后来接受的正式任职仍然成立；这项求仕目标保持已放弃。'
+        : '离开这条志向不等于人生失败。';
+    case 'completed': return '你已接受正式任命，这项求仕目标已经完成。';
+    case 'death_unfinished': return '离世时，这项求仕志向尚未完成。';
+    case 'terminal_unfinished': return '人生走到终局时，这项求仕志向尚未完成。';
+    case 'invalid': return '求仕记录暂时无法核实，页面未据此推断或改写人生事实。';
+    default: return '人生终局时，这项求仕志向仍未完成。';
+  }
+});
 const affiliationLabel = computed(() => {
   if (!player?.affiliation) return '';
   return getAffiliationDefinition(player.affiliation).displayName;
 });
+
+function formatPursuitDate(value: { year: number; month: number; day: number }): string {
+  return `${value.year}年${value.month}月${value.day}日`;
+}
 
 const share = () => {
   const shareText = `${player?.name}的武侠人生：${endingInfo.value?.name ?? player?.deathReason ?? '人生落幕'}！快来试试你的武侠人生吧！`;
@@ -163,6 +219,29 @@ const restart = () => {
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-color);
+}
+
+.scholar-pursuit-review {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(139, 105, 20, 0.2);
+  border-radius: 12px;
+  background: #fffaf1;
+  text-align: left;
+}
+
+.scholar-pursuit-review p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.scholar-pursuit-review ul {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: #655a48;
+  font-size: 13px;
 }
 
 .final-stats {

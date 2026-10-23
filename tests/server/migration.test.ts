@@ -23,6 +23,7 @@ export async function runCheckpointMigrationIsolationTest(databaseUrl: string): 
     await client.query(`SET search_path TO "${schema}"`);
     const initial = await readFile(path.resolve('server/migrations/001_initial_schema.sql'), 'utf8');
     const checkpoint = await readFile(path.resolve('server/migrations/002_progression_checkpoints.sql'), 'utf8');
+    await readFile(path.resolve('server/migrations/003_formal_game_rng_lifecycle.sql'), 'utf8');
     await client.query(initial);
 
     const deviceId = randomUUID();
@@ -74,6 +75,7 @@ export async function runCheckpointMigrationIsolationTest(databaseUrl: string): 
     const secondApplication = await runMigrations(isolatedUrl.toString());
     await closePool();
     assert(firstApplication.includes('002_progression_checkpoints'), 'migration runner applies checkpoint migration in isolated schema');
+    assert(firstApplication.includes('003_formal_game_rng_lifecycle'), 'migration runner applies RNG lifecycle migration in isolated schema');
     assert(secondApplication.length === 0, 'migration runner repeat applies nothing in isolated schema');
 
     const verifyPool = new Pool({ connectionString: databaseUrl });
@@ -98,6 +100,14 @@ export async function runCheckpointMigrationIsolationTest(databaseUrl: string): 
       [occupiedSlotId],
     ).then(() => false, () => true);
     assert(nonObjectPayload, 'payload JSONB constraint rejects non-object values');
+    const missingRngBackfill = await verify.query('SELECT count(*) AS count FROM game_life_rng_states');
+    assert(missingRngBackfill.rows[0]?.count === '0', 'migration does not invent RNG state for existing snapshots');
+    const runtimeColumns = await verify.query<{ runtime_state_version: number; runtime_state: unknown }>(
+      'SELECT runtime_state_version, runtime_state FROM save_slot_progression_checkpoints WHERE save_slot_id = $1',
+      [occupiedSlotId],
+    );
+    assert(runtimeColumns.rows[0]?.runtime_state_version === 0, 'old checkpoints are marked as lacking persisted runtime state');
+    assert(JSON.stringify(runtimeColumns.rows[0]?.runtime_state) === '{}', 'old checkpoint runtime payload stays empty');
     const snapshotsAfter = await verify.query('SELECT id, snapshot, content_hash FROM game_snapshots ORDER BY id');
     assert(JSON.stringify(snapshotsAfter.rows) === JSON.stringify(originalSnapshots.rows), 'migration preserves snapshot JSON and content hashes');
     await verify.query('RESET search_path');
@@ -130,5 +140,13 @@ export async function runMigrationTests(databaseUrl: string): Promise<void> {
     "SELECT version FROM schema_migrations WHERE version = '002_progression_checkpoints'",
   );
   assert(checkpointMigration.rowCount === 1, 'progression checkpoint migration is recorded');
+  const rngMigration = await pool.query<{ version: string }>(
+    "SELECT version FROM schema_migrations WHERE version = '003_formal_game_rng_lifecycle'",
+  );
+  assert(rngMigration.rowCount === 1, 'formal game RNG lifecycle migration is recorded');
+  const rngTable = await pool.query<{ exists: string | null }>(
+    "SELECT to_regclass('game_life_rng_states') AS exists",
+  );
+  assert(rngTable.rows[0]?.exists !== null, 'RNG lifecycle migration creates its independent table');
   await closePool();
 }

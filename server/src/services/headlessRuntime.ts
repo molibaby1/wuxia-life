@@ -10,16 +10,20 @@ import type {
 import { CHOICE_EXECUTION_REQUEST_VERSION } from '../../../src/contracts/choiceExecution.js';
 import type { HeadlessLogger } from '../../../src/headless/dependencies/HeadlessSessionDependencies.js';
 import { noopLogger } from '../../../src/headless/dependencies/HeadlessSessionDependencies.js';
-import { SeededRandomSource } from '../../../src/headless/adapters/randomSource.js';
+import {
+  createDefaultRandomSource,
+  type RandomSource,
+} from '../../../src/headless/adapters/randomSource.js';
 import { progressUntilChoiceOrTerminal } from '../../../src/headless/progressionLoop.js';
 import type { RuntimeEventCatalog } from '../../../src/core/RuntimeEventCatalog.js';
 import type { BackendEnv } from '../config/env.js';
+import { serverRandomSourceScope } from './randomSourceScope.js';
 
 export { progressUntilChoiceOrTerminal };
 
 function serverSessionDeps(
   logger?: HeadlessLogger,
-  seed = 1,
+  random: RandomSource = createDefaultRandomSource(),
   runtimeCatalog?: RuntimeEventCatalog,
 ) {
   return {
@@ -27,7 +31,8 @@ function serverSessionDeps(
     runtimeCatalog,
     snapshot: defaultSnapshotConverter,
     logger: logger ?? noopLogger,
-    random: new SeededRandomSource(seed),
+    random,
+    randomSourceRunner: serverRandomSourceScope,
   };
 }
 
@@ -47,6 +52,7 @@ export function createHeadlessSessionFromNewGame(params: {
   gender: 'male' | 'female';
   catalogVersion: string;
   randomSeed?: number;
+  random?: RandomSource;
   logger?: HeadlessLogger;
   runtimeCatalog?: RuntimeEventCatalog;
 }): HeadlessEngineSession {
@@ -55,9 +61,9 @@ export function createHeadlessSessionFromNewGame(params: {
       playerName: params.playerName,
       gender: params.gender,
       catalogVersion: params.catalogVersion,
-      randomSeed: params.randomSeed ?? Date.now(),
+      ...(params.randomSeed !== undefined ? { randomSeed: params.randomSeed } : {}),
     },
-    serverSessionDeps(params.logger, params.randomSeed ?? 1, params.runtimeCatalog),
+    serverSessionDeps(params.logger, params.random, params.runtimeCatalog),
   );
 }
 
@@ -65,12 +71,13 @@ export async function createHeadlessSessionFromSnapshot(params: {
   snapshot: GameStateSnapshot;
   catalogVersion: string;
   randomSeed?: number;
+  random?: RandomSource;
   logger?: HeadlessLogger;
   runtimeCatalog?: RuntimeEventCatalog;
 }): Promise<HeadlessEngineSession> {
   const session = HeadlessEngineSessionImpl.create(
     { snapshot: params.snapshot },
-    serverSessionDeps(params.logger, params.randomSeed ?? 1, params.runtimeCatalog),
+    serverSessionDeps(params.logger, params.random, params.runtimeCatalog),
   );
   await session.hydrate(params.snapshot);
   return session;
@@ -122,4 +129,13 @@ export async function resolveSessionAfterAutoProgress(session: HeadlessEngineSes
   }
   const next = await session.getNextEvent();
   return { nextEvent: next, phase: session.getSessionPhase() };
+}
+
+/** Describe the persisted Session as-is; restore/read paths must not draw or advance time. */
+export function describeSessionPresentation(session: HeadlessEngineSession) {
+  const phase = session.getSessionPhase();
+  return {
+    nextEvent: phase === 'story_event' ? session.describePendingEvent() : null,
+    phase,
+  };
 }

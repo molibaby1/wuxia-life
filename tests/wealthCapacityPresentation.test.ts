@@ -77,6 +77,7 @@ assertCase('api mapper carries canonical wealth capacity', () => {
       annualPassiveMemory: null,
       pendingStoryEventId: null,
       pendingEphemeralStoryEvent: null,
+      storyGapPassiveServed: false,
     }),
     getRuntimeState: () => ({
       player,

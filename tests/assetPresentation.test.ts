@@ -22,6 +22,7 @@ function makeSession(state: GameState) {
       annualPassiveMemory: null,
       pendingStoryEventId: null,
       pendingEphemeralStoryEvent: null,
+      storyGapPassiveServed: false,
     }),
     getRuntimeState: () => state,
   };

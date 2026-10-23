@@ -22,7 +22,7 @@ import * as gameService from '../../server/src/services/gameService.js';
 import { bootstrapDevice } from '../../server/src/services/deviceService.js';
 import * as saveSlotRepo from '../../server/src/repositories/saveSlotRepository.js';
 import * as snapshotRepo from '../../server/src/repositories/snapshotRepository.js';
-import * as progressionCheckpointRepo from '../../server/src/repositories/progressionCheckpointRepository.js';
+import { persistFixtureRngState, saveFixtureCheckpoint } from './gameLifeRngFixtures.js';
 
 const schedulerGuardEvent: EventDefinition = {
   id: 'p138_scholar_pursuit_scheduler_guard',
@@ -130,7 +130,8 @@ async function createAcceptedFixture(
     snapRow.id,
   );
   assert.ok(slot, 'accepted pursuit fixture becomes the current save');
-  await progressionCheckpointRepo.saveCheckpoint(db, created.slot.id, snapRow.id, {
+  await persistFixtureRngState(db, created.slot.id, created.snapshot.id, snapRow.id);
+  await saveFixtureCheckpoint(db, created.slot.id, snapRow.id, snapshot, {
     protocolVersion: 1,
     state: 'clear',
   });

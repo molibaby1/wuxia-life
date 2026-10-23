@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import type { GameStateSnapshot } from '../../../src/contracts/gameStateSnapshot.js';
 import type { BackendEnv } from '../config/env.js';
 import type { Queryable } from '../db/pool.js';
@@ -9,6 +9,8 @@ import * as snapshotRepo from '../repositories/snapshotRepository.js';
 import * as sessionRepo from '../repositories/sessionRepository.js';
 import * as replayRepo from '../repositories/replayRepository.js';
 import * as checkpointRepo from '../repositories/progressionCheckpointRepository.js';
+import * as lifeRngRepo from '../repositories/gameLifeRngRepository.js';
+import { SeededRandomSource, type SeededRandomState } from '../../../src/headless/adapters/randomSource.js';
 import { HeadlessProgressionError } from '../../../src/headless/session/sessionTypes.js';
 import type { ProgressionAckKind } from '../../../src/contracts/sessionProgression.js';
 import {
@@ -19,6 +21,7 @@ import {
   progressUntilChoiceOrTerminal,
   createProductionLogger,
   resolveSessionAfterAutoProgress,
+  describeSessionPresentation,
 } from './headlessRuntime.js';
 import { mapSessionProgression } from './sessionProgressionMapper.js';
 import { getLatestScholarOfficialPursuitExam } from '../../../src/core/scholarOfficialPursuit.js';
@@ -65,17 +68,103 @@ async function restoreProgressionState(
     throw new ApiError(409, 'PROGRESSION_CHECKPOINT_LEGACY_UNKNOWN',
       '此旧存档的待确认结果无法恢复；存档已保留，请先在存档列表明确选择是否放弃旧结果。');
   }
-  // Only this exact snapshot may supply non-persistent presentation data. The DB
-  // checkpoint always owns settled summaries, even when the cache says otherwise.
-  const volatile = getSnapshotVolatileState(snapshotId) ?? headless.getProgressionVolatileState();
+  const runtime = await checkpointRepo.getCheckpointRuntimeState(client, slotId, snapshotId);
+  const volatile = headless.getProgressionVolatileState();
   headless.applyProgressionVolatileState({
     ...volatile,
+    passiveNarrative: runtime.passiveNarrative,
+    passiveNarrativeId: runtime.passiveNarrativeId,
+    annualPassiveMemory: runtime.annualPassiveMemory,
+    storyGapPassiveServed: runtime.storyGapPassiveServed,
+    pendingEphemeralStoryEvent: runtime.pendingEphemeralStoryEvent,
     pendingActionSummary: null,
     pendingDisturbanceNarrative: null,
     pendingPeriodSummary: null,
     ...(checkpoint.state === 'pending' ? checkpoint.payload : {}),
   });
+  const phase = headless.getSessionPhase();
+  if (phase === 'passive_progression') {
+    try {
+      headless.validatePassiveNarrativeSelection();
+    } catch (error) {
+      if (error instanceof HeadlessProgressionError) {
+        throw new ApiError(422, 'PROGRESSION_CHECKPOINT_INVALID',
+          '已选被动叙事身份无法恢复，系统不会重新抽取其他内容。',
+          { reason: error.message });
+      }
+      throw error;
+    }
+  }
+  if (phase === 'passive_progression' && !runtime.passiveNarrative) {
+    throw new ApiError(422, 'PROGRESSION_CHECKPOINT_INVALID',
+      '已选被动叙事无法恢复，系统不会重新抽取其他内容。', { reason: 'selected passive narrative is missing' });
+  }
+  if (phase === 'story_event' && !headless.describePendingEvent()) {
+    throw new ApiError(422, 'PROGRESSION_CHECKPOINT_INVALID',
+      '已选剧情内容无法恢复，系统不会重新抽取其他剧情。', { reason: 'selected story event is missing' });
+  }
   return checkpoint;
+}
+
+function replayRandomEvidence(
+  lifeId: string,
+  before: SeededRandomState,
+  after: SeededRandomState,
+): Record<string, unknown> {
+  if (before.initialSeed !== after.initialSeed) {
+    throw new ApiError(409, 'GAME_RNG_STATE_INVALID',
+      '人生随机流的初始状态发生变化，已停止保存。');
+  }
+  return {
+    lifeId,
+    algorithm: after.algorithm,
+    algorithmVersion: after.algorithmVersion,
+    initialSeed: after.initialSeed,
+    drawIndexBefore: before.drawIndex,
+    drawIndexAfter: after.drawIndex,
+    stateBefore: before.state,
+    stateAfter: after.state,
+  };
+}
+
+async function persistLifeRngState(
+  client: Queryable,
+  slotId: string,
+  snapshotId: string,
+  lifeId: string,
+  random: SeededRandomSource,
+): Promise<SeededRandomState> {
+  const randomState = random.exportState();
+  await lifeRngRepo.saveLifeRngState(client, { slotId, snapshotId, lifeId, randomState });
+  return randomState;
+}
+
+async function persistSnapshotProgressionState(
+  client: Queryable,
+  params: {
+    slotId: string;
+    snapshotId: string;
+    lifeId: string;
+    headless: Awaited<ReturnType<typeof createHeadlessSessionFromNewGame>>;
+    random: SeededRandomSource;
+  },
+): Promise<SeededRandomState> {
+  const randomState = await persistLifeRngState(
+    client,
+    params.slotId,
+    params.snapshotId,
+    params.lifeId,
+    params.random,
+  );
+  const volatile = params.headless.getProgressionVolatileState();
+  await checkpointRepo.saveCheckpoint(
+    client,
+    params.slotId,
+    params.snapshotId,
+    checkpointRepo.buildCheckpoint(volatile, Boolean(params.headless.getTerminalState())),
+    volatile,
+  );
+  return randomState;
 }
 
 function buildProgressionResponse(
@@ -201,10 +290,14 @@ export async function createNewSession(
       });
     }
     const logger = createProductionLogger(env);
+    const random = lifeRngRepo.createServerLifeRandomSource();
+    const randomStateBefore = random.exportState();
+    const lifeId = randomUUID();
     const headless = createHeadlessSessionFromNewGame({
       playerName: params.playerName,
       gender: params.gender,
       catalogVersion: env.eventCatalogVersion,
+      random,
       logger,
       runtimeCatalog,
     });
@@ -232,6 +325,7 @@ export async function createNewSession(
       engineVersion: env.engineVersion,
       eventCatalogVersion: env.eventCatalogVersion,
     });
+    const randomStateAfter = await persistLifeRngState(client, slot.id, snapRow.id, lifeId, random);
     const updatedSlot = await saveSlotRepo.updateSlotPointer(
       client,
       slot.id,
@@ -242,15 +336,20 @@ export async function createNewSession(
       throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during new game');
     }
 
+    const volatile = headless.getProgressionVolatileState();
     await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
-      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
+      checkpointRepo.buildCheckpoint(volatile, Boolean(headless.getTerminalState())), volatile);
 
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
       actionType: 'session_created',
       snapshotHashAfter: snapRow.content_hash,
-      payload: { slotIndex: params.slotIndex, sourcePlatform: params.sourcePlatform },
+      payload: {
+        slotIndex: params.slotIndex,
+        sourcePlatform: params.sourcePlatform,
+        rng: replayRandomEvidence(lifeId, randomStateBefore, randomStateAfter),
+      },
     });
 
     const terminal = headless.getTerminalState();
@@ -296,9 +395,12 @@ export async function restoreSession(
     snapshotRepo.assertSnapshotCompatibility(snap, env.engineVersion, env.eventCatalogVersion);
 
     const logger = createProductionLogger(env);
+    const lifeRng = await lifeRngRepo.getLifeRngState(client, slot.id, snap.id);
+    const random = SeededRandomSource.fromState(lifeRng.randomState);
     const headless = await createHeadlessSessionFromSnapshot({
       snapshot: snap.snapshot,
       catalogVersion: env.eventCatalogVersion,
+      random,
       logger,
       runtimeCatalog,
     });
@@ -320,10 +422,13 @@ export async function restoreSession(
       actionType: 'session_restored',
       snapshotHashBefore: snap.content_hash,
       snapshotHashAfter: snap.content_hash,
-      payload: { slotIndex: params.slotIndex },
+      payload: {
+        slotIndex: params.slotIndex,
+        rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, random.exportState()),
+      },
     });
 
-    const resolved = await resolveSessionAfterAutoProgress(headless);
+    const resolved = describeSessionPresentation(headless);
     updateCache = () => syncProgressionVolatileCache(snap.id, headless, resolved);
     return {
       sessionId: session.id,
@@ -353,7 +458,7 @@ export async function executeChoice(
 ) {
   let updateCache: (() => void) | undefined;
   const result = await withTransaction(env.databaseUrl, async client => {
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+    const { session, slot, currentSnap, headless, lifeRng, random } = await loadHeadlessForMutation(
       client, env, params, runtimeCatalog,
     );
     if (headless.getSessionPhase() !== 'story_event') {
@@ -391,6 +496,13 @@ export async function executeChoice(
       engineVersion: env.engineVersion,
       eventCatalogVersion: env.eventCatalogVersion,
     });
+    const randomStateAfter = await persistSnapshotProgressionState(client, {
+      slotId: slot.id,
+      snapshotId: snapRow.id,
+      lifeId: lifeRng.lifeId,
+      headless,
+      random,
+    });
     const updatedSlot = await saveSlotRepo.updateSlotPointer(
       client,
       slot.id,
@@ -404,9 +516,6 @@ export async function executeChoice(
       });
     }
 
-    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
-      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
-
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
@@ -415,6 +524,7 @@ export async function executeChoice(
       choiceId: params.choiceId,
       snapshotHashBefore: hashBefore,
       snapshotHashAfter: snapRow.content_hash,
+      payload: { rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter) },
     });
 
     const terminal = headless.getTerminalState();
@@ -452,7 +562,6 @@ async function loadHeadlessForMutation(
   },
   runtimeCatalog?: RuntimeEventCatalog,
   resolveAutoProgress = true,
-  randomSeed?: number,
 ) {
   const { deviceId } = await resolveDevice(client, env, params.deviceToken);
   const { session } = await resolveSession(
@@ -480,11 +589,13 @@ async function loadHeadlessForMutation(
   const currentSnap = await snapshotRepo.getSnapshotById(client, params.expectedSnapshotId);
   if (!currentSnap) throw notFound('Snapshot not found');
   snapshotRepo.assertSnapshotCompatibility(currentSnap, env.engineVersion, env.eventCatalogVersion);
+  const lifeRng = await lifeRngRepo.getLifeRngState(client, slot.id, currentSnap.id);
+  const random = SeededRandomSource.fromState(lifeRng.randomState);
   const logger = createProductionLogger(env);
   const headless = await createHeadlessSessionFromSnapshot({
     snapshot: currentSnap.snapshot,
     catalogVersion: env.eventCatalogVersion,
-    randomSeed,
+    random,
     logger,
     runtimeCatalog,
   });
@@ -492,7 +603,7 @@ async function loadHeadlessForMutation(
   if (resolveAutoProgress) {
     await resolveSessionAfterAutoProgress(headless);
   }
-  return { session, slot, currentSnap, headless, deviceId, checkpoint };
+  return { session, slot, currentSnap, headless, deviceId, checkpoint, lifeRng, random };
 }
 
 export async function executeMarketStallAction(
@@ -515,7 +626,7 @@ export async function executeMarketStallAction(
   const result = await withTransaction(env.databaseUrl, async client => {
     // This action must inspect the selected state as-is. Auto progression here could
     // select a story event and make abandon an extra scheduler draw.
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+    const { session, slot, currentSnap, headless, lifeRng, random } = await loadHeadlessForMutation(
       client,
       env,
       params,
@@ -544,6 +655,13 @@ export async function executeMarketStallAction(
       engineVersion: env.engineVersion,
       eventCatalogVersion: env.eventCatalogVersion,
     });
+    const randomStateAfter = await persistSnapshotProgressionState(client, {
+      slotId: slot.id,
+      snapshotId: snapRow.id,
+      lifeId: lifeRng.lifeId,
+      headless,
+      random,
+    });
     const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
     if (!updatedSlot) {
       throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during market stall action', {
@@ -551,16 +669,16 @@ export async function executeMarketStallAction(
         currentSnapshotId: slot.current_snapshot_id,
       });
     }
-    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
-      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
-
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
       actionType: 'market_stall_action',
       snapshotHashBefore: hashBefore,
       snapshotHashAfter: snapRow.content_hash,
-      payload: { operation: params.operation },
+      payload: {
+        operation: params.operation,
+        rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter),
+      },
     });
     const resolved = { nextEvent: null, phase: headless.getSessionPhase() };
     updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
@@ -572,10 +690,6 @@ export async function executeMarketStallAction(
   });
   updateCache?.();
   return result;
-}
-
-function scholarPursuitRandomSeed(sessionId: string, snapshotId: string): number {
-  return createHash('sha256').update(`${sessionId}:${snapshotId}`).digest().readUInt32BE(0);
 }
 
 export async function executeScholarOfficialPursuitAction(
@@ -597,13 +711,12 @@ export async function executeScholarOfficialPursuitAction(
   let updateCache: (() => void) | undefined;
   const result = await withTransaction(env.databaseUrl, async client => {
     // The action works from this exact selected snapshot and never auto-runs Scheduler.
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+    const { session, slot, currentSnap, headless, lifeRng, random } = await loadHeadlessForMutation(
       client,
       env,
       params,
       runtimeCatalog,
       false,
-      scholarPursuitRandomSeed(params.sessionId, params.expectedSnapshotId),
     );
     if (headless.getSessionPhase() !== 'active_planning') {
       throw validationError('Scholar official pursuit actions require active_planning phase', {
@@ -627,6 +740,13 @@ export async function executeScholarOfficialPursuitAction(
       engineVersion: env.engineVersion,
       eventCatalogVersion: env.eventCatalogVersion,
     });
+    const randomStateAfter = await persistSnapshotProgressionState(client, {
+      slotId: slot.id,
+      snapshotId: snapRow.id,
+      lifeId: lifeRng.lifeId,
+      headless,
+      random,
+    });
     const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
     if (!updatedSlot) {
       throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during scholar official pursuit action', {
@@ -634,9 +754,6 @@ export async function executeScholarOfficialPursuitAction(
         currentSnapshotId: slot.current_snapshot_id,
       });
     }
-    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
-      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
-
     const latestExam = getLatestScholarOfficialPursuitExam(headless.getRuntimeState());
     const replayAction = await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
@@ -645,8 +762,15 @@ export async function executeScholarOfficialPursuitAction(
       snapshotHashBefore: hashBefore,
       snapshotHashAfter: snapRow.content_hash,
       payload: params.operation === 'take_exam'
-        ? { operation: params.operation, exam: latestExam }
-        : { operation: params.operation },
+        ? {
+          operation: params.operation,
+          exam: latestExam,
+          rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter),
+        }
+        : {
+          operation: params.operation,
+          rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter),
+        },
     });
     const resolved = { nextEvent: null, phase: headless.getSessionPhase() };
     updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
@@ -680,7 +804,7 @@ export async function executeActiveAction(
 ) {
   let updateCache: (() => void) | undefined;
   const result = await withTransaction(env.databaseUrl, async client => {
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+    const { session, slot, currentSnap, headless, lifeRng, random } = await loadHeadlessForMutation(
       client,
       env,
       params,
@@ -704,6 +828,13 @@ export async function executeActiveAction(
       engineVersion: env.engineVersion,
       eventCatalogVersion: env.eventCatalogVersion,
     });
+    const randomStateAfter = await persistSnapshotProgressionState(client, {
+      slotId: slot.id,
+      snapshotId: snapRow.id,
+      lifeId: lifeRng.lifeId,
+      headless,
+      random,
+    });
     const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
     if (!updatedSlot) {
       throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during active action', {
@@ -711,16 +842,16 @@ export async function executeActiveAction(
         currentSnapshotId: slot.current_snapshot_id,
       });
     }
-    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
-      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
-
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
       actionType: 'active_action',
       snapshotHashBefore: hashBefore,
       snapshotHashAfter: snapRow.content_hash,
-      payload: { actionId: params.actionId },
+      payload: {
+        actionId: params.actionId,
+        rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter),
+      },
     });
     updateCache = () => syncProgressionVolatileCache(snapRow.id, headless, resolved);
     return buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved);
@@ -744,7 +875,7 @@ export async function acknowledgeProgression(
 ) {
   let updateCache: (() => void) | undefined;
   const result = await withTransaction(env.databaseUrl, async client => {
-    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(
+    const { session, slot, currentSnap, headless, lifeRng, random } = await loadHeadlessForMutation(
       client,
       env,
       params,
@@ -768,6 +899,13 @@ export async function acknowledgeProgression(
       engineVersion: env.engineVersion,
       eventCatalogVersion: env.eventCatalogVersion,
     });
+    const randomStateAfter = await persistSnapshotProgressionState(client, {
+      slotId: slot.id,
+      snapshotId: snapRow.id,
+      lifeId: lifeRng.lifeId,
+      headless,
+      random,
+    });
     const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
     if (!updatedSlot) {
       throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during progression ack', {
@@ -775,15 +913,16 @@ export async function acknowledgeProgression(
         currentSnapshotId: slot.current_snapshot_id,
       });
     }
-    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id,
-      checkpointRepo.buildCheckpoint(headless.getProgressionVolatileState(), Boolean(headless.getTerminalState())));
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
       actionType: 'progression_ack',
       snapshotHashBefore: hashBefore,
       snapshotHashAfter: snapRow.content_hash,
-      payload: { ackKind: params.ackKind },
+      payload: {
+        ackKind: params.ackKind,
+        rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter),
+      },
     });
     const terminal = headless.getTerminalState();
     if (terminal) {
@@ -810,13 +949,14 @@ export async function manualSave(
 ) {
   let updateCache: (() => void) | undefined;
   const result = await withTransaction(env.databaseUrl, async client => {
-    const { session, slot, currentSnap, headless, checkpoint } = await loadHeadlessForMutation(
+    const { session, slot, currentSnap, headless, checkpoint, lifeRng, random } = await loadHeadlessForMutation(
       client, env, params, runtimeCatalog, false,
     );
     const serialized = headless.serialize();
     const newIntegrity = snapshotRepo.buildSnapshotIntegrity(serialized);
     let snapRow = currentSnap;
     let updatedSlot = slot;
+    let randomStateAfter = random.exportState();
     if (newIntegrity.contentHash !== currentSnap.content_hash) {
       snapRow = await snapshotRepo.insertSnapshot(client, {
         saveSlotId: slot.id,
@@ -826,6 +966,9 @@ export async function manualSave(
         engineVersion: env.engineVersion,
         eventCatalogVersion: env.eventCatalogVersion,
       });
+      randomStateAfter = await persistLifeRngState(
+        client, slot.id, snapRow.id, lifeRng.lifeId, random,
+      );
       const swapped = await saveSlotRepo.updateSlotPointer(
         client,
         slot.id,
@@ -841,13 +984,22 @@ export async function manualSave(
       updatedSlot = swapped;
     }
 
-    await checkpointRepo.saveCheckpoint(client, slot.id, snapRow.id, checkpoint);
+    await checkpointRepo.saveCheckpoint(
+      client,
+      slot.id,
+      snapRow.id,
+      checkpoint,
+      headless.getProgressionVolatileState(),
+    );
     await replayRepo.appendReplayAction(client, {
       sessionId: session.id,
       saveSlotId: slot.id,
       actionType: 'manual_save',
       snapshotHashBefore: currentSnap.content_hash,
       snapshotHashAfter: snapRow.content_hash,
+      payload: {
+        rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, randomStateAfter),
+      },
     });
 
     updateCache = () => syncProgressionVolatileCache(snapRow.id, headless,
@@ -882,6 +1034,10 @@ export async function discardLegacyProgression(
     if (checkpoint.state !== 'legacy_unknown') {
       throw new ApiError(422, 'PROGRESSION_CHECKPOINT_INVALID', '只有已标记的旧存档可以放弃无法恢复的结果。');
     }
+    const lifeRng = await lifeRngRepo.getLifeRngState(client, slot.id, slot.current_snapshot_id);
+    const runtimeState = await checkpointRepo.getCheckpointRuntimeState(
+      client, slot.id, slot.current_snapshot_id,
+    );
     const snapshot = await snapshotRepo.getSnapshotById(client, slot.current_snapshot_id);
     if (!snapshot) throw notFound('Snapshot not found');
     snapshotRepo.assertSnapshotCompatibility(snapshot, env.engineVersion, env.eventCatalogVersion);
@@ -889,9 +1045,17 @@ export async function discardLegacyProgression(
     // No Headless execution: preserve every canonical fact and pending event,
     // retain the original row/hash, and never grant an extra scheduler draw.
     const copied = await snapshotRepo.copySnapshotForSlotVersion(client, snapshot, slot.version + 1);
+    await lifeRngRepo.saveLifeRngState(client, {
+      slotId: slot.id,
+      snapshotId: copied.id,
+      lifeId: lifeRng.lifeId,
+      randomState: lifeRng.randomState,
+    });
     const swapped = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, copied.id);
     if (!swapped) throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during legacy discard');
-    await checkpointRepo.saveCheckpoint(client, slot.id, copied.id, { protocolVersion: 1, state: 'clear' });
+    await checkpointRepo.saveCheckpoint(
+      client, slot.id, copied.id, { protocolVersion: 1, state: 'clear' }, runtimeState,
+    );
     await replayRepo.appendReplayAction(client, {
       sessionId: snapshot.session_id,
       saveSlotId: slot.id,
@@ -902,6 +1066,7 @@ export async function discardLegacyProgression(
         previousSnapshotId: snapshot.id,
         newSnapshotId: copied.id,
         reason: 'player_discarded_unrecoverable_legacy_results',
+        rng: replayRandomEvidence(lifeRng.lifeId, lifeRng.randomState, lifeRng.randomState),
       },
     });
     return { slotVersion: swapped.version, snapshotId: copied.id };

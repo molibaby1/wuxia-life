@@ -36,6 +36,18 @@ export async function runRandomSourceTests(): Promise<void> {
   const seqB = [b.next(), b.next(), b.next()];
   assert(seqA.every((v, i) => v === seqB[i]), 'Seeded random should be deterministic');
 
+  const persisted = new SeededRandomSource(42);
+  persisted.next();
+  persisted.next();
+  const checkpoint = persisted.exportState();
+  assert(checkpoint.drawIndex === 2, 'SeededRandomSource should expose the cumulative draw index');
+  const resumed = SeededRandomSource.fromState(checkpoint);
+  const uninterrupted = new SeededRandomSource(42);
+  uninterrupted.next();
+  uninterrupted.next();
+  assert(resumed.next() === uninterrupted.next(),
+    'restored SeededRandomSource should continue at the exact next value');
+
   let patched = 0;
   withRandomSourceSync(new SeededRandomSource(7), () => {
     patched = Math.random();
@@ -47,6 +59,21 @@ export async function runRandomSourceTests(): Promise<void> {
   const titleB = await preschoolPassiveTitle(70001);
   assert(titleA.length > 0, 'seeded passive title should be non-empty');
   assert(titleA === titleB, 'ensurePassivePresentation should be deterministic under fixed randomSeed');
+
+  const idSnapshot = HeadlessEngineSessionImpl.create({
+    playerName: 'rng',
+    gender: 'male',
+    catalogVersion: '1.0.0',
+    randomSeed: 70001,
+  }).serialize();
+  const idRandom = new SeededRandomSource(9876);
+  const sourceBeforeSession = idRandom.exportState();
+  HeadlessEngineSessionImpl.create(
+    { snapshot: idSnapshot },
+    { random: idRandom },
+  );
+  assert(idRandom.exportState().drawIndex === sourceBeforeSession.drawIndex,
+    'creating a technical Headless session id must not consume the game random source');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

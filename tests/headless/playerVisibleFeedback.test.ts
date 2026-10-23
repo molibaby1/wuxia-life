@@ -98,6 +98,7 @@ async function createDailyRecoverySession(
   session.applyProgressionVolatileState({
     ...session.getProgressionVolatileState(),
     pendingEphemeralStoryEvent: event,
+    storyGapPassiveServed: false,
   });
   return { session, event };
 }
@@ -259,6 +260,7 @@ async function assertDailyRecoveryResultFeedback(): Promise<void> {
   absentSession.applyProgressionVolatileState({
     ...absentSession.getProgressionVolatileState(),
     pendingEphemeralStoryEvent: event,
+    storyGapPassiveServed: false,
   });
   await absentSession.acknowledgeProgression('story_automatic');
   const absentResultBody = absentSession.getProgressionVolatileState().pendingPeriodSummary?.body ?? '';
@@ -288,7 +290,7 @@ function age14Snapshot(martialPower: number): GameStateSnapshot {
 async function getSectEvent(martialPower: number) {
   const session = HeadlessEngineSessionImpl.create(
     { snapshot: age14Snapshot(martialPower) },
-    { random: new SeededRandomSource(1) },
+    { random: new SeededRandomSource(0) },
   );
   await session.advanceCalendar(3, 'month');
   const next = await session.getNextEvent({ afterTimeAdvance: true });

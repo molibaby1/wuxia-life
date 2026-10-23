@@ -3,6 +3,7 @@ import { ApiError } from '../../server/src/errors/apiError.js';
 import {
   buildCheckpoint,
   getCheckpoint,
+  getCheckpointRuntimeState,
   saveCheckpoint,
   type ProgressionCheckpoint,
 } from '../../server/src/repositories/progressionCheckpointRepository.js';
@@ -29,9 +30,11 @@ const emptyVolatile = (): HeadlessProgressionVolatileState => ({
   pendingDisturbanceNarrative: null,
   pendingPeriodSummary: null,
   passiveNarrative: null,
+  passiveNarrativeId: null,
   annualPassiveMemory: null,
   pendingStoryEventId: null,
   pendingEphemeralStoryEvent: null,
+  storyGapPassiveServed: false,
 });
 
 export async function runProgressionCheckpointRepositoryTests(): Promise<void> {
@@ -78,12 +81,54 @@ export async function runProgressionCheckpointRepositoryTests(): Promise<void> {
 
   const saveDb = mockDb();
   const clear: ProgressionCheckpoint = buildCheckpoint(emptyVolatile(), true);
-  await saveCheckpoint(saveDb, 'slot-1', 'snapshot-1', clear);
+  await saveCheckpoint(saveDb, 'slot-1', 'snapshot-1', clear, emptyVolatile());
   assert(saveDb.calls.some(sql => sql.includes('INSERT INTO save_slot_progression_checkpoints')), 'checkpoint write uses upsert');
+  assert(saveDb.calls.some(sql => sql.includes('runtime_state_version, runtime_state')),
+    'checkpoint write persists the volatile runtime state with its Snapshot');
+
+  const runtime = {
+    save_slot_id: 'slot-1',
+    snapshot_id: 'snapshot-1',
+    runtime_state_version: 1,
+    runtime_state: {
+      protocolVersion: 1,
+      storyGapPassiveServed: true,
+      passiveNarrative: { title: '雨后', text: '在檐下等雨停。' },
+      passiveNarrativeId: 'preschool_test_rain',
+      annualPassiveMemory: null,
+      pendingEphemeralStoryEvent: null,
+    },
+  };
+  const restoredRuntime = await getCheckpointRuntimeState(mockDb(runtime), 'slot-1', 'snapshot-1');
+  assert(restoredRuntime.passiveNarrative?.title === '雨后', 'persisted passive selection is restored exactly');
+  assert(restoredRuntime.passiveNarrativeId === 'preschool_test_rain', 'persisted passive identity is restored exactly');
+  assert(restoredRuntime.storyGapPassiveServed, 'story-gap scheduler opportunity state is restored');
+
+  const legacyRuntimeState = { ...runtime.runtime_state } as Record<string, unknown>;
+  delete legacyRuntimeState.passiveNarrativeId;
+  let missingPassiveIdentityRejected = false;
+  try {
+    await getCheckpointRuntimeState(
+      mockDb({ ...runtime, runtime_state: legacyRuntimeState }), 'slot-1', 'snapshot-1',
+    );
+  } catch (error) {
+    missingPassiveIdentityRejected = error instanceof ApiError
+      && error.code === 'PROGRESSION_CHECKPOINT_INVALID';
+  }
+  assert(missingPassiveIdentityRejected,
+    'a persisted ordinary passive display without stable identity fails closed');
+
+  let missingRuntimeRejected = false;
+  try {
+    await getCheckpointRuntimeState(mockDb({ ...runtime, runtime_state_version: 0, runtime_state: {} }), 'slot-1', 'snapshot-1');
+  } catch (error) {
+    missingRuntimeRejected = error instanceof ApiError && error.code === 'PROGRESSION_CHECKPOINT_INVALID';
+  }
+  assert(missingRuntimeRejected, 'a current RNG-backed life without durable runtime state fails closed');
 
   let extraTopLevelRejected = false;
   try {
-    await saveCheckpoint(saveDb, 'slot-1', 'snapshot-1', { ...clear, unexpected: true } as never);
+    await saveCheckpoint(saveDb, 'slot-1', 'snapshot-1', { ...clear, unexpected: true } as never, emptyVolatile());
   } catch (error) {
     extraTopLevelRejected = error instanceof ApiError && error.code === 'PROGRESSION_CHECKPOINT_INVALID';
   }

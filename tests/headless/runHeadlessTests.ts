@@ -3,6 +3,7 @@
  */
 
 import { runRandomSourceTests } from './randomSource.test';
+import { runPassiveNarrativeIdentityTests } from './passiveNarrativeIdentity.test';
 import { runTimeSourceTests } from './timeSource.test';
 import { runCatalogAdapterTests } from './catalogAdapter.test';
 import { runSnapshotAdapterTests } from './snapshotAdapter.test';
@@ -41,6 +42,7 @@ import {
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
   await runRandomSourceTests();
+  await runPassiveNarrativeIdentityTests();
   runTimeSourceTests();
   runCatalogAdapterTests();
   runSnapshotAdapterTests();

@@ -64,6 +64,7 @@ function testApiMapperPreservesSharedSemantics(): void {
       annualPassiveMemory: null,
       pendingStoryEventId: null,
       pendingEphemeralStoryEvent: null,
+      storyGapPassiveServed: false,
     }),
     getRuntimeState: () => ({ player: { name: 'parity', age: 45, alive: true }, facts: {} }),
   };

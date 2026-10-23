@@ -10,6 +10,7 @@ import { HeadlessEngineSessionImpl } from '../../src/headless/session/HeadlessEn
 import { closePool } from '../../server/src/db/pool.js';
 import { withTransaction } from '../../server/src/db/transaction.js';
 import * as progressionCheckpointRepo from '../../server/src/repositories/progressionCheckpointRepository.js';
+import * as gameLifeRngRepo from '../../server/src/repositories/gameLifeRngRepository.js';
 import * as saveSlotRepo from '../../server/src/repositories/saveSlotRepository.js';
 import * as snapshotRepo from '../../server/src/repositories/snapshotRepository.js';
 
@@ -219,6 +220,16 @@ async function main(): Promise<void> {
         engineVersion: slot.engine_version,
         eventCatalogVersion: slot.event_catalog_version,
       });
+      const sourceRng = await gameLifeRngRepo.getLifeRngState(client, slot.id, slot.current_snapshot_id);
+      const runtimeState = await progressionCheckpointRepo.getCheckpointRuntimeState(
+        client, slot.id, slot.current_snapshot_id,
+      );
+      await gameLifeRngRepo.saveLifeRngState(client, {
+        slotId: slot.id,
+        snapshotId: inserted.id,
+        lifeId: sourceRng.lifeId,
+        randomState: sourceRng.randomState,
+      });
       const updatedSlot = await saveSlotRepo.updateSlotPointer(
         client,
         slot.id,
@@ -226,10 +237,9 @@ async function main(): Promise<void> {
         inserted.id,
       );
       assert.ok(updatedSlot, 'The fixture must advance the selected save slot with CAS.');
-      await progressionCheckpointRepo.saveCheckpoint(client, slot.id, inserted.id, {
-        protocolVersion: 1,
-        state: 'clear',
-      });
+      await progressionCheckpointRepo.saveCheckpoint(
+        client, slot.id, inserted.id, { protocolVersion: 1, state: 'clear' }, runtimeState,
+      );
       return {
         scenario,
         playerName: playerName.trim(),

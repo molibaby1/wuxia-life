@@ -19,6 +19,8 @@ import { createDefaultRuntimeEventCatalog } from '../../src/core/EventLoaderRunt
 import type { HeadlessProgressionVolatileState } from '../../src/headless/session/sessionTypes.js';
 import * as checkpointRepo from '../../server/src/repositories/progressionCheckpointRepository.js';
 import { getSnapshotVolatileState } from '../../server/src/services/headlessVolatileCache.js';
+import * as lifeRngRepo from '../../server/src/repositories/gameLifeRngRepository.js';
+import { persistFixtureRngState, saveFixtureCheckpoint } from './gameLifeRngFixtures.js';
 
 const { Pool } = pg;
 
@@ -65,12 +67,11 @@ async function createLegacyFixture(
   });
   const slot = await saveSlotRepo.updateSlotPointer(db, created.slot.id, created.slot.version, snap.id);
   assert.ok(slot, 'legacy fixture snapshot becomes current');
-  await db.query(
-    `UPDATE save_slot_progression_checkpoints
-        SET snapshot_id = $2, checkpoint_state = 'legacy_unknown', phase = NULL, payload = '{}'::jsonb
-      WHERE save_slot_id = $1`,
-    [created.slot.id, snap.id],
-  );
+  await persistFixtureRngState(db, created.slot.id, created.snapshot.id, snap.id);
+  await saveFixtureCheckpoint(db, created.slot.id, snap.id, snapshot, {
+    protocolVersion: 1,
+    state: 'legacy_unknown',
+  });
   return {
     deviceToken, deviceId: created.slot.device_id, slotId: created.slot.id, slotIndex,
     slotVersion: slot.version, snapshotId: snap.id, snapshot, sessionId: created.sessionId,
@@ -111,6 +112,37 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
         db, env, device.deviceToken, 2, '保留待办侠', pendingStoryId,
       );
 
+      const missingRngDevice = await bootstrapDevice(db, env);
+      const missingRngLife = await gameService.createNewSession(db, env, {
+        deviceToken: missingRngDevice.deviceToken,
+        slotIndex: 1,
+        playerName: '缺少随机状态旧档侠',
+        gender: 'male',
+        sourcePlatform: 'web-browser',
+      }, runtimeCatalog);
+      await db.query('DELETE FROM game_life_rng_states WHERE snapshot_id = $1', [missingRngLife.snapshot.id]);
+      const sessionsBeforeMissingRngRestore = await db.query<{ count: string }>(
+        'SELECT COUNT(*)::text AS count FROM game_sessions WHERE save_slot_id = $1', [missingRngLife.slot.id],
+      );
+      const missingRngRestore = await fetch(`${baseUrl}/v1/sessions/restore`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json', 'x-device-token': missingRngDevice.deviceToken,
+        },
+        body: JSON.stringify({ slotIndex: 1 }),
+      });
+      assert.equal(missingRngRestore.status, 409, 'a snapshot without trusted RNG state cannot resume');
+      const missingRngError = await missingRngRestore.json() as { error?: { code?: string } };
+      assert.equal(missingRngError.error?.code, 'GAME_RNG_STATE_INVALID');
+      const sessionsAfterMissingRngRestore = await db.query<{ count: string }>(
+        'SELECT COUNT(*)::text AS count FROM game_sessions WHERE save_slot_id = $1', [missingRngLife.slot.id],
+      );
+      assert.equal(sessionsAfterMissingRngRestore.rows[0]?.count, sessionsBeforeMissingRngRestore.rows[0]?.count,
+        'failed historical restore does not create a replacement session');
+      assert.equal((await db.query<{ count: string }>(
+        'SELECT COUNT(*)::text AS count FROM game_life_rng_states WHERE snapshot_id = $1', [missingRngLife.snapshot.id],
+      )).rows[0]?.count, '0', 'failed historical restore does not invent an RNG state');
+
       const getSaves = () => fetch(`${baseUrl}/v1/saves`, { headers: { 'x-device-token': device.deviceToken } });
       const restore = (slotIndex: number) => fetch(`${baseUrl}/v1/sessions/restore`, {
         method: 'POST', headers: { 'content-type': 'application/json', 'x-device-token': device.deviceToken },
@@ -136,7 +168,7 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
         sourceLabel: '主动规划', actionName: '读书', durationLabel: '一月', rewardSummary: '学识 +1',
         costSummary: '一月', riskSummary: '无', nextStepHint: '继续规划',
       };
-      await checkpointRepo.saveCheckpoint(db, pendingChoice.slotId, pendingChoice.snapshotId, {
+      await saveFixtureCheckpoint(db, pendingChoice.slotId, pendingChoice.snapshotId, pendingChoice.snapshot, {
         protocolVersion: 1,
         state: 'pending',
         phase: 'action_summary',
@@ -234,6 +266,12 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
 
       const beforeConfirm = await snapshotRepo.getSnapshotById(db, legacyWithStory.snapshotId);
       assert.ok(beforeConfirm);
+      const rngBeforeConfirm = await lifeRngRepo.getLifeRngState(
+        db, legacyWithStory.slotId, legacyWithStory.snapshotId,
+      );
+      const runtimeBeforeConfirm = await checkpointRepo.getCheckpointRuntimeState(
+        db, legacyWithStory.slotId, legacyWithStory.snapshotId,
+      );
       const confirmed = await discard(legacyWithStory);
       assert.equal(confirmed.status, 200, 'explicit discard accepts a marked legacy save');
       const confirmedBody = await confirmed.json() as { slotVersion: number; snapshotId: string };
@@ -244,6 +282,16 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
       assert.equal(afterConfirm.content_hash, beforeConfirm.content_hash, 'discard preserves snapshot content hash');
       assert.equal(afterConfirm.snapshot.state.pendingStoryEventId, pendingStoryId,
         'discard does not skip a pending story event');
+      const rngAfterConfirm = await lifeRngRepo.getLifeRngState(
+        db, legacyWithStory.slotId, confirmedBody.snapshotId,
+      );
+      assert.equal(rngAfterConfirm.lifeId, rngBeforeConfirm.lifeId,
+        'discard keeps the same life identity on its copied Snapshot');
+      assert.deepEqual(rngAfterConfirm.randomState, rngBeforeConfirm.randomState,
+        'discard copies the trusted RNG position without consuming a draw');
+      assert.deepEqual(await checkpointRepo.getCheckpointRuntimeState(
+        db, legacyWithStory.slotId, confirmedBody.snapshotId,
+      ), runtimeBeforeConfirm, 'discard preserves the runtime state bound to the copied Snapshot');
       const newCheckpoint = await db.query<{ checkpoint_state: string; snapshot_id: string }>(
         'SELECT checkpoint_state, snapshot_id FROM save_slot_progression_checkpoints WHERE save_slot_id = $1',
         [legacyWithStory.slotId],
@@ -260,6 +308,16 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
       assert.equal(audit.rows[0]?.payload.reason, 'player_discarded_unrecoverable_legacy_results');
       assert.equal(audit.rows[0]?.snapshot_hash_before, beforeConfirm.content_hash);
       assert.equal(audit.rows[0]?.snapshot_hash_after, beforeConfirm.content_hash);
+      assert.deepEqual(audit.rows[0]?.payload.rng, {
+        lifeId: rngBeforeConfirm.lifeId,
+        algorithm: rngBeforeConfirm.randomState.algorithm,
+        algorithmVersion: rngBeforeConfirm.randomState.algorithmVersion,
+        initialSeed: rngBeforeConfirm.randomState.initialSeed,
+        drawIndexBefore: rngBeforeConfirm.randomState.drawIndex,
+        drawIndexAfter: rngBeforeConfirm.randomState.drawIndex,
+        stateBefore: rngBeforeConfirm.randomState.state,
+        stateAfter: rngBeforeConfirm.randomState.state,
+      }, 'discard audit binds the unchanged RNG position to the copied Snapshot');
 
       const concurrentDevice = await bootstrapDevice(db, env);
       const concurrentFixture = await createLegacyFixture(
@@ -334,10 +392,14 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
         'SELECT COUNT(*)::text AS count FROM game_snapshots WHERE save_slot_id = $1', [rollback.slotId],
       );
       assert.equal(rolledBackSnapshots.rows[0]?.count, '2', 'failed audit leaves no orphan same-hash snapshot');
+      const rolledBackRngRows = await db.query<{ count: string }>(
+        'SELECT COUNT(*)::text AS count FROM game_life_rng_states WHERE save_slot_id = $1', [rollback.slotId],
+      );
+      assert.equal(rolledBackRngRows.rows[0]?.count, '2', 'failed audit leaves no orphan RNG row');
 
       const mutationDevice = await bootstrapDevice(db, env);
       const mutation = await createLegacyFixture(db, env, mutationDevice.deviceToken, 1, '主动行动回滚侠');
-      await checkpointRepo.saveCheckpoint(db, mutation.slotId, mutation.snapshotId, {
+      await saveFixtureCheckpoint(db, mutation.slotId, mutation.snapshotId, mutation.snapshot, {
         protocolVersion: 1, state: 'clear',
       });
       const restoredMutation = await gameService.restoreSession(db, env, {
@@ -454,7 +516,7 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
         sourceLabel: '途中', disturbanceId: 'checkpoint_rain', title: '骤雨', bodyText: '骤雨落下',
         sourceActionName: '习武', impactSummary: '行程受阻', returnToPlanHint: '返回计划',
       };
-      await checkpointRepo.saveCheckpoint(db, manual.slotId, manual.snapshotId, {
+      await saveFixtureCheckpoint(db, manual.slotId, manual.snapshotId, manual.snapshot, {
         protocolVersion: 1, state: 'pending', phase: 'action_summary',
         payload: {
           pendingActionSummary: manualActionSummary,
@@ -514,7 +576,10 @@ async function runInIsolatedSchema(databaseUrl: string): Promise<void> {
         db, terminalCreated.slot.id, terminalCreated.slot.version, terminalSnapRow.id,
       );
       assert.ok(terminalSlot);
-      await checkpointRepo.saveCheckpoint(db, terminalCreated.slot.id, terminalSnapRow.id, {
+      await persistFixtureRngState(
+        db, terminalCreated.slot.id, terminalCreated.snapshot.id, terminalSnapRow.id,
+      );
+      await saveFixtureCheckpoint(db, terminalCreated.slot.id, terminalSnapRow.id, terminalSnapshot, {
         protocolVersion: 1, state: 'clear',
       });
       const terminalCheckpoint = await checkpointRepo.getCheckpoint(

@@ -82,11 +82,14 @@ export interface HeadlessProgressionVolatileState {
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   passiveNarrative: PassiveNarrativeDisplay | null;
+  passiveNarrativeId: string | null;
   annualPassiveMemory: AnnualPassiveMemoryPlan | null;
   /** Selected story event retained by the API volatile cache. */
   pendingStoryEventId: string | null;
   /** Daily / runtime-built events not resolvable via catalog id alone. */
   pendingEphemeralStoryEvent?: EventDefinition | null;
+  /** Prevents a restored age-gap life from receiving a second passive offer. */
+  storyGapPassiveServed: boolean;
 }
 
 export interface HeadlessSessionVolatileState {
@@ -97,6 +100,7 @@ export interface HeadlessSessionVolatileState {
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   passiveNarrative: PassiveNarrativeDisplay | null;
+  passiveNarrativeId: string | null;
   annualPassiveMemory: AnnualPassiveMemoryPlan | null;
   /** True after story-gap passive served for ages 5–7; allows lite planning on same gap. */
   storyGapPassiveServed: boolean;

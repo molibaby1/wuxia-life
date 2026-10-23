@@ -77,6 +77,9 @@ export interface HeadlessEngineSession {
   /** P7.2: restore volatile UI state after snapshot hydrate (server request boundary). */
   applyProgressionVolatileState(state: HeadlessProgressionVolatileState): void;
 
+  /** Validate that a persisted passive display still resolves to its selected entry. */
+  validatePassiveNarrativeSelection(): void;
+
   /** P7.2: planning options when phase is active_planning. */
   getPlanningOptions(): PlanningOptionDto[];
 

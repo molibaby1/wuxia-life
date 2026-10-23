@@ -8,7 +8,11 @@ import type { EventCatalogReadService } from '../catalog/EventCatalogReadService
 import type { SnapshotConverter } from '../snapshot/SnapshotConverter';
 import { createDefaultRuntimeEventCatalog } from '../../core/EventLoaderRuntimeCatalog';
 import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
-import { createDefaultRandomSource, type RandomSource } from '../adapters/randomSource';
+import {
+  createDefaultRandomSource,
+  type RandomSource,
+  type RandomSourceRunner,
+} from '../adapters/randomSource';
 import { createDefaultTimeSource, type TimeSource } from '../adapters/timeSource';
 
 export interface HeadlessLogger {
@@ -30,6 +34,8 @@ export interface HeadlessSessionDependencies {
   runtimeCatalog: RuntimeEventCatalog;
   /** Required: deterministic or runtime randomness. */
   random: RandomSource;
+  /** Optional runtime-specific async context for request-isolated randomness. */
+  randomSourceRunner?: RandomSourceRunner;
   /** Required: snapshot timestamps and metadata. */
   time: TimeSource;
   /** Required: runtime state ↔ snapshot conversion. */

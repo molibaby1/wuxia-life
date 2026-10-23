@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-10-12
+> 最后更新：2026-10-24
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -2971,3 +2971,27 @@ Milestone 继续从正式人物与世界事实、可验证历史及持久结果�
 - **首版不设置**随机盈亏、随机经营失败、额外声望／关系／营商 Habit 或财富等级变更，也不产生商号 Asset、隐藏钱包、通用商业积分或额外奖励。未来经营波动可另行设计，但不改动本次确认的首版语义。
 
 **授权不扩张：**本条批准首个案例的 Human-direct 内容需求、Event Authoring Card 文案及确定性结果，不代表 Event JSON 已载入或测试已通过；不自动授权代码实施、API／Replay 扩展、通用目标系统、Snapshot 结构变动或 SL-GAP 重排。程序级 flag ID、效果合法生产／消费与接口 Contract conformance 仍须于独立实施任务中验证；如需新正式 Schema／通用机制，应停下提交 Human 决策。
+
+### PD-139: Formal Game RNG Lifecycle & Persistence
+
+**状态：HUMAN ACCEPTED / S1f CONTROLLED VERIFIED**
+
+**证据边界：**S1d 已在受控真实 HTTP/API 路径确认固定 seed 重置缺陷。该事实证明现有路径存在缺陷，不代表本决策已实施或修复效果已验证。
+
+**正式裁决：每段人生独立、连续的服务端随机流。**每段人生各有独立的游戏 RNG 随机流，随机状态由服务端权威持有。同一人生跨 API 请求、保存与恢复必须延续同一随机历史；HTTP Session ID、Snapshot ID 或其他技术性标识不作为游戏随机流的消费主体或正式随机来源。只有既有产品规则要求的游戏随机判定，并且处于合法、可持久化的推进与结算边界时，才可推进该人生的随机流。纯读取不消费游戏随机数；失败、重复操作及无效 CAS 不得提交随机状态推进。并发请求不得使不同人生共享、串扰或错用随机状态。
+
+**持久化与原子性：**服务端随机状态须通过独立于 Snapshot JSON 的持久化记录，与其对应的 Snapshot 建立可靠绑定。成功的合法结算、该 Snapshot、适用的 CAS／checkpoint，以及必要的 Replay 审计证据须作为一致的原子提交结果；部分失败不得留下与结算或 Snapshot 不一致的随机推进。本方向不规定 SQL 字段、记录键、Replay payload 或并发控制技术。Snapshot `3.16.0` 的 canonical JSON envelope、字段 allowlist 与版本均保持不变，不把 RNG 状态加入其 JSON 结构。
+
+**被动随机叙事与恢复：**被动叙事中的随机选择属于游戏随机过程；尤其展示内容会影响后续正式结算时，不得把它视为可以在读取或恢复时任意重抽的 UI 装饰。首次选择必须发生在合法、可持久化的推进边界；已选内容及恢复其必要结算身份所需的信息须可靠保存。恢复已有决策点时，不得重新抽取被动叙事、重新获得普通 Scheduler 机会或消费新的游戏 RNG。恢复所需的已选内容或身份缺失时必须 fail closed，不得静默重新生成。
+
+**Scholar Official Pursuit：**现有考试判定使用统一的单人生连续随机流；取消以 HTTP Session ID 或 Snapshot ID 派生专项 seed 作为正式考试 RNG 的方式。保留已批准的考试资格、知识对通过率的影响、概率公式、结果、Ledger、反馈及必要 Replay 审计语义，不借本裁决改变科举玩法、概率规则或奖励。
+
+**无可信 RNG 状态的历史存档：**对无法证明拥有可信 RNG 状态的历史人生采取 fail closed；不得推测、伪造或默认初始化其随机历史，也不为本次修复增加旧档兼容或自动迁移系统。保留原 Snapshot、世界事实与数据库记录，不主动清理数据。玩家只能通过已有的明确确认覆盖流程创建新人生；不得借新人生流程声称已恢复或迁移旧人生的随机连续性。PD-126 的 `legacy_unknown` 只表达其已批准的不可恢复待确认结果语义，不是 RNG 状态迁移状态，也不改变 PD-126 原有边界。
+
+**与既有权威及 Contract 的关系：**
+
+- PD-126 的阶段优先级、待确认结果恢复及“不重复调度”语义继续有效；本决策不把 `replay_actions` 或 ReplayLog 作为会话阶段事实真源。PD-130 的 API-only 玩家路径、既有存档边界与“不主动销毁数据库或用户数据”语义不变。
+- [Snapshot Contract](../contracts/game-state-snapshot-contract.md) 的 `3.16.0` canonical JSON 结构不变。[Choice Execution Request Contract（P4 US-007）](../contracts/choice-execution-request-contract.md) 中 `randomContext` 的 seed/sequence 与 [Replay Log Contract（P4 US-011）](../contracts/replay-log-contract.md) 中 `initialSeed`、`lifeId`、`randomDrawIndex` 的既有内容不由本决策修改。它们与单人生服务端随机状态及 SQL Replay 的具体映射、适用 Contract 和审计表示，仍须在 S1f 工程设计中审查；本决策不宣称该映射已经确定或实现。
+- 本决策不修改 Snapshot `3.16.0`、Choice Execution Request 或 Replay Log 的正式 Schema／Contract，不调整 Event、Challenge 概率、Scheduler 权重、P8 Gate、SL-GAP-04／09／10，也不改变现行产品主线优先级。
+
+**S1f 完成条件：**只有在工程实施并以正式路径验证以下结果后，才能将 S1f 声明完成：同一人生跨独立 API 请求与保存／恢复保持随机连续、不同人生并发隔离；读取、失败、重复操作和无效 CAS 不提交随机推进；合法结算、Snapshot、CAS／checkpoint 与必要 Replay 证据一致提交；被动叙事恢复不重抽、不重复 Scheduler 机会且缺失资料会 fail closed；Scholar Official Pursuit 保留上述资格、概率、结果及审计语义；无可信 RNG 状态的历史人生 fail closed 且不发生推测或自动迁移；Snapshot `3.16.0` canonical JSON 未改变。所有实现状态与验证结论在证据产生前均为 `IMPLEMENTATION NOT YET VERIFIED`。

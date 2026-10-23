@@ -156,6 +156,24 @@ export function resolvePreschoolPassiveEntryByTitle(
   return getPreschoolPassiveEntries(age).find(entry => entry.title === title);
 }
 
+export function resolvePreschoolPassiveEntryById(
+  id: string,
+  state: GameState,
+): PreschoolPassiveEntry | undefined {
+  const age = state.player?.age ?? 0;
+  const history = new Set((state.eventHistory ?? []).map(record => record.eventId));
+  const recentTitles = getRecentPassiveNarrativeTitles(state);
+  const entry = getPreschoolPassiveEntries(age).find(candidate => candidate.id === id);
+  if (entry
+    && !history.has(entry.id)
+    && !recentTitles.includes(entry.title)
+    && isPreschoolPassiveEligible(entry, resolveOriginTags(state))) {
+    return entry;
+  }
+  const gap = buildPreschoolPassiveGapEntry(age, recentTitles);
+  return gap.id === id && age >= gap.ageMin && age <= gap.ageMax ? gap : undefined;
+}
+
 export function findPreschoolPassiveEntryById(id: string): PreschoolPassiveEntry | undefined {
   const fromMerged = mergedPreschoolCatalog().find(item => item.id === id);
   if (fromMerged) return fromMerged;

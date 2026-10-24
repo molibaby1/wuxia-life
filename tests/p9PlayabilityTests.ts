@@ -28,12 +28,128 @@ import {
 } from '../src/p8/collectPersonaMetrics';
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { P8_GATE_END_AGE } from '../src/p8/metricDefinitions';
-import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
+import type { GameProcessRecord, GameProcessReport } from '../src/types/simulationRecordTypes';
 import type { GameState } from '../src/types/eventTypes';
 import { runAllPersonaSimulations, runPersonaSimulations } from '../src/p9/simulationRunner';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
+}
+
+type ReportTerminalEvidence = Pick<GameProcessReport, 'records' | 'finalAge' | 'isAlive' | 'finalGameState'>;
+
+function hasActiveActionBeforeReportedTerminal(
+  report: ReportTerminalEvidence,
+  category: string,
+): boolean {
+  const finalState = report.finalGameState;
+  if (!finalState || finalState.player?.age !== report.finalAge) return false;
+  if ((finalState.player?.alive !== false) !== report.isAlive) return false;
+
+  return report.records.some(record => {
+    if (
+      record.progressionKind !== 'active_action' ||
+      getActionById(record.activeActionId ?? '')?.category !== category
+    ) {
+      return false;
+    }
+
+    const stateBefore = record.outcomeEvidence?.stateBefore;
+    if (
+      !stateBefore ||
+      stateBefore.player?.alive !== true ||
+      stateBefore.player?.age !== record.age ||
+      record.age > report.finalAge
+    ) {
+      return false;
+    }
+
+    if (report.isAlive || record.age < report.finalAge) return true;
+    // At the terminal age, the action's captured pre-execution state proves it began while alive.
+    return record.age === report.finalAge;
+  });
+}
+
+function makeTerminalTestState(age: number, alive: boolean): GameState {
+  return { player: { age, alive } } as GameState;
+}
+
+function makeActiveActionTestRecord(
+  age: number,
+  stateBefore: GameState,
+  stateAfter: GameState = stateBefore,
+  activeActionId = 'action_business_basic',
+): GameProcessRecord {
+  return {
+    age,
+    eventId: `active_action:${activeActionId}`,
+    eventTitle: '测试主动行动',
+    eventType: 'auto',
+    progressionKind: 'active_action',
+    activeActionId,
+    gameState: stateBefore,
+    outcomeEvidence: { stateBefore, stateAfter },
+    timestamp: '',
+  };
+}
+
+function testTerminalOrderingUsesExecutionEvidence(): void {
+  const finalAge = 26;
+  const finalGameState = makeTerminalTestState(finalAge, false);
+  const terminalReport: ReportTerminalEvidence = {
+    records: [],
+    finalAge,
+    isAlive: false,
+    finalGameState,
+  };
+  const backfilledHistory: GameProcessRecord = {
+    age: 1,
+    eventId: 'origin_background',
+    eventTitle: '出身背景',
+    eventType: 'auto',
+    progressionKind: 'story_event',
+    gameState: finalGameState,
+    timestamp: '',
+  };
+  const actionBeforeDeath = makeActiveActionTestRecord(19, makeTerminalTestState(19, true));
+
+  assert(
+    hasActiveActionBeforeReportedTerminal(
+      { ...terminalReport, records: [backfilledHistory, actionBeforeDeath] },
+      'business',
+    ),
+    'historical final-state backfill does not hide an actual pre-terminal action',
+  );
+  assert(
+    !hasActiveActionBeforeReportedTerminal({ ...terminalReport, records: [backfilledHistory] }, 'business'),
+    'historical backfill alone is not active-action evidence',
+  );
+
+  const actionAtDeathAge = makeActiveActionTestRecord(
+    finalAge,
+    makeTerminalTestState(finalAge, true),
+    finalGameState,
+  );
+  assert(
+    hasActiveActionBeforeReportedTerminal({ ...terminalReport, records: [actionAtDeathAge] }, 'business'),
+    'same-age action is valid when its captured pre-execution state is alive',
+  );
+
+  const sameAgeAfterDeath = makeActiveActionTestRecord(finalAge, finalGameState, finalGameState);
+  assert(
+    !hasActiveActionBeforeReportedTerminal({ ...terminalReport, records: [sameAgeAfterDeath] }, 'business'),
+    'same-age action is rejected when its captured pre-execution state is terminal',
+  );
+
+  const actionAfterDeath = makeActiveActionTestRecord(finalAge + 1, finalGameState, finalGameState);
+  assert(
+    !hasActiveActionBeforeReportedTerminal({ ...terminalReport, records: [actionAfterDeath] }, 'business'),
+    'post-terminal action cannot pass using a dead execution state',
+  );
+  assert(
+    !hasActiveActionBeforeReportedTerminal(terminalReport, 'business'),
+    'missing required active action remains a failure',
+  );
 }
 
 const P8_BASELINE_SOURCE = 'p8-playability-gate-latest.json';
@@ -355,15 +471,14 @@ async function testWealthPersonaBusinessProgression(): Promise<void> {
   const [wealth] = await runPersonaSimulations(['p8-wealth-shen']);
   const businessActions = wealth.metrics.agency.activeActionByCategory.business ?? 0;
   assert(businessActions > 0, `wealth persona should take business actions (got ${businessActions})`);
-  const terminalIndex = wealth.report.records.findIndex(record => record.gameState?.player?.alive === false);
-  const firstBusinessActionIndex = wealth.report.records.findIndex(
+  const firstBusinessAction = wealth.report.records.find(
     record =>
       record.progressionKind === 'active_action' &&
       getActionById(record.activeActionId ?? '')?.category === 'business',
   );
-  assert(firstBusinessActionIndex >= 0, 'wealth persona business action evidence is retained');
+  assert(firstBusinessAction !== undefined, 'wealth persona business action evidence is retained');
   assert(
-    terminalIndex < 0 || firstBusinessActionIndex < terminalIndex,
+    hasActiveActionBeforeReportedTerminal(wealth.report, 'business'),
     'wealth persona business action occurs before any valid terminal',
   );
 }
@@ -372,15 +487,14 @@ async function testExplorerPersonaTravelEchoes(): Promise<void> {
   const [explorer] = await runPersonaSimulations(['p8-explorer-lu']);
   const travelActions = explorer.metrics.agency.activeActionByCategory.travel ?? 0;
   assert(travelActions > 0, `explorer persona should take travel actions (got ${travelActions})`);
-  const terminalIndex = explorer.report.records.findIndex(record => record.gameState?.player?.alive === false);
-  const firstTravelActionIndex = explorer.report.records.findIndex(
+  const firstTravelAction = explorer.report.records.find(
     record =>
       record.progressionKind === 'active_action' &&
       getActionById(record.activeActionId ?? '')?.category === 'travel',
   );
-  assert(firstTravelActionIndex >= 0, 'explorer persona travel action evidence is retained');
+  assert(firstTravelAction !== undefined, 'explorer persona travel action evidence is retained');
   assert(
-    terminalIndex < 0 || firstTravelActionIndex < terminalIndex,
+    hasActiveActionBeforeReportedTerminal(explorer.report, 'travel'),
     'explorer persona travel action occurs before any valid terminal',
   );
 }
@@ -539,6 +653,7 @@ async function testWandererRouteReachabilityProof(): Promise<void> {
 }
 
 async function runP9Tests(): Promise<void> {
+  testTerminalOrderingUsesExecutionEvidence();
   testStageConfigCoversZeroToForty();
   testRouteDefinitionsExist();
   testEchoHooksCoverMinimumActions();
